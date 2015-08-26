@@ -85,7 +85,7 @@ HTMLWidgets.widget({
 	      var data = x["data"];
         var domain_y = x["meta"]["max_y"];
     
-	      console.log(x["meta"]);
+	      console.log(x);
         var svg = instance.svg;
         var line = instance.line;
         var focus = instance.focus;
@@ -114,14 +114,19 @@ HTMLWidgets.widget({
 	      height2Scale.domain([0,domain_y]);
         
         //visualise introns/exons
-        context.append("rect")
-               .attr("x", widthScale(x["meta"]["meta_intrex"]["start"][0]))
-               .attr("y", 0)
-               .attr("rx",5)
-               .attr("ry",5)
-               .attr("opacity",0.5)
-               .attr("width", widthScale(x["meta"]["meta_intrex"]["end"][0]))
-               .attr("height", 55);
+        
+        //TO DO
+        //R must generage a readable structure for the d3 data function 
+        //map color to name so that introns have different color maybe add label
+        var intrex =  [["ex1",689,2034],["ex2",2046,3338]]
+        
+        context.selectAll("rect").data(intrex).enter()
+        .append("rect")
+        .attr("x",function(d){return widthScale(d[1]);})
+        .attr("y",0).attr("rx",5).attr("ry",5).attr("opacity",0.5)
+        .attr("width",function(d){return widthScale(d[2]-d[1]);}).attr("height",55);
+                   
+    
 						
 	      brush.x(width2Scale);
 	      var group_a = focus.append("g");
