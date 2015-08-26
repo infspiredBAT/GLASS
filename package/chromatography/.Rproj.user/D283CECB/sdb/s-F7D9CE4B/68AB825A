@@ -1,0 +1,16 @@
+{
+    "contents" : "require(shiny)\nrequire(data.table)\nrequire(rjson)\nrequire(htmlwidgets)\nrequire(chromatography)\nrequire(stringr)\n#require(DT)\n    \nshinyUI(\n    fluidPage(theme = \"simplex.css\",\n        fluidRow(\n            column(6,\n                # neco\n                fileInput(\"select_file\",\"select file\",multiple=F,accept=c('.abi','.ab1'))\n            ),\n            column(6,\n                # this should be replaced by direct interaction with graph or data table\n                textInput(\"choose_variance\",\"choose variance by number...\"),\n                verbatimTextOutput(\"variance_info\"),\n                selectInput(\"change_peak\",\"and change it to\",choices=c(\"A\",\"T\",\"C\",\"G\"),selected=\"A\",selectize=F,size=1),\n                actionButton(\"execute_btn\",\"execute\")\n            )\n        ),\n        \n        # chromatograf \n        chromatographyOutput(\"plot\"),\n        \n        # urcite bude conditional\n        #        conditionalPanel(\n        #            condition = \" output.chosenCheckboxes == true \",\n        #            DT::dataTableOutput(\"table2\"),\n        shiny::dataTableOutput(\"chosen_variances_table\"),\n        #        ),\n        \n        # vypis vybranych htmlOutput()\n        downloadButton(\"export_btn\",\"export\"),\n        #        actionButton(\"zoom_btn\",\"zoom\"),\n        #        actionButton(\"edit_btn\",\"edit\"),\n        actionButton(\"delete_btn\",\"delete\")\n    )\n)",
+    "created" : 1440439043782.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1034150790",
+    "id" : "68AB825A",
+    "lastKnownWriteTime" : 1439581535,
+    "path" : "~/dev/tp53_sanger_browser/shiny/chrom/ui.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

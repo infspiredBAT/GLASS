@@ -1,0 +1,17 @@
+{
+    "contents" : "library(sangerseqR)\n\n# the function extracts the signal intesities for each channel and returns it formatted for the\n# javascript chromatograph\nget_intensities <- function(file) {\n  \n    #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf\n    g_abif <<- read.abif(file)\n    abi_data <- g_abif@data\n    \n    y9<-setNames(as.list(abi_data$DATA.9),rep(c(\"y\"),times=length(abi_data$DATA.9)))\n    x9<-setNames(as.list(c(1:length(abi_data$DATA.9))),rep(c(\"x\"),times=length(abi_data$DATA.9)))\n    y10<-setNames(as.list(abi_data$DATA.10),rep(c(\"y\"),times=length(abi_data$DATA.10)))\n    x10<-setNames(as.list(c(1:length(abi_data$DATA.10))),rep(c(\"x\"),times=length(abi_data$DATA.10)))\n    y11<-setNames(as.list(abi_data$DATA.11),rep(c(\"y\"),times=length(abi_data$DATA.11)))\n    x11<-setNames(as.list(c(1:length(abi_data$DATA.11))),rep(c(\"x\"),times=length(abi_data$DATA.11)))\n    y12<-setNames(as.list(abi_data$DATA.12),rep(c(\"y\"),times=length(abi_data$DATA.12)))\n    x12<-setNames(as.list(c(1:length(abi_data$DATA.12))),rep(c(\"x\"),times=length(abi_data$DATA.12)))\n    \n    xylist9 <- list()\n    xylist10 <- list()\n    xylist11 <- list()\n    xylist12 <- list()\n    \n    for(i in 1:length(abi_data$DATA.9)){xylist9[[i]]<-append(x9[i],y9[i])}\n    for(i in 1:length(abi_data$DATA.10)){xylist10[[i]]<-append(x10[i],y10[i])}\n    for(i in 1:length(abi_data$DATA.11)){xylist11[[i]]<-append(x11[i],y11[i])}\n    for(i in 1:length(abi_data$DATA.12)){xylist12[[i]]<-append(x12[i],y12[i])}\n    \n    #TO DO extract the order of nucleotide order from abi file FWO_.1\n     \n    list9<-append(\"A\",list(xylist9))\n    list10<-append(\"G\",list(xylist10))\n    list11<-append(\"T\",list(xylist11))\n    list12<-append(\"C\",list(xylist12))\n    \n    list9names<-setNames(list9,c(\"name\",\"data\"))\n    list10names<-setNames(list10,c(\"name\",\"data\"))\n    list11names<-setNames(list11,c(\"name\",\"data\"))\n    list12names<-setNames(list12,c(\"name\",\"data\"))\n    \n    listALL<-list(list9names,list10names,list11names,list12names)\n    \n    return(listALL)   \n}",
+    "created" : 1432572636240.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1448598863",
+    "id" : "5EF3909",
+    "lastKnownWriteTime" : 1432584087,
+    "path" : "~/Dropbox/work/tp53/export/html/shiny/chrom/helpers.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

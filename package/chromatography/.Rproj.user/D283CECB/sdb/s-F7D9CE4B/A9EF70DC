@@ -1,0 +1,16 @@
+{
+    "contents" : "#' <Add Title>\n#'\n#' <Add Description>\n#'\n#' @import htmlwidgets\n#'\n#' @export\n\n \nchromatography <- function(ins,meta, \n                           width = NULL, height = NULL) {\n    \n  #data = fromJSON(file=Data)\n    x <- list(\n        data = ins,\n        meta = meta\n    )\n  \n  # create widget\n    htmlwidgets::createWidget(\n        name = 'chromatography',\n        x,\n        width = width,\n        height = height,\n        package = 'chromatography'\n    )\n}\n\n#' Widget output function for use in Shiny\n#'\n#' @export\nchromatographyOutput <- function(outputId, width = '100%', height = '500px'){\n    shinyWidgetOutput(outputId, 'chromatography', width, height, package = 'chromatography')\n}\n\n#' Widget render function for use in Shiny\n#'\n#' @export\nrenderChromatography <- function(expr, env = parent.frame(), quoted = FALSE) {\n    if (!quoted) { expr <- substitute(expr) } # force quoted\n    shinyRenderWidget(expr, chromatographyOutput, env, quoted = TRUE)\n}\n",
+    "created" : 1440512766988.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1159002763",
+    "id" : "A9EF70DC",
+    "lastKnownWriteTime" : 1440443799,
+    "path" : "~/dev/tp53_sanger_browser/package/chromatography/R/chromatography.R",
+    "project_path" : "R/chromatography.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
