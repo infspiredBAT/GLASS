@@ -24,7 +24,7 @@ HTMLWidgets.widget({
                              
         var line = d3.svg.line()
                 		 .x(function(d,i){return widthScale(i)})
-    		    		     .y(function(d){return heightScale(d.y)});
+    		    		     .y(function(d){return heightScale(d)});
       
         var svg = d3.select(el).append("svg")
                                .attr("width", width + margin.left + margin.right)
@@ -86,8 +86,10 @@ HTMLWidgets.widget({
         
 	      var data = x["data"];
         var domain_y = x["helperdat"]["max_y"];
+        var domain_x = x["helperdat"]["max_x"];
         var intrex = HTMLWidgets.dataframeToD3(x["helperdat"]["helper_intrex"])
         
+        console.log(data)
         var svg = instance.svg;
         var line = instance.line;
         var focus = instance.focus;
@@ -98,7 +100,7 @@ HTMLWidgets.widget({
 	      var height2 = instance.height2;
            
         
-        var domain_x = d3.max(data[0]["data"].map(function(c){return c["x"];}));
+        
 	      widthScale.domain([0,domain_x]);
 	      width2Scale.domain([0,domain_x]);
 	      heightScale.domain([0,domain_y]);
@@ -132,10 +134,10 @@ HTMLWidgets.widget({
   
 	      var linec = d3.svg.line()
 		                  .x(function(d,i){return widthScale(i)})
-		                  .y(function(d){return height2Scale(d.y)});
+		                  .y(function(d){return height2Scale(d)});
 			
 	      group_a.selectAll("path")
-			         .data([data[0].data])
+			         .data([data["A"]])
 			         .enter()
 			         .append("path")
                .attr("class","path")
@@ -144,7 +146,7 @@ HTMLWidgets.widget({
 			         .attr("stroke","#33CC33")
 			         .attr("stroke-width",0.75);				
 	      group_c.selectAll("path")
-			         .data([data[1].data])
+			         .data([data["C"]])
 			         .enter()
 			         .append("path")
 			         .attr("d",line)
@@ -152,7 +154,7 @@ HTMLWidgets.widget({
 			         .attr("stroke","#0000FF")
 			         .attr("stroke-width",0.75);			
  	      group_g.selectAll("path")
-			         .data([data[2].data])
+			         .data([data["G"]])
 			         .enter()
 			         .append("path")
 			         .attr("d",line)
@@ -160,7 +162,7 @@ HTMLWidgets.widget({
 			         .attr("stroke","#000000")
 			         .attr("stroke-width",0.75);				
 	      group_t.selectAll("path")
-			         .data([data[3].data])
+			         .data([data["T"]])
 			         .enter()
 			         .append("path")
 			         .attr("d",line)
@@ -169,7 +171,7 @@ HTMLWidgets.widget({
 			         .attr("stroke-width",0.75);
 			
 	      group_ac.selectAll("path")
-			          .data([data[0].data])
+			          .data([data["A"]])
 			          .enter()
 			          .append("path")
 			          .attr("d",linec)
@@ -177,7 +179,7 @@ HTMLWidgets.widget({
 			          .attr("stroke","#33CC33")
 			          .attr("stroke-width",0.5);
 	      group_cc.selectAll("path")
-			          .data([data[1].data])
+			          .data([data["C"]])
 			          .enter()
 			          .append("path")
 			          .attr("d",linec)
@@ -185,7 +187,7 @@ HTMLWidgets.widget({
 			          .attr("stroke","#0000FF")
 			          .attr("stroke-width",0.5);			
 	      group_gc.selectAll("path")
-			          .data([data[2].data])
+			          .data([data["G"]])
 			          .enter()
 			          .append("path")
 			          .attr("d",linec)
@@ -193,7 +195,7 @@ HTMLWidgets.widget({
 			          .attr("stroke","#000000")
 			          .attr("stroke-width",0.5);				
 	      group_tc.selectAll("path")
-			          .data([data[3].data])
+			          .data([data["T"]])
 			          .enter()
 			          .append("path")
 		          	.attr("d",linec)

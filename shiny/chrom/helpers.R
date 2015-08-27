@@ -12,60 +12,64 @@ get_intensities <- function(data) {
     
     
     #initialize long lists of x's and y's for naming the coordinates
-    y9 <-setNames(as.list(abi_data$DATA.9),
-                 rep(c("y"),times=length(abi_data$DATA.9)))
-    x9 <-setNames(as.list(c(1:length(abi_data$DATA.9))),
-                 rep(c("x"),times=length(abi_data$DATA.9)))
-    y10<-setNames(as.list(abi_data$DATA.10),
-                  rep(c("y"),times=length(abi_data$DATA.10)))
-    x10<-setNames(as.list(c(1:length(abi_data$DATA.10))),
-                  rep(c("x"),times=length(abi_data$DATA.10)))
-    y11<-setNames(as.list(abi_data$DATA.11),
-                  rep(c("y"),times=length(abi_data$DATA.11)))
-    x11<-setNames(as.list(c(1:length(abi_data$DATA.11))),
-                  rep(c("x"),times=length(abi_data$DATA.11)))
-    y12<-setNames(as.list(abi_data$DATA.12),
-                  rep(c("y"),times=length(abi_data$DATA.12)))
-    x12<-setNames(as.list(c(1:length(abi_data$DATA.12))),
-                  rep(c("x"),times=length(abi_data$DATA.12)))
+#     y9 <-setNames(as.list(abi_data$DATA.9),
+#                  rep(c("y"),times=length(abi_data$DATA.9)))
+#     x9 <-setNames(as.list(c(1:length(abi_data$DATA.9))),
+#                  rep(c("x"),times=length(abi_data$DATA.9)))
+#     y10<-setNames(as.list(abi_data$DATA.10),
+#                   rep(c("y"),times=length(abi_data$DATA.10)))
+#     x10<-setNames(as.list(c(1:length(abi_data$DATA.10))),
+#                   rep(c("x"),times=length(abi_data$DATA.10)))
+#     y11<-setNames(as.list(abi_data$DATA.11),
+#                   rep(c("y"),times=length(abi_data$DATA.11)))
+#     x11<-setNames(as.list(c(1:length(abi_data$DATA.11))),
+#                   rep(c("x"),times=length(abi_data$DATA.11)))
+#     y12<-setNames(as.list(abi_data$DATA.12),
+#                   rep(c("y"),times=length(abi_data$DATA.12)))
+#     x12<-setNames(as.list(c(1:length(abi_data$DATA.12))),
+#                   rep(c("x"),times=length(abi_data$DATA.12)))
+#     
+#     
+#     
+#     xylist9  <- list()
+#     xylist10 <- list()
+#     xylist11 <- list()
+#     xylist12 <- list()
+#     
+#     for(i in 1:length(abi_data$DATA.9)){xylist9[[i]]<-append(x9[i],y9[i])}
+#     for(i in 1:length(abi_data$DATA.10)){xylist10[[i]]<-append(x10[i],y10[i])}
+#     for(i in 1:length(abi_data$DATA.11)){xylist11[[i]]<-append(x11[i],y11[i])}
+#     for(i in 1:length(abi_data$DATA.12)){xylist12[[i]]<-append(x12[i],y12[i])}
+#     
+#     #extract the order of nucleotide order from abi file FWO_.1
+#     list9 <-append(substring(abi_data$FWO,1,1),list(xylist9))
+#     list10<-append(substring(abi_data$FWO,2,2),list(xylist10))
+#     list11<-append(substring(abi_data$FWO,3,3),list(xylist11))
+#     list12<-append(substring(abi_data$FWO,4,4),list(xylist12))
+#     
+#     #alternative without y
+#     alist9 <-append(substring(abi_data$FWO,1,1),list(x9))
+#     alist10<-append(substring(abi_data$FWO,2,2),list(x10))
+#     alist11<-append(substring(abi_data$FWO,3,3),list(x11))
+#     alist12<-append(substring(abi_data$FWO,4,4),list(x12))
+#     
+#     list9names <-setNames(list9,c("name","data"))
+#     list10names<-setNames(list10,c("name","data"))
+#     list11names<-setNames(list11,c("name","data"))
+#     list12names<-setNames(list12,c("name","data"))
+#     
+#     alist9names <-setNames(alist9,c("name","data"))
+#     alist10names<-setNames(alist10,c("name","data"))
+#     alist11names<-setNames(alist11,c("name","data"))
+#     alist12names<-setNames(alist12,c("name","data"))
+#     
+#     listALL<-list(list9names,list10names,list11names,list12names)
+#     alistALL<-list(alist9names,alist10names,alist11names,alist12names)
     
-    data.table(abi_data$DATA.9,abi_data$DATA.10,abi_data$DATA.11,abi_data$DATA.12);
-    
-    xylist9  <- list()
-    xylist10 <- list()
-    xylist11 <- list()
-    xylist12 <- list()
-    
-    for(i in 1:length(abi_data$DATA.9)){xylist9[[i]]<-append(x9[i],y9[i])}
-    for(i in 1:length(abi_data$DATA.10)){xylist10[[i]]<-append(x10[i],y10[i])}
-    for(i in 1:length(abi_data$DATA.11)){xylist11[[i]]<-append(x11[i],y11[i])}
-    for(i in 1:length(abi_data$DATA.12)){xylist12[[i]]<-append(x12[i],y12[i])}
-    
-    #extract the order of nucleotide order from abi file FWO_.1
-    list9 <-append(substring(abi_data$FWO,1,1),list(xylist9))
-    list10<-append(substring(abi_data$FWO,2,2),list(xylist10))
-    list11<-append(substring(abi_data$FWO,3,3),list(xylist11))
-    list12<-append(substring(abi_data$FWO,4,4),list(xylist12))
-    
-    #alternative without y
-    alist9 <-append(substring(abi_data$FWO,1,1),list(x9))
-    alist10<-append(substring(abi_data$FWO,2,2),list(x10))
-    alist11<-append(substring(abi_data$FWO,3,3),list(x11))
-    alist12<-append(substring(abi_data$FWO,4,4),list(x12))
-    
-    list9names <-setNames(list9,c("name","data"))
-    list10names<-setNames(list10,c("name","data"))
-    list11names<-setNames(list11,c("name","data"))
-    list12names<-setNames(list12,c("name","data"))
-    
-    alist9names <-setNames(alist9,c("name","data"))
-    alist10names<-setNames(alist10,c("name","data"))
-    alist11names<-setNames(alist11,c("name","data"))
-    alist12names<-setNames(alist12,c("name","data"))
-    
-    listALL<-list(list9names,list10names,list11names,list12names)
-    alistALL<-list(alist9names,alist10names,alist11names,alist12names)
-    return(listALL)   
+    ins <- data.table(abi_data$DATA.9,abi_data$DATA.10,abi_data$DATA.11,abi_data$DATA.12)
+    fwo <- abi_data$FWO
+    setnames(ins,c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
+    return(ins)   
 }
 
 #function extracting 
