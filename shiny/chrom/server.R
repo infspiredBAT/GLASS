@@ -32,6 +32,7 @@ shinyServer(function(input,output,session) {
                 ins<- get_intensities(g_abif@data)
                 res <-get_call_data(g_abif@data) 
                 call <- res$call
+                res$helperdat$max_y <-max(ins)
                 res$helperdat$max_x <- nrow(ins)
                 g_helperdat<<- res$helperdat
                 call.dt <- data.table(call,key="id")

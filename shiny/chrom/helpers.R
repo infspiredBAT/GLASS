@@ -1,16 +1,29 @@
 library(zoo)
 library(seqinr)
 # the function extracts the signal intesities for each channel and returns it formatted for the javascript chromatograph
-get_intensities <- function(data) {
+get_intensities <- function(data,norm=FALSE) {
   
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
     
-    abi_data <- data
-    
-    
-    ins <- data.table(abi_data$DATA.9,abi_data$DATA.10,abi_data$DATA.11,abi_data$DATA.12)
-    fwo <- abi_data$FWO
+    ins <- data.table(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)
+    fwo <- data$FWO
     setnames(ins,c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
+  
+    if(norm==TRUE){
+        #first and last 500 points
+        f_ins_start <- data.table()
+        f_ins_end   <- data.table()
+        last <- nrow(ins)
+        for(i in 1:499){
+          f_ins_start <- rbind(f_ins_start,as.list(apply(ins[1:(i+499)],2,function (x){sum(x)/(499+i)})))
+          f_ins_end   <- rbind(f_ins_end,as.list(apply(ins[(last-998+i):last],2,function(x){sum(x)/(998-i)})))
+        }
+        #1000 rolling mean
+        f_ins_mid <- data.table(rollmean(ins,k=999))
+        f_ins <- rbind(f_ins_start,f_ins_mid,f_ins_end)
+        ins<-ins/f_ins
+    }
+    
     return(ins)   
 }
 
@@ -76,7 +89,6 @@ generate_ref <-function(data){
             }
         }
     }
-    max_y <- max(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)   #max_y prevoiusly calculeted in javascript, faster in R
-    return(list(g_ref=cbind(g_ref,coord,intrex),helperdat=list(helper_intrex=helper_intrex,max_y=max_y)))
+    return(list(g_ref=cbind(g_ref,coord,intrex),helperdat=list(helper_intrex=helper_intrex)))
 }
 
