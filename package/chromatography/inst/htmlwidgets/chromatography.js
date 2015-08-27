@@ -23,7 +23,7 @@ HTMLWidgets.widget({
     				                 .range([height2,0]);   
                              
         var line = d3.svg.line()
-                		 .x(function(d){return widthScale(d.x)})
+                		 .x(function(d,i){return widthScale(i)})
     		    		     .y(function(d){return heightScale(d.y)});
       
         var svg = d3.select(el).append("svg")
@@ -82,10 +82,12 @@ HTMLWidgets.widget({
     renderValue: function(el, x, instance) {
       
         instance.lastValue = x;
+        console.log(x);
+        
 	      var data = x["data"];
-        var domain_y = x["meta"]["max_y"];
-    
-	      console.log(x);
+        var domain_y = x["helperdat"]["max_y"];
+        var intrex = HTMLWidgets.dataframeToD3(x["helperdat"]["helper_intrex"])
+        
         var svg = instance.svg;
         var line = instance.line;
         var focus = instance.focus;
@@ -94,18 +96,7 @@ HTMLWidgets.widget({
         var widthScale = instance.widthScale;
         var heightScale = instance.heightScale;
 	      var height2 = instance.height2;
-   
-	      // calculate the scale domains
-        // probably takes a long time, maybe calculate this in R and pass in meta ? 
-                           
-	      //var domain_y = d3.max(
-			  //    [d3.max(data[0]["data"].map(function(c){return c["y"];})),
-		    //     d3.max(data[1]["data"].map(function(c){return c["y"];})),
-			  //     d3.max(data[2]["data"].map(function(c){return c["y"];})),
-	  	  //     d3.max(data[3]["data"].map(function(c){return c["y"];}))]
-	      //);
-
-        
+           
         
         var domain_x = d3.max(data[0]["data"].map(function(c){return c["x"];}));
 	      widthScale.domain([0,domain_x]);
@@ -113,18 +104,17 @@ HTMLWidgets.widget({
 	      heightScale.domain([0,domain_y]);
 	      height2Scale.domain([0,domain_y]);
         
-        //visualise introns/exons
-        
+        //visualise introns/exons     
         //TO DO
         //R must generage a readable structure for the d3 data function 
         //map color to name so that introns have different color maybe add label
-        var intrex =  [["ex1",689,2034],["ex2",2046,3338]]
-        
         context.selectAll("rect").data(intrex).enter()
-        .append("rect")
-        .attr("x",function(d){return widthScale(d[1]);})
-        .attr("y",0).attr("rx",5).attr("ry",5).attr("opacity",0.5)
-        .attr("width",function(d){return widthScale(d[2]-d[1]);}).attr("height",55);
+                .append("rect")
+                .attr("x",function(d){return widthScale(d["start"]);})
+                .attr("y",0).attr("rx",5).attr("ry",5).attr("opacity",0.5)
+                .attr("width",function(d){return widthScale(d["end"]-d["start"]);})
+                .attr("height",55)
+                .attr("fill","rgba(0, 255, 0, 0.6)");
                    
     
 						
@@ -138,9 +128,10 @@ HTMLWidgets.widget({
 	      var group_cc = context.append("g");
 	      var group_gc = context.append("g");	
 	      var group_tc = context.append("g");
-	
+	      
+  
 	      var linec = d3.svg.line()
-		                  .x(function(d){return widthScale(d.x)})
+		                  .x(function(d,i){return widthScale(i)})
 		                  .y(function(d){return height2Scale(d.y)});
 			
 	      group_a.selectAll("path")

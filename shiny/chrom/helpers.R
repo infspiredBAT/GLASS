@@ -45,13 +45,24 @@ get_intensities <- function(data) {
     list11<-append(substring(abi_data$FWO,3,3),list(xylist11))
     list12<-append(substring(abi_data$FWO,4,4),list(xylist12))
     
+    #alternative without y
+    alist9 <-append(substring(abi_data$FWO,1,1),list(x9))
+    alist10<-append(substring(abi_data$FWO,2,2),list(x10))
+    alist11<-append(substring(abi_data$FWO,3,3),list(x11))
+    alist12<-append(substring(abi_data$FWO,4,4),list(x12))
+    
     list9names <-setNames(list9,c("name","data"))
     list10names<-setNames(list10,c("name","data"))
     list11names<-setNames(list11,c("name","data"))
     list12names<-setNames(list12,c("name","data"))
     
-    listALL<-list(list9names,list10names,list11names,list12names)
+    alist9names <-setNames(alist9,c("name","data"))
+    alist10names<-setNames(alist10,c("name","data"))
+    alist11names<-setNames(alist11,c("name","data"))
+    alist12names<-setNames(alist12,c("name","data"))
     
+    listALL<-list(list9names,list10names,list11names,list12names)
+    alistALL<-list(alist9names,alist10names,alist11names,alist12names)
     return(listALL)   
 }
 
@@ -75,18 +86,19 @@ get_call_data <- function(data){
                       "gen_coord","exon_intron")
     
     # changing the sequence coordinates to intensities coordinates for the brush tool
-    res$meta$meta_intrex$start <- lapply(res$meta$meta_intrex$start,function (x) {call$trace_peak[x]})
-    res$meta$meta_intrex$end   <- lapply(res$meta$meta_intrex$end  ,function (x) {call$trace_peak[x]})
-    return(list(call=call,meta=res$meta))
+    res$helperdat$helper_intrex$start <- lapply(res$helperdat$helper_intrex$start,function (x) {call$trace_peak[x]})
+    res$helperdat$helper_intrex$end   <- lapply(res$helperdat$helper_intrex$end  ,function (x) {call$trace_peak[x]})
+    return(list(call=call,helperdat=res$helperdat))
     
 }
 
 generate_ref <-function(seq){
+    print(getwd())
     refs   <- read.fasta("../../data/ref_ex_in.fa",as.string=TRUE)
     g_ref  <- c(rep("",nchar(abif@data$PBAS.2)))     #generated reference
     coord  <- c(rep(NA,nchar(abif@data$PBAS.2)))
     intrex <- c(rep(NA,nchar(abif@data$PBAS.2)))
-    meta_intrex   <- data.frame(attr=character(),start=numeric(),end=numeric()) #data for showing introns/exons in brush, maybe there is a cleverer way to do this
+    helper_intrex   <- data.frame(attr=character(),start=numeric(),end=numeric()) #data for showing introns/exons in brush, maybe there is a cleverer way to do this
     #STEP 1.  
     for(ref in refs){
         m<-matchPattern(pattern = toupper(ref[1]),
@@ -97,17 +109,17 @@ generate_ref <-function(seq){
         
         if(length(m)!=0){
             if(m@ranges@width==
-               as.integer(strsplit(attr(ref,"Annot"),split='_')[[1]][5])){ #if no indels
+               as.integer(strsplit(attr(ref,"Annot"),split='_')[[1]][5])){ #if there no indels
                 if(nmismatch(pattern=toupper(ref[1]),m)>0){                #if there are variations we must make sure
                     #print(mismatch(pattern=toupper(ref[1]),m))             #to assign ref
                     g_ref[start(m):end(m)]  <- strsplit(toupper(ref),"")[[1]]    
-                }else{                                                                    #no variations
+                }else{ #no variations                                                                   
                     g_ref[start(m):end(m)]  <- suppressWarnings(as.matrix(m))
                 }
                 coord[start(m):end(m)]  <- (strsplit(attr(ref,"name"),"_")[[1]][3]:
                                             strsplit(attr(ref,"name"),"_")[[1]][4])
                 intrex[start(m):end(m)] <- strsplit(attr(ref,"name"),"_")[[1]][2]                  
-                meta_intrex <- rbind(meta_intrex,
+                helper_intrex <- rbind(helper_intrex,
                                      data.frame(attr=strsplit(attr(ref,"name"),"_")[[1]][2],
                                      start=start(m),end=end(m)))
             }else{
@@ -116,6 +128,6 @@ generate_ref <-function(seq){
         }
     }
     max_y <- max(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)   #max_y prevoiusly calculeted in javascript, faster in R
-    return(list(g_ref=cbind(g_ref,coord,intrex),meta=list(meta_intrex=meta_intrex,max_y=max_y)))
+    return(list(g_ref=cbind(g_ref,coord,intrex),helperdat=list(helper_intrex=helper_intrex,max_y=max_y)))
 }
 

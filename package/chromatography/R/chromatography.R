@@ -7,13 +7,13 @@
 #' @export
 
  
-chromatography <- function(ins,meta, 
+chromatography <- function(ins,helperdat, 
                            width = NULL, height = NULL) {
     
   #data = fromJSON(file=Data)
     x <- list(
         data = ins,
-        meta = meta
+        helperdat = helperdat
     )
   
   # create widget

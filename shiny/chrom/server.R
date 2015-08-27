@@ -4,7 +4,7 @@ source("helpers.R")
 
 g_call      <- NULL             #annotated basecall data
 g_ins       <- NULL             #intensities file
-g_meta      <- NULL             #meta data used in graphs 
+g_helperdat      <- NULL             #meta data used in graphs 
 g_choices   <- NULL
 g_selected  <- NULL
 g_selected_zoom_index <- 0
@@ -32,7 +32,7 @@ shinyServer(function(input,output,session) {
                 ins<- get_intensities(g_abif@data)
                 res <-get_call_data(g_abif@data) 
                 call <- res$call
-                g_meta<<- res$meta
+                g_helperdat<<- res$helperdat
                 call.dt <- data.table(call,key="id")
                 g_call<<- call.dt        
                 g_ins <<- ins
@@ -48,7 +48,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
 #            withProgress(message="Rendering plot ...", value=1, {
-                chromatography(g_ins,g_meta)
+                chromatography(g_ins,g_helperdat)
 #            })
         }
     })

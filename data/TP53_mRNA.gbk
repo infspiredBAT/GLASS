@@ -1,0 +1,117 @@
+LOCUS       
+DEFINITION  Homo sapiens chromosome 17, GRCh37 primary reference assembly.
+ACCESSION   NC_000017 REGION: 7571720..7590863 GPC_000000041
+VERSION     NC_000017.10  GI:224589808
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiensEukaryota; Metazoa; Chordata; 
+            Craniata; Vertebrata; Euteleostomi;Mammalia; 
+            Eutheria; Euarchontoglires; Primates; 
+            Haplorrhini;Catarrhini; Hominidae; Homo.
+REFERENCE   
+  AUTHORS   Zody,M.C., Garber,M., Adams,D.J., Sharpe,T., 
+            Harrow,J.,Lupski,J.R., Nicholson,C., Searle,S.M.,
+             Wilming,L., Young,S.K.,Abouelleil,A., Allen,
+            N.R., Bi,W., Bloom,T., Borowsky,M.L.,Bugalter,
+            B.E., Butler,J., Chang,J.L., Chen,C.K., Cook,A., 
+            Corum,B.,Cuomo,C.A., de Jong,P.J., DeCaprio,D., 
+            Dewar,K., FitzGerald,M.,Gilbert,J., Gibson,R., 
+            Gnerre,S., Goldstein,S., Grafham,D.V.,Grocock,R.,
+             Hafez,N., Hagopian,D.S., Hart,E., Norman,C.H.,
+            Humphray,S., Jaffe,D.B., Jones,M., Kamal,M., 
+            Khodiyar,V.K.,LaButti,K., Laird,G., Lehoczky,J., 
+            Liu,X., Lokyitsang,T.,Loveland,J., Lui,A., 
+            Macdonald,P., Major,J.E., Matthews,L.,Mauceli,E.,
+             McCarroll,S.A., Mihalev,A.H., Mudge,J., Nguyen,
+            C.,Nicol,R., O'Leary,S.B., Osoegawa,K., Schwartz,
+            D.C., Shaw-Smith,C.,Stankiewicz,P., Steward,C., 
+            Swarbreck,D., Venkataraman,V.,Whittaker,C.A., 
+            Yang,X., Zimmer,A.R., Bradley,A., Hubbard,T.,
+            Birren,B.W., Rogers,J., Lander,E.S. and Nusbaum,C.
+  TITLE     DNA sequence of human chromosome 17 and 
+            analysis of rearrangementin the human lineage
+  JOURNAL   Nature 440 (7087), 1045-1049 (2006)
+  PUBMED    
+FEATURES             
+     source          1..2583
+                     /organism="Homo sapiens"
+                     /chromosome="17"
+                     /map=""
+                     /mRNAindex="1"
+     gene            1..2583
+                     /gene="TP53"
+                     /note="Derived by automated computational 
+                     analysis usinggene prediction method: BestRefseq."
+     mRNA            1..169,170..268,269..290,291..569,570..753,754..866,867..976,977..1113,1114..1187,1188..1294,1295..2583
+                     /gene="TP53"
+                     /transcript_id="NM_001126112.1"
+                     /product="tumor protein p53, transcript variant 
+                     2"
+                     /note="Derived by automated computational 
+                     analysis usinggene prediction method: BestRefseq."
+     CDS             195..268,269..290,291..569,570..753,754..866,867..976,977..1113,1114..1187,1188..1294,1295..1376
+                     /Region_of_Interest=""
+                     /Amplicon Id=""
+                     /external_primer=""
+                     /internal_primer=""
+                     /gene="TP53"
+                     /corresponding_mRNA="NM_001126112.1"
+                     /note="isoform a is encoded by transcript 
+                     variant 2;Derived by automated computational 
+                     analysis using geneprediction method: BestRefseq."
+                     /codon_start=1
+                     /Amino_Start=1
+                     /product="tumor protein p53 isoform a"
+                     /protein_id="NP_001119584.1"
+                     /translation="IAQAGVQWHYLRLLQPPPGFKXFSC
+                     SGDPPPLELNKGXLFLQLFYFTCSILLFXRELCDCXCGSVVLLPPPLHXCKYTSFRDLFSQQARRCCPEM
+                     GGPKSQSHLEGHRSTDRSPCLYLSNLQXQLDGVSPCXVGLKLLTSGDRPASASRSAGITGVSHHTLPEFH
+                     SCCPGWSAIARSRLTATSASQVLLELGFHHVGQAGPREATCLSLLKVLGLQAXATTPGPYFNRDEVSPSL
+                     SGWSPTPDLRXSAHLGLPKCWDYRRDCLVKTSSMVSTLXESNPFLVPDLRGKSVEFSFLFFFFFFLRRSL
+                     TQLGLXAPATMPGXFFVFVFLVETGFYDHKKNCTRMFIAALFHNRKWETTQKAIKRTDIQSIPSLHSFKI
+                     XFSDVPILFFFPPGRXDIL"
+ORIGIN
+         1  gattggggtt ttcccctccc atgtgctcaa gactggcgct aaaagttttg agcttctcaa
+        61  aagtctagag ccaccgtcca gggagcaggt agctgctggg ctccggggac actttgcgtt
+       121  cgggctggga gcgtgctttc cacgacggtg acacgcttcc ctggattggc cagactgcct
+       181  tccgggtcac tgccatggag gagccgcagt cagatcctag cgtcgagccc cctctgagtc
+       241  aggaaacatt ttcagaccta tggaaactac ttcctgaaaa caacgttctg tcccccttgc
+       301  cgtcccaagc aatggatgat ttgatgctgt ccccggacga tattgaacaa tggttcactg
+       361  aagacccagg tccagatgaa gctcccagaa tgccagaggc tgctcccccc gtggcccctg
+       421  caccagcagc tcctacaccg gcggcccctg caccagcccc ctcctggccc ctgtcatctt
+       481  ctgtcccttc ccagaaaacc taccagggca gctacggttt ccgtctgggc ttcttgcatt
+       541  ctgggacagc caagtctgtg acttgcacgt actcccctgc cctcaacaag atgttttgcc
+       601  aactggccaa gacctgccct gtgcagctgt gggttgattc cacacccccg cccggcaccc
+       661  gcgtccgcgc catggccatc tacaagcagt cacagcacat gacggaggtt gtgaggcgct
+       721  gcccccacca tgagcgctgc tcagatagcg atggtctggc ccctcctcag catcttatcc
+       781  gagtggaagg aaatttgcgt gtggagtatt tggatgacag aaacactttt cgacatagtg
+       841  tggtggtgcc ctatgagccg cctgaggttg gctctgactg taccaccatc cactacaact
+       901  acatgtgtaa cagttcctgc atgggcggca tgaaccggag gcccatcctc accatcatca
+       961  cactggaaga ctccagtggt aatctactgg gacggaacag ctttgaggtg cgtgtttgtg
+      1021  cctgtcctgg gagagaccgg cgcacagagg aagagaatct ccgcaagaaa ggggagcctc
+      1081  accacgagct gcccccaggg agcactaagc gagcactgcc caacaacacc agctcctctc
+      1141  cccagccaaa gaagaaacca ctggatggag aatatttcac ccttcagatc cgtgggcgtg
+      1201  agcgcttcga gatgttccga gagctgaatg aggccttgga actcaaggat gcccaggctg
+      1261  ggaaggagcc aggggggagc agggctcact ccagccacct gaagtccaaa aagggtcagt
+      1321  ctacctcccg ccataaaaaa ctcatgttca agacagaagg gcctgactca gactgacatt
+      1381  ctccacttct tgttccccac tgacagcctc ccacccccat ctctccctcc cctgccattt
+      1441  tgggttttgg gtctttgaac ccttgcttgc aataggtgtg cgtcagaagc acccaggact
+      1501  tccatttgct ttgtcccggg gctccactga acaagttggc ctgcactggt gttttgttgt
+      1561  ggggaggagg atggggagta ggacatacca gcttagattt taaggttttt actgtgaggg
+      1621  atgtttggga gatgtaagaa atgttcttgc agttaagggt tagtttacaa tcagccacat
+      1681  tctaggtagg ggcccacttc accgtactaa ccagggaagc tgtccctcac tgttgaattt
+      1741  tctctaactt caaggcccat atctgtgaaa tgctggcatt tgcacctacc tcacagagtg
+      1801  cattgtgagg gttaatgaaa taatgtacat ctggccttga aaccaccttt tattacatgg
+      1861  ggtctagaac ttgaccccct tgagggtgct tgttccctct ccctgttggt cggtgggttg
+      1921  gtagtttcta cagttgggca gctggttagg tagagggagt tgtcaagtct ctgctggccc
+      1981  agccaaaccc tgtctgacaa cctcttggtg aaccttagta cctaaaagga aatctcaccc
+      2041  catcccacac cctggaggat ttcatctctt gtatatgatg atctggatcc accaagactt
+      2101  gttttatgct cagggtcaat ttcttttttc tttttttttt ttttttttct ttttctttga
+      2161  gactgggtct cgctttgttg cccaggctgg agtggagtgg cgtgatcttg gcttactgca
+      2221  gcctttgcct ccccggctcg agcagtcctg cctcagcctc cggagtagct gggaccacag
+      2281  gttcatgcca ccatggccag ccaacttttg catgttttgt agagatgggg tctcacagtg
+      2341  ttgcccaggc tggtctcaaa ctcctgggct caggcgatcc acctgtctca gcctcccaga
+      2401  gtgctgggat tacaattgtg agccaccacg tccagctgga agggtcaaca tcttttacat
+      2461  tctgcaagca catctgcatt ttcaccccac ccttcccctc cttctccctt tttatatccc
+      2521  atttttatat cgatctctta ttttacaata aaactttgct gccacctgtg tgtctgaggg
+      2581  gtg
+//
