@@ -29,6 +29,8 @@ get_intensities <- function(data) {
     x12<-setNames(as.list(c(1:length(abi_data$DATA.12))),
                   rep(c("x"),times=length(abi_data$DATA.12)))
     
+    data.table(abi_data$DATA.9,abi_data$DATA.10,abi_data$DATA.11,abi_data$DATA.12);
+    
     xylist9  <- list()
     xylist10 <- list()
     xylist11 <- list()
@@ -73,7 +75,7 @@ get_call_data <- function(data){
     qual      <- data$PCON.2
     rm7qual   <- rollmean(qual,k=7)
     rm7qualext<- data.frame(c(rep(rm7qual[1],3),rm7qual,rep(rm7qual[length(qual)-6],3)))  #cbind returns data frame if atleast one argument is a data frame
-    res       <- generate_ref(data$PBAS.2)
+    res       <- generate_ref(data)
     seq_trim  <- str_split(data$PBAS.2,pattern="")[[1]]
     seq_trim[rm7qualext<12|qual<10]<-"low_qual"
     #save send to Vojta
@@ -92,12 +94,13 @@ get_call_data <- function(data){
     
 }
 
-generate_ref <-function(seq){
+generate_ref <-function(data){
     print(getwd())
+    seq    <- data$PBAS.2
     refs   <- read.fasta("../../data/ref_ex_in.fa",as.string=TRUE)
-    g_ref  <- c(rep("",nchar(abif@data$PBAS.2)))     #generated reference
-    coord  <- c(rep(NA,nchar(abif@data$PBAS.2)))
-    intrex <- c(rep(NA,nchar(abif@data$PBAS.2)))
+    g_ref  <- c(rep("",nchar(data$PBAS.2)))     #generated reference
+    coord  <- c(rep(NA,nchar(data$PBAS.2)))
+    intrex <- c(rep(NA,nchar(data$PBAS.2)))
     helper_intrex   <- data.frame(attr=character(),start=numeric(),end=numeric()) #data for showing introns/exons in brush, maybe there is a cleverer way to do this
     #STEP 1.  
     for(ref in refs){
