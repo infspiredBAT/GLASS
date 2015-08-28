@@ -48,10 +48,10 @@ HTMLWidgets.widget({
 	
 	      function brushed() {
 		        widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
-		        //console.log(brush.extent())
+		        console.log(brush.extent())
 		        focus.selectAll("g").selectAll("path").attr("d", line);
 		    }
-
+      
         return {
             svg: svg,
             line: line,
@@ -100,7 +100,6 @@ HTMLWidgets.widget({
 	      var height2 = instance.height2;
            
         
-        
 	      widthScale.domain([0,domain_x]);
 	      width2Scale.domain([0,domain_x]);
 	      heightScale.domain([0,domain_y]);
@@ -118,8 +117,6 @@ HTMLWidgets.widget({
                 .attr("height",55)
                 .attr("fill","rgba(0, 255, 0, 0.6)");
                    
-    
-						
 	      brush.x(width2Scale);
 	      var group_a = focus.append("g");
 	      var group_c = focus.append("g");
@@ -137,68 +134,52 @@ HTMLWidgets.widget({
 		                  .y(function(d){return height2Scale(d)});
 			
 	      group_a.selectAll("path")
-			         .data([data["A"]])
-			         .enter()
-			         .append("path")
-               .attr("class","path")
+			         .data([data["A"]]).enter()
+			         .append("path").attr("class","path")
 			         .attr("d",line)
 			         .attr("fill","none")
 			         .attr("stroke","#33CC33")
 			         .attr("stroke-width",0.75);				
 	      group_c.selectAll("path")
-			         .data([data["C"]])
-			         .enter()
-			         .append("path")
-			         .attr("d",line)
+			         .data([data["C"]]).enter()
+			         .append("path").attr("d",line)
 			         .attr("fill","none")
 			         .attr("stroke","#0000FF")
 			         .attr("stroke-width",0.75);			
  	      group_g.selectAll("path")
-			         .data([data["G"]])
-			         .enter()
-			         .append("path")
-			         .attr("d",line)
+			         .data([data["G"]]).enter()
+			         .append("path").attr("d",line)
 			         .attr("fill","none")
 			         .attr("stroke","#000000")
 			         .attr("stroke-width",0.75);				
 	      group_t.selectAll("path")
-			         .data([data["T"]])
-			         .enter()
-			         .append("path")
-			         .attr("d",line)
+			         .data([data["T"]]).enter()
+			         .append("path").attr("d",line)
 			         .attr("fill","none")
 			         .attr("stroke","#FF0000")
 			         .attr("stroke-width",0.75);
 			
 	      group_ac.selectAll("path")
-			          .data([data["A"]])
-			          .enter()
-			          .append("path")
-			          .attr("d",linec)
-			          .attr("fill","none")
+			          .data([data["A"]]).enter()
+                .append("path").attr("d",linec)
+                .attr("fill","none")
 			          .attr("stroke","#33CC33")
 			          .attr("stroke-width",0.5);
 	      group_cc.selectAll("path")
-			          .data([data["C"]])
-			          .enter()
-			          .append("path")
-			          .attr("d",linec)
+			          .data([data["C"]]).enter()
+			          .append("path").attr("d",linec)
 			          .attr("fill","none")
 			          .attr("stroke","#0000FF")
 			          .attr("stroke-width",0.5);			
 	      group_gc.selectAll("path")
-			          .data([data["G"]])
-			          .enter()
-			          .append("path")
-			          .attr("d",linec)
+			          .data([data["G"]]).enter()
+			          .append("path").attr("d",linec)
 			          .attr("fill","none")
 			          .attr("stroke","#000000")
 			          .attr("stroke-width",0.5);				
 	      group_tc.selectAll("path")
-			          .data([data["T"]])
-			          .enter()
-			          .append("path")
-		          	.attr("d",linec)
+			          .data([data["T"]]).enter()
+			          .append("path").attr("d",linec)
 			          .attr("fill","none")
 			          .attr("stroke","#FF0000")
 			          .attr("stroke-width",0.5);
@@ -207,8 +188,10 @@ HTMLWidgets.widget({
 	             .attr("class", "x brush")
 	             .call(brush)
 	             .selectAll("rect")
-	             .attr("y", -6)
-	             .attr("height", height2 + 7);
+	             .attr("y", -5)
+	             .attr("height", height2 + 10)
+               .attr("rx",2)
+               .attr("ry",2);
 
     }
 

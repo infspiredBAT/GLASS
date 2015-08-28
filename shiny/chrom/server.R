@@ -51,6 +51,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not") {
 #            withProgress(message="Rendering plot ...", value=1, {
                 chromatography(g_ins,g_helperdat)
+                #print(str(session.request))
 #            })
         }
     })
@@ -200,6 +201,7 @@ shinyServer(function(input,output,session) {
             if(is.null(input$goZoom)) return()
             cat(paste0(input$goZoom$id,","))
             session$sendCustomMessage(type = 'zoom_message',message = paste0(input$goZoom$id))
+            
         }
     })
 
