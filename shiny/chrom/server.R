@@ -74,7 +74,7 @@ shinyServer(function(input,output,session) {
     first_update_chosen_variances <- observe({
         if(loading_processed_files() != "not") {
           #TO DO: more sophisticated rules (might need to take intesitied into account)
-          g_choices <<- g_call[call != reference  & seq_trim != "low_qual" & trace_peak != "NA"& gen_coord!=""]         
+          g_choices <<- g_call[call != reference  & seq_trim != "low_qual" & trace_peak != "NA"& !is.na(gen_coord)]         
         }
     })
    

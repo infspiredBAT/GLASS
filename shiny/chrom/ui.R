@@ -4,6 +4,7 @@ require(rjson)
 require(htmlwidgets)
 require(chromatography)
 require(stringr)
+require(stringi)
 #require(DT)
     
 shinyUI(
