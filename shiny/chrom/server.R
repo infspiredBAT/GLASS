@@ -4,83 +4,71 @@ source("helpers.R")
 
 g_call      <- NULL             #annotated basecall data
 g_ins       <- NULL             #intensities file
-g_helperdat      <- NULL             #meta data used in graphs 
+g_helperdat <- NULL             #meta data used in graphs
 g_choices   <- NULL
 g_selected  <- NULL
 g_selected_zoom_index <- 0
 g_chrom <- NULL
 g_max_y <- NULL
-
-#
-g_abif <- NULL
+g_abif  <- NULL
 
 shinyServer(function(input,output,session) {
-  
+
     get_file <- reactive({
        # if (!is.null(input$select_file)) return(input$select_file$datapath)
         if (!is.null(input$select_file)) return(input$select_file)
-        
-        else return(NULL)  
+        else return(NULL)
     })
-    
+
     loading_processed_files <- reactive ({
         if(!is.null(get_file())) {
             file <- get_file()$datapath
             file_name <- get_file()$name
-            withProgress(message = paste('Loading file',file_name,'...',sep=" "), value = 1, {
+            withProgress(message = paste('...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
                 g_abif <- sangerseqR::read.abif(file)
                 ins<- get_intensities(g_abif@data)
-                res <-get_call_data(g_abif@data) 
+                res <-get_call_data(g_abif@data)
                 call <- res$call
                 g_max_y <<- max(ins)
                 res$helperdat$max_x <- nrow(ins)
                 g_helperdat<<- res$helperdat
                 call.dt <- data.table(call,key="id")
-                g_call<<- call.dt        
+                g_call<<- call.dt
                 g_ins <<- ins
-                
             })
-            
             return("loaded")
         }
         return("not")
     })
-    
-    
+
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
-
-                
                 g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
                 chromatography(g_ins,g_helperdat)
-
         }
     })
 
-    
     output$variance_info <- renderPrint({
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
                 tryCatch({
-                    cat(g_call[id == as.integer(input$choose_variance),paste("chosen variance: ",get("reference"),"(",get("exon_intron"),":",gen_coord,") -> ",call," with quality ",quality,sep="")])
+                    cat(g_call[id == as.integer(input$choose_variance),paste("",call," -> ",get("reference")," on ",get("exon_intron")," at ",gen_coord," with quality ",quality,sep="")])
                 }, error = function(er){
-                    if(grepl("NAs introduced",er)) cat("you may type in just integers")
+                    if(grepl("NAs introduced",er)) cat("type an integer number")
     #                else cat("Some error")
                 })
-            } else cat("choose variance by number of peak (above)")
-        } else cat("you must load some file first")
+            } else cat("")
+        } else cat("load .abi/.ab1 file")
     })
 
-    
     first_update_chosen_variances <- observe({
         if(loading_processed_files() != "not") {
           #TO DO: more sophisticated rules (might need to take intesitied into account)
-          g_choices <<- g_call[call != reference  & seq_trim != "low_qual" & trace_peak != "NA"& !is.na(gen_coord)]         
+          g_choices <<- g_call[call != reference  & seq_trim != "low_qual" & trace_peak != "NA"& !is.na(gen_coord)]
         }
     })
-   
 
     update_chosen_variances <- observe({
         input$execute_btn
@@ -100,12 +88,10 @@ shinyServer(function(input,output,session) {
         })
     })
 
-
 #    output$chosenCheckboxes <- reactive({
 #        return(loading_processed_files() != "not" & !is.null(g_choices))
 #    })
 #    outputOptions(output, "chosenCheckboxes", suspendWhenHidden = F)
-
 
 #     output$table2 <- DT::renderDataTable({
 #         input$execute_btn
@@ -118,15 +104,14 @@ shinyServer(function(input,output,session) {
 #             )
 #         }
 #     })
-# 
-# 
+#
+#
 #     variace_selected_2 <- observe({
 #         if(loading_processed_files() != "not") {
 #             g_selected <<- g_choices[input$table2_selected,id]
 #             #cat(input$table2_selected)
 #         }
 #     })
-
 
     add_checkboxes <- reactive({
         input$execute_btn
@@ -139,28 +124,27 @@ shinyServer(function(input,output,session) {
         return(checkboxes)
     })
 
-
     output$chosen_variances_table <- shiny::renderDataTable({
         input$execute_btn
         input$delete_btn
         if(loading_processed_files() != "not" & !is.null(g_choices)) {
 #            add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
             #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
-            add_edit_buttons <- paste0('<input type="button" class="go-edit" value="Edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
-            add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="Zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
+            add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
+            add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
             add_checkbox_buttons <- add_checkboxes()
             cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices)
         }
     }, options = list(orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c(0,1,2), searchable=F, orderable=F, title="")))
     , escape=c(-1,-2,-3)
-    , callback = 
+    , callback =
         "function(table) {
                 table.on('change.dt', 'tr td input:checkbox', function() {
                     setTimeout(function () {
                         Shiny.onInputChange('rows', $(this).add('tr td input:checkbox:checked').parent().siblings(':nth-child(4)').map(function() {
                             return $(this).text();
                         }).get())
-                    }, 10); 
+                    }, 10);
                 });
                 table.on('click', '.go-edit', function(e) {
                     e.preventDefault();
@@ -181,7 +165,6 @@ shinyServer(function(input,output,session) {
             }"
     )
 
-
     variance_select <- observe({
         if(loading_processed_files() != "not") {
             g_selected <<- str_trim(input$rows)
@@ -190,14 +173,12 @@ shinyServer(function(input,output,session) {
         }
     })
 
-
     goEdit_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$goEdit)) return()
             updateTextInput(session,"choose_variance",value=paste0(input$goEdit$id))
         }
     })
-
 
     goZoom_handler <- observe({
         if(loading_processed_files() != "not") {
@@ -207,12 +188,10 @@ shinyServer(function(input,output,session) {
             print(g_helperdat$helper_intrex$start[1])
             g_helperdat$helper_intrex$start[1]<<-50
             print(g_helperdat$helper_intrex$start[1])
-            
+
             chromatography(g_ins,g_helperdat)
-            
         }
     })
-
 
 #     edit_handler <- observe({
 #         input$edit_btn
@@ -225,7 +204,6 @@ shinyServer(function(input,output,session) {
 #         })
 #     })
 
-
 #     zoom_handler <- observe({
 #         input$zoom_btn
 #         isolate({
@@ -237,7 +215,6 @@ shinyServer(function(input,output,session) {
 #             }
 #         })
 #     })
-
 
     delete_handler <- observe({
         input$delete_btn

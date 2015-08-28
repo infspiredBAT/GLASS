@@ -5,17 +5,12 @@
 #' @import htmlwidgets
 #'
 #' @export
-
- 
-chromatography <- function(ins,helperdat, 
-                           width = NULL, height = NULL) {
-    
+chromatography <- function(ins, helperdat, width = NULL, height = NULL) {
   #data = fromJSON(file=Data)
     x <- list(
         data = ins,
         helperdat = helperdat
     )
-  
   # create widget
     htmlwidgets::createWidget(
         name = 'chromatography',
@@ -25,14 +20,12 @@ chromatography <- function(ins,helperdat,
         package = 'chromatography'
     )
 }
-
 #' Widget output function for use in Shiny
 #'
 #' @export
-chromatographyOutput <- function(outputId, width = '100%', height = '500px'){
+chromatographyOutput <- function(outputId, width = '100%', height = '400px'){
     shinyWidgetOutput(outputId, 'chromatography', width, height, package = 'chromatography')
 }
-
 #' Widget render function for use in Shiny
 #'
 #' @export

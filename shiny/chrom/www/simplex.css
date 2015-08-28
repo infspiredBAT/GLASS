@@ -8,18 +8,18 @@
 */
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
 
-table.table td {
-    padding: 0px;
+.shiny-input-checkboxgroup label ~ .shiny-options-group, .shiny-input-radiogroup label ~ .shiny-options-group {
+  margin-top: -5px;
+  margin-bottom: 5px;
+  line-height: 12px;
 }
+/*table.table td {
+    padding: 0px;
+}*/
 intro {
   font-size: 90%;
   font-weight: bold;
   font-style: italic;
-}
-.brush .extent{
-	stroke: #fff;
-	fill-opacity: .25;
-	shape-rendering: crispEdges;
 }
 .shiny-output-error-validation {
   color: red;
@@ -2433,7 +2433,7 @@ output {
   display: block;
   width: 100%;
   height: 20px;
-  padding: 3px;
+  padding: 0px;
   font-size: 13px;
   line-height: 1.6;
   color: #777777;
@@ -3726,7 +3726,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .nav > li > a {
   position: relative;
   display: block;
-  padding: 10px 15px;
+  padding: 6px 6px;
 }
 .nav > li > a:hover,
 .nav > li > a:focus {
@@ -3767,7 +3767,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 .nav-tabs > li > a {
   margin-right: 2px;
-  line-height: 1.42857143;
+  line-height: 1;
   border: 1px solid transparent;
   border-radius: 4px 4px 0 0;
 }

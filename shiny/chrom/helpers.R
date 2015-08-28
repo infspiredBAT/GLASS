@@ -3,13 +3,12 @@ library(seqinr)
 
 # the function extracts the signal intesities for each channel and returns it formatted for the javascript chromatograph
 get_intensities <- function(data,norm=FALSE) {
-  
+
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
-    
     ins <- data.table(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)
     fwo <- data$FWO
     setnames(ins,c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
-  
+
     if(norm==TRUE){
         #first and last 500 points
         f_ins_start <- data.table()
@@ -24,13 +23,13 @@ get_intensities <- function(data,norm=FALSE) {
         f_ins <- rbind(f_ins_start,f_ins_mid,f_ins_end)
         ins<-ins/f_ins
     }
-    
-    return(ins)   
+
+    return(ins)
 }
 
-#function extracting 
+#function extracting
 get_call_data <- function(data){
-  
+
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     qual      <- data$PCON.2
     rm7qual   <- rollmean(qual,k=7)
@@ -55,19 +54,17 @@ get_call_data <- function(data){
     data.table::set(call,which(is.na(call[["gen_coord"]])),"reference","NA")
     data.table::set(call,which(call[["rm7qual"]] < 12 | call[["quality"]]<10),"seq_trim","low_qual")
 
-    
     # changing the sequence coordinates to intensities coordinates for the brush tool
     helperdat <- list()
     helperdat$helper_intrex <- list()
     helperdat$helper_intrex <- setnames(call[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","start","end"))
     return(list(call=call,helperdat=helperdat))
-    
 }
 
 generate_ref <-function(data){
     print(getwd())
     cores <- 2
-    
+
     seq    <- gsub("[^ACGT]","N",data$PBAS.2)
     refs   <- readLines("../../data/ref_ex_in.fa")
     ref_info <- gsub(">ref_","",perl = T,refs[seq(1,length(refs),2)])
@@ -78,39 +75,39 @@ generate_ref <-function(data){
     refs <- DNAStringSet(refs[seq(2,length(refs),2)])
     align <- get_alignment(refs,seq,cores)
     OK_align <- which(align$score / nchar(refs) > 0.2)
-    
+
 
     ex_tab <- rbindlist(lapply(seq_along(OK_align),function(x) data.table(exon_intron = ref_names[OK_align][x]
-                                                                          ,id = sort(c((align$start[OK_align][x] + 1):align$end[OK_align][x],add_ins(align$diffs[type == "I" & id == OK_align[x]])))
-                                                                          ,gen_coord = get_coord(align$start[OK_align][x],align$r_start[OK_align][x],align$r_end[OK_align][x],ref_start[OK_align][x],ref_end[OK_align][x],align$diffs[type == "D" & id == OK_align[x]]))))
-    
+      ,id = sort(c((align$start[OK_align][x] + 1):align$end[OK_align][x],add_ins(align$diffs[type == "I" & id == OK_align[x]])))
+      ,gen_coord = get_coord(align$start[OK_align][x],align$r_start[OK_align][x],align$r_end[OK_align][x],ref_start[OK_align][x],ref_end[OK_align][x],align$diffs[type == "D" & id == OK_align[x]]))))
+
     align$diffs[type == "D",t_pos := t_pos + 1]
     return(list(ex_tab,align$diffs[id %in% OK_align,],add_ins(align$diffs[type == "I"])))
-    
+
 # #     g_ref  <- c(rep("",nchar(data$PBAS.2)))     #generated reference
 # #     coord  <- c(rep(NA,nchar(data$PBAS.2)))
 # #     intrex <- c(rep(NA,nchar(data$PBAS.2)))
 # #     helper_intrex   <- data.frame(attr=character(),start=numeric(),end=numeric()) #data for showing introns/exons in brush, maybe there is a cleverer way to do this
-#     #STEP 1.  
+#     #STEP 1.
 #     for(ref in refs){
 #         m<-matchPattern(pattern = toupper(ref[1]),
 #                         subject = seq,
 #                         max.mismatch = 10,
 #                         min.mismatch=0,
 #                         with.indels = TRUE)
-#         
+#
 #         if(length(m)!=0){
 #             if(m@ranges@width==
 #                as.integer(strsplit(attr(ref,"Annot"),split='_')[[1]][5])){ #if there no indels
 #                 if(nmismatch(pattern=toupper(ref[1]),m)>0){                #if there are variations we must make sure
 #                     #print(mismatch(pattern=toupper(ref[1]),m))             #to assign ref
-#                     g_ref[start(m):end(m)]  <- strsplit(toupper(ref),"")[[1]]    
-#                 }else{ #no variations                                                                   
+#                     g_ref[start(m):end(m)]  <- strsplit(toupper(ref),"")[[1]]
+#                 }else{ #no variations
 #                     g_ref[start(m):end(m)]  <- suppressWarnings(as.matrix(m))
 #                 }
 #                 coord[start(m):end(m)]  <- (strsplit(attr(ref,"name"),"_")[[1]][3]:
 #                                             strsplit(attr(ref,"name"),"_")[[1]][4])
-#                 intrex[start(m):end(m)] <- strsplit(attr(ref,"name"),"_")[[1]][2]                  
+#                 intrex[start(m):end(m)] <- strsplit(attr(ref,"name"),"_")[[1]][2]
 #                 helper_intrex <- rbind(helper_intrex,
 #                                      data.frame(attr=strsplit(attr(ref,"name"),"_")[[1]][2],
 #                                      start=start(m),end=end(m)))
@@ -137,7 +134,6 @@ get_coord <- function(seq_start,al_start,al_end,ref_start,ref_end,diffs){
         for(index in which(coord_out == 0)) coord_out[index] <- coord_out[index - 1] + 0.1
         return(coord_out)
     } else return(coord)
-    
 }
 
 get_alignment <- function(data,target,cores,type = "overlap"){
@@ -185,10 +181,10 @@ get_alignment <- function(data,target,cores,type = "overlap"){
         res$diffs[,id := id + length(which(splitid < x))]
         res$score <- Biostrings::score(align)
         return(res)
-    })     
-    
+    })
+
     #,mc.preschedule = F,mc.cores = cores
-    
+
     res <- list()
     res$score <- unlist(sapply(a,function(x) x$score))
     res$r_starts <- unlist(sapply(a,function(x) x$r_starts))
@@ -201,4 +197,3 @@ get_alignment <- function(data,target,cores,type = "overlap"){
     set(res$diffs,which(res$diffs[["replace"]] == "1"),"replace","I")
     return(res)
 }
-
