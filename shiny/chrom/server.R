@@ -8,6 +8,8 @@ g_helperdat      <- NULL             #meta data used in graphs
 g_choices   <- NULL
 g_selected  <- NULL
 g_selected_zoom_index <- 0
+g_chrom <- NULL
+g_max_y <- NULL
 
 #
 g_abif <- NULL
@@ -32,7 +34,7 @@ shinyServer(function(input,output,session) {
                 ins<- get_intensities(g_abif@data)
                 res <-get_call_data(g_abif@data) 
                 call <- res$call
-                res$helperdat$max_y <-max(ins)
+                g_max_y <<- max(ins)
                 res$helperdat$max_x <- nrow(ins)
                 g_helperdat<<- res$helperdat
                 call.dt <- data.table(call,key="id")
@@ -49,10 +51,11 @@ shinyServer(function(input,output,session) {
     
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
-#            withProgress(message="Rendering plot ...", value=1, {
+
+                
+                g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
                 chromatography(g_ins,g_helperdat)
-                #print(str(session.request))
-#            })
+
         }
     })
 
@@ -201,6 +204,11 @@ shinyServer(function(input,output,session) {
             if(is.null(input$goZoom)) return()
             cat(paste0(input$goZoom$id,","))
             session$sendCustomMessage(type = 'zoom_message',message = paste0(input$goZoom$id))
+            print(g_helperdat$helper_intrex$start[1])
+            g_helperdat$helper_intrex$start[1]<<-50
+            print(g_helperdat$helper_intrex$start[1])
+            
+            chromatography(g_ins,g_helperdat)
             
         }
     })

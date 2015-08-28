@@ -17,6 +17,7 @@ shinyUI(
             column(6,
                 # this should be replaced by direct interaction with graph or data table
                 textInput("choose_variance","choose variance by number..."),
+                sliderInput("max_y_p","Set peek height",min = 0, max = 200, value = 100),
                 verbatimTextOutput("variance_info"),
                 selectInput("change_peak","and change it to",choices=c("A","T","C","G"),selected="A",selectize=F,size=1),
                 actionButton("execute_btn","execute")
