@@ -43,8 +43,15 @@ get_call_data <- function(data){
                        ,quality = qual
                        ,reference = str_split(data$PBAS.2,pattern="")[[1]])
     call[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
+    setkey(res[[2]],id)
+    if(length(res[[3]]) > 0) {
+        setkey(call,id)
+        add <- call[as.integer(res[[3]]),]
+        data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
+        call <- rbind(call,add[,id := res[[3]]][,call := "-"][,seq_trim := "-"])
+    }
     call <- merge(call,res[[1]],all.x = T,by = "id")
-    data.table::set(call,which(call[["id"]] %in% res[[2]][["t_pos"]]),"reference",res[[2]][["replace"]])
+    data.table::set(call,which(call[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
     data.table::set(call,which(is.na(call[["gen_coord"]])),"reference","NA")
     data.table::set(call,which(call[["rm7qual"]] < 12 | call[["quality"]]<10),"seq_trim","low_qual")
 
@@ -52,8 +59,7 @@ get_call_data <- function(data){
     # changing the sequence coordinates to intensities coordinates for the brush tool
     helperdat <- list()
     helperdat$helper_intrex <- list()
-    helperdat$helper_intrex$start <- call[!is.na(exon_intron),min(trace_peak),by = exon_intron]
-    helperdat$helper_intrex$end   <- call[!is.na(exon_intron),max(trace_peak),by = exon_intron]
+    helperdat$helper_intrex <- setnames(call[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","start","end"))
     return(list(call=call,helperdat=helperdat))
     
 }
@@ -73,15 +79,13 @@ generate_ref <-function(data){
     align <- get_alignment(refs,seq,cores)
     OK_align <- which(align$score / nchar(refs) > 0.2)
     
-    
-    
+
     ex_tab <- rbindlist(lapply(seq_along(OK_align),function(x) data.table(exon_intron = ref_names[OK_align][x]
-                                                                          ,id = (align$start[OK_align][x] + 1):align$end[OK_align][x]
-                                                                          ,gen_coord = get_coord(align$start[OK_align][x],align$r_start[OK_align][x],align$r_end[OK_align][x],ref_start[OK_align][x],ref_end[OK_align][x],align$diffs[type == "I" & id == OK_align[x]]))))
+                                                                          ,id = sort(c((align$start[OK_align][x] + 1):align$end[OK_align][x],add_ins(align$diffs[type == "I" & id == OK_align[x]])))
+                                                                          ,gen_coord = get_coord(align$start[OK_align][x],align$r_start[OK_align][x],align$r_end[OK_align][x],ref_start[OK_align][x],ref_end[OK_align][x],align$diffs[type == "D" & id == OK_align[x]]))))
     
-    
-    
-    return(list(ex_tab,align$diffs[id %in% OK_align,]))
+    align$diffs[type == "D",t_pos := t_pos + 1]
+    return(list(ex_tab,align$diffs[id %in% OK_align,],add_ins(align$diffs[type == "I"])))
     
 # #     g_ref  <- c(rep("",nchar(data$PBAS.2)))     #generated reference
 # #     coord  <- c(rep(NA,nchar(data$PBAS.2)))
@@ -119,13 +123,19 @@ generate_ref <-function(data){
 #     return(list(g_ref=cbind(g_ref,coord,intrex),helperdat=list(helper_intrex=helper_intrex,max_y=max_y)))
 }
 
+add_ins <- function(diffs){
+    if(nrow(diffs) > 0) return(unlist(lapply(1:nrow(diffs),function(x) diffs[["t_pos"]][x] + (1:nchar(diffs[["replace"]][x]))/10 )))
+    else return(numeric())
+}
+
 get_coord <- function(seq_start,al_start,al_end,ref_start,ref_end,diffs){
     coord <- (ref_start:ref_end)[al_start:al_end]
     if(nrow(diffs) > 0){
-        diffs[,ins_len := nchar(replace)]
-        diffs[,t_pos := t_pos + (cumsum(ins_len) - ins_len[1]) - seq_start + 1]
-        vec <- unlist(lapply(1:nrow(diffs),function(x) diffs[x][["t_pos"]]:(diffs[x][["t_pos"]] + diffs[x][["ins_len"]] - 1)))
-        return(coord[-vec])
+        diffs[,t_pos := t_pos - seq_start + 1]
+        coord_out <- numeric(length(coord) + nrow(diffs))
+        coord_out[-diffs[["t_pos"]]] <- coord
+        for(index in which(coord_out == 0)) coord_out[index] <- coord_out[index - 1] + 0.1
+        return(coord_out)
     } else return(coord)
     
 }
