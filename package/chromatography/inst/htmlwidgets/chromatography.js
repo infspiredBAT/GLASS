@@ -63,7 +63,16 @@ HTMLWidgets.widget({
             console.log("reseting.height",domain_y);
             focus.selectAll("g").selectAll("path").attr("d", line);
         }
+        
+        function reWidth(domain_x){
+            
+            brush.extent([0,domain_x]);
+            widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
+            focus.selectAll("g").selectAll("path").attr("d", line);
+        }
       
+        //passing arguments
+        //this enables to acces vars and functions from the render function as instance.*
         return {
             svg: svg,
             line: line,
@@ -77,7 +86,8 @@ HTMLWidgets.widget({
             height: h,
 		        height2: height2,
             instanceCounter: instanceCounter,
-            reHeight: reHeight
+            reHeight: reHeight,
+            reWidth: reWidth
         }
     },
 
@@ -134,7 +144,10 @@ HTMLWidgets.widget({
                   .attr("y",0).attr("rx",5).attr("ry",5).attr("opacity",0.5)
                   .attr("width",function(d){return widthScale(d["end"]-d["start"]);})
                   .attr("height",55)
-                  .attr("fill","rgba(0, 255, 0, 0.6)");
+                  .attr("fill","rgba(0, 200, 150, 0.6)")
+                  .attr("stroke-width",1)
+                  .attr("stroke","rgba(0,100,100,0.8)")
+                  .attr("stroke-dasharray",2);
                   
           brush.x(width2Scale);
           var group_a = focus.append("g");
@@ -205,22 +218,18 @@ HTMLWidgets.widget({
   	             .attr("height", height2 + 10)
                  .attr("rx",2)
                  .attr("ry",2);  
-                  
+          context.selectAll("g").selectAll("path").attr("opacity",0.5);
+
+          //zooming in so that the first view is not dense ugly graph
+          //works but does not show the brush tool
+          //instance.reWidth(2000);
+                
         }else{
           
           console.log("redrawing");
           if(x["helperdat"]["max_y"]!= instance.max_y){
              instance.reHeight(x["helperdat"]["max_y"]);
-          }
-          
-        }
-           
-	      
-			
-	      
-		
-	      
-
+          } 
+        }   
     }
-
 });
