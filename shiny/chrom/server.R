@@ -3,7 +3,7 @@ library(sangerseqR)
 source("helpers.R")
 
 g_call      <- NULL             #annotated basecall data
-g_ins       <- NULL             #intensities file
+g_intens       <- NULL             #intensities file
 g_helperdat <- NULL             #meta data used in graphs
 g_choices   <- NULL
 g_selected  <- NULL
@@ -27,16 +27,17 @@ shinyServer(function(input,output,session) {
             withProgress(message = paste('...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
-                g_abif <- sangerseqR::read.abif(file)
-                ins<- get_intensities(g_abif@data)
-                res <-get_call_data(g_abif@data)
-                call <- res$call
-                g_max_y <<- max(ins)
-                res$helperdat$max_x <- nrow(ins)
-                g_helperdat<<- res$helperdat
-                call.dt <- data.table(call,key="id")
-                g_call<<- call.dt
-                g_ins <<- ins
+                g_abif      <- sangerseqR::read.abif(file)
+                intens      <- get_intensities(g_abif@data)
+                res         <- get_call_data(g_abif@data)
+                call        <- res$call
+                g_max_y     <<- max(intens)
+                res$helperdat$max_x <- nrow(intens)
+                g_helperdat <<- res$helperdat
+                call.dt     <- data.table(call,key="id")
+                g_call      <<- call.dt
+#                g_choices   <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
+                g_intens    <<- intens
             })
             return("loaded")
         }
@@ -45,8 +46,8 @@ shinyServer(function(input,output,session) {
 
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
-                g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
-                chromatography(g_ins,g_helperdat)
+            g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
+            chromatography(g_intens,g_helperdat,g_call,g_choices)
         }
     })
 
@@ -65,8 +66,8 @@ shinyServer(function(input,output,session) {
 
     first_update_chosen_variances <- observe({
         if(loading_processed_files() != "not") {
-          #TO DO: more sophisticated rules (might need to take intesitied into account)
-          g_choices <<- g_call[call != reference  & seq_trim != "low_qual" & trace_peak != "NA"& !is.na(gen_coord)]
+          #TO DO: more sophisticated rules (might need to take intensities into account)
+          g_choices <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
         }
     })
 
@@ -165,6 +166,20 @@ shinyServer(function(input,output,session) {
             }"
     )
 
+    output$call_table <- shiny::renderDataTable({
+    	if(loading_processed_files() != "not" & !is.null(g_call)) {
+    		g_call
+    	}
+    }, options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title="")))
+    )
+
+    output$intens_table <- shiny::renderDataTable({
+        if(loading_processed_files() != "not" & !is.null(g_intens)) {
+            g_intens
+        }
+    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title="")))
+    )
+
     variance_select <- observe({
         if(loading_processed_files() != "not") {
             g_selected <<- str_trim(input$rows)
@@ -189,7 +204,7 @@ shinyServer(function(input,output,session) {
             g_helperdat$helper_intrex$start[1]<<-50
             print(g_helperdat$helper_intrex$start[1])
 
-            chromatography(g_ins,g_helperdat)
+            chromatography(g_intens,g_helperdat)
         }
     })
 

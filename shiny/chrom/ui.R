@@ -8,7 +8,7 @@ require(stringi)
 #require(DT)
 
 shinyUI(
-    fluidPage(theme = "simplex.css",
+    fluidPage(theme = "simplex.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 
 		tags$head(
 		  tags$title("genomePD/glass"),
@@ -26,38 +26,47 @@ shinyUI(
 		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Demko and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
 		hr(),
 
-        fluidRow(
-            column(1,
-                fileInput("select_file","",multiple=F,accept=c('.abi','.ab1'))
-            ),
-            column(2,
-                # this should be replaced by direct interaction with graph or data table
-                textInput("choose_variance","type sequence position to see info"),
-                selectInput("change_peak","and change the call to",choices=c("A","T","C","G"),selected="",selectize=F,size=1),
-                actionButton("execute_btn","change")
-            ),
-            column(4,
-            	   # HTML(paste("info", sep="<br/>")),
-            	   verbatimTextOutput("variance_info")
-            ),
-            column(3,
-            	   sliderInput("max_y_p","set peak height",min = 0, max = 200, value = 100)
-            )
-        ),
+		tabsetPanel(id = 'tab',
+			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
+				fluidRow(
+					column(2,
+					    fileInput("select_file","",multiple=F,accept=c('.abi','.ab1'))
+					),
+					column(1,
+					    # this should be replaced by direct interaction with graph or data table
+					    textInput("choose_variance","type seq pos"),
+					    selectInput("change_peak","change call to",choices=c("A","T","C","G"),selected="",selectize=F,size=1),
+					    actionButton("execute_btn","change", icon = icon("exchange"))
+					),
+					column(4,
+					    HTML(paste("messages and info will appear here", sep="")),
+					    verbatimTextOutput("variance_info")
+					),
+					column(1,
+					    sliderInput("koukou","set trim thres",min = 0, max = 10, value = 3),
+					    sliderInput("koukou","set qual thres",min = 0, max = 10, value = 3)
+					),
+					column(2,
+					    sliderInput("max_y_p","set intens peak height",min = 0, max = 200, value = 100),
+                        sliderInput("koukou","set intens guide line",min = 0, max = 100, value = 50)
+					)
+				),
 
-        chromatographyOutput("plot"),
+				chromatographyOutput("plot"),
 
-        # urcite bude conditional
-        #        conditionalPanel(
-        #            condition = " output.chosenCheckboxes == true ",
-        #            DT::dataTableOutput("table2"),
-        shiny::dataTableOutput("chosen_variances_table"),
-        #        ),
+				shiny::dataTableOutput("chosen_variances_table"),
 
-        # vypis vybranych htmlOutput()
-        downloadButton("export_btn","export"),
-        #        actionButton("zoom_btn","zoom"),
-        #        actionButton("edit_btn","edit"),
-        actionButton("delete_btn","delete")
+				downloadButton("export_btn","export"),
+				actionButton("delete_btn","delete", icon = icon("times"))
+	 		),
+			tabPanel('annotation', value = 'annotation', icon = icon("user-md")
+			),
+			tabPanel('calls', value = 'call_table', icon = icon("table"),
+				 shiny::dataTableOutput("call_table")
+ 			),
+			tabPanel('intensities', value = 'intens_table', icon = icon("table"),
+		         shiny::dataTableOutput("intens_table")
+			)
+		)
     )
 )
