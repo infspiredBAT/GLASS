@@ -3,8 +3,8 @@ library(sangerseqR)
 source("helpers.R")
 
 g_call      <- NULL             #annotated basecall data
-g_intens       <- NULL             #intensities file
-g_helperdat <- NULL             #meta data used in graphs
+g_intens    <- NULL             #intensities file
+g_helperdat <- NULL             #helper data used in graphs
 g_choices   <- NULL
 g_selected  <- NULL
 g_selected_zoom_index <- 0
@@ -44,6 +44,14 @@ shinyServer(function(input,output,session) {
         return("not")
     })
 
+    first_update_chosen_variances <- observe({
+      if(loading_processed_files() != "not") {
+        #TO DO: more sophisticated rules (might need to take intensities into account)
+        g_choices <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
+        
+      }
+    })
+
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
             g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
@@ -64,12 +72,7 @@ shinyServer(function(input,output,session) {
         } else cat("load .abi/.ab1 file")
     })
 
-    first_update_chosen_variances <- observe({
-        if(loading_processed_files() != "not") {
-          #TO DO: more sophisticated rules (might need to take intensities into account)
-          g_choices <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
-        }
-    })
+
 
     update_chosen_variances <- observe({
         input$execute_btn
@@ -126,9 +129,9 @@ shinyServer(function(input,output,session) {
     })
 
     output$chosen_variances_table <- shiny::renderDataTable({
-        input$execute_btn
-        input$delete_btn
-        if(loading_processed_files() != "not" & !is.null(g_choices)) {
+        input$execute_btn       #I removed the isnull choices condition as it sometimes doesn't initialize in time. Once the table is created it is quickly updated once choices are changed
+        input$delete_btn        #if(loading_processed_files() != "not" & !is.null(g_choices) 
+        if(loading_processed_files() != "not" ) {
 #            add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
             #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
             add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
