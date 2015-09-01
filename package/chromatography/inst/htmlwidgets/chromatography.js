@@ -47,13 +47,16 @@ HTMLWidgets.widget({
 		}
         function reHeight(domain_y){
             heightScale.domain([0,domain_y]);
-            console.log("reseting.height",domain_y);
+            //console.log("reseting.height",domain_y);
             focus.selectAll("g").selectAll("path").attr("d", line);
         }
-        function reWidth(domain_x){
-            brush.extent([0,domain_x]);
+        function setBrush(start,end){
+           
+            context.call(brush.extent([start,end]));
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
-            focus.selectAll("g").selectAll("path").attr("d", line);
+            focus.selectAll("g").selectAll("path").attr("d", line);            
+            
+            
         }
 
         //passing arguments
@@ -72,7 +75,7 @@ HTMLWidgets.widget({
 	        height2: height2,
             instanceCounter: instanceCounter,
             reHeight: reHeight,
-            reWidth: reWidth
+            setBrush: setBrush
         }
     },
 
@@ -92,11 +95,11 @@ HTMLWidgets.widget({
     renderValue: function(el, x, instance) {
 
         instance.lastValue = x;
-        //a somewhat nasty hack, the render function behaves differently when called repeatedly
-        //the first run is actually still an initialization step
+        //the render function behaves differently when called repeatedly
+        //the first run is actually still a part initialization step
         if(instance.instanceCounter === 0){
 
-//			console.log("first drawing")
+			console.log(x)
 			instance.instanceCounter = instance.instanCounter+1;
 			var intens = x["intens"];
 			var calls = HTMLWidgets.dataframeToD3(x["call"]);
@@ -123,8 +126,7 @@ HTMLWidgets.widget({
 			heightScale.domain([0,domain_y]);
 			height2Scale.domain([0,domain_y]);
 			//visualise introns/exons
-			//TO DO
-			//R must generage a readable structure for the d3 data function
+      //lines 
 			context.selectAll("lines.intrex").data(intrex).enter()
 				.append("line")
 				.attr("x1",function(d){return widthScale(d["start"]);})
@@ -134,6 +136,7 @@ HTMLWidgets.widget({
 				.attr("stroke-width",2).attr("stroke","rgba(20,20,20,0.6)").attr("stroke-dasharray",2);
 //				.on("mouseover", function(){d3.select(this).style("fill", "white");})
 //				.on("mouseout",  function(){d3.select(this).style("fill", "rgba(200,200,200,0.2)");});
+      //intron/exon boxes
 			context.selectAll("rect").data(intrex).enter()
 				.append("rect")
 				.attr("x",function(d){return widthScale(d["start"]);})
@@ -147,6 +150,7 @@ HTMLWidgets.widget({
 //				.attr("stroke-width",1).attr("stroke","rgba(20,20,20,0.8)").attr("stroke-dasharray",2)
 //				.on("mouseover", function(){d3.select(this).style("fill", "white");})
 //				.on("mouseout",  function(){d3.select(this).style("fill", "rgba(200,200,200,0.2)");});
+
 			context.selectAll("text.intrex.name").data(intrex).enter()
 				.append("text")
 				.attr("x",function(d){return widthScale(d["start"]);})
@@ -159,14 +163,14 @@ HTMLWidgets.widget({
 				.attr("x",function(d){return widthScale(d["start"]);})
 				.attr("y",60)
 				.attr("opacity",0.6)
-				.text(function(d){return Math.ceil(widthScale(d["start"]));})
+				.text(function(d){return d["id"];}) // position labels !extract sequence coords
 				.attr("fill","black");
 			// genomic
 			context.selectAll("lines.choices").data(choices).enter()
 				.append("line")
-				.attr("x1",function(d){return d["id"];})
+				.attr("x1",function(d){return widthScale(d["trace_peak"]);})
 				.attr("y1",6)
-				.attr("x2",function(d){return d["id"];})
+				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
 				.attr("y2",24)
 				.attr("stroke-width",3)
 				.attr("stroke",function(d) {
@@ -178,9 +182,9 @@ HTMLWidgets.widget({
 			// user
 			context.selectAll("lines.choices").data(choices).enter() //function(d){return d["trace_peak"]*5;})
 				.append("line")
-				.attr("x1",function(d){return d["id"];})
+				.attr("x1",function(d){return widthScale(d["trace_peak"]);}) 
 				.attr("y1",26)
-				.attr("x2",function(d){return d["id"];})
+				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
 				.attr("y2",44)
 				.attr("stroke-width",3)
 				.attr("stroke",function(d) {
@@ -191,7 +195,7 @@ HTMLWidgets.widget({
 				    else    {                    return "white";  }});
 			context.selectAll("text.choices.coord").data(choices).enter()
 				.append("text")
-				.attr("x",function(d){return d["id"]+4;})
+				.attr("x",function(d){return widthScale(d["trace_peak"])+4;})
 				.attr("y",30)
 				.attr("opacity",0.6)
 				.text(function(d){return d["id"];})
@@ -203,7 +207,7 @@ HTMLWidgets.widget({
 			var group_c = focus.append("g");
 			var group_g = focus.append("g");
 			var group_t = focus.append("g");
-
+      
 			group_a.selectAll("path").data([intens["A"]]).enter()
 				.append("path").attr("class","path")
 				.attr("d",line)
@@ -224,6 +228,7 @@ HTMLWidgets.widget({
 				.attr("d",line)
 				.attr("fill","none")
 				.attr("stroke","#FF0000").attr("stroke-width",0.75);
+        
             focus.append("g").selectAll("qualities").data(calls).enter()
 				.append("rect")
 				.attr("x",function(d){return d["trace_peak"]*5;})
@@ -267,7 +272,8 @@ HTMLWidgets.widget({
 				.attr("y1",100)
 				.attr("x2",1200)
 				.attr("y2",100)
-				.attr("stroke-width",1).attr("stroke","rgba(0,0,0,0.6)").attr("stroke-dasharray",2);
+				.attr("stroke-width",1).attr("stroke","rgba(0,0,0,0.6)").attr("stroke-dasharray",2); 
+
 
 /*
 			var group_ac = context.append("g");
@@ -315,8 +321,15 @@ HTMLWidgets.widget({
 
 	          //zooming in so that the first view is not dense ugly graph
 	          //works but does not show the brush tool
-	          //instance.reWidth(2000);
-
+            
+            if (typeof choices[0] !== 'undefined') {
+                console.log(choices[0])
+                instance.setBrush((choices[0]["trace_peak"]-300),(choices[0]["trace_peak"]+320));
+            }else{
+                instance.setBrush(200,1000);
+            }
+	          
+              
         }else{
 			console.log("redrawing");
 			if(x["helperdat"]["max_y"]!= instance.max_y){

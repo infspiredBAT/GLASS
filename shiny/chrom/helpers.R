@@ -50,10 +50,11 @@ get_call_data <- function(data){
     data.table::set(call,which(is.na(call[["gen_coord"]])),"reference","NA")
     data.table::set(call,which(call[["rm7qual"]] < 12 | call[["quality"]] < 10),"seq_trim","low_qual")
 
-    # changing the sequence coordinates to intensities coordinates for the brush tool
+    #helper_intrex contains intesities coordinates of start and end of exons with the sequence id (position in sequence coordinates)
     helperdat <- list()
     helperdat$helper_intrex <- list()
-    helperdat$helper_intrex <- setnames(call[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","start","end"))
+    helperdat$helper_intrex <- setnames(call[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
+    helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,call[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
     return(list(call=call,helperdat=helperdat))
 }
 
