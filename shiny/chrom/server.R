@@ -1,4 +1,4 @@
-require(shiny)
+library(shiny)
 library(sangerseqR)
 source("helpers.R")
 
@@ -6,6 +6,7 @@ g_call      <- NULL             #annotated basecall data
 g_intens    <- NULL             #intensities file
 g_helperdat <- NULL             #helper data used in graphs
 g_choices   <- NULL
+makeReactiveBinding("g_choices")  #need someones opinion on this
 g_selected  <- NULL
 g_selected_zoom_index <- 0
 g_chrom <- NULL
@@ -36,21 +37,20 @@ shinyServer(function(input,output,session) {
                 g_helperdat <<- res$helperdat
                 call.dt     <- data.table(call,key="id")
                 g_call      <<- call.dt
-#                g_choices   <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
+                g_choices   <<- g_call[seq_trim != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
                 g_intens    <<- intens
             })
             return("loaded")
         }
         return("not")
     })
-
-    first_update_chosen_variances <- observe({
-      if(loading_processed_files() != "not") {
-        #TO DO: more sophisticated rules (might need to take intensities into account)
-        g_choices <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
-        
-      }
-    })
+    #don't see the point of this anymore moved to loading processed files
+#    first_update_chosen_variances <- observe({
+#      if(loading_processed_files() != "not") {
+#        #TO DO: more sophisticated rules (might need to take intensities into account)
+#        g_choices <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]        
+#      }
+#    })
 
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
@@ -73,7 +73,7 @@ shinyServer(function(input,output,session) {
     })
 
 
-
+    #! go through this function , update seq_trim instead of call
     update_chosen_variances <- observe({
         input$execute_btn
         isolate({
