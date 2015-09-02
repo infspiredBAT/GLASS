@@ -25,12 +25,12 @@ get_intensities <- function(data,norm=FALSE) {
     return(intens)
 }
 
-get_call_data <- function(data){
+get_call_data <- function(data, trim_thres=12, qual_thres=10, aln_min=0.2){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     qual      <- data$PCON.2
     rm7qual   <- rollmean(qual,k=7)
     #rm7qualext<- data.frame(c(rep(rm7qual[1],3),rm7qual,rep(rm7qual[length(qual)-6],3)))  #cbind returns data frame if atleast one argument is a data frame
-    res       <- generate_ref(data)
+    res       <- generate_ref(data, aln_min)
     call <- data.table(id = seq_along(data$PLOC.2)
                    ,trace_peak = data$PLOC.2
                    ,call = str_split(data$PBAS.2,pattern="")[[1]]
@@ -48,7 +48,7 @@ get_call_data <- function(data){
     call <- merge(call,res[[1]],all.x = T,by = "id")
     data.table::set(call,which(call[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
     data.table::set(call,which(is.na(call[["gen_coord"]])),"reference","NA")
-    data.table::set(call,which(call[["rm7qual"]] < 12 | call[["quality"]] < 10),"seq_trim","low_qual")
+    data.table::set(call,which(call[["rm7qual"]] < trim_thres | call[["quality"]] < qual_thres),"seq_trim","low_qual")
 
     #helper_intrex contains intesities coordinates of start and end of exons with the sequence id (position in sequence coordinates)
     helperdat <- list()
@@ -58,7 +58,7 @@ get_call_data <- function(data){
     return(list(call=call,helperdat=helperdat))
 }
 
-generate_ref <-function(data){
+generate_ref <-function(data, aln_min=0.2){
 #    print(getwd())
     cores <- 2
 
@@ -72,7 +72,7 @@ generate_ref <-function(data){
     ref_end <- as.numeric(sapply(ref_info,function(x) x[3]))
     refs <- DNAStringSet(refs[seq(2,length(refs),2)])
     align <- get_alignment(refs,user_seq,cores)
-    OK_align <- which(align$score / nchar(refs) > 0.2)
+    OK_align <- which(align$score / nchar(refs) > aln_min)
 
     user_seq_vs_genome <- rbindlist(lapply(seq_along(OK_align),function(x) data.table(exon_intron = ref_names[OK_align][x]
 		,id = sort(c((align$start[OK_align][x] + 1):align$end[OK_align][x],add_insert(align$diffs[type == "I" & id == OK_align[x]])))

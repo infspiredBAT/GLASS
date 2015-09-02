@@ -5,13 +5,14 @@
 #' @import htmlwidgets
 #'
 #' @export
-chromatography <- function(intens, helperdat, call, choices, width = NULL, height = NULL) {
+chromatography <- function(intens, helperdat, call, choices, intens_guide_line=200, width = NULL, height = NULL) {
   #data = fromJSON(file=Data)
     x <- list(
         intens = intens,
         helperdat = helperdat,
         call = call,
-        choices = choices
+        choices = choices,
+        intens_guide_line = intens_guide_line
     )
   # create widget
     htmlwidgets::createWidget(

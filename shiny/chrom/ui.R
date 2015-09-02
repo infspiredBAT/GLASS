@@ -23,7 +23,7 @@ shinyUI(
 		  			'),
 		  tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		  ),
-		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Demko and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
+		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Reigl Demko and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
 		hr(),
 
 		tabsetPanel(id = 'tab',
@@ -43,12 +43,13 @@ shinyUI(
 					    verbatimTextOutput("variance_info")
 					),
 					column(2,
-					    sliderInput("koukou","set trim thres",min = 0, max = 10, value = 3),
-					    sliderInput("koukou","set qual thres",min = 0, max = 10, value = 3)
+					    sliderInput("trim_thres","set qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
+					    sliderInput("qual_thres","set qual thres for low qual", ticks=FALSE, min = 0, max = 50, value = 10),
+					    sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),
 					column(3,
-					    sliderInput("max_y_p","set intens peak height",min = 0, max = 200, value = 100),
-                        sliderInput("koukou","set intens guide line",min = 0, max = 100, value = 50)
+					    sliderInput("max_y_p","set intens peak height", ticks=FALSE, min = 0, max = 200, value = 100),
+                        sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
 					)
 				),
 
@@ -56,8 +57,11 @@ shinyUI(
 
 				shiny::dataTableOutput("chosen_variances_table"),
 
-				downloadButton("export_btn","export"),
-				actionButton("delete_btn","delete", icon = icon("times"))
+				# when variants exist - this one's for Tomas
+#				conditionalPanel(condition=" output.input_file_selected != 'not' ",
+	                 downloadButton("export_btn","export"),
+	                 actionButton("delete_btn","delete", icon = icon("times"))
+#				)
 	 		),
 			tabPanel('annotation', value = 'annotation', icon = icon("user-md")
 			),

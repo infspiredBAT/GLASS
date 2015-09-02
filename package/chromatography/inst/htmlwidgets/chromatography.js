@@ -15,7 +15,7 @@ HTMLWidgets.widget({
             height  = h - margin.top  - margin.bottom,
             height2 = h - margin2.top - margin2.bottom;
         var widthScale   = d3.scale.linear().range([0,width]);
-            width2Scale  = d3.scale.linear().range([0,width]),  //remains constat, to be used with context
+            width2Scale  = d3.scale.linear().range([0,width]),  //remains constant, to be used with context
             heightScale  = d3.scale.linear().range([height,0]),
     	      height2Scale = d3.scale.linear().range([height2,0]);
         var line = d3.svg.line()
@@ -49,7 +49,7 @@ HTMLWidgets.widget({
     	      focus.selectAll("g").selectAll("path").attr("d", line);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             //conditional visibility
-            if(w<410){                
+            if(w<410){
                 focus.selectAll(".peak_label").attr("visibility","visible");
                 if(w==0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
@@ -62,13 +62,13 @@ HTMLWidgets.widget({
             //console.log("reseting.height",domain_y);
             focus.selectAll("g").selectAll("path").attr("d", line);
         }
-        function setBrush(start,end){           
+        function setBrush(start,end){
             context.call(brush.extent([start,end]));
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             focus.selectAll("g").selectAll("path").attr("d", line);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             //conditional visibility
-            if(w<410){                
+            if(w<410){
                 focus.selectAll(".peak_label").attr("visibility","visible");
                 if(w==0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
@@ -77,9 +77,9 @@ HTMLWidgets.widget({
             }
         }
         function showVarInMap(choices){
-            
+
             //genomic
-            console.log("changing choices");  
+            console.log("changing choices");
             context.selectAll("lines.choices").data(choices).enter() //give these line class or other identifier to be used as identifier for deletion
         			.append("line")
               .attr("class","varInMinimap")
@@ -93,12 +93,12 @@ HTMLWidgets.widget({
       				    else if (d["reference"] === "C"){ return "#0000FF"; }
       				    else if (d["reference"] === "G"){ return "#000000"; }
       				    else if (d["reference"] === "T"){ return "#FF0000"; }
-      				    else    {                         return "white";  }}); 
+      				    else    {                         return "white";  }});
       			// user
       			context.selectAll("lines.choices").data(choices).enter() //function(d){return d["trace_peak"]*5;})
       				.append("line")
               .attr("class","varInMinimap")
-      				.attr("x1",function(d){return width2Scale(d["trace_peak"]);}) 
+      				.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
       				.attr("y1",26)
       				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
       				.attr("y2",44)
@@ -116,7 +116,7 @@ HTMLWidgets.widget({
       				.attr("y",30)
       				.attr("opacity",0.6)
       				.text(function(d){return d["id"];})
-      				.attr("fill","black"); 
+      				.attr("fill","black");
         }
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
@@ -136,7 +136,7 @@ HTMLWidgets.widget({
             instanceCounter: instanceCounter,
             reHeight: reHeight,
             setBrush: setBrush,
-            showVarInMap:showVarInMap        
+            showVarInMap:showVarInMap
         }
     },
 
@@ -163,6 +163,7 @@ HTMLWidgets.widget({
       			console.log(x)
       			instance.instanceCounter = instance.instanCounter+1;
       			var intens = x["intens"];
+      			var intens_guide_line = x["intens_guide_line"];
       			var calls = HTMLWidgets.dataframeToD3(x["call"]);
       			var choices = HTMLWidgets.dataframeToD3(x["choices"]);
       			var domain_y = x["helperdat"]["max_y"];
@@ -171,7 +172,7 @@ HTMLWidgets.widget({
       			instance.max_x = domain_x;
       			var intrex = HTMLWidgets.dataframeToD3(x["helperdat"]["helper_intrex"])
       			instance.intrex = intrex;
-      
+
       			var svg     = instance.svg;
       			var line    = instance.line;
       			var linec   = instance.linec;
@@ -182,13 +183,13 @@ HTMLWidgets.widget({
       			var heightScale = instance.heightScale;
             var width2Scale = instance.width2Scale;
       			var height2 = instance.height2;
-      
+
       			widthScale.domain([0,domain_x]);
       			width2Scale.domain([0,domain_x]);
       			heightScale.domain([0,domain_y]);
       			height2Scale.domain([0,domain_y]);
       			//visualise introns/exons
-            //lines 
+            //lines
       			context.selectAll("lines.intrex").data(intrex).enter()
       				.append("line")
       				.attr("x1",function(d){return widthScale(d["start"]);})
@@ -212,7 +213,7 @@ HTMLWidgets.widget({
       //				.attr("stroke-width",1).attr("stroke","rgba(20,20,20,0.8)").attr("stroke-dasharray",2)
       //				.on("mouseover", function(){d3.select(this).style("fill", "white");})
       //				.on("mouseout",  function(){d3.select(this).style("fill", "rgba(200,200,200,0.2)");});
-      
+
       			context.selectAll("text.intrex.name").data(intrex).enter()
       				.append("text")
       				.attr("x",function(d){return widthScale(d["start"]);})
@@ -227,16 +228,16 @@ HTMLWidgets.widget({
       				.attr("opacity",0.6)
       				.text(function(d){return d["id"];}) // position labels !extract sequence coords
       				.attr("fill","black");
-              
+
       			instance.showVarInMap(choices);
-      
+
       			brush.x(width2Scale);
-      
+
       			var group_a = focus.append("g");  //why do I need a group for each line?
       			var group_c = focus.append("g");
       			var group_g = focus.append("g");
       			var group_t = focus.append("g");
-            
+
       			group_a.selectAll("path").data([intens["A"]]).enter()
       				.append("path").attr("class","path")
       				.attr("d",line)
@@ -257,27 +258,29 @@ HTMLWidgets.widget({
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#FF0000").attr("stroke-width",0.75);
-              
-              
-            //trace peak labels  
+
+
+            //trace peak labels
             focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
       				.append("rect").attr("class","peak_label")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y",0).attr("rx",2).attr("ry",2)
-      				.attr("width",5*5)
+      				.attr("width",10)
       				.attr("height",function(d){return d["quality"];})
       				.attr("fill", "rgba(200,200,200,0.4)");
             focus.append("g").selectAll("text.qualities").data(calls).enter() // quality number !do we need it?
       				.append("text").attr("class","peak_label")
       				.text(function(d){return d["quality"];})
+      				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",4)
+      				.attr("y",-1)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
             focus.append("g").selectAll("text.seq.genomic").data(calls).enter() //reference
         			.append("text").attr("class","peak_label short")
       				.text(function(d){return d["reference"];})
+      				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",16)
+      				.attr("y",10)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
               .attr("stroke",function(d) {
         			    if      (d["reference"] === "A"){ return "#33CC33"; }
@@ -288,47 +291,51 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("text.seq.user").data(calls).enter() //call
       				.append("text").attr("class","peak_label short")
       				.text(function(d){return d["call"];})
+      				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",28)
+      				.attr("y",22)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
               .attr("stroke",function(d) {
           		    if      (d["call"] === "A"){ return "#33CC33"; }
       				    else if (d["call"] === "C"){ return "#0000FF"; }
       				    else if (d["call"] === "G"){ return "#000000"; }
       				    else if (d["call"] === "T"){ return "#FF0000"; }
-      				    else    {                         return "#000000";  }});          
-            focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord 
+      				    else    {                         return "#000000";  }});
+            focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
       				.append("text").attr("class","peak_label")
       				.text(function(d){return d["gen_coord"];})
+      				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y",40)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
             focus.append("g").selectAll("text.exon_intron").data(calls).enter() //intrex
       				.append("text").attr("class","peak_label")
       				.text(function(d){return d["exon_intron"];})
+      				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y",52)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
-              
+
             focus.selectAll(".peak_label").attr("visibility","hidden")
 
 
-            //what is this?  
-      			focus
+            //what is this? this is the horizontal line on top of the chrom
+/*
+                focus
       				.append("line")
       				.attr("x1",0)
-      				.attr("y1",100)
+      				.attr("y1",intens_guide_line)
       				.attr("x2",1200)
-      				.attr("y2",100)
-      				.attr("stroke-width",1).attr("stroke","rgba(0,0,0,0.6)").attr("stroke-dasharray",2); 
-      
-      
+      				.attr("y2",intens_guide_line)
+      				.attr("stroke-width",1).attr("stroke","rgba(0,0,0,0.6)").attr("stroke-dasharray",2);
+*/
+
       /*
       			var group_ac = context.append("g");
       			var group_cc = context.append("g");
       			var group_gc = context.append("g");
       			var group_tc = context.append("g");
-      
+
       			group_ac.selectAll("path")
       				.data([intens["A"]]).enter()
       				.append("path").attr("d",linec)
@@ -369,16 +376,16 @@ HTMLWidgets.widget({
 
 	          //zooming in so that the first view is not dense ugly graph
 	          //works but does not show the brush tool
-            
+
             if (typeof choices[0] !== 'undefined') {
                 console.log(choices[0])
                 instance.setBrush((choices[0]["trace_peak"]-300),(choices[0]["trace_peak"]+320));
             }else{
                 instance.setBrush(200,1000);
-            } 
-              
+            }
+
         }else{
-          
+
       			if(x["helperdat"]["max_y"]!= instance.max_y){
       				instance.reHeight(x["helperdat"]["max_y"]);
       			}else if(x.choices != instance.choices){
