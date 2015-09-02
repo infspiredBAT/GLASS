@@ -15,7 +15,7 @@ HTMLWidgets.widget({
             height  = h - margin.top  - margin.bottom,
             height2 = h - margin2.top - margin2.bottom;
         var widthScale   = d3.scale.linear().range([0,width]);
-            width2Scale  = d3.scale.linear().range([0,width]),
+            width2Scale  = d3.scale.linear().range([0,width]),  //remains constat, to be used with context
             heightScale  = d3.scale.linear().range([height,0]),
     	    height2Scale = d3.scale.linear().range([height2,0]);
         var line = d3.svg.line()
@@ -29,53 +29,93 @@ HTMLWidgets.widget({
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
         var focus = svg.append("g")
-			.attr("class", "focus")
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			      .attr("class", "focus")
+			      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         svg.append("defs").append("clipPath")
-			.attr("id", "clip")
-			.append("rect")
-			.attr("width", width)
-			.attr("height", height);
-		var context = svg.append("g")
-			.attr("class", "context")
-			.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-		var brush = d3.svg.brush().on("brushend", brushed);
+			      .attr("id", "clip")
+			      .append("rect")
+			      .attr("width", width)
+			      .attr("height", height);
+		    var context = svg.append("g")
+			      .attr("class", "context")
+			      .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+		    var brush = d3.svg.brush().on("brushend", brushed);
 
-		function brushed() {
-	        widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
-	        focus.selectAll("g").selectAll("path").attr("d", line);
-		}
+    		function brushed() {
+    	      widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
+    	      focus.selectAll("g").selectAll("path").attr("d", line);
+    		}
         function reHeight(domain_y){
             heightScale.domain([0,domain_y]);
             //console.log("reseting.height",domain_y);
             focus.selectAll("g").selectAll("path").attr("d", line);
         }
-        function setBrush(start,end){
-           
+        function setBrush(start,end){           
             context.call(brush.extent([start,end]));
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             focus.selectAll("g").selectAll("path").attr("d", line);            
-            
-            
         }
-
+        function showVarInMap(choices){
+            
+            //genomic
+            console.log("changing choices");  
+            context.selectAll("lines.choices").data(choices).enter() //give these line class or other identifier to be used as identifier for deletion
+        			.append("line")
+              .attr("class","varInMinimap")
+      				.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+      				.attr("y1",6)
+      				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+      				.attr("y2",24)
+      				.attr("stroke-width",3)
+      				.attr("stroke",function(d) {
+      				    if      (d["reference"] === "A"){ return "#33CC33"; }
+      				    else if (d["reference"] === "C"){ return "#0000FF"; }
+      				    else if (d["reference"] === "G"){ return "#000000"; }
+      				    else if (d["reference"] === "T"){ return "#FF0000"; }
+      				    else    {                         return "white";  }}); 
+      			// user
+      			context.selectAll("lines.choices").data(choices).enter() //function(d){return d["trace_peak"]*5;})
+      				.append("line")
+              .attr("class","varInMinimap")
+      				.attr("x1",function(d){return width2Scale(d["trace_peak"]);}) 
+      				.attr("y1",26)
+      				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+      				.attr("y2",44)
+      				.attr("stroke-width",3)
+      				.attr("stroke",function(d) {
+      				    if      (d["call"] === "A"){ return "#33CC33"; }
+      				    else if (d["call"] === "C"){ return "#0000FF"; }
+      				    else if (d["call"] === "G"){ return "#000000"; }
+      				    else if (d["call"] === "T"){ return "#FF0000"; }
+      				    else    {                    return "white";  }});
+      			context.selectAll("text.choices.coord").data(choices).enter()
+      				.append("text")
+              .attr("class","varInMinimap")
+      				.attr("x",function(d){return width2Scale(d["trace_peak"])+4;})
+      				.attr("y",30)
+      				.attr("opacity",0.6)
+      				.text(function(d){return d["id"];})
+      				.attr("fill","black"); 
+        }
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
-            svg: svg,
-            line: line,
-            linec: linec,
-		    context: context,
-	        brush: brush,
-            focus: focus,
-            widthScale: widthScale,
+            svg:     svg,
+            line:    line,
+            linec:   linec,
+		        context: context,
+	          brush:   brush,
+            focus:   focus,
+            widthScale:  widthScale,
+            width2Scale: width2Scale,
             heightScale: heightScale,
-            width: w,
-            height: h,
-	        height2: height2,
+            width:   w,
+            height:  h,
+	          height2: height2,
             instanceCounter: instanceCounter,
             reHeight: reHeight,
-            setBrush: setBrush
+            setBrush: setBrush,
+            showVarInMap:    showVarInMap        
         }
     },
 
@@ -165,45 +205,12 @@ HTMLWidgets.widget({
 				.attr("opacity",0.6)
 				.text(function(d){return d["id"];}) // position labels !extract sequence coords
 				.attr("fill","black");
-			// genomic
-			context.selectAll("lines.choices").data(choices).enter()
-				.append("line")
-				.attr("x1",function(d){return widthScale(d["trace_peak"]);})
-				.attr("y1",6)
-				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
-				.attr("y2",24)
-				.attr("stroke-width",3)
-				.attr("stroke",function(d) {
-				    if      (d["reference"] === "A"){ return "#33CC33"; }
-				    else if (d["reference"] === "C"){ return "#0000FF"; }
-				    else if (d["reference"] === "G"){ return "#000000"; }
-				    else if (d["reference"] === "T"){ return "#FF0000"; }
-				    else    {                         return "white";  }});
-			// user
-			context.selectAll("lines.choices").data(choices).enter() //function(d){return d["trace_peak"]*5;})
-				.append("line")
-				.attr("x1",function(d){return widthScale(d["trace_peak"]);}) 
-				.attr("y1",26)
-				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
-				.attr("y2",44)
-				.attr("stroke-width",3)
-				.attr("stroke",function(d) {
-				    if      (d["call"] === "A"){ return "#33CC33"; }
-				    else if (d["call"] === "C"){ return "#0000FF"; }
-				    else if (d["call"] === "G"){ return "#000000"; }
-				    else if (d["call"] === "T"){ return "#FF0000"; }
-				    else    {                    return "white";  }});
-			context.selectAll("text.choices.coord").data(choices).enter()
-				.append("text")
-				.attr("x",function(d){return widthScale(d["trace_peak"])+4;})
-				.attr("y",30)
-				.attr("opacity",0.6)
-				.text(function(d){return d["id"];})
-				.attr("fill","black");
+        
+			instance.showVarInMap(choices);
 
 			brush.x(width2Scale);
 
-			var group_a = focus.append("g");
+			var group_a = focus.append("g");  //why do I need a group for each line?
 			var group_c = focus.append("g");
 			var group_g = focus.append("g");
 			var group_t = focus.append("g");
@@ -229,38 +236,38 @@ HTMLWidgets.widget({
 				.attr("fill","none")
 				.attr("stroke","#FF0000").attr("stroke-width",0.75);
         
-            focus.append("g").selectAll("qualities").data(calls).enter()
+      focus.append("g").selectAll("qualities").data(calls).enter()
 				.append("rect")
 				.attr("x",function(d){return d["trace_peak"]*5;})
 				.attr("y",0).attr("rx",2).attr("ry",2)
 				.attr("width",5*5)
 				.attr("height",function(d){return d["quality"];})
 				.attr("fill", "rgba(200,200,200,0.4)");
-            focus.append("g").selectAll("text.qualities").data(calls).enter()
+      focus.append("g").selectAll("text.qualities").data(calls).enter()
 				.append("text")
 				.text(function(d){return d["quality"];})
 				.attr("x",function(d){return d["trace_peak"]*5;})
 				.attr("y",4)
 				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
-            focus.append("g").selectAll("text.seq.user").data(calls).enter()
+      focus.append("g").selectAll("text.seq.user").data(calls).enter()
 				.append("text")
 				.text(function(d){return d["call"];})
 				.attr("x",function(d){return d["trace_peak"]*5;})
 				.attr("y",16)
 				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
-            focus.append("g").selectAll("text.seq.genomic").data(calls).enter()
+      focus.append("g").selectAll("text.seq.genomic").data(calls).enter()
 				.append("text")
 				.text(function(d){return d["reference"];})
 				.attr("x",function(d){return d["trace_peak"]*5;})
 				.attr("y",28)
 				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
-            focus.append("g").selectAll("text.coord.genomic").data(calls).enter()
+      focus.append("g").selectAll("text.coord.genomic").data(calls).enter()
 				.append("text")
 				.text(function(d){return d["gen_coord"];})
 				.attr("x",function(d){return d["trace_peak"]*5;})
 				.attr("y",40)
 				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
-            focus.append("g").selectAll("text.exon_intron").data(calls).enter()
+      focus.append("g").selectAll("text.exon_intron").data(calls).enter()
 				.append("text")
 				.text(function(d){return d["exon_intron"];})
 				.attr("x",function(d){return d["trace_peak"]*5;})
@@ -327,14 +334,19 @@ HTMLWidgets.widget({
                 instance.setBrush((choices[0]["trace_peak"]-300),(choices[0]["trace_peak"]+320));
             }else{
                 instance.setBrush(200,1000);
-            }
-	          
+            } 
               
         }else{
-			console.log("redrawing");
-			if(x["helperdat"]["max_y"]!= instance.max_y){
-				instance.reHeight(x["helperdat"]["max_y"]);
-			}
+          
+      			if(x["helperdat"]["max_y"]!= instance.max_y){
+      				instance.reHeight(x["helperdat"]["max_y"]);
+      			}else if(x.choices != instance.choices){
+              console.log("changing choices");
+              var choices = HTMLWidgets.dataframeToD3(x["choices"]);
+              instance.context.selectAll(".varInMinimap").remove();
+              instance.showVarInMap(choices);
+              instance.choices = x.choices;
+      			}
         }
     }
 });

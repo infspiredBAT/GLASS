@@ -1,10 +1,10 @@
-require(shiny)
-require(data.table)
-require(rjson)
-require(htmlwidgets)
-require(chromatography)
-require(stringr)
-require(stringi)
+library(shiny)
+library(data.table)
+library(rjson)
+library(htmlwidgets)
+library(chromatography)
+library(stringr)
+library(stringi)
 #require(DT)
 
 shinyUI(
@@ -42,11 +42,11 @@ shinyUI(
 					    HTML(paste("messages and info will appear here", sep="")),
 					    verbatimTextOutput("variance_info")
 					),
-					column(1,
+					column(2,
 					    sliderInput("koukou","set trim thres",min = 0, max = 10, value = 3),
 					    sliderInput("koukou","set qual thres",min = 0, max = 10, value = 3)
 					),
-					column(2,
+					column(3,
 					    sliderInput("max_y_p","set intens peak height",min = 0, max = 200, value = 100),
                         sliderInput("koukou","set intens guide line",min = 0, max = 100, value = 50)
 					)
