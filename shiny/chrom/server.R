@@ -35,8 +35,7 @@ shinyServer(function(input,output,session) {
                 g_max_y     <<- max(intens)
                 res$helperdat$max_x <- nrow(intens)
                 g_helperdat <<- res$helperdat
-                call.dt     <- data.table(call,key="id")
-                g_call      <<- call.dt
+                g_call      <<- data.table(call,key="id")
                 g_choices   <<- g_call[seq_trim != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
                 g_intens    <<- intens
             })
@@ -63,7 +62,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
                 tryCatch({
-                    cat(g_call[id == as.integer(input$choose_variance),paste("",call," -> ",get("reference")," on ",get("exon_intron")," at ",gen_coord," with quality ",quality,sep="")])
+                    cat(g_call[id == input$choose_variance,paste("",call," -> ",get("reference")," on ",get("exon_intron")," at ",gen_coord," with quality ",quality,sep="")])
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
     #                else cat("Some error")
@@ -79,14 +78,15 @@ shinyServer(function(input,output,session) {
         isolate({
             if(loading_processed_files() != "not") {
                 if(is.null(g_choices))
-                    g_choices <<- g_call[as.integer(input$choose_variance)]
+                    g_choices <<- g_call[input$choose_variance]
                 else {
-                    if(!as.integer(input$choose_variance) %in% g_choices$id) {
-                        new_variance <- g_call[as.integer(input$choose_variance)]
+                    if(!input$choose_variance %in% g_choices$id) {
+                        #new_variance <- g_call[as.integer(input$choose_variance)]
+                        new_variance <- g_call[id==input$choose_variance]
                         new_variance$call <- input$change_peak
                         g_choices <<- rbind(g_choices,new_variance)
-                    } else if(g_choices[id == as.integer(input$choose_variance)]$call != input$change_peak)
-                        g_choices[id == as.integer(input$choose_variance)]$call <<- input$change_peak
+                    } else if(g_choices[id == input$choose_variance]$call != input$change_peak)
+                        g_choices[id == input$choose_variance]$call <<- input$change_peak
                 }
             }
         })
@@ -129,9 +129,9 @@ shinyServer(function(input,output,session) {
     })
 
     output$chosen_variances_table <- shiny::renderDataTable({
-        input$execute_btn       #I removed the isnull choices condition as it sometimes doesn't initialize in time. Once the table is created it is quickly updated once choices are changed
-        input$delete_btn        #if(loading_processed_files() != "not" & !is.null(g_choices)
-        if(loading_processed_files() != "not" ) {
+        input$execute_btn 
+        input$delete_btn    
+        if(loading_processed_files() != "not" & !is.null(g_choices)) {
 #            add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
             #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
             add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")

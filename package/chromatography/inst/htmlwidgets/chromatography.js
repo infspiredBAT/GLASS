@@ -40,47 +40,42 @@ HTMLWidgets.widget({
 			      .attr("class", "context")
 			      .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 		    var brush = d3.svg.brush().on("brushend", brushed);
-
-    		function brushed() {
-            console.log(brush.extent());
+        
+        function redraw()  {
+            widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
-            console.log(w);
-    	      widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
-    	      focus.selectAll("g").selectAll("path").attr("d", line);
+            focus.selectAll("g").selectAll("path").attr("d", line);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
+            focus.selectAll(".q").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
             //conditional visibility
             if(w<410){
                 focus.selectAll(".peak_label").attr("visibility","visible");
                 if(w==0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
                 focus.selectAll(".peak_label").attr("visibility","hidden");
+                if(w<800){focus.selectAll(".q").attr("visibility","visible")}
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
+          
+        }
+        function brushed() {
+            redraw();
     		}
         function reHeight(domain_y){
             heightScale.domain([0,domain_y]);
             //console.log("reseting.height",domain_y);
             focus.selectAll("g").selectAll("path").attr("d", line);
         }
+        //setting brush programmatically 
         function setBrush(start,end){
             context.call(brush.extent([start,end]));
-            widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
-            focus.selectAll("g").selectAll("path").attr("d", line);
-            focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
-            //conditional visibility
-            if(w<410){
-                focus.selectAll(".peak_label").attr("visibility","visible");
-                if(w==0){focus.selectAll(".peak_label").attr("visibility","hidden");}
-            }else{
-                focus.selectAll(".peak_label").attr("visibility","hidden");
-                if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
-            }
+            redraw();
         }
         function showVarInMap(choices){
 
             //genomic
             console.log("changing choices");
-            context.selectAll("lines.choices").data(choices).enter() //give these line class or other identifier to be used as identifier for deletion
+            context.selectAll("lines.choices").data(choices).enter() 
         			.append("line")
               .attr("class","varInMinimap")
       				.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
@@ -229,10 +224,8 @@ HTMLWidgets.widget({
       				.text(function(d){return d["id"];}) // position labels !extract sequence coords
       				.attr("fill","black");
 
-      			instance.showVarInMap(choices);
-
       			brush.x(width2Scale);
-
+            
       			var group_a = focus.append("g");  //why do I need a group for each line?
       			var group_c = focus.append("g");
       			var group_g = focus.append("g");
@@ -262,10 +255,10 @@ HTMLWidgets.widget({
 
             //trace peak labels
             focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
-      				.append("rect").attr("class","peak_label")
-      				.attr("x",function(d){return widthScale(d["trace_peak"]);})
+      				.append("rect").attr("class","peak_label q")
+      				.attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
       				.attr("y",0).attr("rx",2).attr("ry",2)
-      				.attr("width",10)
+      				.attr("width",18)
       				.attr("height",function(d){return d["quality"];})
       				.attr("fill", "rgba(200,200,200,0.4)");
             focus.append("g").selectAll("text.qualities").data(calls).enter() // quality number !do we need it?
@@ -319,7 +312,7 @@ HTMLWidgets.widget({
             focus.selectAll(".peak_label").attr("visibility","hidden")
 
 
-            //what is this? this is the horizontal line on top of the chrom
+            //horizontal line on top of the chrom
 /*
                 focus
       				.append("line")
@@ -373,12 +366,14 @@ HTMLWidgets.widget({
       				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","2,6")
       				.attr("opacity",0.5);
       			//context.selectAll("g").selectAll("path").attr("opacity",0.5);
-
-	          //zooming in so that the first view is not dense ugly graph
-	          //works but does not show the brush tool
+            
+            //In SVG, z-index is defined by the order the element appears in the document
+            //http://stackoverflow.com/questions/17786618/how-to-use-z-index-in-svg-elements
+            //the vars on the minimap are shown last sto that they stay on to
+            instance.showVarInMap(choices);
+	          //zooming in so that the first view is not ugly dense graph
 
             if (typeof choices[0] !== 'undefined') {
-                console.log(choices[0])
                 instance.setBrush((choices[0]["trace_peak"]-300),(choices[0]["trace_peak"]+320));
             }else{
                 instance.setBrush(200,1000);
@@ -389,7 +384,6 @@ HTMLWidgets.widget({
       			if(x["helperdat"]["max_y"]!= instance.max_y){
       				instance.reHeight(x["helperdat"]["max_y"]);
       			}else if(x.choices != instance.choices){
-              console.log("changing choices");
               var choices = HTMLWidgets.dataframeToD3(x["choices"]);
               instance.context.selectAll(".varInMinimap").remove();
               instance.showVarInMap(choices);
