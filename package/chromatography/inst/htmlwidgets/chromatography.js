@@ -47,6 +47,8 @@ HTMLWidgets.widget({
             focus.selectAll("g").selectAll("path").attr("d", line);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".q").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
+            focus.selectAll(".line").attr("x1",function(d){return widthScale(d["trace_peak"]);})
+                                    .attr("x2",function(d){return widthScale(d["trace_peak"]);});
             //conditional visibility
             if(w<410){
                 focus.selectAll(".peak_label").attr("visibility","visible");
@@ -105,15 +107,14 @@ HTMLWidgets.widget({
       				    else if (d["call"] === "T"){ return "#FF0000"; }
       				    else    {                    return "white";  }});
       			context.selectAll("text.choices.coord").data(choices).enter()
-      				.append("text")
-                    .attr("class","varInMinimap")
+      				.append("text").attr("class","varInMinimap")
       				.attr("x",function(d){return width2Scale(d["trace_peak"])+4;})
       				.attr("y",30)
       				.attr("opacity",0.6)
       				.text(function(d){return d["id"];})
       				.attr("fill","black");
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
-      				.append("line").attr("class","peak_label q")
+      				.append("line").attr("class","peak_label q line")
       				.attr("x1",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y1",function(d){return d["quality"]+30;})
       				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
