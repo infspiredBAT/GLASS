@@ -25,37 +25,37 @@ get_intensities <- function(data,norm=FALSE) {
     return(intens)
 }
 
-get_call_data <- function(data, trim_thres=12, qual_thres=10, aln_min=0.2){
+get_call_data <- function(data, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     qual      <- data$PCON.2
     rm7qual   <- rollmean(qual,k=7)
     #rm7qualext<- data.frame(c(rep(rm7qual[1],3),rm7qual,rep(rm7qual[length(qual)-6],3)))  #cbind returns data frame if atleast one argument is a data frame
     res       <- generate_ref(data, aln_min)
-    call <- data.table(id = seq_along(data$PLOC.2)
-                   ,trace_peak = data$PLOC.2
-                   ,call = str_split(data$PBAS.2,pattern="")[[1]]
-                   ,seq_trim = str_split(data$PBAS.2,pattern="")[[1]]
-                   ,quality = qual
-                   ,reference = str_split(data$PBAS.2,pattern="")[[1]])
-    call[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
+    calls <- data.table(id         = seq_along(data$PLOC.2)
+                       ,user_mod   = str_split(data$PBAS.2,pattern="")[[1]]
+                       ,call       = str_split(data$PBAS.2,pattern="")[[1]]
+                       ,reference  = str_split(data$PBAS.2,pattern="")[[1]]
+                       ,trace_peak = data$PLOC.2
+                       ,quality    = qual)
+    calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
     setkey(res[[2]],id)
     if(length(res[[3]]) > 0) {
-        setkey(call,id)
-        add <- call[as.integer(res[[3]]),]
+        setkey(calls,id)
+        add <- calls[as.integer(res[[3]]),]
         data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
-        call <- rbind(call,add[,id := res[[3]]][,call := "-"][,seq_trim := "-"])
+        calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_mod := "-"])
     }
-    call <- merge(call,res[[1]],all.x = T,by = "id")
-    data.table::set(call,which(call[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
-    data.table::set(call,which(is.na(call[["gen_coord"]])),"reference","NA")
-    data.table::set(call,which(call[["rm7qual"]] < trim_thres | call[["quality"]] < qual_thres),"seq_trim","low_qual")
+    calls <- merge(calls,res[[1]],all.x = T,by = "id")
+    data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
+    data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
+    data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
 
     #helper_intrex contains intesities coordinates of start and end of exons with the sequence id (position in sequence coordinates)
     helperdat <- list()
     helperdat$helper_intrex <- list()
-    helperdat$helper_intrex <- setnames(call[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
-    helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,call[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-    return(list(call=call,helperdat=helperdat))
+    helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
+    helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+    return(list(calls=calls,helperdat=helperdat))
 }
 
 generate_ref <-function(data, aln_min=0.2){

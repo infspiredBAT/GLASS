@@ -35,7 +35,7 @@ shinyUI(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
 					    textInput("choose_variance","type seq pos"),
-					    selectInput("change_peak","change call to",choices=c("A","T","C","G"),selected="",selectize=F,size=1),
+					    selectInput("change_peak","user_mod it to",choices=c("A","T","C","G"),selected="",selectize=F,size=1),
 					    actionButton("execute_btn","change", icon = icon("exchange"))
 					),
 					column(4,
@@ -43,7 +43,7 @@ shinyUI(
 					    verbatimTextOutput("variance_info")
 					),
 					column(2,
-					    sliderInput("trim_thres","set qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
+#					    sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
 					    sliderInput("qual_thres","set qual thres for low qual", ticks=FALSE, min = 0, max = 50, value = 10),
 					    sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),

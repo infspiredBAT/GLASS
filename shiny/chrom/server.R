@@ -2,7 +2,7 @@ library(shiny)
 library(sangerseqR)
 source("helpers.R")
 
-g_call      <- NULL             #annotated basecall data
+g_calls      <- NULL             #annotated basecall data
 g_intens    <- NULL             #intensities file
 g_helperdat <- NULL             #helper data used in graphs
 g_choices   <- NULL
@@ -30,13 +30,13 @@ shinyServer(function(input,output,session) {
                 #        - otherwise chceck if file has correct format
                 g_abif      <- sangerseqR::read.abif(file)
                 intens      <- get_intensities(g_abif@data)
-                res         <- get_call_data(g_abif@data,input$trim_thres,input$qual_thres,input$aln_min)
-                call        <- res$call
+                res         <- get_call_data(g_abif@data,input$rm7qual_thres,input$qual_thres,input$aln_min)
+                calls        <- res$calls
                 g_max_y     <<- max(intens)
                 res$helperdat$max_x <- nrow(intens)
                 g_helperdat <<- res$helperdat
-                g_call      <<- data.table(call,key="id")
-                g_choices   <<- g_call[seq_trim != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
+                g_calls      <<- data.table(calls,key="id")
+                g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
                 g_intens    <<- intens
             })
             return("loaded")
@@ -47,14 +47,14 @@ shinyServer(function(input,output,session) {
 #    first_update_chosen_variances <- observe({
 #      if(loading_processed_files() != "not") {
 #        #TO DO: more sophisticated rules (might need to take intensities into account)
-#        g_choices <<- g_call[call != reference & seq_trim != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
+#        g_choices <<- g_calls[user_mod != reference & user_mod != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
 #      }
 #    })
 
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
             g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
-            chromatography(g_intens,g_helperdat,g_call,g_choices,input$intens_guide_line)
+            chromatography(g_intens,g_helperdat,g_calls,g_choices,input$intens_guide_line)
         }
     })
 
@@ -62,7 +62,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
                 tryCatch({
-                    cat(g_call[id == input$choose_variance,paste("",call," -> ",get("reference")," on ",get("exon_intron")," at ",gen_coord," with quality ",quality,sep="")])
+                    cat(g_calls[id == input$choose_variance,paste("ref:",reference," call:",call," user:",user_mod," on ",exon_intron," at ",gen_coord," with quality ",quality,sep="")])
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
     #                else cat("Some error")
@@ -72,21 +72,20 @@ shinyServer(function(input,output,session) {
     })
 
 
-    #! go through this function , update seq_trim instead of call
     update_chosen_variances <- observe({
         input$execute_btn
         isolate({
             if(loading_processed_files() != "not") {
                 if(is.null(g_choices))
-                    g_choices <<- g_call[input$choose_variance]
+                    g_choices <<- g_calls[input$choose_variance]
                 else {
                     if(!input$choose_variance %in% g_choices$id) {
-                        #new_variance <- g_call[as.integer(input$choose_variance)]
-                        new_variance <- g_call[id==input$choose_variance]
-                        new_variance$call <- input$change_peak
+                        #new_variance <- g_calls[as.integer(input$choose_variance)]
+                        new_variance <- g_calls[id==input$choose_variance]
+                        new_variance$user_mod <- input$change_peak
                         g_choices <<- rbind(g_choices,new_variance)
-                    } else if(g_choices[id == input$choose_variance]$call != input$change_peak)
-                        g_choices[id == input$choose_variance]$call <<- input$change_peak
+                    } else if(g_choices[id == input$choose_variance]$user_mod != input$change_peak)
+                        g_choices[id == input$choose_variance]$user_mod <<- input$change_peak
                 }
             }
         })
@@ -129,8 +128,8 @@ shinyServer(function(input,output,session) {
     })
 
     output$chosen_variances_table <- shiny::renderDataTable({
-        input$execute_btn 
-        input$delete_btn    
+        input$execute_btn
+        input$delete_btn
         if(loading_processed_files() != "not" & !is.null(g_choices)) {
 #            add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
             #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
@@ -170,8 +169,8 @@ shinyServer(function(input,output,session) {
     )
 
     output$call_table <- shiny::renderDataTable({
-    	if(loading_processed_files() != "not" & !is.null(g_call)) {
-    		g_call
+    	if(loading_processed_files() != "not" & !is.null(g_calls)) {
+    		g_calls
     	}
     }, options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title="")))
     )

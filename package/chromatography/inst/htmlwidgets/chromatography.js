@@ -40,7 +40,7 @@ HTMLWidgets.widget({
 			      .attr("class", "context")
 			      .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 		    var brush = d3.svg.brush().on("brushend", brushed);
-        
+
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
@@ -56,7 +56,7 @@ HTMLWidgets.widget({
                 if(w<800){focus.selectAll(".q").attr("visibility","visible")}
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
-          
+
         }
         function brushed() {
             redraw();
@@ -66,7 +66,7 @@ HTMLWidgets.widget({
             //console.log("reseting.height",domain_y);
             focus.selectAll("g").selectAll("path").attr("d", line);
         }
-        //setting brush programmatically 
+        //setting brush programmatically
         function setBrush(start,end){
             context.call(brush.extent([start,end]));
             redraw();
@@ -75,9 +75,9 @@ HTMLWidgets.widget({
 
             //genomic
             console.log("changing choices");
-            context.selectAll("lines.choices").data(choices).enter() 
+            context.selectAll("lines.choices").data(choices).enter()
         			.append("line")
-              .attr("class","varInMinimap")
+                    .attr("class","varInMinimap")
       				.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
       				.attr("y1",6)
       				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
@@ -92,7 +92,7 @@ HTMLWidgets.widget({
       			// user
       			context.selectAll("lines.choices").data(choices).enter() //function(d){return d["trace_peak"]*5;})
       				.append("line")
-              .attr("class","varInMinimap")
+                    .attr("class","varInMinimap")
       				.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
       				.attr("y1",26)
       				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
@@ -106,12 +106,19 @@ HTMLWidgets.widget({
       				    else    {                    return "white";  }});
       			context.selectAll("text.choices.coord").data(choices).enter()
       				.append("text")
-              .attr("class","varInMinimap")
+                    .attr("class","varInMinimap")
       				.attr("x",function(d){return width2Scale(d["trace_peak"])+4;})
       				.attr("y",30)
       				.attr("opacity",0.6)
       				.text(function(d){return d["id"];})
       				.attr("fill","black");
+            focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
+      				.append("line").attr("class","peak_label q")
+      				.attr("x1",function(d){return widthScale(d["trace_peak"]);})
+      				.attr("y1",function(d){return d["quality"]+30;})
+      				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
+      				.attr("y2",190)
+      				.attr("stroke-width",1).attr("stroke","rgba(255,0,0,0.3)").attr("stroke-dasharray",2);
         }
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
@@ -159,7 +166,7 @@ HTMLWidgets.widget({
       			instance.instanceCounter = instance.instanCounter+1;
       			var intens = x["intens"];
       			var intens_guide_line = x["intens_guide_line"];
-      			var calls = HTMLWidgets.dataframeToD3(x["call"]);
+      			var calls = HTMLWidgets.dataframeToD3(x["calls"]);
       			var choices = HTMLWidgets.dataframeToD3(x["choices"]);
       			var domain_y = x["helperdat"]["max_y"];
       			instance.max_y = domain_y;
@@ -176,7 +183,7 @@ HTMLWidgets.widget({
       			var brush   = instance.brush;
       			var widthScale  = instance.widthScale;
       			var heightScale = instance.heightScale;
-            var width2Scale = instance.width2Scale;
+                var width2Scale = instance.width2Scale;
       			var height2 = instance.height2;
 
       			widthScale.domain([0,domain_x]);
@@ -225,7 +232,7 @@ HTMLWidgets.widget({
       				.attr("fill","black");
 
       			brush.x(width2Scale);
-            
+
       			var group_a = focus.append("g");  //why do I need a group for each line?
       			var group_c = focus.append("g");
       			var group_g = focus.append("g");
@@ -275,12 +282,12 @@ HTMLWidgets.widget({
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y",10)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
-              .attr("stroke",function(d) {
+                    .attr("stroke",function(d) {
         			    if      (d["reference"] === "A"){ return "#33CC33"; }
       				    else if (d["reference"] === "C"){ return "#0000FF"; }
       				    else if (d["reference"] === "G"){ return "#000000"; }
       				    else if (d["reference"] === "T"){ return "#FF0000"; }
-      				    else    {                         return "#000000";  }});
+      				    else    {                         return "#000000"; }});
             focus.append("g").selectAll("text.seq.user").data(calls).enter() //call
       				.append("text").attr("class","peak_label short")
       				.text(function(d){return d["call"];})
@@ -288,32 +295,45 @@ HTMLWidgets.widget({
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y",22)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
-              .attr("stroke",function(d) {
-          		    if      (d["call"] === "A"){ return "#33CC33"; }
+                    .attr("stroke",function(d) {
+          		        if      (d["call"] === "A"){ return "#33CC33"; }
       				    else if (d["call"] === "C"){ return "#0000FF"; }
       				    else if (d["call"] === "G"){ return "#000000"; }
       				    else if (d["call"] === "T"){ return "#FF0000"; }
-      				    else    {                         return "#000000";  }});
+      				    else    {                    return "#000000"; }});
+            focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_mod
+      				.append("text").attr("class","peak_label short")
+      				.text(function(d){return d["user_mod"];})
+      				.attr("text-anchor", "middle")
+      				.attr("x",function(d){return widthScale(d["trace_peak"]);})
+      				.attr("y",34)
+      				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+                    .attr("stroke",function(d) {
+          		        if      (d["user_mod"] === "A"){ return "#33CC33"; }
+      				    else if (d["user_mod"] === "C"){ return "#0000FF"; }
+      				    else if (d["user_mod"] === "G"){ return "#000000"; }
+      				    else if (d["user_mod"] === "T"){ return "#FF0000"; }
+      				    else    {                        return "#000000"; }});
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
       				.append("text").attr("class","peak_label")
       				.text(function(d){return d["gen_coord"];})
       				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",40)
+      				.attr("y",50)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
             focus.append("g").selectAll("text.exon_intron").data(calls).enter() //intrex
       				.append("text").attr("class","peak_label")
       				.text(function(d){return d["exon_intron"];})
       				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",52)
+      				.attr("y",62)
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
 
             focus.selectAll(".peak_label").attr("visibility","hidden")
 
 
-            //horizontal line on top of the chrom
 /*
+            //horizontal line on top of the chrom
                 focus
       				.append("line")
       				.attr("x1",0)
@@ -323,37 +343,6 @@ HTMLWidgets.widget({
       				.attr("stroke-width",1).attr("stroke","rgba(0,0,0,0.6)").attr("stroke-dasharray",2);
 */
 
-      /*
-      			var group_ac = context.append("g");
-      			var group_cc = context.append("g");
-      			var group_gc = context.append("g");
-      			var group_tc = context.append("g");
-
-      			group_ac.selectAll("path")
-      				.data([intens["A"]]).enter()
-      				.append("path").attr("d",linec)
-      				.attr("fill","none")
-      				.attr("stroke","#33CC33")
-      				.attr("stroke-width",0.5);
-      			group_cc.selectAll("path")
-      				.data([intens["C"]]).enter()
-      				.append("path").attr("d",linec)
-      				.attr("fill","none")
-      				.attr("stroke","#0000FF")
-      				.attr("stroke-width",0.5);
-      			group_gc.selectAll("path")
-      				.data([intens["G"]]).enter()
-      				.append("path").attr("d",linec)
-      				.attr("fill","none")
-      				.attr("stroke","#000000")
-      				.attr("stroke-width",0.5);
-      			group_tc.selectAll("path")
-      				.data([intens["T"]]).enter()
-      				.append("path").attr("d",linec)
-      				.attr("fill","none")
-      				.attr("stroke","#FF0000")
-      				.attr("stroke-width",0.5);
-      	*/
       			context.append("g")
       //				.attr("class", "x brush")
       				.call(brush)
@@ -366,7 +355,7 @@ HTMLWidgets.widget({
       				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","2,6")
       				.attr("opacity",0.5);
       			//context.selectAll("g").selectAll("path").attr("opacity",0.5);
-            
+
             //In SVG, z-index is defined by the order the element appears in the document
             //http://stackoverflow.com/questions/17786618/how-to-use-z-index-in-svg-elements
             //the vars on the minimap are shown last sto that they stay on to
