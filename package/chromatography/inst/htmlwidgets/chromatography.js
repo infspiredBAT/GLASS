@@ -65,7 +65,6 @@ HTMLWidgets.widget({
     		}
         function reHeight(domain_y){
             heightScale.domain([0,domain_y]);
-            //console.log("reseting.height",domain_y);
             focus.selectAll("g").selectAll("path").attr("d", line);
         }
         //setting brush programmatically
@@ -101,10 +100,10 @@ HTMLWidgets.widget({
       				.attr("y2",44)
       				.attr("stroke-width",3)
       				.attr("stroke",function(d) {
-      				    if      (d["call"] === "A"){ return "#33CC33"; }
-      				    else if (d["call"] === "C"){ return "#0000FF"; }
-      				    else if (d["call"] === "G"){ return "#000000"; }
-      				    else if (d["call"] === "T"){ return "#FF0000"; }
+      				    if      (d["user_mod"] === "A"){ return "#33CC33"; }
+      				    else if (d["user_mod"] === "C"){ return "#0000FF"; }
+      				    else if (d["user_mod"] === "G"){ return "#000000"; }
+      				    else if (d["user_mod"] === "T"){ return "#FF0000"; }
       				    else    {                    return "white";  }});
       			context.selectAll("text.choices.coord").data(choices).enter()
       				.append("text").attr("class","varInMinimap")
@@ -114,7 +113,7 @@ HTMLWidgets.widget({
       				.text(function(d){return d["id"];})
       				.attr("fill","black");
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
-      				.append("line").attr("class","peak_label q line")
+      				.append("line").attr("class","peak_label short line")
       				.attr("x1",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y1",function(d){return d["quality"]+30;})
       				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
@@ -375,6 +374,7 @@ HTMLWidgets.widget({
       				instance.reHeight(x["helperdat"]["max_y"]);
       			}else if(x.choices != instance.choices){
               var choices = HTMLWidgets.dataframeToD3(x["choices"]);
+              instance.context.selectAll(".line").remove();
               instance.context.selectAll(".varInMinimap").remove();
               instance.showVarInMap(choices);
               instance.choices = x.choices;

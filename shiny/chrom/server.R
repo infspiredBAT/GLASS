@@ -29,7 +29,7 @@ shinyServer(function(input,output,session) {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
                 g_abif      <- sangerseqR::read.abif(file)
-                intens      <- get_intensities(g_abif@data)
+                intens      <- get_intensities(g_abif@data,norm=FALSE)
                 res         <- get_call_data(g_abif@data,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 calls        <- res$calls
                 g_max_y     <<- max(intens)
