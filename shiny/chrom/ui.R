@@ -57,11 +57,10 @@ shinyUI(
 
 				shiny::dataTableOutput("chosen_variances_table"),
 
-				# when variants exist - this one's for Tomas
-#				conditionalPanel(condition=" output.input_file_selected != 'not' ",
+				conditionalPanel(condition=" output.chosen_variances_table ",
 	                 downloadButton("export_btn","export"),
 	                 actionButton("delete_btn","delete", icon = icon("times"))
-#				)
+				)
 	 		),
 			tabPanel('annotation', value = 'annotation', icon = icon("user-md")
 			),
