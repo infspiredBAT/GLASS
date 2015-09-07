@@ -4,7 +4,7 @@ HTMLWidgets.widget({
     type: 'output',
 
     initialize: function(el, w, h) {
-
+        console.log("I'm being initialized.")
         var instanceCounter = 0;
         var intrex = "";
         var max_x = 0;
@@ -120,6 +120,16 @@ HTMLWidgets.widget({
       				.attr("y2",190)
       				.attr("stroke-width",1).attr("stroke","rgba(255,0,0,0.3)").attr("stroke-dasharray",2);
         }
+        
+        Shiny.addCustomMessageHandler("zoom",
+            function(message) {
+                setBrush(Number(message)-300,Number(message)+320);
+            }                
+        );
+        function callShiny(message){
+            Shiny.onInputChange("pos_click", message);
+            
+        }
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
@@ -138,7 +148,8 @@ HTMLWidgets.widget({
             instanceCounter: instanceCounter,
             reHeight: reHeight,
             setBrush: setBrush,
-            showVarInMap:showVarInMap
+            showVarInMap:showVarInMap,
+            callShiny: callShiny
         }
     },
 
@@ -280,7 +291,11 @@ HTMLWidgets.widget({
       				.text(function(d){return d["reference"];})
       				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",10)
+              .on("click",function(d,i){instance.callShiny("message");
+                                        console.log(d["id"]);
+              })
+              .attr("y",10)
+              .attr("id",function(d){return d["id"]})
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
                     .attr("stroke",function(d) {
         			    if      (d["reference"] === "A"){ return "#33CC33"; }
@@ -303,7 +318,12 @@ HTMLWidgets.widget({
       				    else    {                    return "#000000"; }});
             focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_mod
       				.append("text").attr("class","peak_label short")
-      				.text(function(d){return d["user_mod"];})
+      				.text(function(d){if(d["user_mod"]=="low qual") {return "N";}
+                                else                          {return d["user_mod"];}
+                                })
+              .attr("opacity",function(d){if(d["user_mod"]=="low qual"){return 0.6;}
+                                          else{return 1}
+                                          })
       				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y",34)
@@ -369,7 +389,7 @@ HTMLWidgets.widget({
             }
 
         }else{
-
+            console.log(x)
       			if(x["helperdat"]["max_y"]!= instance.max_y){
       				instance.reHeight(x["helperdat"]["max_y"]);
       			}else if(x.choices != instance.choices){
@@ -378,6 +398,8 @@ HTMLWidgets.widget({
               instance.context.selectAll(".varInMinimap").remove();
               instance.showVarInMap(choices);
               instance.choices = x.choices;
+      			}else {
+              console.log(x)        		  
       			}
         }
     }

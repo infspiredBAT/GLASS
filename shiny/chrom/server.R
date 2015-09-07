@@ -22,24 +22,33 @@ shinyServer(function(input,output,session) {
     })
 
     loading_processed_files <- reactive ({
+        
         if(!is.null(get_file())) {
             file <- get_file()$datapath
             file_name <- get_file()$name
+            ret <- "not"
             withProgress(message = paste('...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
                 g_abif      <- sangerseqR::read.abif(file)
-                intens      <- get_intensities(g_abif@data,norm=FALSE)
-                res         <- get_call_data(g_abif@data,input$rm7qual_thres,input$qual_thres,input$aln_min)
-                calls        <- res$calls
-                g_max_y     <<- max(intens)
-                res$helperdat$max_x <- nrow(intens)
-                g_helperdat <<- res$helperdat
-                g_calls      <<- data.table(calls,key="id")
-                g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
-                g_intens    <<- intens
+                res <- ""
+                tryCatch(res <- suppressWarnings(get_call_data(g_abif@data,input$rm7qual_thres,input$qual_thres,input$aln_min)),
+                                                 error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ", 
+                                                                                                                e$message ))})
+                if(res!=""){
+                    output$variance_info <- renderPrint("")
+                    intens      <- get_intensities(g_abif@data,norm=FALSE)     
+                    calls        <- res$calls
+                    g_max_y     <<- max(intens)
+                    res$helperdat$max_x <- nrow(intens)
+                    g_helperdat <<- res$helperdat
+                    g_calls      <<- data.table(calls,key="id")
+                    g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
+                    g_intens    <<- intens
+                    ret<-"loaded"
+                }
             })
-            return("loaded")
+            return(ret)
         }
         return("not")
     })
@@ -57,7 +66,10 @@ shinyServer(function(input,output,session) {
             chromatography(g_intens,g_helperdat,g_calls,g_choices,input$intens_guide_line)
         }
     })
-
+    output$variance_info <- renderPrint({
+        print("anything")
+        input$pos_click
+    })
     output$variance_info <- renderPrint({
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
@@ -70,7 +82,7 @@ shinyServer(function(input,output,session) {
             } else cat("")
         } else cat("load .abi/.ab1 file")
     })
-
+    
 
     update_chosen_variances <- observe({
         input$execute_btn
@@ -200,13 +212,8 @@ shinyServer(function(input,output,session) {
     goZoom_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$goZoom)) return()
-            cat(paste0(input$goZoom$id,","))
-            session$sendCustomMessage(type = 'zoom_message',message = paste0(input$goZoom$id))
-            print(g_helperdat$helper_intrex$start[1])
-            g_helperdat$helper_intrex$start[1]<<-50
-            print(g_helperdat$helper_intrex$start[1])
-
-            chromatography(g_intens,g_helperdat)
+            #cat(paste0(input$goZoom$id,","))
+            session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))
         }
     })
 

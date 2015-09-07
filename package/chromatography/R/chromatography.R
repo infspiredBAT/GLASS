@@ -22,6 +22,7 @@ chromatography <- function(intens, helperdat, calls, choices, intens_guide_line=
         height = height,
         package = 'chromatography'
     )
+    #create input binding
 }
 #' Widget output function for use in Shiny
 #'
