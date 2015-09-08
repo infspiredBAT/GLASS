@@ -29,7 +29,7 @@ shinyUI(
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
 				fluidRow(
 					column(2,
-					    fileInput("select_file","",multiple=F,accept=c('.abi','.ab1'))
+					    fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))
 					),
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table

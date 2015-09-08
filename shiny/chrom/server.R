@@ -24,13 +24,31 @@ shinyServer(function(input,output,session) {
     loading_processed_files <- reactive ({
         
         if(!is.null(get_file())) {
-            file <- get_file()$datapath
-            file_name <- get_file()$name
             ret <- "not"
+            file <- get_file()$datapath           
+            name <- get_file()$name
+            
+            #if multiple files uploaded we use the first to 
+            #check if we can distinguish forward and reverse
+            #otherwise we only take the first file
+            if(length(name)>=2){
+                if(name[1]==gsub("R(?=[^F]*$)","F",name[2],perl=TRUE)){
+                    fwd_file <- get_file()$datapath[1]
+                    rev_file <- get_file()$datapath[2] 
+                }else if(name[2]==gsub("F(?=[^F]*$)","R",name[1],perl=TRUE)){
+                    fwd_file <- get_file()$datapath[2]
+                    ref_file <- get_file()$datapath[1]
+                }else{
+                    fwd_file <- get_file()$datapath[1]
+                }
+            }else{
+                fwd_file<-get_file()$datapath
+            }
+ 
             withProgress(message = paste('...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
-                g_abif      <- sangerseqR::read.abif(file)
+                g_abif      <- sangerseqR::read.abif(fwd_file)
                 res <- ""
                 tryCatch(res <- suppressWarnings(get_call_data(g_abif@data,input$rm7qual_thres,input$qual_thres,input$aln_min)),
                                                  error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ", 
