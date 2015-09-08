@@ -40,10 +40,10 @@ shinyServer(function(input,output,session) {
                     intens      <- get_intensities(g_abif@data,norm=FALSE)     
                     
                     calls        <- res$calls
-                    iG <- intens[call[,trace_peak]][,G]
-                    iA <- intens[call[,trace_peak]][,A]
-                    iT <- intens[call[,trace_peak]][,T]
-                    iC <- intens[call[,trace_peak]][,C]
+                    iG <- intens[calls[,trace_peak]][,G]
+                    iA <- intens[calls[,trace_peak]][,A]
+                    iT <- intens[calls[,trace_peak]][,T]
+                    iC <- intens[calls[,trace_peak]][,C]
                     calls[,c("G","A","T","C"):= list(iG,iA,iT,iC)]
                     g_max_y     <<- max(intens)
                     res$helperdat$max_x <- nrow(intens)
