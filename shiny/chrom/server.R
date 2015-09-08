@@ -38,7 +38,13 @@ shinyServer(function(input,output,session) {
                 if(res!=""){
                     output$variance_info <- renderPrint("")
                     intens      <- get_intensities(g_abif@data,norm=FALSE)     
+                    
                     calls        <- res$calls
+                    iG <- intens[call[,trace_peak]][,G]
+                    iA <- intens[call[,trace_peak]][,A]
+                    iT <- intens[call[,trace_peak]][,T]
+                    iC <- intens[call[,trace_peak]][,C]
+                    calls[,c("G","A","T","C"):= list(iG,iA,iT,iC)]
                     g_max_y     <<- max(intens)
                     res$helperdat$max_x <- nrow(intens)
                     g_helperdat <<- res$helperdat
