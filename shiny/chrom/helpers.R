@@ -25,31 +25,57 @@ get_intensities <- function(data,norm=FALSE) {
     return(intens)
 }
 
-get_call_data <- function(data, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
+get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
-    qual      <- data$PCON.2
-    rm7qual   <- rollmean(qual,k=7)
-    #rm7qualext<- data.frame(c(rep(rm7qual[1],3),rm7qual,rep(rm7qual[length(qual)-6],3)))  #cbind returns data frame if atleast one argument is a data frame
-    res       <- generate_ref(data, aln_min)
-    calls <- data.table(id         = seq_along(data$PLOC.2)
-                       ,user_mod   = str_split(data$PBAS.2,pattern="")[[1]]
-                       ,call       = str_split(data$PBAS.2,pattern="")[[1]]
-                       ,reference  = str_split(data$PBAS.2,pattern="")[[1]]
-                       ,trace_peak = data$PLOC.2
-                       ,quality    = qual)
-    calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
-    setkey(res[[2]],id)
-    if(length(res[[3]]) > 0) {
-        setkey(calls,id)
-        add <- calls[as.integer(res[[3]]),]
-        data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
-        calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_mod := "-"])
+    if(is.null(data_r)) {
+        qual      <- data$PCON.2
+        rm7qual   <- rollmean(qual,k=7)
+    
+        res       <- generate_ref(data$PBAS.2, aln_min)
+        calls <- data.table(id         = seq_along(data$PLOC.2)
+                           ,user_mod   = str_split(data$PBAS.2,pattern="")[[1]][seq_along(data$PLOC.2)]
+                           ,call       = str_split(data$PBAS.2,pattern="")[[1]][seq_along(data$PLOC.2)]
+                           ,reference  = str_split(data$PBAS.2,pattern="")[[1]][seq_along(data$PLOC.2)]
+                           ,trace_peak = data$PLOC.2
+                           ,quality    = qual)
+        calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
+        setkey(res[[2]],id)
+        if(length(res[[3]]) > 0) {
+            setkey(calls,id)
+            add <- calls[as.integer(res[[3]]),]
+            data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
+            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_mod := "-"])
+        }
+        calls <- merge(calls,res[[1]],all.x = T,by = "id")
+        data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
+        data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
+        data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
+    } else {
+        user_align <- get_for_rev_align(data$PBAS.2,data_r$PBAS.2,data$PCON.2,data_r$PCON.2)
+        res <- generate_ref(paste(user_align[[1]],collapse = ""), aln_min)
+        calls <- data.table(id         = seq_along(user_align[[1]])
+                            ,user_mod   = user_align[[1]]
+                            ,call       = user_align[[2]]
+                            ,call_r     = user_align[[3]]
+                            ,reference  =  user_align[[1]]
+                            ,trace_peak = data$PLOC.2
+                            ,trace_peak_r = data_r$PLOC.2
+                            ,quality    = user_align[[4]]
+                            ,quality_r    = user_align[[5]])
+        cons_qual <- sapply(seq_along(user_align[[4]]),function(x) max(user_align[[4]][x],user_align[[5]][x]))
+        calls[,rm7qual := c(cons_qual[1:3],rollmean(cons_qual,k=7),cons_qual[(length(cons_qual) - 2):length(cons_qual)])]
+        setkey(res[[2]],id)
+        if(length(res[[3]]) > 0) {
+            setkey(calls,id)
+            add <- calls[as.integer(res[[3]]),]
+            data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
+            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,call_r := "-"][,user_mod := "-"])
+        }
+        calls <- merge(calls,res[[1]],all.x = T,by = "id")
+        data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
+        data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
+        data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
     }
-    calls <- merge(calls,res[[1]],all.x = T,by = "id")
-    data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
-    data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
-    data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
-
     #helper_intrex contains intesities coordinates of start and end of exons with the sequence id (position in sequence coordinates)
     helperdat <- list()
     helperdat$helper_intrex <- list()
@@ -58,12 +84,11 @@ get_call_data <- function(data, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
     return(list(calls=calls,helperdat=helperdat))
 }
 
-generate_ref <-function(data, aln_min=0.2){
-#    print(getwd())
+generate_ref <-function(user_seq, aln_min=0.2){
     cores <- 2
-
-    user_seq <- gsub("[^ACGT]","N",data$PBAS.2)
-    #user_seq <- 'TGNAGGAGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGCTCANATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGACAGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTACAACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCCAGGTCAGGAGCCACTTGCCACCCTGCACACTGGCCTGCTGTGCCCCAGCCTCTGCTTGCCTCTGACCCCTGGGCCCACCTCTTACCGATTTCTTCCATACTACTACCCATCCACCTCTCATCACATCCCCGGCGGGGAATCTCCTTACTGCTCCCACTCAGTTTTCTTTTCTCTGGCTTTGGGACCTCTTAACCTGTGGCTTCTCCTCCACCTACCTGGAGCTGGAGCTTAGGCTCCAGAAAGGACAAGGGTGGTTGGGAGTAGATGGAGCCTGGTTTTTTAAATGGGACAGGTAGGACCTGATTTCCTTACTGCCTCTTGCTTCTCTTTTCCTATCCTGGTAGTGGTAATCTTCTGGGACGGAACAGCTTTGAGGTTCATGTTTGTGCCTGTCCTGGGAGAGACCGGCGCACAGAGGAAGAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCCCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACCAGCTCCTCTCCCCAGCCAAAGAAGTAACCACTGGATGGAGAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTCGAGATGTTCCGAGAGCTGAATGAGCCTTGGACTCAGGATGCCCAGGCTGGAAGGAGCCAGGGGGAGCAGGCTCACTCCAGCCACCTGAAGTCCAAAANAGGGTA'
+    multiple_covered <- list()
+    user_seq <- gsub("[^ACGT]","N",user_seq)
+    
     refs   <- readLines("../../data/ref_ex_in.fa")
     ref_info <- gsub(">ref_","",perl = T,refs[seq(1,length(refs),2)])
     ref_info <- strsplit(ref_info,split = "_")
@@ -72,49 +97,32 @@ generate_ref <-function(data, aln_min=0.2){
     ref_end <- as.numeric(sapply(ref_info,function(x) x[3]))
     refs <- DNAStringSet(refs[seq(2,length(refs),2)])
     align <- get_alignment(refs,user_seq,cores)
-    OK_align <- which(align$score / nchar(refs) > aln_min)
+    OK_align <- which(align$score / nchar(refs) > 0.8 | align$score > 50)
+    
+    seq_coverage <- logical(nchar(user_seq))
+    for(index in OK_align[order(align$score[OK_align],decreasing = T)]){
+        if(any(seq_coverage[(align$start[index] + 1):align$end[index]])) {
+            multiple_covered[[ref_names[index]]] <- c(align$start[index],align$end[index],align$score[index])
+            OK_align <- OK_align[-which(index == OK_align)]
+        } else {
+            seq_coverage[(align$start[index] + 1):align$end[index]] <- T
+        }
+    }
 
+    all_aligns <- seq_along(align$score)
+    for(index in all_aligns[order(align$score[all_aligns],decreasing = T)]){
+        if(!any(seq_coverage[(align$start[index] + 1):align$end[index]]) &&  align$score[index] / (align$end[index] - align$end[index]) > 0.6 && align$score[index] > 10) {
+            seq_coverage[(align$start[index] + 1):align$end[index]] <- T
+            OK_align <- c(OK_align,index)
+        }
+    }
+    
     user_seq_vs_genome <- rbindlist(lapply(seq_along(OK_align),function(x) data.table(exon_intron = ref_names[OK_align][x]
 		,id = sort(c((align$start[OK_align][x] + 1):align$end[OK_align][x],add_insert(align$diffs[type == "I" & id == OK_align[x]])))
 		,gen_coord = get_coord(align$start[OK_align][x],align$ref_start[OK_align][x],align$ref_end[OK_align][x],ref_start[OK_align][x],ref_end[OK_align][x],align$diffs[type == "D" & id == OK_align[x]]))))
 
     align$diffs[type == "D",t_pos := t_pos + 1]
     return(list(user_seq_vs_genome,align$diffs[id %in% OK_align,],add_insert(align$diffs[type == "I"])))
-
-# #     g_ref  <- c(rep("",nchar(data$PBAS.2)))     #generated reference
-# #     coord  <- c(rep(NA,nchar(data$PBAS.2)))
-# #     intrex <- c(rep(NA,nchar(data$PBAS.2)))
-# #     helper_intrex   <- data.frame(attr=character(),start=numeric(),end=numeric()) #data for showing introns/exons in brush, maybe there is a cleverer way to do this
-#     #STEP 1.
-#     for(ref in refs){
-#         m<-matchPattern(pattern = toupper(ref[1]),
-#                         subject = user_seq,
-#                         max.mismatch = 10,
-#                         min.mismatch=0,
-#                         with.indels = TRUE)
-#
-#         if(length(m)!=0){
-#             if(m@ranges@width==
-#                as.integer(strsplit(attr(ref,"Annot"),split='_')[[1]][5])){ #if there no indels
-#                 if(nmismatch(pattern=toupper(ref[1]),m)>0){                #if there are variations we must make sure
-#                     #print(mismatch(pattern=toupper(ref[1]),m))             #to assign ref
-#                     g_ref[start(m):end(m)]  <- strsplit(toupper(ref),"")[[1]]
-#                 }else{ #no variations
-#                     g_ref[start(m):end(m)]  <- suppressWarnings(as.matrix(m))
-#                 }
-#                 coord[start(m):end(m)]  <- (strsplit(attr(ref,"name"),"_")[[1]][3]:
-#                                             strsplit(attr(ref,"name"),"_")[[1]][4])
-#                 intrex[start(m):end(m)] <- strsplit(attr(ref,"name"),"_")[[1]][2]
-#                 helper_intrex <- rbind(helper_intrex,
-#                                      data.frame(attr=strsplit(attr(ref,"name"),"_")[[1]][2],
-#                                      start=start(m),end=end(m)))
-#             }else{
-#               #deal with indels
-#             }
-#         }
-#     }
-#     max_y <- max(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)   #max_y prevoiusly calculeted in javascript, faster in R
-#     return(list(g_ref=cbind(g_ref,coord,intrex),helperdat=list(helper_intrex=helper_intrex,max_y=max_y)))
 }
 
 add_insert <- function(diffs){
@@ -133,6 +141,34 @@ get_coord <- function(seq_start,al_start,al_end,ref_start,ref_end,diffs){
     } else return(coord)
 }
 
+get_for_rev_align <- function(for_seq,rev_seq,for_qual,rev_qual){
+    rev_seq <- gsub("[^ACGT]","N",rev_seq)
+    for_seq <- gsub("[^ACGT]","N",for_seq)
+    sm <- matrix(-1,5,5,dimnames = list(c("A","C","G","T","N"),c("A","C","G","T","N")))
+    diag(sm) <- 1
+    sm[,"N"] <- 0.1
+    sm["N",] <- 0.1
+    align <- pairwiseAlignment(pattern = reverseComplement(DNAString(rev_seq)), subject = for_seq,type = "overlap",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+    cons_length <- max(start(subject(align)), start(pattern(align))) - 1 + max(nchar(for_seq) - end(subject(align)), nchar(rev_seq) - end(pattern(align))) + nchar(as.character(subject(align)))
+    for_split <- rep("-",cons_length)
+    rev_split <- for_split
+    splitfr <- strsplit(c(for_seq,as.character(reverseComplement(DNAString(rev_seq)))),"")
+    for_split[(1:nchar(as.character(subject(align)))) + max(start(subject(align)), start(pattern(align))) - 1] <- strsplit(as.character(subject(align)),"")[[1]]
+    rev_split[(1:nchar(as.character(subject(align)))) + max(start(subject(align)), start(pattern(align))) - 1] <- strsplit(as.character(pattern(align)),"")[[1]]
+    if(start(subject(align)) > 1) for_split[1:(start(subject(align)) - 1)] <- splitfr[[1]][1:(start(subject(align)) - 1)]
+    if(start(pattern(align)) > 1) rev_split[1:(start(pattern(align)) - 1)] <- splitfr[[2]][1:(start(pattern(align)) - 1)]
+    if(nchar(for_seq) - end(subject(align)) > 0) for_split[(length(for_split) - (nchar(for_seq) - end(subject(align))) + 1):length(for_split)] <- splitfr[[1]][length(for_split) - (nchar(for_seq) - end(subject(align))):length(for_split)]
+    if(nchar(rev_seq) - end(pattern(align)) > 0) rev_split[(length(rev_split) - (nchar(rev_seq) - end(pattern(align))) + 1):length(rev_split)] <- splitfr[[2]][length(rev_split) - (nchar(rev_seq) - end(pattern(align))):length(rev_split)]
+    
+    for_split_qual <- rep(0,cons_length)
+    rev_split_qual <- for_split_qual
+    for_split_qual[which(for_split != "-")] <- for_qual
+    rev_split_qual[which(rev_split != "-")] <- rev_qual
+    cons_split <- for_split
+    cons_split[which(for_split_qual < rev_split_qual)] <- rev_split[which(for_split_qual < rev_split_qual)]
+    return(list(cons_split,for_split,rev_split,for_split_qual,rev_split_qual))
+}
+
 get_alignment <- function(data,user_seq,cores,type = "overlap"){
     insert_weights <- c(1,4,8,12.6,16.3,25,30,rep(50,100))
     if(length(data) < 1) return(NULL)
@@ -141,10 +177,10 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
     splitid <- sort(seq_along(data) %% cores)
     sm <- matrix(-1,5,5,dimnames = list(c("A","C","G","T","N"),c("A","C","G","T","N")))
     diag(sm) <- 1
-    sm[,"N"] <- 1
-    sm["N",] <- 1
+    sm[,"N"] <- 0
+    sm["N",] <- 0
     a <- lapply(1:cores - 1L, function(x) {
-        align <- pairwiseAlignment(pattern = data[which(splitid == x)], subject = user_seq,type = "overlap",substitutionMatrix = sm,gapOpening = -6, gapExtension = -0.3)
+        align <- pairwiseAlignment(pattern = data[which(splitid == x)], subject = user_seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -0.3)
         res <- list()
         res$starts <- start(subject(align)) - 1
         res$ends <- end(subject(align))

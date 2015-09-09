@@ -32,30 +32,34 @@ shinyServer(function(input,output,session) {
             #check if we can distinguish forward and reverse
             #otherwise we only take the first file
             if(length(name)>=2){
-                if(name[1]==gsub("R(?=[^F]*$)","F",name[2],perl=TRUE)){
+                if(gsub("F.*","F",name[1])==gsub("R.*","F",name[2])){
                     fwd_file <- get_file()$datapath[1]
                     rev_file <- get_file()$datapath[2] 
-                }else if(name[2]==gsub("F(?=[^F]*$)","R",name[1],perl=TRUE)){
+                }else if(gsub("R.*","R",name[1])==gsub("F.*","R",name[2])){
                     fwd_file <- get_file()$datapath[2]
-                    ref_file <- get_file()$datapath[1]
+                    rev_file <- get_file()$datapath[1]
                 }else{
                     fwd_file <- get_file()$datapath[1]
+                    rev_file <- NULL
                 }
             }else{
                 fwd_file<-get_file()$datapath
+                rev_file <- NULL
             }
  
             withProgress(message = paste('...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
-                g_abif      <- sangerseqR::read.abif(fwd_file)
+                g_abif      <- sangerseqR::read.abif(fwd_file)@data
+                if(!is.null(rev_file)) g_abif_r      <- sangerseqR::read.abif(rev_file)@data
+                else g_abif_r <- NULL
                 res <- ""
-                tryCatch(res <- suppressWarnings(get_call_data(g_abif@data,input$rm7qual_thres,input$qual_thres,input$aln_min)),
+                tryCatch(res <- suppressWarnings(get_call_data(g_abif,g_abif_r,input$rm7qual_thres,input$qual_thres,input$aln_min)),
                                                  error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ", 
                                                                                                                 e$message ))})
                 if(res!=""){
                     output$variance_info <- renderPrint("")
-                    intens      <- get_intensities(g_abif@data,norm=FALSE)     
+                    intens      <- get_intensities(g_abif,norm=FALSE)     
                     
                     calls        <- res$calls
                     iG <- intens[calls[,trace_peak]][,G]
