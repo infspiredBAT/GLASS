@@ -63,10 +63,16 @@ shinyServer(function(input,output,session) {
                     iT <- intens[calls[,trace_peak]][,T]
                     iC <- intens[calls[,trace_peak]][,C]
                     calls[,c("G","A","T","C"):= list(iG,iA,iT,iC)]
+                    
+                    #adding codon information
+                    cod         <- fread("../../data/p53_annot")
+                    setnames(cod,c("gen_coord","cod","seq_coord","intrex_ord","ord_in_cod"))
+                    setkey(cod,"gen_coord")
+                    calls       <-  merge(x = calls, y = cod[,list(gen_coord,cod,ord_in_cod)], by = "gen_coord", all.x = TRUE)
                     g_max_y     <<- max(intens)
                     res$helperdat$max_x <- nrow(intens)
                     g_helperdat <<- res$helperdat
-                    g_calls      <<- data.table(calls,key="id")
+                    g_calls     <<- data.table(calls,key="id")
                     g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
                     g_intens    <<- intens
                     ret<-"loaded"
