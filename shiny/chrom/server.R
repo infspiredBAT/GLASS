@@ -58,21 +58,18 @@ shinyServer(function(input,output,session) {
                                                  error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ", 
                                                                                                                 e$message ))})
                 if(res!=""){
-                    output$variance_info <- renderPrint("")
-                    intens      <- get_intensities(g_abif,norm=FALSE)     
-                    
                     calls        <- res$calls
-                    iG <- intens[calls[,trace_peak]][,G]
-                    iA <- intens[calls[,trace_peak]][,A]
-                    iT <- intens[calls[,trace_peak]][,T]
-                    iC <- intens[calls[,trace_peak]][,C]
-                    calls[,c("G","A","T","C"):= list(iG,iA,iT,iC)]
+                    #output$variance_info <- renderPrint("")
+                    intens      <- get_intensities(g_abif,calls,norm=FALSE)     
                     
-                    #adding codon information
-                    cod         <- fread("../../data/p53_annot")
-                    setnames(cod,c("gen_coord","cod","seq_coord","intrex_ord","ord_in_cod"))
-                    setkey(cod,"gen_coord")
-                    calls       <-  merge(x = calls, y = cod[,list(gen_coord,cod,ord_in_cod)], by = "gen_coord", all.x = TRUE)
+                
+                    #Adam
+                    #intens<-normalize_intensities_lengths(intens,calls[,trace_peak],11)
+                    
+                    #calls <- annotate_calls(calls,intens)
+                    
+                    calls <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
+
                     g_max_y     <<- max(intens)
                     res$helperdat$max_x <- nrow(intens)
                     g_helperdat <<- res$helperdat

@@ -2,12 +2,10 @@ library(zoo)
 library(seqinr)
 
 # the function extracts the signal intesities for each channel and returns it formatted for the javascript chromatograph
-get_intensities <- function(data,norm=FALSE) {
+get_intensities <- function(data,calls,norm=FALSE) {
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
     intens <- data.table(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)
-    fwo <- data$FWO
-    setnames(intens,c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
-
+    
     if(norm==TRUE){
         #first and last 500 points
         f_intens_start <- data.table()
@@ -22,15 +20,25 @@ get_intensities <- function(data,norm=FALSE) {
         f_intens <- rbind(f_intens_start,f_intens_mid,f_intens_end)
         intens<-intens/f_intens
     }
+    
+    intens<-normalize_intensities_lengths(intens,calls[,trace_peak],11)
+    fwo <- data$FWO
+    intens<-setnames(data.table(intens),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
+    #cliping the end of chromatogram after last call
+    if(nrow(intens)>(calls[length(trace_peak)]$trace_peak+100)){
+      intens <- intens[1:(calls[length(trace_peak)]$trace_peak+100)]
+    }
+    
     return(intens)
 }
+
 
 get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     if(is.null(data_r)) {
         qual      <- data$PCON.2
         rm7qual   <- rollmean(qual,k=7)
-    
+        
         res       <- generate_ref(data$PBAS.2, aln_min)
         calls <- data.table(id         = seq_along(data$PLOC.2)
                            ,user_mod   = str_split(data$PBAS.2,pattern="")[[1]][seq_along(data$PLOC.2)]
@@ -122,7 +130,8 @@ generate_ref <-function(user_seq, aln_min=0.2){
 		,gen_coord = get_coord(align$start[OK_align][x],align$ref_start[OK_align][x],align$ref_end[OK_align][x],ref_start[OK_align][x],ref_end[OK_align][x],align$diffs[type == "D" & id == OK_align[x]]))))
 
     align$diffs[type == "D",t_pos := t_pos + 1]
-    return(list(user_seq_vs_genome,align$diffs[id %in% OK_align,],add_insert(align$diffs[type == "I"])))
+    align$diffs <- align$diffs[id %in% OK_align,]
+    return(list(user_seq_vs_genome,align$diffs,add_insert(align$diffs[type == "I"])))
 }
 
 add_insert <- function(diffs){
@@ -231,6 +240,30 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
     return(res)
 }
 
+annotate_calls <- function(calls,intens){
+    iG <- intens[calls[,trace_peak]][,G]
+    iA <- intens[calls[,trace_peak]][,A]
+    iT <- intens[calls[,trace_peak]][,T]
+    iC <- intens[calls[,trace_peak]][,C]
+    calls[,c("G","A","T","C"):= list(iG,iA,iT,iC)]
+    
+    cod         <- load("../../data/codons.rdata")
+    
+    calls       <-  merge(x = calls, y = cod[,list(gen_coord,cod,ord_in_cod)], by = "gen_coord", all.x = TRUE)
+    return(calls)
+}
+#Adam
+normalize_intensities_lengths <- function(intensities, call_positions, intervening_length){
+  interpolate <- function(vec, coords, length){
+    c(c(vec[1:(coords[1]-1)],
+      round(as.vector(apply(embed(coords, 2), 1, function(x) {approx(vec[x[2]:x[1]], n=length + 2)$y[-(length + 2)]})))),
+      vec[coords[length(coords)]:length(vec)])
+  }
+  return(apply(intensities, 2, function(x) interpolate(x, unique(call_positions), intervening_length)))
+}
+rescale_call_positions <- function(call_positions, intervening_length){
+  return(seq(from = call_positions[1], by = intervening_length + 1, length.out = length(call_positions)))
+}
 #add zero intensities for deletions to be properly shown in graph 
 #add_zero_intens(){
   
