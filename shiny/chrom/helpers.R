@@ -2,7 +2,7 @@ library(zoo)
 library(seqinr)
 
 # the function extracts the signal intesities for each channel and returns it formatted for the javascript chromatograph
-get_intensities <- function(data,calls,norm=FALSE) {
+get_intensities <- function(data,calls,deletions,norm=FALSE) {
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
     intens <- data.table(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)
     
@@ -21,20 +21,43 @@ get_intensities <- function(data,calls,norm=FALSE) {
         intens<-intens/f_intens
     }
     
-    intens<-normalize_intensities_lengths(intens,calls[,trace_peak],11)
-    fwo <- data$FWO
-    intens<-setnames(data.table(intens),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
     #cliping the end of chromatogram after last call
     if(nrow(intens)>(calls[length(trace_peak)]$trace_peak+100)){
       intens <- intens[1:(calls[length(trace_peak)]$trace_peak+100)]
     }
     
-    return(intens)
+    intens<-normalize_intensities_lengths(intens,calls[,trace_peak],11)
+    fwo <- data$FWO
+    intens<-setnames(data.table(intens),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
+    
+    #adjust call positions to normalized graph 
+    calls <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
+    if(length(deletions)!=0){
+        intens[,id:=c(1:nrow(intens))]
+        setkey(intens,id)
+        del_pos <- calls[id %in% deletions][,trace_peak]
+        rep = 0
+        for(i in c(1:length(del_pos))){
+          
+                   print(del_pos[i])
+                   pos <- del_pos[i]
+                   for(i in 1:12){intens<-rbind(intens,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))} 
+                   rep = rep -12
+                   #return(intens)
+        }
+        setkey(intens,id)
+        intens[,id:=c(1:nrow(intens))]
+        setkey(intens,id)
+        
+    }
+    
+    return(list(intens=intens,calls=calls))
 }
 
 
 get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
+    deletions <- list()
     if(is.null(data_r)) {
         qual      <- data$PCON.2
         rm7qual   <- rollmean(qual,k=7)
@@ -54,10 +77,12 @@ get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=
             data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
             calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_mod := "-"])
         }
+        deletions <- res[[3]]
         calls <- merge(calls,res[[1]],all.x = T,by = "id")
         data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
         data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
         data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
+        
     } else {
         user_align <- get_for_rev_align(data$PBAS.2,data_r$PBAS.2,data$PCON.2,data_r$PCON.2)
         res <- generate_ref(paste(user_align[[1]],collapse = ""), aln_min)
@@ -89,7 +114,7 @@ get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=
     helperdat$helper_intrex <- list()
     helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
     helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-    return(list(calls=calls,helperdat=helperdat))
+    return(list(calls=calls,helperdat=helperdat,deletions=deletions))
 }
 
 generate_ref <-function(user_seq, aln_min=0.2){
@@ -255,6 +280,7 @@ annotate_calls <- function(calls,intens){
 #Adam
 normalize_intensities_lengths <- function(intensities, call_positions, intervening_length){
   interpolate <- function(vec, coords, length){
+    print(embed(coords,2))
     c(c(vec[1:(coords[1]-1)],
       round(as.vector(apply(embed(coords, 2), 1, function(x) {approx(vec[x[2]:x[1]], n=length + 2)$y[-(length + 2)]})))),
       vec[coords[length(coords)]:length(vec)])

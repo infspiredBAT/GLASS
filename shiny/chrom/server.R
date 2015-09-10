@@ -50,26 +50,33 @@ shinyServer(function(input,output,session) {
             withProgress(message = paste('...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
-                g_abif      <- sangerseqR::read.abif(fwd_file)@data
-                if(!is.null(rev_file)) g_abif_r      <- sangerseqR::read.abif(rev_file)@data
+              
+                tryCatch( 
+                    g_abif <- sangerseqR::read.abif(fwd_file)@data,
+                    error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ", 
+                                                                                   e$message ))}
+                )   
+                if(!is.null(rev_file)) {
+                    tryCatch(
+                        g_abif_r <- sangerseqR::read.abif(rev_file)@data,
+                        error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ", 
+                                                                                       e$message ))}
+                        )
+                }
                 else g_abif_r <- NULL
+                
                 res <- ""
                 tryCatch(res <- suppressWarnings(get_call_data(g_abif,g_abif_r,input$rm7qual_thres,input$qual_thres,input$aln_min)),
-                                                 error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ", 
+                         error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ", 
                                                                                                                 e$message ))})
                 if(res!=""){
                     calls        <- res$calls
                     #output$variance_info <- renderPrint("")
-                    intens      <- get_intensities(g_abif,calls,norm=FALSE)     
-                    
-                
-                    #Adam
-                    #intens<-normalize_intensities_lengths(intens,calls[,trace_peak],11)
-                    
+                    r      <- get_intensities(g_abif,calls,res$deletions,norm=FALSE)     
+                    intens <- r$intens
+                    calls  <- r$calls
                     #calls <- annotate_calls(calls,intens)
-                    
-                    calls <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
-
+                  
                     g_max_y     <<- max(intens)
                     res$helperdat$max_x <- nrow(intens)
                     g_helperdat <<- res$helperdat
@@ -83,13 +90,6 @@ shinyServer(function(input,output,session) {
         }
         return("not")
     })
-    #don't see the point of this anymore moved to loading processed files
-#    first_update_chosen_variances <- observe({
-#      if(loading_processed_files() != "not") {
-#        #TO DO: more sophisticated rules (might need to take intensities into account)
-#        g_choices <<- g_calls[user_mod != reference & user_mod != "low_qual" & trace_peak != "NA" & !is.na(gen_coord)]
-#      }
-#    })
 
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
