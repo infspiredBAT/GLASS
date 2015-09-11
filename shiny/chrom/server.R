@@ -2,8 +2,9 @@ library(shiny)
 library(sangerseqR)
 source("helpers.R")
 
-g_calls      <- NULL             #annotated basecall data
+g_calls     <- NULL             #annotated basecall data
 g_intens    <- NULL             #intensities file
+g_intens_r  <- NULL             #optional reverse intensities file
 g_helperdat <- NULL             #helper data used in graphs
 g_choices   <- NULL
 makeReactiveBinding("g_choices")  #need someones opinion on this
@@ -71,18 +72,20 @@ shinyServer(function(input,output,session) {
                                                                                                                 e$message ))})
                 if(res!=""){
                     calls        <- res$calls
-                    #output$variance_info <- renderPrint("")
-                    r      <- get_intensities(g_abif,calls,res$deletions,norm=FALSE)     
-                    intens <- r$intens
+                    if(!is.null(g_abif_r)) r <- get_intensities(g_abif,g_abif_r,calls=calls,deletions=res$deletions,norm=FALSE)
+                    else r      <- get_intensities(g_abif,calls=calls,deletions=res$deletions,norm=FALSE)     
+                    
                     calls  <- r$calls
                     #calls <- annotate_calls(calls,intens)
-                  
-                    g_max_y     <<- max(intens)
-                    res$helperdat$max_x <- nrow(intens)
+                    g_intens    <<- r$intens
+                    g_intens_r  <<- r$intens_r
+                    g_max_y     <<- max(c(max(g_intens[,list(A,C,G,T)]),max(g_intens[,list(A,C,G,T)])))
+                    res$helperdat$max_x <- max(c(nrow(g_intens),nrow(g_intens_r))) #although these numbers should be the same
                     g_helperdat <<- res$helperdat
                     g_calls     <<- data.table(calls,key="id")
+                    #!this will be different if we have reverse
                     g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
-                    g_intens    <<- intens
+                    
                     ret<-"loaded"
                 }
             })
@@ -224,7 +227,13 @@ shinyServer(function(input,output,session) {
         }
     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title="")))
     )
-
+    
+    output$intens_table_r <- shiny::renderDataTable({
+        if(loading_processed_files() != "not" & !is.null(g_intens_r)) {
+            g_intens_r
+        }
+    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title="")))
+    )
     variance_select <- observe({
         if(loading_processed_files() != "not") {
             g_selected <<- str_trim(input$rows)

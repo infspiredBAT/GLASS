@@ -68,7 +68,10 @@ shinyUI(
  			),
 			tabPanel('intensities', value = 'intens_table', icon = icon("table"),
 		         shiny::dataTableOutput("intens_table")
-			)
+			),
+      tabPanel('intensities_r', value = 'intens_table_r', icon = icon("table"),
+             shiny::dataTableOutput("intens_table_r")
+      )
 		)
     
     ))

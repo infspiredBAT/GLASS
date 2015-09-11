@@ -2,10 +2,15 @@ library(zoo)
 library(seqinr)
 
 # the function extracts the signal intesities for each channel and returns it formatted for the javascript chromatograph
-get_intensities <- function(data,calls,deletions,norm=FALSE) {
+get_intensities <- function(data,data_r=NULL,calls,deletions=NULL,norm=FALSE) {
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
-    intens <- data.table(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)
+    rev <- !(is.null(data_r))
     
+    intens <- data.table(data$DATA.9,data$DATA.10,data$DATA.11,data$DATA.12)
+    if(rev) intens_r <- data.table(data_r$DATA.9,data_r$DATA.10,data_r$DATA.11,data_r$DATA.12)
+    else intens_r <- NULL
+
+    #!!out of date
     if(norm==TRUE){
         #first and last 500 points
         f_intens_start <- data.table()
@@ -22,23 +27,37 @@ get_intensities <- function(data,calls,deletions,norm=FALSE) {
     }
     
     #cliping the end of chromatogram after last call
-    if(nrow(intens)>(calls[length(trace_peak)]$trace_peak+100)){
-      intens <- intens[1:(calls[length(trace_peak)]$trace_peak+100)]
+    if(nrow(intens)>(data$PLOC.2[length(data$PLOC.2)]+100)){
+      intens <- intens[1:(data$PLOC.2[length(data$PLOC.2)]+100)]
     }
     
-    intens<-normalize_intensities_lengths(intens,calls[,trace_peak],11)
+    if(rev){if(nrow(intens_r)>(data_r$PLOC.2[length(data_r$PLOC.2)]+100)) intens_r <- intens_r[1:(data_r$PLOC.2[length(data_r$PLOC.2)]+100)]}
+       
+    
+    intens<-normalize_intensities_lengths(intens,data$PLOC.2,11)
     fwo <- data$FWO
     intens<-setnames(data.table(intens),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
-    
     #adjust call positions to normalized graph 
     calls <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
+
+    if(rev){
+        intens_r<-normalize_intensities_lengths(intens_r,data_r$PLOC.2,11)
+        fwo <- data_r$FWO
+        intens_r<-setnames(data.table(intens_r),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
+        intens_r<-intens_r[nrow(intens_r):1]
+        calls <- calls[,trace_peak_r:=rescale_call_positions(calls[,trace_peak_r],11)]
+    }
+    
+    if(rev){ 
+        deletions <- calls[call=="-"][,id]
+        deletions_r <- calls[call_r=="-"][,id]
+    }else deletions_r <- list()
     if(length(deletions)!=0){
         intens[,id:=c(1:nrow(intens))]
         setkey(intens,id)
         del_pos <- calls[id %in% deletions][,trace_peak]
         rep = 0
-        for(i in c(1:length(del_pos))){
-          
+        for(i in c(1:length(del_pos))){      
                    print(del_pos[i])
                    pos <- del_pos[i]
                    for(i in 1:12){intens<-rbind(intens,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))} 
@@ -48,16 +67,32 @@ get_intensities <- function(data,calls,deletions,norm=FALSE) {
         setkey(intens,id)
         intens[,id:=c(1:nrow(intens))]
         setkey(intens,id)
-        
+    }
+    if(length(deletions_r)!=0){
+        intens_r[,id:=c(1:nrow(intens_r))]
+        setkey(intens_r,id)
+        del_pos <- calls[id %in% deletions_r][,trace_peak_r]
+        rep = 0
+        for(i in c(1:length(del_pos))){      
+            print(del_pos[i])
+            pos <- del_pos[i]
+            for(i in 1:12){intens_r<-rbind(intens_r,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))} 
+            rep = rep -12
+            #return(intens)
+        }
+        setkey(intens_r,id)
+        intens[,id:=c(1:nrow(intens_r))]
+        setkey(intens_r,id)
     }
     
-    return(list(intens=intens,calls=calls))
+    return(list(intens=intens,intens_r=intens_r,calls=calls))
 }
 
 
 get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     deletions <- list()
+    helperdat <- list()
     if(is.null(data_r)) {
         qual      <- data$PCON.2
         rm7qual   <- rollmean(qual,k=7)
@@ -91,10 +126,11 @@ get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=
                             ,call       = user_align[[2]]
                             ,call_r     = user_align[[3]]
                             ,reference  =  user_align[[1]]
-                            ,trace_peak = data$PLOC.2
-                            ,trace_peak_r = data_r$PLOC.2
                             ,quality    = user_align[[4]]
-                            ,quality_r    = user_align[[5]])
+                            ,quality_r    = user_align[[5]]
+                            ,trace_peak = data$PLOC.2
+                            ,trace_peak_r = data_r$PLOC.2)
+        #not sure we'll need this
         cons_qual <- sapply(seq_along(user_align[[4]]),function(x) max(user_align[[4]][x],user_align[[5]][x]))
         calls[,rm7qual := c(cons_qual[1:3],rollmean(cons_qual,k=7),cons_qual[(length(cons_qual) - 2):length(cons_qual)])]
         setkey(res[[2]],id)
@@ -110,7 +146,7 @@ get_call_data <- function(data,data_r, rm7qual_thres=12, qual_thres=10, aln_min=
         data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
     }
     #helper_intrex contains intesities coordinates of start and end of exons with the sequence id (position in sequence coordinates)
-    helperdat <- list()
+    
     helperdat$helper_intrex <- list()
     helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
     helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
@@ -191,16 +227,22 @@ get_for_rev_align <- function(for_seq,rev_seq,for_qual,rev_qual){
     rev_split[(1:nchar(as.character(subject(align)))) + max(start(subject(align)), start(pattern(align))) - 1] <- strsplit(as.character(pattern(align)),"")[[1]]
     if(start(subject(align)) > 1) for_split[1:(start(subject(align)) - 1)] <- splitfr[[1]][1:(start(subject(align)) - 1)]
     if(start(pattern(align)) > 1) rev_split[1:(start(pattern(align)) - 1)] <- splitfr[[2]][1:(start(pattern(align)) - 1)]
-    if(nchar(for_seq) - end(subject(align)) > 0) for_split[(length(for_split) - (nchar(for_seq) - end(subject(align))) + 1):length(for_split)] <- splitfr[[1]][length(for_split) - (nchar(for_seq) - end(subject(align))):length(for_split)]
-    if(nchar(rev_seq) - end(pattern(align)) > 0) rev_split[(length(rev_split) - (nchar(rev_seq) - end(pattern(align))) + 1):length(rev_split)] <- splitfr[[2]][length(rev_split) - (nchar(rev_seq) - end(pattern(align))):length(rev_split)]
-    
+    if(nchar(for_seq) - end(subject(align)) > 0) for_split[(length(for_split) - (nchar(for_seq) - end(subject(align))) + 1):length(for_split)] <- splitfr[[1]][(end(subject(align)) + 1):length(splitfr[[1]])]
+    if(nchar(rev_seq) - end(pattern(align)) > 0) rev_split[(length(rev_split) - (nchar(rev_seq) - end(pattern(align))) + 1):length(rev_split)] <- splitfr[[2]][(end(pattern(align)) + 1):length(splitfr[[2]])]
+        
+    #create quality scores coresponding with alignments
     for_split_qual <- rep(0,cons_length)
     rev_split_qual <- for_split_qual
     for_split_qual[which(for_split != "-")] <- for_qual
-    rev_split_qual[which(rev_split != "-")] <- rev_qual
+    rev_split_qual[which(rev_split != "-")] <- rev(rev_qual)
+    
+    fwd_offset <- start(pattern(align))
+    rev_offset <- start(subject(align))
+    
+    #construct consensus /higher quality wins/
     cons_split <- for_split
     cons_split[which(for_split_qual < rev_split_qual)] <- rev_split[which(for_split_qual < rev_split_qual)]
-    return(list(cons_split,for_split,rev_split,for_split_qual,rev_split_qual))
+    return(list(cons_split,for_split,rev_split,for_split_qual,rev_split_qual,fwd_offset,rev_offset))
 }
 
 get_alignment <- function(data,user_seq,cores,type = "overlap"){
@@ -277,6 +319,7 @@ annotate_calls <- function(calls,intens){
     calls       <-  merge(x = calls, y = cod[,list(gen_coord,cod,ord_in_cod)], by = "gen_coord", all.x = TRUE)
     return(calls)
 }
+
 #Adam
 normalize_intensities_lengths <- function(intensities, call_positions, intervening_length){
   interpolate <- function(vec, coords, length){
@@ -290,7 +333,3 @@ normalize_intensities_lengths <- function(intensities, call_positions, interveni
 rescale_call_positions <- function(call_positions, intervening_length){
   return(seq(from = call_positions[1], by = intervening_length + 1, length.out = length(call_positions)))
 }
-#add zero intensities for deletions to be properly shown in graph 
-#add_zero_intens(){
-  
-#}
