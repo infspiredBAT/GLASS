@@ -2,17 +2,17 @@ library(shiny)
 library(sangerseqR)
 source("helpers.R")
 
-g_calls     <- NULL             #annotated basecall data
-g_intens    <- NULL             #intensities file
-g_intens_r  <- NULL             #optional reverse intensities file
-g_helperdat <- NULL             #helper data used in graphs
-g_choices   <- NULL
-makeReactiveBinding("g_choices")  #need someones opinion on this
-g_selected  <- NULL
+g_calls         <- NULL             #annotated basecall data
+g_intens        <- NULL             #intensities file
+g_intens_rev    <- NULL             #optional reverse intensities file
+g_helperdat     <- NULL             #helper data used in graphs
+g_choices       <- NULL
+makeReactiveBinding("g_choices")  #need someone's opinion on this
+g_selected      <- NULL
 g_selected_zoom_index <- 0
-g_chrom <- NULL
-g_max_y <- NULL
-g_abif  <- NULL
+g_chrom         <- NULL
+g_max_y         <- NULL
+g_abif          <- NULL
 
 shinyServer(function(input,output,session) {
 
@@ -23,19 +23,19 @@ shinyServer(function(input,output,session) {
     })
 
     loading_processed_files <- reactive ({
-        
+
         if(!is.null(get_file())) {
             ret <- "not"
-            file <- get_file()$datapath           
+            file <- get_file()$datapath
             name <- get_file()$name
-            
-            #if multiple files uploaded we use the first to 
+
+            #if multiple files uploaded we use the first to
             #check if we can distinguish forward and reverse
             #otherwise we only take the first file
             if(length(name)>=2){
                 if(gsub("F.*","F",name[1])==gsub("R.*","F",name[2])){
                     fwd_file <- get_file()$datapath[1]
-                    rev_file <- get_file()$datapath[2] 
+                    rev_file <- get_file()$datapath[2]
                 }else if(gsub("R.*","R",name[1])==gsub("F.*","R",name[2])){
                     fwd_file <- get_file()$datapath[2]
                     rev_file <- get_file()$datapath[1]
@@ -47,45 +47,44 @@ shinyServer(function(input,output,session) {
                 fwd_file<-get_file()$datapath
                 rev_file <- NULL
             }
- 
-            withProgress(message = paste('...',sep=" "), value = 1, {
+
+            withProgress(message = paste('loading...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
-              
-                tryCatch( 
+
+                tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
-                    error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ", 
+                    error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",
                                                                                    e$message ))}
-                )   
+                )
                 if(!is.null(rev_file)) {
                     tryCatch(
-                        g_abif_r <- sangerseqR::read.abif(rev_file)@data,
-                        error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ", 
+                        g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
+                        error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",
                                                                                        e$message ))}
-                        )
+                    )
                 }
-                else g_abif_r <- NULL
-                
+                else g_abif_rev <- NULL
+
                 res <- ""
-                tryCatch(res <- suppressWarnings(get_call_data(g_abif,g_abif_r,input$rm7qual_thres,input$qual_thres,input$aln_min)),
-                         error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ", 
+                tryCatch(res <- suppressWarnings(get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)),
+                         error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",
                                                                                                                 e$message ))})
                 if(res!=""){
-                    calls        <- res$calls
-                    if(!is.null(g_abif_r)) r <- get_intensities(g_abif,g_abif_r,calls=calls,deletions=res$deletions,norm=FALSE)
-                    else r      <- get_intensities(g_abif,calls=calls,deletions=res$deletions,norm=FALSE)     
-                    
-                    calls  <- r$calls
+                    calls <- res$calls
+                    if(!is.null(g_abif_rev)) r <- get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
+                    else                     r <- get_intensities(g_abif,           calls=calls,deletions=res$deletions,norm=FALSE)
+                    calls               <- r$calls
                     #calls <- annotate_calls(calls,intens)
-                    g_intens    <<- r$intens
-                    g_intens_r  <<- r$intens_r
-                    g_max_y     <<- max(c(max(g_intens[,list(A,C,G,T)]),max(g_intens[,list(A,C,G,T)])))
-                    res$helperdat$max_x <- max(c(nrow(g_intens),nrow(g_intens_r))) #although these numbers should be the same
-                    g_helperdat <<- res$helperdat
-                    g_calls     <<- data.table(calls,key="id")
+                    g_intens            <<- r$intens
+                    g_intens_rev        <<- r$intens_rev
+                    g_max_y             <<- max(c(max(g_intens[,list(A,C,G,T)]),max(g_intens_rev[,list(A,C,G,T)])))
+                    res$helperdat$max_x <-  max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
+                    g_helperdat         <<- res$helperdat
+                    g_calls             <<- data.table(calls,key="id")
                     #!this will be different if we have reverse
-                    g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
-                    
+                    g_choices           <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
+
                     ret<-"loaded"
                 }
             })
@@ -96,8 +95,8 @@ shinyServer(function(input,output,session) {
 
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
-            g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
-            chromatography(g_intens,g_helperdat,g_calls,g_choices,input$intens_guide_line)
+            g_helperdat$max_y = (g_max_y*100)/input$max_y_p
+            chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,input$intens_guide_line)
         }
     })
     output$variance_info <- renderPrint({
@@ -116,7 +115,6 @@ shinyServer(function(input,output,session) {
             } else cat("")
         } else cat("load .abi/.ab1 file")
     })
-    
 
     update_chosen_variances <- observe({
         input$execute_btn
@@ -154,7 +152,6 @@ shinyServer(function(input,output,session) {
 #         }
 #     })
 #
-#
 #     variace_selected_2 <- observe({
 #         if(loading_processed_files() != "not") {
 #             g_selected <<- g_choices[input$table2_selected,id]
@@ -177,7 +174,7 @@ shinyServer(function(input,output,session) {
         input$execute_btn
         input$delete_btn
         if(loading_processed_files() != "not" & !is.null(g_choices)) {
-#            add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
+            #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
             #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
             add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
             add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
@@ -218,22 +215,20 @@ shinyServer(function(input,output,session) {
     	if(loading_processed_files() != "not" & !is.null(g_calls)) {
     		g_calls
     	}
-    }, options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title="")))
-    )
+    }, options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
     output$intens_table <- shiny::renderDataTable({
         if(loading_processed_files() != "not" & !is.null(g_intens)) {
             g_intens
         }
-    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title="")))
-    )
-    
-    output$intens_table_r <- shiny::renderDataTable({
-        if(loading_processed_files() != "not" & !is.null(g_intens_r)) {
-            g_intens_r
+    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+
+    output$intens_table_rev <- shiny::renderDataTable({
+        if(loading_processed_files() != "not" & !is.null(g_intens_rev)) {
+            g_intens_rev
         }
-    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title="")))
-    )
+    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+
     variance_select <- observe({
         if(loading_processed_files() != "not") {
             g_selected <<- str_trim(input$rows)

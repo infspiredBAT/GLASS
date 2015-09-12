@@ -22,7 +22,7 @@ shinyUI(
 		  			'),
 		  tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		  ),
-		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Reigl Demko and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
+		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
 		hr(),
 
 		tabsetPanel(id = 'tab',
@@ -42,13 +42,13 @@ shinyUI(
 					    verbatimTextOutput("variance_info")
 					),
 					column(2,
-#					    sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
-					    sliderInput("qual_thres","set qual thres for low qual", ticks=FALSE, min = 0, max = 50, value = 10),
-					    sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
+					    # sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
+					    sliderInput("qual_thres","set qual thres for low qual", ticks=FALSE, min = 0, max = 50, value = 10)
+					    # sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),
 					column(3,
-					    sliderInput("max_y_p","set intens peak height", ticks=FALSE, min = 0, max = 200, value = 100),
-                        sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
+					    sliderInput("max_y_p","set intens peak height", ticks=FALSE, min = 0, max = 200, value = 100)
+                        # sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
 					)
 				),
 
@@ -66,12 +66,12 @@ shinyUI(
 			tabPanel('calls', value = 'call_table', icon = icon("table"),
 				 shiny::dataTableOutput("call_table")
  			),
-			tabPanel('intensities', value = 'intens_table', icon = icon("table"),
+			tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
 		         shiny::dataTableOutput("intens_table")
 			),
-      tabPanel('intensities_r', value = 'intens_table_r', icon = icon("table"),
-             shiny::dataTableOutput("intens_table_r")
-      )
+            tabPanel('intensities rev', value = 'intens_table_r', icon = icon("table"),
+                 shiny::dataTableOutput("intens_table_r")
+            )
 		)
-    
+
     ))
