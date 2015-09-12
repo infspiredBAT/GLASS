@@ -190,19 +190,19 @@ HTMLWidgets.widget({
       			var intens = x["intens"];
             var intens_rev = "";
             var rev = 0;  //offset on labels in case we have alternative reference
-            if(x["intens_r"] !== null){
+            if(x["intens_rev"] !== null){
                 var intens_rev = x["intens_rev"];
                 rev = 12;
 
             }
       			var intens_guide_line = x["intens_guide_line"];
-      			var calls = HTMLWidgets.dataframeToD3(x["calls"]);
-      			var choices = HTMLWidgets.dataframeToD3(x["choices"]);
-      			var domain_y = x["helperdat"]["max_y"];
-      			instance.max_y = domain_y;
-      			var domain_x = x["helperdat"]["max_x"];
-      			instance.max_x = domain_x;
-      			var intrex = HTMLWidgets.dataframeToD3(x["helperdat"]["helper_intrex"])
+      			var calls       = HTMLWidgets.dataframeToD3(x["calls"]);
+      			var choices     = HTMLWidgets.dataframeToD3(x["choices"]);
+      			var domain_y    = x["helperdat"]["max_y"];
+      			instance.max_y  = domain_y;
+      			var domain_x    = x["helperdat"]["max_x"];
+      			instance.max_x  = domain_x;
+      			var intrex      = HTMLWidgets.dataframeToD3(x["helperdat"]["helper_intrex"])
       			instance.intrex = intrex;
 
       			var svg     = instance.svg;
@@ -452,7 +452,10 @@ HTMLWidgets.widget({
 	          //zooming in so that the first view is not ugly dense graph
 
             if (typeof choices[0] !== 'undefined') {
-                instance.setBrush((choices[0]["trace_peak"]-300),(choices[0]["trace_peak"]+320));
+                from = choices[0]["trace_peak"]-300;
+                to   = choices[0]["trace_peak"]+320;
+                if(from < 0) {from = 0;to = 620}
+                instance.setBrush(from,to);
             }else{
                 instance.setBrush(200,1000);
             }

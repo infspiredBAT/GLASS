@@ -72,11 +72,11 @@ shinyServer(function(input,output,session) {
 #                     if(!is.null(g_abif_rev)) r <- get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
 #                     else                     r <- get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
                     r                   <-  get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
-                    calls               <-  r$calls
-                    #calls <- annotate_calls(calls,intens)
+                    calls               <-  r$calls               
                     g_intens            <<- r$intens
                     g_intens_rev        <<- r$intens_rev
-                    g_max_y             <<- max(c(max(g_intens[,list(A,C,G,T)]),max(g_intens_rev[,list(A,C,G,T)])))
+                    calls               <-  annotate_calls(calls,g_intens,g_intens_rev)
+                    g_max_y             <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                     #helper_intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
                         helperdat               <- list()
                         helperdat$helper_intrex <- list()
@@ -84,7 +84,7 @@ shinyServer(function(input,output,session) {
                         helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
                         helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                     g_helperdat         <<- helperdat
-                    print(g_helperdat)
+                    #print(g_helperdat)
                     g_calls             <<- data.table(calls,key="id")
                     #!this will be different if we have reverse
                     g_choices           <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]

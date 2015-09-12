@@ -14,7 +14,7 @@ chromatography <- function(intens, intens_rev = NULL, helperdat, calls, choices,
         intens_rev = intens_rev,
         helperdat  = helperdat,
         calls      = calls,
-        choices    = choices,
+        choices    = choices
     )
   # create widget
     htmlwidgets::createWidget(

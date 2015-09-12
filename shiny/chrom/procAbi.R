@@ -214,7 +214,7 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
     return(res)
 }
 
-# the function extracts the signal intesities for each channel and returns it formatted for the javascript chromatogram
+# the function extracts the signal intesities for each channel 
 get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) {
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
     rev <- !(is.null(data_rev))
