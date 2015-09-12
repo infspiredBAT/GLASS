@@ -64,8 +64,10 @@ shinyServer(function(input,output,session) {
                 else g_abif_rev <- NULL
 
                 res <- NULL
-                tryCatch(res <- suppressWarnings(get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)),
-                         error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
+                res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
+                tryCatch(
+                        res <- suppressWarnings(get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)),
+                        error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
 
                 if(!is.null(res)){
                     calls               <-  res$calls
