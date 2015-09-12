@@ -120,11 +120,11 @@ HTMLWidgets.widget({
       				.attr("y2",190)
       				.attr("stroke-width",1).attr("stroke","rgba(255,0,0,0.3)").attr("stroke-dasharray",2);
         }
-        
+
         Shiny.addCustomMessageHandler("zoom",
             function(message) {
                 setBrush(Number(message)-300,Number(message)+320);
-            }                
+            }
         );
         Shiny.addCustomMessageHandler("opac_f",
             function(message){
@@ -140,7 +140,7 @@ HTMLWidgets.widget({
         );
         function callShiny(message){
             Shiny.onInputChange("pos_click", message);
-            
+
         }
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
@@ -193,7 +193,7 @@ HTMLWidgets.widget({
             if(x["intens_r"] !== null){
                 var intens_rev = x["intens_rev"];
                 rev = 12;
-                
+
             }
       			var intens_guide_line = x["intens_guide_line"];
       			var calls = HTMLWidgets.dataframeToD3(x["calls"]);
@@ -267,7 +267,7 @@ HTMLWidgets.widget({
       			var group_c = focus.append("g");
       			var group_g = focus.append("g");
       			var group_t = focus.append("g");
-          
+
             //forward strand
       			group_a.selectAll("path").data([intens["A"]]).enter()
       				.append("path").attr("class","path line_f")
@@ -289,7 +289,7 @@ HTMLWidgets.widget({
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#FF0000").attr("stroke-width",0.75);
-              
+
             //reverse strand
             if(intens_rev != ""){
                 var group_a_r = focus.append("g");
@@ -321,7 +321,7 @@ HTMLWidgets.widget({
           				.attr("stroke","#FF0000").attr("stroke-width",0.75)
                   .attr("stroke-dasharray","20,3,10,3,10,3");
             }
-            
+
 
             //trace peak labels
             focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
@@ -364,11 +364,11 @@ HTMLWidgets.widget({
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
                     .attr("stroke",function(d) {
           		        if      (d["call"] === "A"){ return "#33CC33"; }
-          				    else if (d["call"] === "C"){ return "#0000FF"; }
-          				    else if (d["call"] === "G"){ return "#000000"; }
-          				    else if (d["call"] === "T"){ return "#FF0000"; }
-          				    else    {                    return "#000000"; }});
-                  
+      				    else if (d["call"] === "C"){ return "#0000FF"; }
+      				    else if (d["call"] === "G"){ return "#000000"; }
+      				    else if (d["call"] === "T"){ return "#FF0000"; }
+      				    else    {                    return "#000000"; }});
+
             if(rev!==0){
                 focus.append("g").selectAll("text.seq.user").data(calls).enter() //rev call
               			.append("text").attr("class","peak_label short")
@@ -382,13 +382,13 @@ HTMLWidgets.widget({
                 				    else if (d["call_rev"] === "C"){ return "#0000FF"; }
                 				    else if (d["call_rev"] === "G"){ return "#000000"; }
                 				    else if (d["call_rev"] === "T"){ return "#FF0000"; }
-                				    else    {                      return "#000000"; }});
-                          
+                				    else    {                        return "#000000"; }});
+
             }
             focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_mod
       				.append("text").attr("class","peak_label short")
       				.text(function(d){if(d["user_mod"]=="low qual") {return "N";}
-                                else                          {return d["user_mod"];}
+                                else                                {return d["user_mod"];}
                                 })
               .attr("opacity",function(d){if(d["user_mod"]=="low qual"){return 0.6;}
                                           else{return 1}
@@ -417,7 +417,7 @@ HTMLWidgets.widget({
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
       				.attr("y",(62+rev))
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
-            
+
             focus.selectAll(".peak_label").attr("visibility","hidden")
 
 
@@ -468,7 +468,7 @@ HTMLWidgets.widget({
               instance.showVarInMap(choices);
               instance.choices = x.choices;
       			}else {
-              console.log(x)        		  
+              console.log(x)
       			}
         }
     }

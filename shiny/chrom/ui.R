@@ -23,7 +23,7 @@ shinyUI(
 		  tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		  ),
 
-		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Reigl Krejci Demko and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
+		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
 
 		hr(),
 
@@ -48,15 +48,14 @@ shinyUI(
 					    sliderInput("qual_thres","set qual thres for low qual", ticks=FALSE, min = 0, max = 50, value = 10)
 					    #sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),
-
 					column(2,
-					    sliderInput("max_y_p","set intens peak height", ticks=FALSE, min = 0, max = 200, value = 100),
-              sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
+					    sliderInput("max_y_p","set intens peak height", ticks=FALSE, min = 0, max = 200, value = 100)
+                        # sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
 					),
-          column(2,
-              sliderInput("opacity_fwd","set forward trace opacity", ticks=FALSE, min = 0, max = 100, value = 100),
-              sliderInput("opacity_rev","set reverse trace opacity", ticks=FALSE, min = 0, max = 100, value = 100)
-          )
+                    column(2,
+                        sliderInput("opacity_fwd","set forward trace opacity", ticks=FALSE, min = 0, max = 100, value = 100),
+                        sliderInput("opacity_rev","set reverse trace opacity", ticks=FALSE, min = 0, max = 100, value = 100)
+                    )
 				),
 
 				chromatographyOutput("plot"),

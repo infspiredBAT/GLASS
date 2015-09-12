@@ -6,16 +6,15 @@
 #'
 #' @export
 
-chromatography <- function(intens, intens_rev = NULL, helperdat, calls, choices, intens_guide_line=200, width = NULL, height = NULL) {
+chromatography <- function(intens, intens_rev = NULL, helperdat, calls, choices, width = NULL, height = NULL) {
 
   #data = fromJSON(file=Data)
     x <- list(
-        intens = intens,
-        helperdat = helperdat,
-        intens_rev = intens_rev,      
-        calls = calls,
-        choices = choices,
-        intens_guide_line = intens_guide_line
+        intens     = intens,
+        intens_rev = intens_rev,
+        helperdat  = helperdat,
+        calls      = calls,
+        choices    = choices,
     )
   # create widget
     htmlwidgets::createWidget(

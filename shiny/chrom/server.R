@@ -45,7 +45,7 @@ shinyServer(function(input,output,session) {
                     rev_file <- NULL
                 }
             }else{
-                fwd_file<-get_file()$datapath
+                fwd_file <- get_file()$datapath
                 rev_file <- NULL
             }
 
@@ -55,33 +55,36 @@ shinyServer(function(input,output,session) {
 
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
-                    error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",
-                                                                                   e$message ))}
-                )
+                    error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",e$message ))})
                 if(!is.null(rev_file)) {
                     tryCatch(
                         g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
-                        error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",
-                                                                                       e$message ))}
-                    )
+                        error = function(e){output$variance_info <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",e$message ))})
                 }
                 else g_abif_rev <- NULL
 
-                res <- ""
+                res <- NULL
                 tryCatch(res <- suppressWarnings(get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)),
-                         error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",
-                                                                                                                e$message ))})
-                if(res!=""){
-                    calls <- res$calls
-                    if(!is.null(g_abif_rev)) r <- get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
-                    else                     r <- get_intensities(g_abif,g_abif_rev, calls=calls,deletions=res$deletions,norm=FALSE)
-                    calls               <- r$calls
+                         error = function(e){output$variance_info <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
+
+                if(!is.null(res)){
+                    calls               <-  res$calls
+#                     if(!is.null(g_abif_rev)) r <- get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
+#                     else                     r <- get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
+                    r                   <-  get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
+                    calls               <-  r$calls
                     #calls <- annotate_calls(calls,intens)
                     g_intens            <<- r$intens
-                    g_intens_rev          <<- r$intens_rev
+                    g_intens_rev        <<- r$intens_rev
                     g_max_y             <<- max(c(max(g_intens[,list(A,C,G,T)]),max(g_intens_rev[,list(A,C,G,T)])))
-                    res$helperdat$max_x <-  max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
-                    g_helperdat         <<- res$helperdat
+                    #helper_intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
+                        helperdat               <- list()
+                        helperdat$helper_intrex <- list()
+                        helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
+                        helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+                        helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
+                    g_helperdat         <<- helperdat
+                    print(g_helperdat)
                     g_calls             <<- data.table(calls,key="id")
                     #!this will be different if we have reverse
                     g_choices           <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
@@ -96,9 +99,8 @@ shinyServer(function(input,output,session) {
 
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
-
-            g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
-            chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,input$intens_guide_line)
+            g_helperdat$max_y = (g_max_y*100)/input$max_y_p
+            chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices)
         }
     })
     output$variance_info <- renderPrint({
