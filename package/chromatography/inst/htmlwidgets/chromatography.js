@@ -188,10 +188,10 @@ HTMLWidgets.widget({
       			console.log(x)
       			instance.instanceCounter = instance.instanCounter+1;
       			var intens = x["intens"];
-            var intens_r = "";
+            var intens_rev = "";
             var rev = 0;  //offset on labels in case we have alternative reference
             if(x["intens_r"] !== null){
-                var intens_r = x["intens_r"];
+                var intens_rev = x["intens_rev"];
                 rev = 12;
                 
             }
@@ -291,30 +291,30 @@ HTMLWidgets.widget({
       				.attr("stroke","#FF0000").attr("stroke-width",0.75);
               
             //reverse strand
-            if(intens_r != ""){
+            if(intens_rev != ""){
                 var group_a_r = focus.append("g");
         	    	var group_c_r = focus.append("g");
       		    	var group_g_r = focus.append("g");
       		    	var group_t_r = focus.append("g");
-                group_a_r.selectAll("path").data([intens_r["A"]]).enter()
+                group_a_r.selectAll("path").data([intens_rev["A"]]).enter()
             			.append("path").attr("class","path line_r")
           				.attr("d",line)
           				.attr("fill","none")
           				.attr("stroke","#33CC33").attr("stroke-width",0.75)
                   .attr("stroke-dasharray","20,3,10,3,10,3");
-          			group_c_r.selectAll("path").data([intens_r["C"]]).enter()
+          			group_c_r.selectAll("path").data([intens_rev["C"]]).enter()
           				.append("path").attr("class","line_r")
           				.attr("d",line)
           				.attr("fill","none")
           				.attr("stroke","#0000FF").attr("stroke-width",0.75)
                   .attr("stroke-dasharray","20,3,10,3,10,3");
-          			group_g_r.selectAll("path").data([intens_r["G"]]).enter()
+          			group_g_r.selectAll("path").data([intens_rev["G"]]).enter()
           				.append("path").attr("class","line_r")
           				.attr("d",line)
           				.attr("fill","none")
           				.attr("stroke","#000000").attr("stroke-width",0.75)
                   .attr("stroke-dasharray","20,3,10,3,10,3");
-          			group_t_r.selectAll("path").data([intens_r["T"]]).enter()
+          			group_t_r.selectAll("path").data([intens_rev["T"]]).enter()
           				.append("path").attr("class","line_r")
           				.attr("d",line)
           				.attr("fill","none")
@@ -372,16 +372,16 @@ HTMLWidgets.widget({
             if(rev!==0){
                 focus.append("g").selectAll("text.seq.user").data(calls).enter() //rev call
               			.append("text").attr("class","peak_label short")
-            				.text(function(d){return d["call_r"];})
+            				.text(function(d){return d["call_rev"];})
             				.attr("text-anchor", "middle")
             				.attr("x",function(d){return widthScale(d["trace_peak"]);})
             				.attr("y",34)
             				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
                           .attr("stroke",function(d) {
-                		        if      (d["call_r"] === "A"){ return "#33CC33"; }
-                				    else if (d["call_r"] === "C"){ return "#0000FF"; }
-                				    else if (d["call_r"] === "G"){ return "#000000"; }
-                				    else if (d["call_r"] === "T"){ return "#FF0000"; }
+                		        if      (d["call_rev"] === "A"){ return "#33CC33"; }
+                				    else if (d["call_rev"] === "C"){ return "#0000FF"; }
+                				    else if (d["call_rev"] === "G"){ return "#000000"; }
+                				    else if (d["call_rev"] === "T"){ return "#FF0000"; }
                 				    else    {                      return "#000000"; }});
                           
             }

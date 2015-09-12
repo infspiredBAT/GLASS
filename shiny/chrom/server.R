@@ -74,11 +74,11 @@ shinyServer(function(input,output,session) {
                 if(res!=""){
                     calls <- res$calls
                     if(!is.null(g_abif_rev)) r <- get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
-                    else                     r <- get_intensities(g_abif,           calls=calls,deletions=res$deletions,norm=FALSE)
+                    else                     r <- get_intensities(g_abif,g_abif_rev, calls=calls,deletions=res$deletions,norm=FALSE)
                     calls               <- r$calls
                     #calls <- annotate_calls(calls,intens)
                     g_intens            <<- r$intens
-                    g_intens_r          <<- r$intens_r
+                    g_intens_rev          <<- r$intens_rev
                     g_max_y             <<- max(c(max(g_intens[,list(A,C,G,T)]),max(g_intens_rev[,list(A,C,G,T)])))
                     res$helperdat$max_x <-  max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                     g_helperdat         <<- res$helperdat
@@ -98,7 +98,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not") {
 
             g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
-            chromatography(g_intens,g_intens_r,g_helperdat,g_calls,g_choices,input$intens_guide_line)
+            chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,input$intens_guide_line)
         }
     })
     output$variance_info <- renderPrint({
