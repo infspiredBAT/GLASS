@@ -31,7 +31,7 @@ get_intensities <- function(data,data_r=NULL,calls,deletions=NULL,norm=FALSE) {
       intens <- intens[1:(data$PLOC.2[length(data$PLOC.2)]+100)]
     }
     
-    if(rev){if(nrow(intens_r)>(data_r$PLOC.2[length(data_r$PLOC.2)]+100)) intens_r <- intens_r[1:(data_r$PLOC.2[length(data_r$PLOC.2)]+100)]}
+    if(rev){if(nrow(intens_r)>(data_r$PLOC.2[length(data_r$PLOC.2)]+3)) intens_r <- intens_r[1:(data_r$PLOC.2[length(data_r$PLOC.2)]+3)]}
        
     
     intens<-normalize_intensities_lengths(intens,data$PLOC.2,11)
@@ -43,7 +43,10 @@ get_intensities <- function(data,data_r=NULL,calls,deletions=NULL,norm=FALSE) {
     if(rev){
         intens_r<-normalize_intensities_lengths(intens_r,data_r$PLOC.2,11)
         fwo <- data_r$FWO
-        intens_r<-setnames(data.table(intens_r),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
+        intens_r<-setnames(data.table(intens_r),c(complement(substring(fwo,1,1)),
+                                                  complement(substring(fwo,2,2)),
+                                                  complement(substring(fwo,3,3)),
+                                                  complement(substring(fwo,4,4))))
         intens_r<-intens_r[nrow(intens_r):1]
         calls <- calls[,trace_peak_r:=rescale_call_positions(calls[,trace_peak_r],11)]
     }
@@ -58,7 +61,7 @@ get_intensities <- function(data,data_r=NULL,calls,deletions=NULL,norm=FALSE) {
         del_pos <- calls[id %in% deletions][,trace_peak]
         rep = 0
         for(i in c(1:length(del_pos))){      
-                   print(del_pos[i])
+                   #print(del_pos[i])
                    pos <- del_pos[i]
                    for(i in 1:12){intens<-rbind(intens,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))} 
                    rep = rep -12
@@ -74,7 +77,7 @@ get_intensities <- function(data,data_r=NULL,calls,deletions=NULL,norm=FALSE) {
         del_pos <- calls[id %in% deletions_r][,trace_peak_r]
         rep = 0
         for(i in c(1:length(del_pos))){      
-            print(del_pos[i])
+            #print(del_pos[i])
             pos <- del_pos[i]
             for(i in 1:12){intens_r<-rbind(intens_r,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))} 
             rep = rep -12
@@ -307,23 +310,10 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
     return(res)
 }
 
-annotate_calls <- function(calls,intens){
-    iG <- intens[calls[,trace_peak]][,G]
-    iA <- intens[calls[,trace_peak]][,A]
-    iT <- intens[calls[,trace_peak]][,T]
-    iC <- intens[calls[,trace_peak]][,C]
-    calls[,c("G","A","T","C"):= list(iG,iA,iT,iC)]
-    
-    cod         <- load("../../data/codons.rdata")
-    
-    calls       <-  merge(x = calls, y = cod[,list(gen_coord,cod,ord_in_cod)], by = "gen_coord", all.x = TRUE)
-    return(calls)
-}
-
 #Adam
 normalize_intensities_lengths <- function(intensities, call_positions, intervening_length){
   interpolate <- function(vec, coords, length){
-    print(embed(coords,2))
+    #print(embed(coords,2))
     c(c(vec[1:(coords[1]-1)],
       round(as.vector(apply(embed(coords, 2), 1, function(x) {approx(vec[x[2]:x[1]], n=length + 2)$y[-(length + 2)]})))),
       vec[coords[length(coords)]:length(vec)])

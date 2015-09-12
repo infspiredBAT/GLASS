@@ -126,6 +126,18 @@ HTMLWidgets.widget({
                 setBrush(Number(message)-300,Number(message)+320);
             }                
         );
+        Shiny.addCustomMessageHandler("opac_f",
+            function(message){
+                console.log(message);
+                focus.selectAll(".line_f").attr("opacity",Number(message));
+            }
+        );
+        Shiny.addCustomMessageHandler("opac_r",
+            function(message){
+                console.log(message);
+                focus.selectAll(".line_r").attr("opacity",Number(message));
+            }
+        );
         function callShiny(message){
             Shiny.onInputChange("pos_click", message);
             
@@ -176,6 +188,13 @@ HTMLWidgets.widget({
       			console.log(x)
       			instance.instanceCounter = instance.instanCounter+1;
       			var intens = x["intens"];
+            var intens_r = "";
+            var rev = 0;  //offset on labels in case we have alternative reference
+            if(x["intens_r"] !== null){
+                var intens_r = x["intens_r"];
+                rev = 12;
+                
+            }
       			var intens_guide_line = x["intens_guide_line"];
       			var calls = HTMLWidgets.dataframeToD3(x["calls"]);
       			var choices = HTMLWidgets.dataframeToD3(x["choices"]);
@@ -248,28 +267,61 @@ HTMLWidgets.widget({
       			var group_c = focus.append("g");
       			var group_g = focus.append("g");
       			var group_t = focus.append("g");
-
+          
+            //forward strand
       			group_a.selectAll("path").data([intens["A"]]).enter()
-      				.append("path").attr("class","path")
+      				.append("path").attr("class","path line_f")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#33CC33").attr("stroke-width",0.75);
       			group_c.selectAll("path").data([intens["C"]]).enter()
-      				.append("path")
+      				.append("path").attr("class","line_f")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#0000FF").attr("stroke-width",0.75);
       			group_g.selectAll("path").data([intens["G"]]).enter()
-      				.append("path")
+      				.append("path").attr("class","line_f")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#000000").attr("stroke-width",0.75);
       			group_t.selectAll("path").data([intens["T"]]).enter()
-      				.append("path")
+      				.append("path").attr("class","line_f")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#FF0000").attr("stroke-width",0.75);
-
+              
+            //reverse strand
+            if(intens_r != ""){
+                var group_a_r = focus.append("g");
+        	    	var group_c_r = focus.append("g");
+      		    	var group_g_r = focus.append("g");
+      		    	var group_t_r = focus.append("g");
+                group_a_r.selectAll("path").data([intens_r["A"]]).enter()
+            			.append("path").attr("class","path line_r")
+          				.attr("d",line)
+          				.attr("fill","none")
+          				.attr("stroke","#33CC33").attr("stroke-width",0.75)
+                  .attr("stroke-dasharray","20,3,10,3,10,3");
+          			group_c_r.selectAll("path").data([intens_r["C"]]).enter()
+          				.append("path").attr("class","line_r")
+          				.attr("d",line)
+          				.attr("fill","none")
+          				.attr("stroke","#0000FF").attr("stroke-width",0.75)
+                  .attr("stroke-dasharray","20,3,10,3,10,3");
+          			group_g_r.selectAll("path").data([intens_r["G"]]).enter()
+          				.append("path").attr("class","line_r")
+          				.attr("d",line)
+          				.attr("fill","none")
+          				.attr("stroke","#000000").attr("stroke-width",0.75)
+                  .attr("stroke-dasharray","20,3,10,3,10,3");
+          			group_t_r.selectAll("path").data([intens_r["T"]]).enter()
+          				.append("path").attr("class","line_r")
+          				.attr("d",line)
+          				.attr("fill","none")
+          				.attr("stroke","#FF0000").attr("stroke-width",0.75)
+                  .attr("stroke-dasharray","20,3,10,3,10,3");
+            }
+            
 
             //trace peak labels
             focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
@@ -303,7 +355,7 @@ HTMLWidgets.widget({
       				    else if (d["reference"] === "G"){ return "#000000"; }
       				    else if (d["reference"] === "T"){ return "#FF0000"; }
       				    else    {                         return "#000000"; }});
-            focus.append("g").selectAll("text.seq.user").data(calls).enter() //call
+            focus.append("g").selectAll("text.seq.user").data(calls).enter() //fwd call
       				.append("text").attr("class","peak_label short")
       				.text(function(d){return d["call"];})
       				.attr("text-anchor", "middle")
@@ -312,10 +364,27 @@ HTMLWidgets.widget({
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
                     .attr("stroke",function(d) {
           		        if      (d["call"] === "A"){ return "#33CC33"; }
-      				    else if (d["call"] === "C"){ return "#0000FF"; }
-      				    else if (d["call"] === "G"){ return "#000000"; }
-      				    else if (d["call"] === "T"){ return "#FF0000"; }
-      				    else    {                    return "#000000"; }});
+          				    else if (d["call"] === "C"){ return "#0000FF"; }
+          				    else if (d["call"] === "G"){ return "#000000"; }
+          				    else if (d["call"] === "T"){ return "#FF0000"; }
+          				    else    {                    return "#000000"; }});
+                  
+            if(rev!==0){
+                focus.append("g").selectAll("text.seq.user").data(calls).enter() //rev call
+              			.append("text").attr("class","peak_label short")
+            				.text(function(d){return d["call_r"];})
+            				.attr("text-anchor", "middle")
+            				.attr("x",function(d){return widthScale(d["trace_peak"]);})
+            				.attr("y",34)
+            				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+                          .attr("stroke",function(d) {
+                		        if      (d["call_r"] === "A"){ return "#33CC33"; }
+                				    else if (d["call_r"] === "C"){ return "#0000FF"; }
+                				    else if (d["call_r"] === "G"){ return "#000000"; }
+                				    else if (d["call_r"] === "T"){ return "#FF0000"; }
+                				    else    {                      return "#000000"; }});
+                          
+            }
             focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_mod
       				.append("text").attr("class","peak_label short")
       				.text(function(d){if(d["user_mod"]=="low qual") {return "N";}
@@ -326,7 +395,7 @@ HTMLWidgets.widget({
                                           })
       				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",34)
+      				.attr("y",(34+rev))
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
                     .attr("stroke",function(d) {
           		        if      (d["user_mod"] === "A"){ return "#33CC33"; }
@@ -339,16 +408,16 @@ HTMLWidgets.widget({
       				.text(function(d){return d["gen_coord"];})
       				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",50)
+      				.attr("y",(50+rev))
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
             focus.append("g").selectAll("text.exon_intron").data(calls).enter() //intrex
       				.append("text").attr("class","peak_label")
       				.text(function(d){return d["exon_intron"];})
       				.attr("text-anchor", "middle")
       				.attr("x",function(d){return widthScale(d["trace_peak"]);})
-      				.attr("y",62)
+      				.attr("y",(62+rev))
       				.attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
-
+            
             focus.selectAll(".peak_label").attr("visibility","hidden")
 
 

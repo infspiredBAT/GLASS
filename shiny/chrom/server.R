@@ -1,5 +1,6 @@
 library(shiny)
 library(sangerseqR)
+source("procAbi.R")
 source("helpers.R")
 
 g_calls     <- NULL             #annotated basecall data
@@ -97,7 +98,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
             g_helperdat$max_y =  (g_max_y*100)/input$max_y_p
-            chromatography(g_intens,g_helperdat,g_calls,g_choices,input$intens_guide_line)
+            chromatography(g_intens,g_intens_r,g_helperdat,g_calls,g_choices,input$intens_guide_line)
         }
     })
     output$variance_info <- renderPrint({
@@ -257,29 +258,6 @@ shinyServer(function(input,output,session) {
         }
     })
 
-#     edit_handler <- observe({
-#         input$edit_btn
-#         isolate({
-#             if(length(g_selected) != 0) {
-#                 index <- g_selected_zoom_index + 1
-#                 g_selected_zoom_index <<- (1 + g_selected_zoom_index) %% length(g_selected)
-#                 updateTextInput(session,"choose_variance",value=paste0(g_selected[index]))
-#             }
-#         })
-#     })
-
-#     zoom_handler <- observe({
-#         input$zoom_btn
-#         isolate({
-#             if(length(g_selected) != 0) {
-#                 index <- g_selected_zoom_index + 1
-#                 g_selected_zoom_index <<- (1 + g_selected_zoom_index) %% length(g_selected)
-#                 cat(paste0(g_selected[index],","))
-#                 session$sendCustomMessage(type = 'zoom_message',message = paste0(g_selected[index]))
-#             }
-#         })
-#     })
-
     delete_handler <- observe({
         input$delete_btn
         isolate({
@@ -288,5 +266,11 @@ shinyServer(function(input,output,session) {
                 g_selected <<-  NULL
             }
         })
+    })
+    set_opacity <- observe({
+      if(loading_processed_files() != "not"){
+          session$sendCustomMessage(type = "opac_f",message = paste0(input$opacity_fwd/100))
+          session$sendCustomMessage(type = "opac_r",message = paste0(input$opacity_rev/100))
+      }
     })
 })
