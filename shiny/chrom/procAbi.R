@@ -8,12 +8,12 @@ get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_m
     if(is.null(data_rev)) {
         qual    <- data$PCON.2
         rm7qual <- rollmean(qual,k=7)
-        res     <- generate_ref(data$PBAS.2, aln_min)
-        calls <- data.table(id         = seq_along(data$PLOC.2)
-                           ,user_mod   = str_split(data$PBAS.2,pattern="")[[1]][seq_along(data$PLOC.2)]
-                           ,call       = str_split(data$PBAS.2,pattern="")[[1]][seq_along(data$PLOC.2)]
-                           ,reference  = str_split(data$PBAS.2,pattern="")[[1]][seq_along(data$PLOC.2)]
-                           ,trace_peak = data$PLOC.2
+        res     <- generate_ref(data$PBAS.1, aln_min)
+        calls <- data.table(id         = seq_along(data$PLOC.1)
+                           ,user_mod   = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
+                           ,call       = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
+                           ,reference  = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
+                           ,trace_peak = data$PLOC.1
                            ,quality    = qual)
         calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
         setkey(res[[2]],id)
@@ -25,7 +25,7 @@ get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_m
         }
 
     } else {
-        user_align <- get_fwd_rev_align(data$PBAS.2,data_rev$PBAS.2,data$PCON.2,data_rev$PCON.2)
+        user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,data$PCON.2,data_rev$PCON.2)
         res <- generate_ref(paste(user_align[[1]],collapse = ""), aln_min)
         calls <- data.table(id              = seq_along(user_align[[1]])
                             ,user_mod       = user_align[[1]]
@@ -35,8 +35,8 @@ get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_m
                             ,quality        = sapply(seq_along(user_align[[4]]),function(x) max(user_align[[4]][x],user_align[[5]][x]))
                             ,quality_fwd    = user_align[[4]]
                             ,quality_rev    = user_align[[5]]
-                            ,trace_peak     = data$PLOC.2
-                            ,trace_peak_rev = data_rev$PLOC.2)
+                            ,trace_peak     = data$PLOC.1
+                            ,trace_peak_rev = data_rev$PLOC.1)
         calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
         setkey(res[[2]],id)
         if(length(res[[3]]) > 0) {
@@ -246,25 +246,37 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     }
 
     #cliping the end of chromatogram after last call
-    if(nrow(intens)>(data$PLOC.2[length(data$PLOC.2)]+100))
-        intens <- intens[1:(data$PLOC.2[length(data$PLOC.2)]+100)]
+    
+    if(nrow(intens)>(data$PLOC.1[length(data$PLOC.1)]+3)){
+        intens <- intens[1:(data$PLOC.1[length(data$PLOC.1)]+3)]
+    }
+    
+    #cliping the end of reverse chromatogram after last call + lenghth of first trace peak in fwd so we get the same offset once we turn it over
+    offset <- data$PLOC.1[1]
     if(rev){
-        if(nrow(intens_rev)>(data_rev$PLOC.2[length(data_rev$PLOC.2)]+3))
-            intens_rev <- intens_rev[1:(data_rev$PLOC.2[length(data_rev$PLOC.2)]+3)]}
+        if(nrow(intens_rev)>(data_rev$PLOC.1[length(data_rev$PLOC.1)]+offset)){
+            intens_rev <- intens_rev[1:(data_rev$PLOC.1[length(data_rev$PLOC.1)]+offset)]
+        }
+    }
 
-    intens<-normalize_intensities_lengths(intens,data$PLOC.2,11)
+    intens<-normalize_peak_width(intens,data$PLOC.1,11)
     fwo <- data$FWO
     intens<-setnames(data.table(intens),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
     calls <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
     if(rev){
-        intens_rev<-normalize_intensities_lengths(intens_rev,data_rev$PLOC.2,11)
+        print(data_rev$PBAS.1)
+        print(data_rev$PLOC.1)
+        print(data$PLOC.1)
+        intens_rev<-normalize_peak_width(intens_rev,data_rev$PLOC.1,11)
         fwo <- data_rev$FWO
         intens_rev<-setnames(data.table(intens_rev),c(complement(substring(fwo,1,1)),
                                                       complement(substring(fwo,2,2)),
                                                       complement(substring(fwo,3,3)),
                                                       complement(substring(fwo,4,4))))
+        #turn the rev intensities back to front
         intens_rev <- intens_rev[nrow(intens_rev):1]
         calls <- calls[,trace_peak_rev:=rescale_call_positions(calls[,trace_peak_rev],11)]
+        
     }
 
     if(rev){
@@ -274,13 +286,14 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     if(length(deletions)!=0){
         intens[,id:=c(1:nrow(intens))]
         setkey(intens,id)
+        del_pos <- 0
         del_pos <- calls[id %in% deletions][,trace_peak]
-        rep = 0
+        rep <- 0
         for(i in c(1:length(del_pos))){
             #print(del_pos[i])
             pos <- del_pos[i]
             for(i in 1:12){intens<-rbind(intens,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))}
-            rep = rep -12
+            rep <- rep -12
             #return(intens)
         }
         setkey(intens,id)
@@ -290,13 +303,14 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     if(length(deletions_rev)!=0){
         intens_rev[,id:=c(1:nrow(intens_rev))]
         setkey(intens_rev,id)
+        del_pos <- 0
         del_pos <- calls[id %in% deletions_rev][,trace_peak_rev]
-        rep = 0
+        rep <- 0
         for(i in c(1:length(del_pos))){
             #print(del_pos[i])
             pos <- del_pos[i]
             for(i in 1:12){intens_rev<-rbind(intens_rev,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))}
-            rep = rep -12
+            rep <- rep -12
             #return(intens)
         }
         setkey(intens_rev,id)
@@ -308,7 +322,7 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
 }
 
 #Adam
-normalize_intensities_lengths <- function(intensities, call_positions, intervening_length){
+normalize_peak_width <- function(intensities, call_positions, intervening_length){
     interpolate <- function(vec, coords, length){
     #print(embed(coords,2))
     c(c(vec[1:(coords[1]-1)],
