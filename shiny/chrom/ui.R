@@ -10,18 +10,18 @@ library(stringi)
 shinyUI(
     fluidPage(theme = "simplex.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
-		  tags$title("genomePD/glass"),
-		  # script for input file cleaning
-		  tags$script('
-		  			Shiny.addCustomMessageHandler("resetFileInputHandler", function(x) {
-		  			var el = $("#" + x);
-		  			el.replaceWith(el = el.clone(true));
-		  			var id = "#" + x + "_progress";
-		  			$(id).css("visibility", "hidden");
-		  			});
-		  			'),
-		  tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
-		  ),
+            tags$title("genomePD/glass"),
+            # script for input file cleaning
+            tags$script('
+              		Shiny.addCustomMessageHandler("resetFileInputHandler", function(x) {
+              		var el = $("#" + x);
+              		el.replaceWith(el = el.clone(true));
+              		var id = "#" + x + "_progress";
+              		$(id).css("visibility", "hidden");
+              		});
+              		'),
+            tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
+		),
 
 		HTML("<font size=3em><b>genomePD/glass</b></font><font size=2.5em> | <i>dev</i> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas @ <a href=http://bat.infspire.org>bat.infspire.org</a></font><font size=1.0em> | CESNET/MetaCentrum | CEITEC MU</font>"),
 
@@ -36,12 +36,12 @@ shinyUI(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
 					    textInput("choose_variance","type seq pos"),
-					    selectInput("change_peak","user_mod it to",choices=c("A","T","C","G"),selected="",selectize=F,size=1),
+					    selectInput("change_peak","user_mod it to",choices=c("","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
 					    actionButton("execute_btn","change", icon = icon("exchange"))
 					),
 					column(3,
 					    HTML(paste("messages and info will appear here", sep="")),
-					    verbatimTextOutput("variance_info")
+					    verbatimTextOutput("infobox")
 					),
 					column(2,
 					     #sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
@@ -63,8 +63,9 @@ shinyUI(
 				shiny::dataTableOutput("chosen_variances_table"),
 
 				conditionalPanel(condition=" output.chosen_variances_table ",
-	                 downloadButton("export_btn","export"),
-	                 actionButton("delete_btn","delete", icon = icon("times"))
+				    br(),
+                    downloadButton("export_btn","export"),
+                    actionButton("delete_btn","delete", icon = icon("times"))
 				)
 	 		),
 			tabPanel('annotation', value = 'annotation', icon = icon("user-md")
@@ -75,9 +76,9 @@ shinyUI(
 			tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
 		         shiny::dataTableOutput("intens_table")
 			),
-      tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
+            tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
                  shiny::dataTableOutput("intens_table_rev")
-      )
+            )
 		)
 
     ))

@@ -53,10 +53,6 @@ get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_m
     data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
     data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
 
-#     #helper_intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
-#     helperdat$helper_intrex <- list()
-#     helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
-#     helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
     return(list(calls=calls,deletions=deletions))
 }
 
@@ -127,7 +123,7 @@ get_fwd_rev_align <- function(fwd_seq,rev_seq,fwd_qual,rev_qual){
     #sm["N",] <- 0.1
     #sm <- matrix(c(5 ,-4 ,-4 ,-4 ,-4 ,1 ,1 ,-4 ,-4 ,1 ,-4 ,-1 ,-1 ,-1 ,-2 ,-4 ,5 ,-4 ,-4 ,-4 ,1 ,-4 ,1 ,1 ,-4 ,-1 ,-4 ,-1 ,-1 ,-2 ,-4 ,-4 ,5 ,-4 ,1 ,-4 ,1 ,-4 ,1 ,-4 ,-1 ,-1 ,-4 ,-1 ,-2 ,-4 ,-4 ,-4 ,5 ,1 ,-4 ,-4 ,1 ,-4 ,1 ,-1 ,-1 ,-1 ,-4 ,-2 ,-4 ,-4 ,1 ,1 ,-1 ,-4 ,-2 ,-2 ,-2 ,-2 ,-1 ,-1 ,-3 ,-3 ,-1 ,1 ,1 ,-4 ,-4 ,-4 ,-1 ,-2 ,-2 ,-2 ,-2 ,-3 ,-3 ,-1 ,-1 ,-1 ,1 ,-4 ,1 ,-4 ,-2 ,-2 ,-1 ,-4 ,-2 ,-2 ,-3 ,-1 ,-3 ,-1 ,-1 ,-4 ,1 ,-4 ,1 ,-2 ,-2 ,-4 ,-1 ,-2 ,-2 ,-1 ,-3 ,-1 ,-3 ,-1 ,-4 ,1 ,1 ,-4 ,-2 ,-2 ,-2 ,-2 ,-1 ,-4 ,-1 ,-3 ,-3 ,-1 ,-1 ,1 ,-4 ,-4 ,1 ,-2 ,-2 ,-2 ,-2 ,-4 ,-1 ,-3 ,-1 ,-1 ,-3 ,-1 ,-4 ,-1 ,-1 ,-1 ,-1 ,-3 ,-3 ,-1 ,-1 ,-3 ,-1 ,-2 ,-2 ,-2 ,-1 ,-1 ,-4 ,-1 ,-1 ,-1 ,-3 ,-1 ,-3 ,-3 ,-1 ,-2 ,-1 ,-2 ,-2 ,-1 ,-1 ,-1 ,-4 ,-1 ,-3 ,-1 ,-3 ,-1 ,-3 ,-1 ,-2 ,-2 ,-1 ,-2 ,-1 ,-1 ,-1 ,-1 ,-4 ,-3 ,-1 ,-1 ,-3 ,-1 ,-3 ,-2 ,-2 ,-2 ,-1 ,-1 ,-2 ,-2 ,-2 ,-2 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
     sm <- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
-    
+
     align <- pairwiseAlignment(pattern = reverseComplement(DNAString(rev_seq)), subject = fwd_seq,type = "overlap",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
     cons_length <- max(start(subject(align)), start(pattern(align))) - 1 + max(nchar(fwd_seq) - end(subject(align)), nchar(rev_seq) - end(pattern(align))) + nchar(as.character(subject(align)))
     fwd_split <- rep("-",cons_length)
@@ -167,7 +163,7 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
     #sm["N",] <- 0
     #sm <- matrix(c(5 ,-4 ,-4 ,-4 ,-4 ,1 ,1 ,-4 ,-4 ,1 ,-4 ,-1 ,-1 ,-1 ,-2 ,-4 ,5 ,-4 ,-4 ,-4 ,1 ,-4 ,1 ,1 ,-4 ,-1 ,-4 ,-1 ,-1 ,-2 ,-4 ,-4 ,5 ,-4 ,1 ,-4 ,1 ,-4 ,1 ,-4 ,-1 ,-1 ,-4 ,-1 ,-2 ,-4 ,-4 ,-4 ,5 ,1 ,-4 ,-4 ,1 ,-4 ,1 ,-1 ,-1 ,-1 ,-4 ,-2 ,-4 ,-4 ,1 ,1 ,-1 ,-4 ,-2 ,-2 ,-2 ,-2 ,-1 ,-1 ,-3 ,-3 ,-1 ,1 ,1 ,-4 ,-4 ,-4 ,-1 ,-2 ,-2 ,-2 ,-2 ,-3 ,-3 ,-1 ,-1 ,-1 ,1 ,-4 ,1 ,-4 ,-2 ,-2 ,-1 ,-4 ,-2 ,-2 ,-3 ,-1 ,-3 ,-1 ,-1 ,-4 ,1 ,-4 ,1 ,-2 ,-2 ,-4 ,-1 ,-2 ,-2 ,-1 ,-3 ,-1 ,-3 ,-1 ,-4 ,1 ,1 ,-4 ,-2 ,-2 ,-2 ,-2 ,-1 ,-4 ,-1 ,-3 ,-3 ,-1 ,-1 ,1 ,-4 ,-4 ,1 ,-2 ,-2 ,-2 ,-2 ,-4 ,-1 ,-3 ,-1 ,-1 ,-3 ,-1 ,-4 ,-1 ,-1 ,-1 ,-1 ,-3 ,-3 ,-1 ,-1 ,-3 ,-1 ,-2 ,-2 ,-2 ,-1 ,-1 ,-4 ,-1 ,-1 ,-1 ,-3 ,-1 ,-3 ,-3 ,-1 ,-2 ,-1 ,-2 ,-2 ,-1 ,-1 ,-1 ,-4 ,-1 ,-3 ,-1 ,-3 ,-1 ,-3 ,-1 ,-2 ,-2 ,-1 ,-2 ,-1 ,-1 ,-1 ,-1 ,-4 ,-3 ,-1 ,-1 ,-3 ,-1 ,-3 ,-2 ,-2 ,-2 ,-1 ,-1 ,-2 ,-2 ,-2 ,-2 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1 ,-1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
     sm <- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
-    
+
     a <- lapply(1:cores - 1L, function(x) {
         align <- pairwiseAlignment(pattern = data[which(splitid == x)], subject = user_seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -0.3)
         res <- list()
@@ -220,7 +216,7 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
     return(res)
 }
 
-# the function extracts the signal intesities for each channel 
+# the function extracts the signal intesities for each channel
 get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) {
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
     rev <- !(is.null(data_rev))
