@@ -260,9 +260,9 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     intens<-setnames(data.table(intens),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
     calls <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
     if(rev){
-        print(data_rev$PBAS.1)
-        print(data_rev$PLOC.1)
-        print(data$PLOC.1)
+        #print(data_rev$PBAS.1)
+        #print(data_rev$PLOC.1)
+        #print(data$PLOC.1)
         intens_rev<-normalize_peak_width(intens_rev,data_rev$PLOC.1,11)
         fwo <- data_rev$FWO
         intens_rev<-setnames(data.table(intens_rev),c(complement(substring(fwo,1,1)),
