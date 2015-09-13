@@ -18,6 +18,8 @@ annotate_calls <- function(calls,intens=g_intens,intens_rev=g_intens_rev){
     #contains codons table
     load("../../data/codons.rdata")
     calls       <-  merge(x = calls, y = codons[,list(gen_coord,codon,ord_in_cod,coding_seq,AA)], by = "gen_coord", all.x = TRUE)
+    #reorder columns so that id is first (so that the checkbox from the shiny data table selects the correct value and the dele button knows what to delete)
+    setcolorder(calls,c("id",colnames(calls)[-2]))
     return(calls)
 }
 

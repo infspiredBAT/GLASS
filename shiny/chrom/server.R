@@ -102,10 +102,13 @@ shinyServer(function(input,output,session) {
             chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices)
         }
     })
-#     output$infobox <- renderPrint({
-#         print("anything")
-#         input$pos_click
-#     })
+
+    output$infobox <- renderPrint({
+        if(loading_processed_files() != "not") {
+            print("anything")
+            input$pos_click
+        }
+     })
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
@@ -257,7 +260,7 @@ shinyServer(function(input,output,session) {
         input$delete_btn
         isolate({
             if(length(g_selected) != 0) {
-                g_choices <<- g_choices[-match(g_selected,id)]
+                g_choices <<- g_choices[-match(as.numeric(g_selected),id)]
                 g_selected <<-  NULL
             }
         })
