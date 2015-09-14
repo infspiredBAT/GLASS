@@ -65,7 +65,7 @@ shinyUI(
 				conditionalPanel(condition=" output.chosen_variances_table ",
 				    br(),
                     downloadButton("export_btn","export"),
-                    actionButton("delete_btn","delete", icon = icon("times"))
+                    actionButton("reset_btn","Reset to ref", icon = icon("times"))
 				)
 	 		),
 			tabPanel('annotation', value = 'annotation', icon = icon("user-md")

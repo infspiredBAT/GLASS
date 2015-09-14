@@ -170,7 +170,7 @@ shinyServer(function(input,output,session) {
     add_checkboxes <- reactive({
         if(nrow(g_choices) > 0){
             input$execute_btn
-            input$delete_btn
+            input$reset_btn
             checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")
             for(i in 1:nrow(g_choices)) {
                 if(g_choices[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
@@ -183,7 +183,7 @@ shinyServer(function(input,output,session) {
     output$chosen_variances_table <- shiny::renderDataTable({
         if(!is.null(g_choices) && nrow(g_choices) > 0){
             input$execute_btn
-            input$delete_btn
+            input$reset_btn
             if(loading_processed_files() != "not" & !is.null(g_choices)) {
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
@@ -258,11 +258,12 @@ shinyServer(function(input,output,session) {
         }
     })
 
-    delete_handler <- observe({
-        input$delete_btn
+    reset_handler <- observe({
+        input$reset_btn
         isolate({
             if(length(g_selected) != 0) {
                 g_choices <<- g_choices[-match(as.numeric(g_selected),id)]
+                g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- g_calls[id==as.numeric(input$choose_variance)]$ref
                 g_selected <<-  NULL
             }
         })
