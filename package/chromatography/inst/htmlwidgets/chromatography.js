@@ -482,11 +482,34 @@ HTMLWidgets.widget({
   			}else if(x.choices != instance.choices){
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
+                var rev = 0;  //offset on labels in case we have alternative reference
+                if(x["intens_rev"] !== null){
+                    var intens_rev = x["intens_rev"];
+                    rev = 12;
+                }
                 instance.focus.selectAll(".peak_label short line").remove();
                 instance.context.selectAll(".varInMinimap").remove();
                 instance.showVarInMap(choices);
                 instance.choices = x.choices;
-                instance.focus.selectAll(".user") //update user_mod, can I select by x coord or smth?
+                instance.focus.selectAll(".user").remove(); //update user_mod, can I select by x coord or smth?
+                instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_mod
+    			              .append("text").attr("class","peak_label short user")
+  				              .text(function(d){
+  			                   if (d["user_mod"]==="low qual") {return "N";}
+                           else                            {return d["user_mod"];}})
+                        .attr("opacity",function(d){
+                           if (d["user_mod"]==="low qual") {return 0.3;}
+                           else                            {return 0.7;}})
+  				              .attr("text-anchor", "middle")
+  				              .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
+  				              .attr("y",(34+rev))
+  				              .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "10px")
+                        .attr("stroke",function(d) {
+      		                          if      (d["user_mod"] === "A"){ return "#33CC33"; }
+  				                          else if (d["user_mod"] === "C"){ return "#0000FF"; }
+  				                          else if (d["user_mod"] === "G"){ return "#000000"; }
+  				                          else if (d["user_mod"] === "T"){ return "#FF0000"; }
+  				                          else    {                        return "#000000"; }});
     			     
   			}else {
                 console.log(x)

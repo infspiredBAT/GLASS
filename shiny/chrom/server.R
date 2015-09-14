@@ -129,14 +129,16 @@ shinyServer(function(input,output,session) {
                 if(is.null(g_choices))
                     g_choices <<- g_calls[input$choose_variance]
                 else {
-                    if(!input$choose_variance %in% g_choices$id) {
-                        #new_variance <- g_calls[as.integer(input$choose_variance)]
-                        new_variance <- g_calls[id==input$choose_variance]
+                    if(!input$choose_variance %in% g_choices$id) {  #add new variance
+                        new_variance <- g_calls[as.numeric(input$choose_variance)]
                         new_variance$user_mod <- input$change_peak
                         g_choices <<- rbind(g_choices,new_variance)
-                    } else if(g_choices[id == input$choose_variance]$user_mod != input$change_peak)
+                    } else{ if(g_choices[id == input$choose_variance]$user_mod != input$change_peak) #update existing
                         g_choices[id == input$choose_variance]$user_mod <<- input$change_peak
+                    }
+                    g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- input$change_peak
                 }
+                
             }
         })
     })
