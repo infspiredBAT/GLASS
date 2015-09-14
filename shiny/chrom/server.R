@@ -103,12 +103,7 @@ shinyServer(function(input,output,session) {
         }
     })
 
-    output$infobox <- renderPrint({
-        if(loading_processed_files() != "not") {
-            print("anything")
-            input$pos_click
-        }
-     })
+  
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
@@ -256,6 +251,16 @@ shinyServer(function(input,output,session) {
             #cat(paste0(input$goZoom$id,","))
             session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))
         }
+    })
+    
+    goZoom_handler <- observe({
+      if(loading_processed_files() != "not") {
+        if(is.null(input$posClick)) return()
+        #cat(paste0(input$goZoom$id,","))
+        print("pos.click")
+        updateTextInput(session,"choose_variance",value=paste0(input$posClick$id))
+        #session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))
+      }
     })
 
     reset_handler <- observe({

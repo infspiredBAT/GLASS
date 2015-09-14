@@ -139,7 +139,8 @@ HTMLWidgets.widget({
             }
         );
         function callShiny(message){
-            Shiny.onInputChange("pos_click", {m: message});
+            console.log(message);
+            Shiny.onInputChange("posClick", {id: message});
         }
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
@@ -346,7 +347,7 @@ HTMLWidgets.widget({
   				       .text(function(d){return d["reference"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                 .on("click",function(d,i){instance.callShiny("message");
+                 .on("click",function(d,i){instance.callShiny(d["id"]);
                             console.log(d["id"]);})
                  .attr("y",10)
                  .attr("id",function(d){return d["id"]})
