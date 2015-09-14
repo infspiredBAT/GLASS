@@ -112,13 +112,13 @@ HTMLWidgets.widget({
   				.attr("fill","black");
 */
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
-  				.append("line").attr("class","peak_label short line")
-  				.attr("x1",function(d){return widthScale(d["trace_peak"]);})
+  				       .append("line").attr("class","peak_label short line varind")
+  				       .attr("x1",function(d){return widthScale(d["trace_peak"]);})
 //  				.attr("y1",function(d){return d["quality"]+30;})
-  				.attr("y1",100)
-  				.attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  				.attr("y2",190)
-  				.attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.2)").attr("stroke-dasharray",2);
+  				       .attr("y1",100)
+  				       .attr("x2",function(d){return widthScale(d["trace_peak"]);})
+  				       .attr("y2",190)
+  				       .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.2)").attr("stroke-dasharray",2);
         }
 
         Shiny.addCustomMessageHandler("zoom",
@@ -510,7 +510,15 @@ HTMLWidgets.widget({
   				                          else if (d["user_mod"] === "G"){ return "#000000"; }
   				                          else if (d["user_mod"] === "T"){ return "#FF0000"; }
   				                          else    {                        return "#000000"; }});
-    			     
+    			     instance.focus.selectAll(".varind").remove();
+               instance.focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
+    			             .append("line").attr("class","peak_label short line varind")
+  				             .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
+//  				.attr("y1",function(d){return d["quality"]+30;})
+  				             .attr("y1",100)
+  				             .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
+  				             .attr("y2",190)
+  				             .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.2)").attr("stroke-dasharray",2);
   			}else {
                 console.log(x)
   			}
