@@ -75,7 +75,7 @@ HTMLWidgets.widget({
             console.log("changing choices");
             context.selectAll("lines.choices").data(choices).enter()
     			.append("line")
-                .attr("class","varInMinimap")
+                .attr("class","varInMinimap context")
       			.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
       			.attr("y1",1)
       			.attr("x2",function(d){return width2Scale(d["trace_peak"]);})

@@ -20,9 +20,61 @@ annotate_calls <- function(calls,intens=g_intens,intens_rev=g_intens_rev){
     calls       <-  merge(x = calls, y = codons[,list(gen_coord,codon,ord_in_cod,coding_seq,AA)], by = "gen_coord", all.x = TRUE)
     #reorder columns so that id is first (so that the checkbox from the shiny data table selects the correct value and the dele button knows what to delete)
     setcolorder(calls,c("id",colnames(calls)[-2]))
+    
+    
+    #calculate the noise levels
+    calls[,noise_abs_fwd:=noise(iG_fwd,iC_fwd,iA_fwd,iT_fwd,TRUE),by=1:nrow(calls)]
+    calls[,noise_rel_fwd:=noise(iG_fwd,iC_fwd,iA_fwd,iT_fwd,FALSE),by=1:nrow(calls)]
+    
+    if(!is.null(intens_rev)){
+        calls[,noise_abs_rev:=noise(iG_rev,iC_rev,iA_rev,iT_rev,TRUE),by=1:nrow(calls)]
+        calls[,noise_rel_rev:=noise(iG_rev,iC_rev,iA_rev,iT_rev,FALSE),by=1:nrow(calls)]
+    }
+    
+    #precalculate neighbourhood  (absolute,relative)x(forward,reverse)
+    nbrhd_a_f <- rollmean(calls$noise_abs_fwd,k=7)
+    nbrhd_r_f <- rollmean(calls$noise_rel_fwd,k=7)
+    
+    if(!is.null(intens_rev)){
+        nbrhd_a_r <- rollmean(calls$noise_abs_rev,k=7)
+        nbrhd_r_r <- rollmean(calls$noise_rel_rev,k=7)
+    }
+    
+    calls[,rm7noise_abs_fwd := c(rep(nbrhd_a_f[1],3),nbrhd_a_f,rep(nbrhd_a_f[length(nbrhd_a_f)],3))]
+    calls[,rm7noise_rel_fwd := c(rep(nbrhd_r_f[1],3),nbrhd_r_f,rep(nbrhd_r_f[length(nbrhd_r_f)],3))]
+    if(!is.null(intens_rev)){
+        calls[,rm7noise_abs_rev := c(rep(nbrhd_a_r[1],3),nbrhd_a_r,rep(nbrhd_a_r[length(nbrhd_a_r)],3))]
+        calls[,rm7noise_rel_rev := c(rep(nbrhd_r_r[1],3),nbrhd_r_r,rep(nbrhd_r_r[length(nbrhd_r_r)],3))]
+    }
+    
+    calls[,overall_ins_fwd:=sum(iG_fwd,iA_fwd,iT_fwd,iC_fwd),by=1:nrow(calls)]
+    if(!is.null(intens_rev)) calls[,overall_ins_rev:=sum(iG_rev,iA_rev,iT_rev,iC_rev),by=1:nrow(calls)]
+    
+    #add information about the second highest peak
+    calls[,c("scnd_name_fwd","scnd_val_fwd"):=second(iA_fwd,iG_fwd,iC_fwd,iT_fwd),by=1:nrow(calls)]
+    calls[,scnd_fwd_perc:=((100/overall_ins_fwd)*scnd_val_fwd)]
+    if(!is.null(intens_rev)){ 
+        calls[,c("scnd_name_rev","scnd_val_rev"):=second(iA_rev,iG_rev,iC_rev,iT_rev),by=1:nrow(calls)]
+        calls[,scnd_rev_perc:=((100/overall_ins_rev)*scnd_val_rev)]
+    }
     return(calls)
 }
 
 complement <- function(base){
     return (chartr("ATGC","TACG",base))
+}
+#background nose absolute or relative to reference peak
+noise <- function(a,b,c,d,abs=FALSE){
+    vec <- sort(c(a,b,c,d))
+    if(a==0 & b==0 & c==0 & d==0) return(0)
+    if(abs) return(mean(vec[1:3]))
+    else    return(mean(vec[1:3]/sum(vec[4])))
+}
+
+second <- function(iA,iC,iG,iT){
+    scnd <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[2])
+    if(scnd == iA) return(list("A",scnd))
+    else if (scnd == iC) return(list("C",scnd))
+    else if (scnd == iG) return(list("G",scnd))
+    else if (scnd == iT) return(list("T",scnd))
 }

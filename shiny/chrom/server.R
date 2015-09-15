@@ -184,7 +184,6 @@ shinyServer(function(input,output,session) {
             input$execute_btn
             input$reset_btn
             if(loading_processed_files() != "not" & !is.null(g_choices)) {
-                #g_choices subset do vystupu
                
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')

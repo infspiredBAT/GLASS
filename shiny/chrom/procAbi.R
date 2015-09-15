@@ -1,4 +1,4 @@
-library(zoo)
+library(zoo)           #for the rolling mean function 
 library(seqinr)
 
 get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_min=0.2){

@@ -47,6 +47,7 @@ shinyUI(
 					     #sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
 					    sliderInput("qual_thres","set qual thres for low qual", ticks=FALSE, min = 0, max = 50, value = 10)
 					    #sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
+              ,sliderInput("scnd_min","min mutation peak intensity %", ticks=FALSE, min = 0, max = 100, value = 20)
 					),
 					column(2,
 					    sliderInput("max_y_p","set intens peak height", ticks=FALSE, min = 0, max = 200, value = 100)
