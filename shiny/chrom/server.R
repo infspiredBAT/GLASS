@@ -184,15 +184,18 @@ shinyServer(function(input,output,session) {
             input$execute_btn
             input$reset_btn
             if(loading_processed_files() != "not" & !is.null(g_choices)) {
+                #g_choices subset do vystupu
+               
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
                 add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
-                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices)
+                
+                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(muj_id=id,call,user_mod,reference)])
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
-    }, options = list(orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c(0,1,2), searchable=F, orderable=F, title="")))
+    }, options = list(dom = "t",orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2), orderable=F, title="")))
     , escape=c(-1,-2,-3)
     , callback =
         "function(table) {
