@@ -4,7 +4,7 @@ HTMLWidgets.widget({
     type: 'output',
 
     initialize: function(el, w, h) {
-        console.log("I'm being initialized.")
+        //console.log("I'm being initialized.")
         var instanceCounter = 0;
         var intrex = "";
         var max_x = 0;
@@ -183,16 +183,25 @@ HTMLWidgets.widget({
         instance.lastValue = x;
         //the render function behaves differently when called repeatedly
         //the first run is actually still a part initialization step
-        if(instance.instanceCounter === 0){
-  			console.log(x)
-  			instance.instanceCounter = instance.instanCounter+1;
-  			var intens = x["intens"];
+        if(x.new_sample){
+  			    console.log(x)
+  			    
+  			    var intens = x["intens"];
             var intens_rev = "";
             var rev = 0;  //offset on labels in case we have alternative reference
             if(x["intens_rev"] !== null){
                 var intens_rev = x["intens_rev"];
                 rev = 12;
             }
+        console.log(instance.instanceCounter)
+        if(instance.instanceCounter>=1){ //cleanup after previouse sample
+              console.log("remove shit")
+              instance.focus.selectAll(".line_f").remove();
+              instance.focus.selectAll(".line_r").remove();
+              instance.focus.selectAll(".peak_label").remove();
+              instance.context.selectAll(".context").remove();
+        }
+        instance.instanceCounter = instance.instanceCounter+1;
   			var intens_guide_line = x["intens_guide_line"];
   			var calls       = HTMLWidgets.dataframeToD3(x["calls"]);
   			var choices     = HTMLWidgets.dataframeToD3(x["choices"]);
@@ -221,7 +230,7 @@ HTMLWidgets.widget({
 
   			//visualise fullseq width
   			context
-  				.append("line")
+  				.append("line").attr("class","context")
   				.attr("x1",0)
   				.attr("y1",25)
   				.attr("x2",widthScale(domain_x))
@@ -242,7 +251,7 @@ HTMLWidgets.widget({
 */
             //intron/exon boxes
   			context.selectAll("rect").data(intrex).enter()
-  				.append("rect")
+  				.append("rect").attr("class","context")
   				.attr("x",function(d){return widthScale(d["start"]);})
   				.attr("y",0).attr("rx",3).attr("ry",3)
   				.attr("width",function(d){return widthScale(d["end"]-d["start"]);})
@@ -252,14 +261,14 @@ HTMLWidgets.widget({
   				    } else {                     return "rgba(220,220,220,1.0)"; }
   				});
   			context.selectAll("text.intrex.name").data(intrex).enter()
-  				.append("text")
+  				.append("text").attr("class","context")
   				.attr("x",function(d){return widthScale(d["start"]);})
   				.attr("y",-2)
   				.attr("opacity",0.6)
   				.text(function(d){return d["attr"];})
   				.attr("fill","black");
   			context.selectAll("text.intrex.start").data(intrex).enter()
-  				.append("text")
+  				.append("text").attr("class","context")
   				.attr("x",function(d){return widthScale(d["start"]);})
   				.attr("y",60)
   				.attr("opacity",0.6)
@@ -451,7 +460,7 @@ HTMLWidgets.widget({
 */
   			context.append("g")
 //				.attr("class", "x brush")
-  				.call(brush)
+  				.call(brush).attr("class","context")
   				.selectAll("rect")
   				.attr("y", -14)
   				.attr("height", 78) //height2 + 10)

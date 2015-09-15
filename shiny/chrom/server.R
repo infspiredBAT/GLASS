@@ -83,12 +83,14 @@ shinyServer(function(input,output,session) {
                         helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
                         helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
                         helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
+                        helperdat$new_sample    <- TRUE
                     g_helperdat         <<- helperdat
                     g_calls             <<- data.table(calls,key="id")
                     #!this will be different if we have reverse
                     g_choices           <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
 
                     ret<-"loaded"
+                    g_new_sample <<- TRUE
                 }
             })
             return(ret)
@@ -99,7 +101,9 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(loading_processed_files() != "not") {
             g_helperdat$max_y = (g_max_y*100)/input$max_y_p
-            chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices)
+            ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls, g_choices, g_new_sample)
+            g_new_sample <<- FALSE
+            return(ret)
         }
     })
 
@@ -253,11 +257,10 @@ shinyServer(function(input,output,session) {
         }
     })
     
-    goZoom_handler <- observe({
+    goClick_handler <- observe({
       if(loading_processed_files() != "not") {
         if(is.null(input$posClick)) return()
         #cat(paste0(input$goZoom$id,","))
-        print("pos.click")
         updateTextInput(session,"choose_variance",value=paste0(input$posClick$id))
         #session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))
       }
