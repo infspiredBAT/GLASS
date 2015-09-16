@@ -67,8 +67,9 @@ shinyUI(
 
 				conditionalPanel(condition=" output.chosen_variances_table ",
 				    # br(),
-				    actionButton("reset_btn","reset to ref", icon = icon("times")),
-				    downloadButton("export_btn","export")
+				    actionButton("reset_btn","reset to ref", icon = icon("times"))
+				    ,downloadButton("export_btn","export")
+            ,actionButton("confirm","Confirm prediction",icon = icon("check"))
 				),
 
 				br()

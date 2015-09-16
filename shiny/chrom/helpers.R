@@ -56,13 +56,15 @@ annotate_calls <- function(calls,intens=g_intens,intens_rev=g_intens_rev){
         calls[,c("scnd_name_rev","scnd_val_rev"):=second(iA_rev,iG_rev,iC_rev,iT_rev),by=1:nrow(calls)]
         calls[,scnd_rev_perc:=((100/overall_ins_rev)*scnd_val_rev)]
     }
+    calls[,reset_by_user:=FALSE]
     return(calls)
 }
 
 call_variants <- function(calls, rev_null, qual_thres, scnd_min){
 
     # low qual
-    data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres), "user_mod", "low qual")
+    calls[(rm7qual>qual_thres | quality>qual_thres)&!reset_by_user,user_mod:=call]
+    data.table::set(calls,which((calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres) & !calls[["reset_by_user"]]), "user_mod", "low qual")
 
     # scnd perc
     if(rev_null){
@@ -78,7 +80,7 @@ complement <- function(base){
     return (chartr("ATGC","TACG",base))
 }
 
-#background nose absolute or relative to reference peak
+#background noise absolute or relative to reference peak
 noise <- function(a,b,c,d,abs=FALSE){
     vec <- sort(c(a,b,c,d))
     if(a==0 & b==0 & c==0 & d==0) return(0)
@@ -86,6 +88,7 @@ noise <- function(a,b,c,d,abs=FALSE){
     else    return(mean(vec[1:3]/sum(vec[4])))
 }
 
+#retreive the name and value of the secont highest peak
 second <- function(iA,iC,iG,iT){
     scnd <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[2])
     if(scnd == iA) return(list("A",scnd))

@@ -4,16 +4,17 @@ source("procAbi.R")
 source("helpers.R")
 
 g_calls         <- NULL             #annotated basecall data
+makeReactiveBinding("g_calls")
 g_intens        <- NULL             #intensities file
 g_intens_rev    <- NULL             #optional reverse intensities file
 g_helperdat     <- NULL             #helper data used in graphs
 g_choices       <- NULL
-makeReactiveBinding("g_choices")  #need someone's opinion on this
 g_selected      <- NULL
 g_selected_zoom_index <- 0
 g_chrom         <- NULL
 g_max_y         <- NULL
 g_abif          <- NULL
+g_varcall       <- FALSE
 
 shinyServer(function(input,output,session) {
 
@@ -27,6 +28,7 @@ shinyServer(function(input,output,session) {
 
         if(!is.null(get_file())) {
             ret <- "not"
+            g_varcall <<- FALSE
             file <- get_file()$datapath
             name <- get_file()$name
 
@@ -85,11 +87,8 @@ shinyServer(function(input,output,session) {
                         helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                         helperdat$new_sample    <- TRUE
                     g_helperdat         <<- helperdat
-                    calls               <-  call_variants(calls,is.null(g_intens_rev),input$qual_thres,input$scnd_min)
                     g_calls             <<- data.table(calls,key="id")
                     #!this will be different if we have reverse
-                    g_choices           <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
-
                     ret<-"loaded"
                     g_new_sample <<- TRUE
                 }
@@ -98,10 +97,23 @@ shinyServer(function(input,output,session) {
         }
         return("not")
     })
+    
+    varcall <- reactive({
+        if(loading_processed_files() != "not"){
+          g_calls     <<-  call_variants(g_calls,is.null(g_intens_rev),input$qual_thres,input$scnd_min) 
+          g_choices   <<- NULL
+          g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
+          g_varcall   <<- TRUE          
+        }
+        return(g_varcall)
+    })
 
     output$plot <- renderChromatography({
-        if(loading_processed_files() != "not") {
-            g_helperdat$max_y = (g_max_y*100)/input$max_y_p
+        #lg_calls
+        if((loading_processed_files() != "not") & varcall() ) {
+            #g_choices <<- call_variants
+            
+            g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls, g_choices, g_new_sample)
             g_new_sample <<- FALSE
             return(ret)
@@ -126,18 +138,7 @@ shinyServer(function(input,output,session) {
         input$execute_btn
         isolate({
             if(loading_processed_files() != "not") {
-                if(is.null(g_choices))
-                    g_choices <<- g_calls[input$choose_variance]
-                else {
-                    if(!input$choose_variance %in% g_choices$id) {  #add new variance
-                        new_variance <- g_calls[as.numeric(input$choose_variance)]
-                        new_variance$user_mod <- input$change_peak
-                        g_choices <<- rbind(g_choices,new_variance)
-                    } else{ if(g_choices[id == input$choose_variance]$user_mod != input$change_peak) #update existing
-                        g_choices[id == input$choose_variance]$user_mod <<- input$change_peak
-                    }
-                    g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- input$change_peak
-                }
+                g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- input$change_peak
 
             }
         })
@@ -181,6 +182,8 @@ shinyServer(function(input,output,session) {
     })
 
     output$chosen_variances_table <- shiny::renderDataTable({
+       
+        if(varcall())  
         if(!is.null(g_choices) && nrow(g_choices) > 0){
             input$execute_btn
             input$reset_btn
@@ -191,8 +194,8 @@ shinyServer(function(input,output,session) {
                 add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
-
-                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(muj_id=id,call,user_mod,reference)])
+                
+                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,user_mod,call,reference)])
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
     }, options = list(dom = "t",orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2), orderable=F, title="")))
@@ -273,9 +276,11 @@ shinyServer(function(input,output,session) {
         input$reset_btn
         isolate({
             if(length(g_selected) != 0) {
-                g_choices <<- g_choices[-match(as.numeric(g_selected),id)]
-                g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- g_calls[id==as.numeric(input$choose_variance)]$ref
-                g_selected <<-  NULL
+                #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
+                g_calls[id==as.numeric(g_selected)]$user_mod      <<- g_calls[id==as.numeric(g_selected)]$ref
+                g_calls[id==as.numeric(g_selected)]$reset_by_user <<- TRUE
+                
+                #g_selected <<-  NULL
             }
         })
     })
