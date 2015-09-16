@@ -116,6 +116,7 @@ shinyServer(function(input,output,session) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls, g_choices, g_new_sample)
             g_new_sample <<- FALSE
+            showReactLog()
             return(ret)
         }
     })
