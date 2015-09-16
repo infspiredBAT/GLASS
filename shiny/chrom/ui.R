@@ -44,8 +44,8 @@ shinyUI(
 					    verbatimTextOutput("infobox")
 					),
 					column(1,
-                        sliderInput("scnd_min","min mut peak %", ticks=FALSE, min = 0, max = 100, value = 20),
-					    sliderInput("s2n","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2)
+                        sliderInput("mut_min","min mut peak %", ticks=FALSE, min = 0, max = 100, value = 20),
+					    sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2)
 					    #sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
 					    #sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),
@@ -69,7 +69,7 @@ shinyUI(
 				    # br(),
 				    actionButton("reset_btn","reset to ref", icon = icon("times"))
 				    ,downloadButton("export_btn","export")
-            ,actionButton("confirm","Confirm prediction",icon = icon("check"))
+                    ,actionButton("confirm","confirm prediction",icon = icon("check"))
 				),
 
 				br()
@@ -86,5 +86,5 @@ shinyUI(
                  shiny::dataTableOutput("intens_table_rev")
             )
 		)
-
-    ))
+    )
+)

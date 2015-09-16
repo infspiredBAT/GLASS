@@ -358,8 +358,7 @@ HTMLWidgets.widget({
   				       .text(function(d){return d["reference"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                 .on("click",function(d,i){instance.callShiny(d["id"]);
-                            console.log(d["id"]);})
+                 .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
                  .attr("y",10)
                  .attr("id",function(d){return d["id"]})
   				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
@@ -375,6 +374,7 @@ HTMLWidgets.widget({
   				       .text(function(d){return d["call"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                     .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
   			       	 .attr("y",22)
   				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px").attr("font-style", "italic")
                  .attr("stroke",function(d) {
@@ -391,6 +391,7 @@ HTMLWidgets.widget({
     				         .text(function(d){return d["call_rev"];})
     				         .attr("text-anchor", "middle")
     				         .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                             .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
     				         .attr("y",34)
     				         .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px").attr("font-style", "italic")
                      .attr("stroke",function(d) {
@@ -411,6 +412,7 @@ HTMLWidgets.widget({
                            else                            {return 0.7;}})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                         .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
   				       .attr("y",(36+rev))
   				       .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "11px").attr("font-weight", "bold")
                  .attr("stroke",function(d) {

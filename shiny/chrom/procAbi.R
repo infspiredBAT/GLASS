@@ -52,7 +52,8 @@ get_call_data <- function(data, data_rev){
 
     data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
     data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
-    # data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
+
+    calls[]
 
     return(list(calls=calls,deletions=deletions))
 }
@@ -243,7 +244,6 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     }
 
     #cliping the end of chromatogram after last call
-
     if(nrow(intens)>(data$PLOC.1[length(data$PLOC.1)]+3)){
         intens <- intens[1:(data$PLOC.1[length(data$PLOC.1)]+3)]
     }
@@ -261,17 +261,14 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     intens<-setnames(data.table(intens),c(substring(fwo,1,1),substring(fwo,2,2),substring(fwo,3,3),substring(fwo,4,4)))
     calls <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
     if(rev){
-
         intens_rev<-normalize_peak_width(intens_rev,data_rev$PLOC.1,11)
         fwo <- data_rev$FWO
         intens_rev<-setnames(data.table(intens_rev),c(complement(substring(fwo,1,1)),
                                                       complement(substring(fwo,2,2)),
                                                       complement(substring(fwo,3,3)),
                                                       complement(substring(fwo,4,4))))
-
         intens_rev <- intens_rev[nrow(intens_rev):1]
         calls <- calls[,trace_peak_rev:=rescale_call_positions(calls[,trace_peak_rev],11)]
-
     }
 
     if(rev){

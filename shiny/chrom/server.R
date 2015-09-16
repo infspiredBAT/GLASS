@@ -68,8 +68,8 @@ shinyServer(function(input,output,session) {
                 res <- NULL
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
-                        res <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
-                        error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
+                    res <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
+                    error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
 
                 if(!is.null(res)){
                     calls               <-  res$calls
@@ -97,13 +97,13 @@ shinyServer(function(input,output,session) {
         }
         return("not")
     })
-    
+
     varcall <- reactive({
         if(loading_processed_files() != "not"){
-          g_calls     <<-  call_variants(g_calls,is.null(g_intens_rev),input$qual_thres,input$scnd_min) 
+          g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
           g_choices   <<- NULL
           g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
-          g_varcall   <<- TRUE          
+          g_varcall   <<- TRUE
         }
         return(g_varcall)
     })
@@ -112,7 +112,6 @@ shinyServer(function(input,output,session) {
         #lg_calls
         if((loading_processed_files() != "not") & varcall() ) {
             #g_choices <<- call_variants
-            
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls, g_choices, g_new_sample)
             g_new_sample <<- FALSE
@@ -120,12 +119,15 @@ shinyServer(function(input,output,session) {
         }
     })
 
-
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
                 tryCatch({
-                    cat(g_calls[id == input$choose_variance,paste("ref:",reference," call:",call," user:",user_mod," on ",exon_intron," at ",gen_coord," with quality ",quality,sep="")])
+                    if(!is.null(rev_file)) {
+                        cat(g_calls[id == input$choose_variance,paste("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),"\nrev mut ",mut_peak_call_rev,"   peak% ",round(mut_peak_pct_rev,digits=2),"   S/N ",round(mut_s2n_abs_rev,digits=2),sep="")])
+                    } else {
+                        cat(g_calls[id == input$choose_variance,paste("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),sep="")])
+                    }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
     #                else cat("Some error")
@@ -139,7 +141,6 @@ shinyServer(function(input,output,session) {
         isolate({
             if(loading_processed_files() != "not") {
                 g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- input$change_peak
-
             }
         })
     })
@@ -182,8 +183,8 @@ shinyServer(function(input,output,session) {
     })
 
     output$chosen_variances_table <- shiny::renderDataTable({
-       
-        if(varcall())  
+
+        if(varcall())
         if(!is.null(g_choices) && nrow(g_choices) > 0){
             input$execute_btn
             input$reset_btn
@@ -194,7 +195,7 @@ shinyServer(function(input,output,session) {
                 add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
-                
+
                 cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,user_mod,call,reference)])
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
@@ -279,7 +280,6 @@ shinyServer(function(input,output,session) {
                 #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
                 g_calls[id==as.numeric(g_selected)]$user_mod      <<- g_calls[id==as.numeric(g_selected)]$ref
                 g_calls[id==as.numeric(g_selected)]$reset_by_user <<- TRUE
-                
                 #g_selected <<-  NULL
             }
         })
