@@ -115,7 +115,6 @@ shinyServer(function(input,output,session) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls, g_choices, g_new_sample)
             g_new_sample <<- FALSE
-            showReactLog()
             return(ret)
         }
     })
@@ -125,9 +124,11 @@ shinyServer(function(input,output,session) {
             if(input$choose_variance != "") {
                 tryCatch({
                     if(!is.null(rev_file)) {
-                        cat(g_calls[id == input$choose_variance,paste("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),"\nrev mut ",mut_peak_call_rev,"   peak% ",round(mut_peak_pct_rev,digits=2),"   S/N ",round(mut_s2n_abs_rev,digits=2),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),"\nrev mut ",mut_peak_call_rev,"   peak% ",round(mut_peak_pct_rev,digits=2),"   S/N ",round(mut_s2n_abs_rev,digits=2),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_variance,paste("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),sep="")])
+                        #cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste("ref", reference)])
+                        print("ref")
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -142,6 +143,7 @@ shinyServer(function(input,output,session) {
         isolate({
             if(loading_processed_files() != "not") {
                 g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- input$change_peak
+                g_calls[id==as.numeric(input$choose_variance)]$reset_by_user <<- TRUE
             }
         })
     })
@@ -170,18 +172,27 @@ shinyServer(function(input,output,session) {
 #         }
 #     })
 
-    add_checkboxes <- reactive({
-        if(nrow(g_choices) > 0){
-            input$execute_btn
-            input$reset_btn
-            checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")
+#     add_checkboxes <- reactive({
+#         if(nrow(g_choices) > 0){
+#             input$execute_btn
+#             input$reset_btn
+#             checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")
+#             for(i in 1:nrow(g_choices)) {
+#                 if(g_choices[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
+#                 else checkboxes[i] <- paste0(checkboxes[i],">","")
+#             }
+#             return(checkboxes)
+#         }
+#     })
+
+    add_checkboxes <- function(){
+        checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")
             for(i in 1:nrow(g_choices)) {
                 if(g_choices[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
                 else checkboxes[i] <- paste0(checkboxes[i],">","")
             }
-            return(checkboxes)
-        }
-    })
+        return(checkboxes)
+    }
 
     output$chosen_variances_table <- shiny::renderDataTable({
 
@@ -268,9 +279,7 @@ shinyServer(function(input,output,session) {
     goClick_handler <- observe({
       if(loading_processed_files() != "not") {
         if(is.null(input$posClick)) return()
-        #cat(paste0(input$goZoom$id,","))
         updateTextInput(session,"choose_variance",value=paste0(input$posClick$id))
-        #session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))
       }
     })
 
@@ -279,8 +288,11 @@ shinyServer(function(input,output,session) {
         isolate({
             if(length(g_selected) != 0) {
                 #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
-                g_calls[id==as.numeric(g_selected)]$user_mod      <<- g_calls[id==as.numeric(g_selected)]$ref
-                g_calls[id==as.numeric(g_selected)]$reset_by_user <<- TRUE
+                for(i in as.numeric(g_selected)) {
+                    g_calls[id==i,]$user_mod <<- g_calls[id==i,]$reference
+                    g_calls[id==i,]$reset_by_user <<- TRUE
+                }
+                
                 #g_selected <<-  NULL
             }
         })

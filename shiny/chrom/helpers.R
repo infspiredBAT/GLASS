@@ -69,7 +69,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
 
     # mut peak
     if("call_rev" %in% colnames(calls)) {
-        calls[(mut_peak_pct_fwd > mut_min & mut_peak_pct_rev > mut_min & mut_s2n_abs_fwd > s2n_min & mut_s2n_abs_rev > s2n_min & mut_peak_call_fwd == mut_peak_call_rev & user_mod != "low qual"), user_mod := paste(user_mod,mut_peak_call_fwd,sep="")]
+        calls[(mut_peak_pct_fwd > mut_min & mut_peak_pct_rev > mut_min & mut_s2n_abs_fwd > s2n_min & mut_s2n_abs_rev > s2n_min & mut_peak_call_fwd == mut_peak_call_rev & user_mod != "low qual"), user_mod := paste(user_mod,mut_peak_call_fwd,sep="")]    
     } else {
         calls[(mut_peak_pct_fwd > mut_min                              & mut_s2n_abs_fwd > s2n_min                                                                      & user_mod != "low qual"), user_mod := paste(user_mod,mut_peak_call_fwd,sep="")]
     }
