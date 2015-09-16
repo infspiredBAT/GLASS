@@ -86,7 +86,8 @@ HTMLWidgets.widget({
       			    else if (d["reference"] === "C"){ return "#0000FF"; }
       			    else if (d["reference"] === "G"){ return "#000000"; }
       			    else if (d["reference"] === "T"){ return "#FF0000"; }
-      			    else    {                         return "white";  }});
+      			    else if (d["reference"] === "-"){ return "white"; }
+      			    else    {                         return "yellow";  }});
   			// user
   			context.selectAll("lines.choices").data(choices).enter()
   				.append("line")
@@ -101,7 +102,8 @@ HTMLWidgets.widget({
   				    else if (d["user_mod"] === "C"){ return "#0000FF"; }
   				    else if (d["user_mod"] === "G"){ return "#000000"; }
   				    else if (d["user_mod"] === "T"){ return "#FF0000"; }
-  				    else    {                        return "white";  }});
+  				    else if (d["user_mod"] === "-"){ return "white"; }
+  				    else    {                        return "yellow";  }});
 /*
   			context.selectAll("text.choices.coord").data(choices).enter()
   				.append("text").attr("class","varInMinimap")
@@ -118,12 +120,12 @@ HTMLWidgets.widget({
   				       .attr("y1",100)
   				       .attr("x2",function(d){return widthScale(d["trace_peak"]);})
   				       .attr("y2",190)
-  				       .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.2)").attr("stroke-dasharray",2);
+  				       .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
         }
 
         Shiny.addCustomMessageHandler("zoom",
             function(message) {
-                setBrush(Number(message)-300,Number(message)+320);
+                setBrush(Number(message)-100,Number(message)+120);
             }
         );
         Shiny.addCustomMessageHandler("opac_f",
@@ -185,7 +187,7 @@ HTMLWidgets.widget({
         //the first run is actually still a part initialization step
         if(x.new_sample){
   			    console.log(x)
-  			    
+
   			    var intens = x["intens"];
             var intens_rev = "";
             var rev = 0;  //offset on labels in case we have alternative reference
@@ -366,20 +368,22 @@ HTMLWidgets.widget({
   				                         else if (d["reference"] === "C"){ return "#0000FF"; }
   				                         else if (d["reference"] === "G"){ return "#000000"; }
   				                         else if (d["reference"] === "T"){ return "#FF0000"; }
-  				                         else    {                         return "#000000"; }});
+  				                         else if (d["reference"] === "-"){ return "white"; }
+  				                         else    {                         return "orange"; }});
             focus.append("g").selectAll("text.seq.user").data(calls).enter() //fwd call
   				       .append("text").attr("class","peak_label short")
   				       .text(function(d){return d["call"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
   			       	 .attr("y",22)
-  				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+  				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px").attr("font-style", "italic")
                  .attr("stroke",function(d) {
       		                          if      (d["call"] === "A"){ return "#33CC33"; }
   				                          else if (d["call"] === "C"){ return "#0000FF"; }
   				                          else if (d["call"] === "G"){ return "#000000"; }
   				                          else if (d["call"] === "T"){ return "#FF0000"; }
-  				                          else    {                    return "#000000"; }});
+  				                          else if (d["call"] === "-"){ return "white"; }
+  				                          else    {                    return "orange"; }});
 
             if(rev!==0){
                 focus.append("g").selectAll("text.seq.user").data(calls).enter() //rev call
@@ -388,13 +392,14 @@ HTMLWidgets.widget({
     				         .attr("text-anchor", "middle")
     				         .attr("x",function(d){return widthScale(d["trace_peak"]);})
     				         .attr("y",34)
-    				         .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+    				         .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px").attr("font-style", "italic")
                      .attr("stroke",function(d) {
         		                            if      (d["call_rev"] === "A"){ return "#33CC33"; }
     				                            else if (d["call_rev"] === "C"){ return "#0000FF"; }
     				                            else if (d["call_rev"] === "G"){ return "#000000"; }
     				                            else if (d["call_rev"] === "T"){ return "#FF0000"; }
-    				                            else    {                        return "#000000"; }});
+    				                            else if (d["call_rev"] === "-"){ return "white"; }
+    				                            else    {                        return "orange"; }});
             }
             focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_mod
   				       .append("text").attr("class","peak_label short user")
@@ -406,14 +411,15 @@ HTMLWidgets.widget({
                            else                            {return 0.7;}})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-  				       .attr("y",(34+rev))
-  				       .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "10px")
+  				       .attr("y",(36+rev))
+  				       .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "11px").attr("font-weight", "bold")
                  .attr("stroke",function(d) {
       		                          if      (d["user_mod"] === "A"){ return "#33CC33"; }
   				                          else if (d["user_mod"] === "C"){ return "#0000FF"; }
   				                          else if (d["user_mod"] === "G"){ return "#000000"; }
   				                          else if (d["user_mod"] === "T"){ return "#FF0000"; }
-  				                          else    {                        return "#000000"; }});
+  				                          else if (d["user_mod"] === "-"){ return "white"; }
+  				                          else    {                        return "orange"; }});
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
   				       .append("text").attr("class","peak_label short")
   				       .text(function(d){
@@ -421,7 +427,7 @@ HTMLWidgets.widget({
   				                      else {                       return ".";}})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-  				       .attr("y",46+rev)
+  				       .attr("y",48+rev)
   				       .attr("fill", "black").attr("opacity", 0.5).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
@@ -477,9 +483,9 @@ HTMLWidgets.widget({
 	          //zooming in so that the first view is not ugly dense graph
 
             if (typeof choices[0] !== 'undefined') {
-                from = choices[0]["trace_peak"]-300;
-                to   = choices[0]["trace_peak"]+320;
-                if(from < 0) {from = 0;to = 620}
+                from = choices[0]["trace_peak"]-100;
+                to   = choices[0]["trace_peak"]+120;
+                if(from < 0) {from = 0;to = 220}
                 instance.setBrush(from,to);
             }else{
                 instance.setBrush(200,1000);
@@ -512,14 +518,15 @@ HTMLWidgets.widget({
                            else                            {return 0.7;}})
   				              .attr("text-anchor", "middle")
   				              .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
-  				              .attr("y",(34+rev))
-  				              .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "10px")
+  				              .attr("y",(36+rev))
+  				              .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "11px").attr("font-weight", "bold")
                         .attr("stroke",function(d) {
       		                          if      (d["user_mod"] === "A"){ return "#33CC33"; }
   				                          else if (d["user_mod"] === "C"){ return "#0000FF"; }
   				                          else if (d["user_mod"] === "G"){ return "#000000"; }
   				                          else if (d["user_mod"] === "T"){ return "#FF0000"; }
-  				                          else    {                        return "#000000"; }});
+  				                          else if (d["user_mod"] === "-"){ return "white"; }
+  				                          else    {                        return "orange"; }});
     			     instance.focus.selectAll(".varind").remove();
                instance.focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
     			             .append("line").attr("class","peak_label short line varind")
@@ -528,7 +535,7 @@ HTMLWidgets.widget({
   				             .attr("y1",100)
   				             .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
   				             .attr("y2",190)
-  				             .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.2)").attr("stroke-dasharray",2);
+  				             .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
   			}else {
                 console.log(x)
   			}

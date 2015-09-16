@@ -1,14 +1,14 @@
-library(zoo)           #for the rolling mean function 
+library(zoo)           #for the rolling mean function
 library(seqinr)
 
-get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_min=0.2){
+get_call_data <- function(data, data_rev){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     deletions <- list()
     # helperdat <- list()
     if(is.null(data_rev)) {
         qual    <- data$PCON.2
         rm7qual <- rollmean(qual,k=7)
-        res     <- generate_ref(data$PBAS.1, aln_min)
+        res     <- generate_ref(data$PBAS.1)
         calls <- data.table(id         = seq_along(data$PLOC.1)
                            ,user_mod   = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
                            ,call       = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
@@ -26,7 +26,7 @@ get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_m
 
     } else {
         user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,data$PCON.2,data_rev$PCON.2)
-        res <- generate_ref(paste(user_align[[1]],collapse = ""), aln_min)
+        res <- generate_ref(paste(user_align[[1]],collapse = ""))
         calls <- data.table(id              = seq_along(user_align[[1]])
                             ,user_mod       = user_align[[1]]
                             ,call           = user_align[[2]]
@@ -49,14 +49,15 @@ get_call_data <- function(data, data_rev, rm7qual_thres=12, qual_thres=10, aln_m
 
     deletions <- res[[3]]
     calls <- merge(calls,res[[1]],all.x = T,by = "id")
+
     data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
     data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
-    data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
+    # data.table::set(calls,which(calls[["rm7qual"]] < qual_thres | calls[["quality"]] < qual_thres),"user_mod","low qual")
 
     return(list(calls=calls,deletions=deletions))
 }
 
-generate_ref <-function(user_seq, aln_min=0.2){
+generate_ref <-function(user_seq){
     cores <- 2
     multiple_covered <- list()
     user_seq <- gsub("[^ACGT]","N",user_seq)
@@ -242,11 +243,11 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     }
 
     #cliping the end of chromatogram after last call
-    
+
     if(nrow(intens)>(data$PLOC.1[length(data$PLOC.1)]+3)){
         intens <- intens[1:(data$PLOC.1[length(data$PLOC.1)]+3)]
     }
-    
+
     #cliping the end of reverse chromatogram after last call + lenghth of first trace peak in fwd so we get the same offset once we turn it over
     offset <- data$PLOC.1[1]
     if(rev){
@@ -270,7 +271,7 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
 
         intens_rev <- intens_rev[nrow(intens_rev):1]
         calls <- calls[,trace_peak_rev:=rescale_call_positions(calls[,trace_peak_rev],11)]
-        
+
     }
 
     if(rev){

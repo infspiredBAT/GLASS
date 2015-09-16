@@ -39,36 +39,40 @@ shinyUI(
 					    selectInput("change_peak","user_mod it to",choices=c("","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
 					    actionButton("execute_btn","change", icon = icon("exchange"))
 					),
-					column(3,
+					column(4,
 					    HTML(paste("messages and info will appear here", sep="")),
 					    verbatimTextOutput("infobox")
 					),
-					column(2,
-					     #sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
-					    sliderInput("qual_thres","set qual thres for low qual", ticks=FALSE, min = 0, max = 50, value = 10)
+					column(1,
+                        sliderInput("scnd_min","min mut peak %", ticks=FALSE, min = 0, max = 100, value = 20),
+					    sliderInput("s2n","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2)
+					    #sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
 					    #sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
-              ,sliderInput("scnd_min","min mutation peak intensity %", ticks=FALSE, min = 0, max = 100, value = 20)
 					),
-					column(2,
-					    sliderInput("max_y_p","set intens peak height", ticks=FALSE, min = 0, max = 200, value = 100)
+					column(1,
+				        sliderInput("qual_thres","low qual thres", ticks=FALSE, min = 0, max = 50, value = 10),
+				        sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 0, max = 200, value = 100)
                         # sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
 					),
-                    column(2,
-                        sliderInput("opacity_fwd","set forward trace opacity", ticks=FALSE, min = 0, max = 100, value = 100),
-                        sliderInput("opacity_rev","set reverse trace opacity", ticks=FALSE, min = 0, max = 100, value = 100)
+                    column(1,
+                        sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100),
+                        sliderInput("opacity_rev","rev trace opacity", ticks=FALSE, min = 0, max = 100, value = 100)
                     )
 				),
+				br(),
 
 				chromatographyOutput("plot"),
 
 				shiny::dataTableOutput("chosen_variances_table"),
 
 				conditionalPanel(condition=" output.chosen_variances_table ",
-				    br(),
-                    downloadButton("export_btn","export"),
-                    actionButton("reset_btn","Reset to ref", icon = icon("times"))
-				)
-	 		),
+				    # br(),
+				    actionButton("reset_btn","reset to ref", icon = icon("times")),
+				    downloadButton("export_btn","export")
+				),
+
+				br()
+			),
 			tabPanel('annotation', value = 'annotation', icon = icon("user-md")
 			),
 			tabPanel('calls', value = 'call_table', icon = icon("table"),

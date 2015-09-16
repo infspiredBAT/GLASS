@@ -66,7 +66,7 @@ shinyServer(function(input,output,session) {
                 res <- NULL
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
-                        res <- suppressWarnings(get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)),
+                        res <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
                         error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
 
                 if(!is.null(res)){
@@ -85,6 +85,7 @@ shinyServer(function(input,output,session) {
                         helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                         helperdat$new_sample    <- TRUE
                     g_helperdat         <<- helperdat
+                    calls               <-  call_variants(calls,is.null(g_intens_rev),input$qual_thres,input$scnd_min)
                     g_calls             <<- data.table(calls,key="id")
                     #!this will be different if we have reverse
                     g_choices           <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
@@ -107,7 +108,7 @@ shinyServer(function(input,output,session) {
         }
     })
 
-  
+
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
@@ -137,7 +138,7 @@ shinyServer(function(input,output,session) {
                     }
                     g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- input$change_peak
                 }
-                
+
             }
         })
     })
@@ -184,13 +185,13 @@ shinyServer(function(input,output,session) {
             input$execute_btn
             input$reset_btn
             if(loading_processed_files() != "not" & !is.null(g_choices)) {
-               
+
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
                 add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
-                
+
                 cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(muj_id=id,call,user_mod,reference)])
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
@@ -258,7 +259,7 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))
         }
     })
-    
+
     goClick_handler <- observe({
       if(loading_processed_files() != "not") {
         if(is.null(input$posClick)) return()
