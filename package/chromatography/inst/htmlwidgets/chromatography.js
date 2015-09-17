@@ -425,7 +425,7 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
   				       .append("text").attr("class","peak_label short")
   				       .text(function(d){
-  				                      if   (d["ord_in_cod"] == 1) {return d["AA"].toUpperCase();}
+  				                      if   (d["ord_in_cod"] == 1) {return d["AA_refdev"].toUpperCase();}
   				                      else {                       return ".";}})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})

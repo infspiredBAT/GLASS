@@ -126,8 +126,8 @@ shinyServer(function(input,output,session) {
                     if(!is.null(rev_file)) {
                         cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),"\nrev mut ",mut_peak_call_rev,"   peak% ",round(mut_peak_pct_rev,digits=2),"   S/N ",round(mut_s2n_abs_rev,digits=2),sep="")])
                     } else {
-                        #cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),sep="")])
-                        cat(g_calls[id == input$choose_variance,paste("ref", reference)])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),sep="")])
+                       
                         print("ref")
                     }
                 }, error = function(er){
@@ -143,7 +143,7 @@ shinyServer(function(input,output,session) {
         isolate({
             if(loading_processed_files() != "not") {
                 g_calls[id==as.numeric(input$choose_variance)]$user_mod <<- input$change_peak
-                g_calls[id==as.numeric(input$choose_variance)]$reset_by_user <<- TRUE
+                g_calls[id==as.numeric(input$choose_variance)]$set_by_user <<- TRUE
             }
         })
     })
@@ -290,7 +290,7 @@ shinyServer(function(input,output,session) {
                 #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
                 for(i in as.numeric(g_selected)) {
                     g_calls[id==i,]$user_mod <<- g_calls[id==i,]$reference
-                    g_calls[id==i,]$reset_by_user <<- TRUE
+                    g_calls[id==i,]$set_by_user <<- TRUE
                 }
                 
                 #g_selected <<-  NULL

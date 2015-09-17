@@ -15,7 +15,7 @@ annotate_calls <- function(calls,intens=g_intens,intens_rev=g_intens_rev){
 
     #contains codons table
     load("../../data/codons.rdata")
-    calls <- merge(x = calls, y = codons[,list(gen_coord,codon,ord_in_cod,coding_seq,AA)], by = "gen_coord", all.x = TRUE)
+    calls <- merge(x = calls, y = codons[,list(gen_coord,codon,ord_in_cod,coding_seq,AA_ref=AA,AA_mod=AA)], by = "gen_coord", all.x = TRUE)
     #reorder columns so that id is first (so that the checkbox from the shiny data table selects the correct value and the delete button knows what to delete)
     setcolorder(calls,c("id",colnames(calls)[-2]))
 
@@ -54,24 +54,24 @@ annotate_calls <- function(calls,intens=g_intens,intens_rev=g_intens_rev){
         calls[,mut_s2n_abs_rev:=mut_peak_abs_rev/noise_abs_rev]
         calls[,mut_peak_pct_rev:=((100/ref_peak_abs_rev)*mut_peak_abs_rev)]
     }
-    calls[,reset_by_user:=FALSE]
+    calls[,set_by_user:=FALSE]
     calls[,cons:=user_mod]
     return(calls)
 }
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
 
-    # reset all but reset_by_user
-    calls[reset_by_user == FALSE, user_mod := cons]
+    # reset all but set_by_user
+    calls[set_by_user == FALSE, user_mod := cons]
 
     # low qual
-    calls[(rm7qual < qual_thres | quality < qual_thres) & reset_by_user == FALSE, user_mod := "low qual"]
+    calls[(rm7qual < qual_thres | quality < qual_thres) & set_by_user == FALSE, user_mod := "low qual"]
 
     # mut peak
     if("call_rev" %in% colnames(calls)) {
-        calls[(mut_peak_pct_fwd > mut_min & mut_peak_pct_rev > mut_min & mut_s2n_abs_fwd > s2n_min & mut_s2n_abs_rev > s2n_min & mut_peak_call_fwd == mut_peak_call_rev & user_mod != "low qual"), user_mod := paste(user_mod,mut_peak_call_fwd,sep="")]    
+        calls[(mut_peak_pct_fwd > mut_min & mut_peak_pct_rev > mut_min & mut_s2n_abs_fwd > s2n_min & mut_s2n_abs_rev > s2n_min & mut_peak_call_fwd == mut_peak_call_rev & user_mod != "low qual")&!set_by_user, user_mod := paste(user_mod,mut_peak_call_fwd,sep="")]    
     } else {
-        calls[(mut_peak_pct_fwd > mut_min                              & mut_s2n_abs_fwd > s2n_min                                                                      & user_mod != "low qual"), user_mod := paste(user_mod,mut_peak_call_fwd,sep="")]
+        calls[(mut_peak_pct_fwd > mut_min                              & mut_s2n_abs_fwd > s2n_min                                                                      & user_mod != "low qual")&!set_by_user, user_mod := paste(user_mod,mut_peak_call_fwd,sep="")]
     }
 
     return(calls)
