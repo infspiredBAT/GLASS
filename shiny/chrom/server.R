@@ -14,6 +14,7 @@ g_selected_zoom_index <- 0
 g_chrom         <- NULL
 g_max_y         <- NULL
 g_abif          <- NULL
+g_abif_rev      <- NULL
 g_varcall       <- FALSE
 
 shinyServer(function(input,output,session) {
@@ -101,6 +102,7 @@ shinyServer(function(input,output,session) {
     varcall <- reactive({
         if(loading_processed_files() != "not"){
           g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
+          #g_calls     <<- retranslate(g_calls)
           g_choices   <<- NULL
           g_choices   <<- g_calls[user_mod != reference & user_mod != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
           g_varcall   <<- TRUE
@@ -123,12 +125,12 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not") {
             if(input$choose_variance != "") {
                 tryCatch({
-                    if(!is.null(rev_file)) {
+                    if(!is.null(g_abif_rev)) {
                         cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),"\nrev mut ",mut_peak_call_rev,"   peak% ",round(mut_peak_pct_rev,digits=2),"   S/N ",round(mut_s2n_abs_rev,digits=2),sep="")])
                     } else {
                         cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_mod,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"   peak% ",round(mut_peak_pct_fwd,digits=2),"   S/N ",round(mut_s2n_abs_fwd,digits=2),sep="")])
                        
-                        print("ref")
+                    #    print("ref")
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")

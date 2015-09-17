@@ -80,6 +80,9 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
 complement <- function(base){
     return (chartr("ATGC","TACG",base))
 }
+retranslate <- function(calls){
+  calls[coding_seq != 0]
+}
 
 #background noise absolute or relative to reference peak
 noise <- function(a,b,c,d,abs=FALSE){
