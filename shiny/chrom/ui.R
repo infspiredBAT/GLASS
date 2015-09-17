@@ -36,8 +36,9 @@ shinyUI(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
 					    textInput("choose_variance","type seq pos"),
-					    selectInput("change_peak","user_mod it to",choices=c("","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
-					    actionButton("execute_btn","change", icon = icon("exchange"))
+					    #selectInput("change_peak","user_mod it to",choices=list(epmty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
+					    selectInput("change_peak","user_mod it to",choices=list(epmty="",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
+              actionButton("execute_btn","change", icon = icon("exchange"))
 					),
 					column(4,
 					    HTML(paste("messages and info will appear here", sep="")),
