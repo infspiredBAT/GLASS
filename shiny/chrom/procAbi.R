@@ -74,10 +74,20 @@ generate_ref <-function(user_seq){
     OK_align <- which(align$score / nchar(refs) > 0.8 | align$score > 50)
 
     seq_coverage <- logical(nchar(user_seq))
-    for(index in OK_align[order(align$score[OK_align],decreasing = T)]){
+    for(index in OK_align[order(-(align$ref_starts + nchar(refs) - align$ref_ends - 1)[OK_align],align$score[OK_align],decreasing = T)]){
         if(any(seq_coverage[(align$start[index] + 1):align$end[index]])) {
+            indeces <- which(!seq_coverage[(align$start[index] + 1):align$end[index]]) + align$start[index]
+            if(length(indeces > 50)) {
+                align$starts[index] <- min(indeces) - 1
+                align$ends[index] <- max(indeces)
+                ref_indeces <- which(!seq_coverage[(align$start[index] + 1):align$end[index]]) + align$ref_start[index] - 1
+                align$ref_start[index] <- min(ref_indeces)
+                align$ref_end[index] <- max(ref_indeces)
+                seq_coverage[indeces] <- T
+            } else {
+                OK_align <- OK_align[-which(index == OK_align)]
+            }
             multiple_covered[[ref_names[index]]] <- c(align$start[index],align$end[index],align$score[index])
-            OK_align <- OK_align[-which(index == OK_align)]
         } else {
             seq_coverage[(align$start[index] + 1):align$end[index]] <- T
         }
