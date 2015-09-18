@@ -36,29 +36,32 @@ shinyUI(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
 					    textInput("choose_variance","type seq pos"),
-					    #selectInput("change_peak","user_mod it to",choices=list(epmty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
-					    selectInput("change_peak","user_mod it to",choices=list(epmty="",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
-              actionButton("execute_btn","change", icon = icon("exchange"))
+					    #selectInput("change_peak","user_mod it to",choices=list(empty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
+					    selectInput("change_peak","change it to",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
+                        actionButton("execute_btn","change", icon = icon("exchange"))
 					),
 					column(4,
 					    HTML(paste("messages and info will appear here", sep="")),
 					    verbatimTextOutput("infobox")
 					),
 					column(1,
-                        sliderInput("mut_min","min mut peak %", ticks=FALSE, min = 0, max = 100, value = 20),
-					    sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2)
+                        sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1),
+					    sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
 					    #sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
 					    #sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),
 					column(1,
-				        sliderInput("qual_thres","low qual thres", ticks=FALSE, min = 0, max = 50, value = 10),
-				        sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 0, max = 200, value = 100)
+				        sliderInput("qual_thres","low qual thres", ticks=FALSE, min = 0, max = 50, value = 10)
                         # sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
 					),
                     column(1,
-                        sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100),
-                        sliderInput("opacity_rev","rev trace opacity", ticks=FALSE, min = 0, max = 100, value = 100)
-                    )
+                        sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
+                        sliderInput("opacity_rev","rev trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5)
+                    ),
+					column(1,
+					       sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 0, max = 200, value = 100, step = 10)
+					       # sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
+					)
 				),
 				br(),
 
@@ -67,7 +70,6 @@ shinyUI(
 				shiny::dataTableOutput("chosen_variances_table"),
 
 				conditionalPanel(condition=" output.chosen_variances_table ",
-				    # br(),
 				    actionButton("reset_btn","reset to ref", icon = icon("times"))
 				    ,downloadButton("export_btn","export")
                     ,actionButton("confirm","confirm prediction",icon = icon("check"))

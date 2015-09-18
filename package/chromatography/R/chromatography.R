@@ -6,7 +6,7 @@
 #'
 #' @export
 
-chromatography <- function(intens, intens_rev = NULL, helperdat, calls, choices, new_sample,width = NULL, height = NULL) {
+chromatography <- function(intens, intens_rev = NULL, helperdat, calls, choices, new_sample, width = NULL, height = NULL) {
 
   #data = fromJSON(file=Data)
     x <- list(
@@ -30,7 +30,7 @@ chromatography <- function(intens, intens_rev = NULL, helperdat, calls, choices,
 #' Widget output function for use in Shiny
 #'
 #' @export
-chromatographyOutput <- function(outputId, width = '100%', height = '300px'){
+chromatographyOutput <- function(outputId, width = '100%', height = '500px'){
     shinyWidgetOutput(outputId, 'chromatography', width, height, package = 'chromatography')
 }
 #' Widget render function for use in Shiny
