@@ -45,14 +45,20 @@ annotate_calls <- function(calls,intens=g_intens,intens_rev=g_intens_rev){
     calls[,ref_peak_abs_fwd:=sum(iG_fwd,iA_fwd,iT_fwd,iC_fwd),by=1:nrow(calls)]
     if(!is.null(intens_rev)) calls[,ref_peak_abs_rev:=sum(iG_rev,iA_rev,iT_rev,iC_rev),by=1:nrow(calls)]
 
-    #add information about the second highest peak
-    calls[,c("mut_peak_call_fwd","mut_peak_abs_fwd"):=second(iA_fwd,iC_fwd,iG_fwd,iT_fwd),by=1:nrow(calls)]
+    #add information about the first and second highest peak
+    calls[,c("sample_peak_call_fwd","sample_peak_abs_fwd"):=  first(iA_fwd,iC_fwd,iG_fwd,iT_fwd),by=1:nrow(calls)]
+    calls[,sample_peak_pct_fwd := ((100/ref_peak_abs_fwd)*sample_peak_abs_fwd)]
+    calls[,c("mut_peak_call_fwd",   "mut_peak_abs_fwd"   ):= second(iA_fwd,iC_fwd,iG_fwd,iT_fwd),by=1:nrow(calls)]    
+    calls[,mut_peak_pct_fwd    := ((100/ref_peak_abs_fwd)*mut_peak_abs_fwd)   ]
     calls[,mut_s2n_abs_fwd:=mut_peak_abs_fwd/noise_abs_fwd]
-    calls[,mut_peak_pct_fwd:=((100/ref_peak_abs_fwd)*mut_peak_abs_fwd)]
+    calls[,sndary_fwd:=sample_peak_call_fwd]                  #secondary call, threshold dependant
     if(!is.null(intens_rev)){
-        calls[,c("mut_peak_call_rev","mut_peak_abs_rev"):=second(iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
+        calls[,c("sample_peak_call_rev", "sample_peak_abs_rev"):= first(iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
+        calls[,sample_peak_pct_rev := ((100/ref_peak_abs_rev)*sample_peak_abs_rev)]
+        calls[,c("mut_peak_call_rev",   "mut_peak_abs_rev"    ):=second(iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
+        calls[,mut_peak_pct_rev    := ((100/ref_peak_abs_rev)*mut_peak_abs_rev)   ]
         calls[,mut_s2n_abs_rev:=mut_peak_abs_rev/noise_abs_rev]
-        calls[,mut_peak_pct_rev:=((100/ref_peak_abs_rev)*mut_peak_abs_rev)]
+        calls[,sndary_rev:=sample_peak_call_rev]
     }
     calls[,set_by_user:=FALSE]
     calls[,cons:=user_mod]
@@ -64,7 +70,16 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
     calls[set_by_user == FALSE, user_mod := cons]
 
-    # low qual
+    
+    calls[,sndary_fwd:=sample_peak_call_fwd]
+    calls[(mut_peak_pct_fwd > mut_min),sndary_fwd:=mut_peak_call_fwd]
+    if("call_rev" %in% colnames(calls)){
+        calls[,sndary_rev:=sample_peak_call_rev]
+        calls[(mut_peak_pct_rev > mut_min),sndary_rev:=mut_peak_call_rev]
+    }
+    
+
+    
     calls[(rm7qual < qual_thres | quality < qual_thres) & set_by_user == FALSE, user_mod := "low qual"]
 
     # mut peak
@@ -92,10 +107,20 @@ noise <- function(a,b,c,d,abs=FALSE){
     else    return(mean(vec[1:3]/sum(vec[4])))
 }
 
+#retrieve the name and the value of the first highest peak as this may differ from the "call" which may bey ambiguous iupac (S,W,R...)
+first <- function(iA,iC,iG,iT){
+  mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[1])
+  if (mut_peak == 0 ) return(list(" ",mut_peak))
+  else if (mut_peak == iA) return(list("A",mut_peak))
+  else if (mut_peak == iC) return(list("C",mut_peak))
+  else if (mut_peak == iG) return(list("G",mut_peak))
+  else if (mut_peak == iT) return(list("T",mut_peak))
+}
 #retrieve the name and value of the second highest peak
 second <- function(iA,iC,iG,iT){
     mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[2])
-         if (mut_peak == iA) return(list("A",mut_peak))
+         if (mut_peak == 0 ) return(list(" ",mut_peak))
+    else if (mut_peak == iA) return(list("A",mut_peak))
     else if (mut_peak == iC) return(list("C",mut_peak))
     else if (mut_peak == iG) return(list("G",mut_peak))
     else if (mut_peak == iT) return(list("T",mut_peak))

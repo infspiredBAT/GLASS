@@ -193,7 +193,7 @@ HTMLWidgets.widget({
             var rev = 0;  //offset on labels in case we have alternative reference
             if(x["intens_rev"] !== null){
                 var intens_rev = x["intens_rev"];
-                rev = 12;
+                rev = 24;
             }
         console.log(instance.instanceCounter)
         if(instance.instanceCounter>=1){ //cleanup after previouse sample
@@ -346,7 +346,7 @@ HTMLWidgets.widget({
   				       .attr("width",18)
   				       .attr("height",function(d){return d["quality"];})
   				       .attr("fill", "rgba(200,200,200,0.4)");
-            focus.append("g").selectAll("text.qualities").data(calls).enter() // quality number !do we need it?
+            focus.append("g").selectAll("text.qualities").data(calls).enter() // quality number 
   				       .append("text").attr("class","peak_label")
   				       .text(function(d){return d["quality"];})
   				       .attr("text-anchor", "middle")
@@ -358,7 +358,7 @@ HTMLWidgets.widget({
   				       .text(function(d){return d["reference"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                 .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
+                 .on("click",function(d,i){instance.callShiny(d["id"]);})
                  .attr("y",10)
                  .attr("id",function(d){return d["id"]})
   				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
@@ -374,15 +374,31 @@ HTMLWidgets.widget({
   				       .text(function(d){return d["call"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                     .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
+                     .on("click",function(d,i){instance.callShiny(d["id"]);})
   			       	 .attr("y",22)
-  				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px").attr("font-style", "italic")
+  				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
                  .attr("stroke",function(d) {
       		                          if      (d["call"] === "A"){ return "#33CC33"; }
   				                          else if (d["call"] === "C"){ return "#0000FF"; }
   				                          else if (d["call"] === "G"){ return "#000000"; }
   				                          else if (d["call"] === "T"){ return "#FF0000"; }
   				                          else if (d["call"] === "-"){ return "white"; }
+  				                          else    {                    return "orange"; }});
+              
+              focus.append("g").selectAll("text.seq.user").data(calls).enter() //secondary call fwd
+    			       .append("text").attr("class","peak_label short sndary")
+  				       .text(function(d){return d["sndary_fwd"].toLowerCase();})
+  				       .attr("text-anchor", "middle")
+  				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                     .on("click",function(d,i){instance.callShiny(d["id"]);})
+  			       	 .attr("y",34)
+  				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+                 .attr("stroke",function(d) {
+      		                          if      (d["call"] === "A"){ return "#33CC33"; }
+  				                          else if (d["call"] === "C"){ return "#0000FF"; }
+  				                          else if (d["call"] === "G"){ return "#000000"; }
+  				                          else if (d["call"] === "T"){ return "#FF0000"; }
+  				                          else if (d["call"] === "-"){ return "white";   }
   				                          else    {                    return "orange"; }});
 
             if(rev!==0){
@@ -391,9 +407,24 @@ HTMLWidgets.widget({
     				         .text(function(d){return d["call_rev"];})
     				         .attr("text-anchor", "middle")
     				         .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                             .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
-    				         .attr("y",34)
-    				         .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px").attr("font-style", "italic")
+                             .on("click",function(d,i){instance.callShiny(d["id"]);})
+    				         .attr("y",46)
+    				         .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+                     .attr("stroke",function(d) {
+        		                            if      (d["call_rev"] === "A"){ return "#33CC33"; }
+    				                            else if (d["call_rev"] === "C"){ return "#0000FF"; }
+    				                            else if (d["call_rev"] === "G"){ return "#000000"; }
+    				                            else if (d["call_rev"] === "T"){ return "#FF0000"; }
+    				                            else if (d["call_rev"] === "-"){ return "white";   }
+    				                            else    {                        return "orange"; }});
+                focus.append("g").selectAll("text.seq.user").data(calls).enter() //secundary rev
+            		     .append("text").attr("class","peak_label short sndary")
+    				         .text(function(d){return d["sndary_rev"].toLowerCase();})
+    				         .attr("text-anchor", "middle")
+    				         .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                             .on("click",function(d,i){instance.callShiny(d["id"]);})
+    				         .attr("y",58)
+    				         .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
                      .attr("stroke",function(d) {
         		                            if      (d["call_rev"] === "A"){ return "#33CC33"; }
     				                            else if (d["call_rev"] === "C"){ return "#0000FF"; }
@@ -412,8 +443,8 @@ HTMLWidgets.widget({
                            else                            {return 0.7;}})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                         .on("click",function(d,i){instance.callShiny(d["id"]);console.log(d["id"]);})
-  				       .attr("y",(36+rev))
+                         .on("click",function(d,i){instance.callShiny(d["id"]);})
+  				       .attr("y",(46+rev))
   				       .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "11px").attr("font-weight", "bold")
                  .attr("stroke",function(d) {
       		                          if      (d["user_mod"] === "A"){ return "#33CC33"; }
@@ -429,7 +460,7 @@ HTMLWidgets.widget({
   				                      else {                       return ".";}})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-  				       .attr("y",48+rev)
+  				       .attr("y",58+rev)
   				       .attr("fill", "black").attr("opacity", 0.5).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
@@ -439,21 +470,21 @@ HTMLWidgets.widget({
   				                else {                     return "";}})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-  				       .attr("y",(62+rev))
+  				       .attr("y",(70+rev))
   				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
   				       .append("text").attr("class","peak_label")
   				       .text(function(d){return d["gen_coord"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-  				       .attr("y",(74+rev))
+  				       .attr("y",(82+rev))
   				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
             focus.append("g").selectAll("text.exon_intron").data(calls).enter() //intrex
   				       .append("text").attr("class","peak_label")
   				       .text(function(d){return d["exon_intron"];})
   				       .attr("text-anchor", "middle")
   				       .attr("x",function(d){return widthScale(d["trace_peak"]);})
-  				       .attr("y",(86+rev))
+  				       .attr("y",(90+rev))
   				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px");
             focus.selectAll(".peak_label").attr("visibility","hidden")
 /*
@@ -503,13 +534,15 @@ HTMLWidgets.widget({
                 var rev = 0;  //offset on labels in case we have alternative reference
                 if(x["intens_rev"] !== null){
                     var intens_rev = x["intens_rev"];
-                    rev = 12;
+                    rev = 24;
                 }
                 instance.focus.selectAll(".peak_label short line").remove();
                 instance.context.selectAll(".varInMinimap").remove();
                 instance.showVarInMap(choices);
                 instance.choices = x.choices;
-                instance.focus.selectAll(".user").remove(); //update user_mod, can I select by x coord or smth?
+                instance.focus.selectAll(".user").remove();
+                instance.focus.selectAll(".sndary").remove();
+                
                 instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_mod
     			              .append("text").attr("class","peak_label short user")
   				              .text(function(d){
@@ -520,7 +553,7 @@ HTMLWidgets.widget({
                            else                            {return 0.7;}})
   				              .attr("text-anchor", "middle")
   				              .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
-  				              .attr("y",(36+rev))
+  				              .attr("y",(46+rev))
   				              .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "11px").attr("font-weight", "bold")
                         .attr("stroke",function(d) {
       		                          if      (d["user_mod"] === "A"){ return "#33CC33"; }
@@ -529,6 +562,21 @@ HTMLWidgets.widget({
   				                          else if (d["user_mod"] === "T"){ return "#FF0000"; }
   				                          else if (d["user_mod"] === "-"){ return "white"; }
   				                          else    {                        return "orange"; }});
+               instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //secondary call fwd
+      		       .append("text").attr("class","peak_label short sndary")
+  				       .text(function(d){return d["sndary_fwd"].toLowerCase();})
+  				       .attr("text-anchor", "middle")
+  				       .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
+                     .on("click",function(d,i){instance.callShiny(d["id"]);})
+  			       	 .attr("y",34)
+  				       .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+                 .attr("stroke",function(d) {
+      		                          if      (d["call"] === "A"){ return "#33CC33"; }
+  				                          else if (d["call"] === "C"){ return "#0000FF"; }
+  				                          else if (d["call"] === "G"){ return "#000000"; }
+  				                          else if (d["call"] === "T"){ return "#FF0000"; }
+  				                          else if (d["call"] === "-"){ return "white";   }
+  				                          else    {                    return "orange"; }});
     			     instance.focus.selectAll(".varind").remove();
                instance.focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
     			             .append("line").attr("class","peak_label short line varind")
@@ -538,6 +586,24 @@ HTMLWidgets.widget({
   				             .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
   				             .attr("y2",190)
   				             .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
+                       
+              if(rev!==0){
+                instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //secundary rev
+            		     .append("text").attr("class","peak_label short sndary")
+    				         .text(function(d){return d["sndary_rev"].toLowerCase();})
+    				         .attr("text-anchor", "middle")
+    				         .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
+                             .on("click",function(d,i){instance.callShiny(d["id"]);})
+    				         .attr("y",58)
+    				         .attr("fill", "black").attr("opacity", 0.7).attr("font-family", "sans-serif").attr("font-size", "10px")
+                     .attr("stroke",function(d) {
+        		                            if      (d["call_rev"] === "A"){ return "#33CC33"; }
+    				                            else if (d["call_rev"] === "C"){ return "#0000FF"; }
+    				                            else if (d["call_rev"] === "G"){ return "#000000"; }
+    				                            else if (d["call_rev"] === "T"){ return "#FF0000"; }
+    				                            else if (d["call_rev"] === "-"){ return "white"; }
+    				                            else    {                        return "orange"; }});
+              }
   			}else {
                 console.log(x)
   			}
