@@ -3,3 +3,7 @@ dependencies:
     version: 3.5.5
     src: htmlwidgets/lib/d3-3.5.5
     script: d3.v3.min.js
+  - name: keybinding
+    version: 0.1
+    src: htmlwidgets/lib
+    script: keybinding.js

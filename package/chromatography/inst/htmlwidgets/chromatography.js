@@ -69,6 +69,7 @@ HTMLWidgets.widget({
             context.call(brush.extent([start,end]));
             redraw();
         }
+        
         function showVarInMap(choices){
 
             //genomic
@@ -144,7 +145,62 @@ HTMLWidgets.widget({
         function callShiny(message){
             console.log(message);
             Shiny.onInputChange("posClick", {id: message});
-        }
+        };
+        
+        function brushZoomIn(){
+            return function(event) {
+                event.preventDefault();
+                var ext = brush.extent();
+                full = ext[1] - ext[0];
+                if(full >= 20){
+                    ten = full/10;
+                    setBrush(ext[0]+ten,ext[1]-ten);}
+            };
+        };
+        function brushZoomOut(){
+            return function(event) {
+                event.preventDefault();
+                var ext = brush.extent();
+                full = ext[1] - ext[0];
+                console.log(ext);
+                console.log(full);
+                ten = full/10;
+                from = (ext[0]-ten);
+                if(from < 0){from=0};
+                to   = (ext[1]+ten);
+                //if(to > width){to = width}; must get the scales right to set boundaries
+              
+                setBrush(from,to);}
+        };
+        function brushMoveLeft(){
+            return function(event) {
+                event.preventDefault();
+                var ext = brush.extent();
+                full = ext[1] - ext[0];
+                ten = full/10;
+                from = (ext[0]-ten);
+                if(from < 0){from=0};
+                to   = (ext[1]-(ext[0]-from));
+                setBrush(from,to);}
+          
+        };
+        function brushMoveRight(){
+            return function(event) {
+                event.preventDefault();
+                var ext = brush.extent();
+                full = ext[1] - ext[0];
+                ten = full/10;
+                to = ext[1] + ten;
+                //if(to > width){to=width};must set scales
+                from  = (ext[0]+(to-ext[1]));
+                setBrush(from,to);}
+        };
+        d3.select('body').call(d3.keybinding()
+            .on('←', brushMoveLeft())
+            .on('↑', brushZoomIn())
+            .on('→', brushMoveRight())
+            .on('↓', brushZoomOut())
+            );
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
