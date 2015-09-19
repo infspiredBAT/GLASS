@@ -17,7 +17,7 @@ HTMLWidgets.widget({
         var widthScale   = d3.scale.linear().range([0,width]);
             width2Scale  = d3.scale.linear().range([0,width]),  //remains constant, to be used with context
             heightScale  = d3.scale.linear().range([height,0]),
-    	    height2Scale = d3.scale.linear().range([height2,0]);
+    	      height2Scale = d3.scale.linear().range([height2,0]);
         var line = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return heightScale(d)});
@@ -36,11 +36,19 @@ HTMLWidgets.widget({
             .append("rect")
             .attr("width", width)
             .attr("height", height);
-	    var context = svg.append("g")
+	      var context = svg.append("g")
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-	    var brush = d3.svg.brush().on("brushend", brushed);
-
+	      var brush = d3.svg.brush().on("brushend", brushed);
+        
+        var label_pos = {}        //map for pisitioning labels representing called bases 
+        label_pos["reference"] = 10;
+        label_pos["call"]      = 28;
+        label_pos["sec_fwd"]   = 38;
+        label_pos["call_rev"]  = 58;
+        label_pos["sec_rev"]   = 68;
+        label_pos["user_pri"]  = 58;  // + rev
+        label_pos["user_sec"]  = 70;  // + rev
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
@@ -69,42 +77,76 @@ HTMLWidgets.widget({
             context.call(brush.extent([start,end]));
             redraw();
         }
-        
+        function setPeakLabel(calls,label,offset){
+            focus.append("g").selectAll("text.seq").data(calls).enter() //reference
+  	            .append("text")
+                .attr("class",function(d){
+                    if(label.indexOf("sec") > -1){
+                        return "peak_label short sec";
+                    }else if(label.indexOf("user")> -1){
+                        return "peak_label short user";
+                    }else{return "peak_label short";}    
+                })
+                .text(function(d){
+                    if(label.indexOf("sec") > -1){
+                        return d[label].toLowerCase();
+                    }else if(label.indexOf("user") > -1 && d[label]==="low qual"){
+                        return "N";}
+                    else {
+                        return d[label];}  
+                 })
+                .attr("text-anchor", "middle")
+                .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                .on("click",function(d,i){callShiny(d["id"]);})
+                .attr("y",label_pos[label]+offset)
+                .attr("fill", "black")
+                .attr("opacity", function(d){
+                    if (d[label]==="low qual") {return 0.3;}
+                    else                       {return 0.8;}})
+                .attr("font-family", "sans-serif")
+                .attr("font-size",function(){if(label.indexOf("user")>-1){return "12px";}else{return "11px";}})
+                .attr("stroke",function(d) {
+                    if      (d[label] === "A"){ return "#33CC33"; }
+                    else if (d[label] === "C"){ return "#0000FF"; }
+                    else if (d[label] === "G"){ return "#000000"; }
+                    else if (d[label] === "T"){ return "#FF0000"; }
+                    else if (d[label] === "-"){ return "white"; }
+                    else    {                         return "orange"; }});  
+        }
         function showVarInMap(choices){
-
             //genomic
-            console.log("changing choices");
+            //console.log("changing choices");
             context.selectAll("lines.choices").data(choices).enter()
-    			.append("line")
+    			      .append("line")
                 .attr("class","varInMinimap context")
-      			.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-      			.attr("y1",1)
-      			.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-      			.attr("y2",24)
-      			.attr("stroke-width",3)
-      			.attr("stroke",function(d) {
-      			    if      (d["reference"] === "A"){ return "#33CC33"; }
-      			    else if (d["reference"] === "C"){ return "#0000FF"; }
-      			    else if (d["reference"] === "G"){ return "#000000"; }
-      			    else if (d["reference"] === "T"){ return "#FF0000"; }
-      			    else if (d["reference"] === "-"){ return "white"; }
-      			    else    {                         return "yellow";  }});
-  			// user
-  			context.selectAll("lines.choices").data(choices).enter()
-  				.append("line")
+      			    .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+      			    .attr("y1",1)
+      			    .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+      			    .attr("y2",24)
+      			    .attr("stroke-width",3)
+      			    .attr("stroke",function(d) {
+      			        if      (d["reference"] === "A"){ return "#33CC33"; }
+      			        else if (d["reference"] === "C"){ return "#0000FF"; }
+      			        else if (d["reference"] === "G"){ return "#000000"; }
+      			        else if (d["reference"] === "T"){ return "#FF0000"; }
+      			        else if (d["reference"] === "-"){ return "white"; }
+      			        else    {                         return "yellow";  }});
+  			    // user
+  			    context.selectAll("lines.choices").data(choices).enter()
+  				      .append("line")
                 .attr("class","varInMinimap context")
-  				.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-  				.attr("y1",26)
-  				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-  				.attr("y2",49)
-  				.attr("stroke-width",3)
-  				.attr("stroke",function(d) {
-  				    if      (d["user_pri"] === "A"){ return "#33CC33"; }
-  				    else if (d["user_pri"] === "C"){ return "#0000FF"; }
-  				    else if (d["user_pri"] === "G"){ return "#000000"; }
-  				    else if (d["user_pri"] === "T"){ return "#FF0000"; }
-  				    else if (d["user_pri"] === "-"){ return "white"; }
-  				    else    {                        return "yellow";  }});
+  				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+  				      .attr("y1",26)
+  				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+  				      .attr("y2",49)
+  				      .attr("stroke-width",3)
+  				      .attr("stroke",function(d) {
+  				          if      (d["user_pri"] === "A"){ return "#33CC33"; }
+  				          else if (d["user_pri"] === "C"){ return "#0000FF"; }
+  				          else if (d["user_pri"] === "G"){ return "#000000"; }
+  				          else if (d["user_pri"] === "T"){ return "#FF0000"; }
+  				          else if (d["user_pri"] === "-"){ return "white"; }
+  				          else    {                        return "yellow";  }});
 /*
   			context.selectAll("text.choices.coord").data(choices).enter()
   				.append("text").attr("class","varInMinimap")
@@ -115,12 +157,12 @@ HTMLWidgets.widget({
   				.attr("fill","black");
 */
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
-  		       .append("line").attr("class","peak_label short line varind")
-  		       .attr("x1",function(d){return widthScale(d["trace_peak"]);})
-  		       .attr("y1",180)
-  		       .attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  		       .attr("y2",280)
-  		       .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
+  		         .append("line").attr("class","peak_label short line varind")
+  		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
+  		         .attr("y1",180)
+  		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
+  		         .attr("y2",280)
+  		         .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
         }
 
         Shiny.addCustomMessageHandler("zoom",
@@ -130,23 +172,22 @@ HTMLWidgets.widget({
         );
         Shiny.addCustomMessageHandler("opac_f",
             function(message){
-                console.log(message);
+                //console.log(message);
                 focus.selectAll(".line_f").attr("opacity",Number(message));
 //                focus.selectAll(".fwd").attr("opacity",Number(message));
             }
         );
         Shiny.addCustomMessageHandler("opac_r",
             function(message){
-                console.log(message);
+                //console.log(message);
                 focus.selectAll(".line_r").attr("opacity",Number(message));
 //                focus.selectAll(".rev").attr("opacity",Number(message));
             }
         );
         function callShiny(message){
-            console.log(message);
+            //console.log(message);
             Shiny.onInputChange("posClick", {id: message});
         };
-        
         function brushZoomIn(){
             return function(event) {
                 event.preventDefault();
@@ -162,8 +203,6 @@ HTMLWidgets.widget({
                 event.preventDefault();
                 var ext = brush.extent();
                 full = ext[1] - ext[0];
-                console.log(ext);
-                console.log(full);
                 ten = full/10;
                 from = (ext[0]-ten);
                 if(from < 0){from=0};
@@ -207,19 +246,20 @@ HTMLWidgets.widget({
             svg:     svg,
             line:    line,
             linec:   linec,
-		    context: context,
-	        brush:   brush,
+            context: context,
+	          brush:   brush,
             focus:   focus,
             widthScale:  widthScale,
             width2Scale: width2Scale,
             heightScale: heightScale,
             width:   w,
             height:  h,
-	        height2: height2,
+	          height2: height2,
             instanceCounter: instanceCounter,
             reHeight: reHeight,
             setBrush: setBrush,
-            showVarInMap:showVarInMap,
+            setPeakLabel: setPeakLabel,
+            showVarInMap: showVarInMap,
             callShiny: callShiny
         }
     },
@@ -243,7 +283,7 @@ HTMLWidgets.widget({
         //the render function behaves differently when called repeatedly
         //the first run is actually still a part initialization step
         if(x.new_sample){
-  		    console.log(x)
+  		    //console.log(x)
   		    var intens = x["intens"];
             var intens_rev = "";
             var rev = 0;  //offset on labels in case we have alternative reference
@@ -251,9 +291,7 @@ HTMLWidgets.widget({
                 var intens_rev = x["intens_rev"];
                 rev = 30;
             }
-        console.log(instance.instanceCounter)
         if(instance.instanceCounter>=1){ //cleanup after previous sample
-            console.log("remove shit")
             instance.focus.selectAll(".line_f").remove();
             instance.focus.selectAll(".line_r").remove();
             instance.focus.selectAll(".peak_label").remove();
@@ -410,124 +448,15 @@ HTMLWidgets.widget({
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
   		        .attr("y",-2)
   		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
-            focus.append("g").selectAll("text.seq.genomic").data(calls).enter() //reference
-		        .append("text").attr("class","peak_label short")
-                .text(function(d){return d["reference"];})
-                .attr("text-anchor", "middle")
-                .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",10)
-                .attr("id",function(d){return d["id"]})
-                .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px")
-                .attr("stroke",function(d) {
-                    if      (d["reference"] === "A"){ return "#33CC33"; }
-                    else if (d["reference"] === "C"){ return "#0000FF"; }
-                    else if (d["reference"] === "G"){ return "#000000"; }
-                    else if (d["reference"] === "T"){ return "#FF0000"; }
-                    else if (d["reference"] === "-"){ return "white"; }
-                    else    {                         return "orange"; }});
-            focus.append("g").selectAll("text.seq.user").data(calls).enter() //fwd call
-                .append("text").attr("class","peak_label short fwd")
-                .text(function(d){return d["call"];})
-                .attr("text-anchor", "middle")
-                .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",28)
-                .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px")
-                .attr("stroke",function(d) {
-                    if      (d["call"] === "A"){ return "#33CC33"; }
-                    else if (d["call"] === "C"){ return "#0000FF"; }
-                    else if (d["call"] === "G"){ return "#000000"; }
-                    else if (d["call"] === "T"){ return "#FF0000"; }
-                    else if (d["call"] === "-"){ return "white"; }
-                    else    {                    return "orange"; }});
-            focus.append("g").selectAll("text.seq.user").data(calls).enter() //secondary fwd
-                .append("text").attr("class","peak_label short sec fwd")
-                .text(function(d){return d["sec_fwd"].toLowerCase();})
-                .attr("text-anchor", "middle")
-                .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",38)
-                .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px")
-                .attr("stroke",function(d) {
-                    if      (d["sec_fwd"] === "A"){ return "#33CC33"; }
-                    else if (d["sec_fwd"] === "C"){ return "#0000FF"; }
-                    else if (d["sec_fwd"] === "G"){ return "#000000"; }
-                    else if (d["sec_fwd"] === "T"){ return "#FF0000"; }
-                    else if (d["sec_fwd"] === "-"){ return "white";   }
-                    else    {                       return "orange"; }});
-            if(rev!==0){
-                focus.append("g").selectAll("text.seq.user").data(calls).enter() //rev call
-                    .append("text").attr("class","peak_label short rev")
-                    .text(function(d){return d["call_rev"];})
-                    .attr("text-anchor", "middle")
-                    .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-                    .attr("y",58)
-                    .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px")
-                    .attr("stroke",function(d) {
-                        if      (d["call_rev"] === "A"){ return "#33CC33"; }
-                        else if (d["call_rev"] === "C"){ return "#0000FF"; }
-                        else if (d["call_rev"] === "G"){ return "#000000"; }
-                        else if (d["call_rev"] === "T"){ return "#FF0000"; }
-                        else if (d["call_rev"] === "-"){ return "white";   }
-                        else    {                        return "orange"; }});
-                focus.append("g").selectAll("text.seq.user").data(calls).enter() //secondary rev
-                    .append("text").attr("class","peak_label short sec rev")
-                    .text(function(d){return d["sec_rev"].toLowerCase();})
-                    .attr("text-anchor", "middle")
-                    .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-                    .attr("y",68)
-                    .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px")
-                    .attr("stroke",function(d) {
-                        if      (d["sec_rev"] === "A"){ return "#33CC33"; }
-                        else if (d["sec_rev"] === "C"){ return "#0000FF"; }
-                        else if (d["sec_rev"] === "G"){ return "#000000"; }
-                        else if (d["sec_rev"] === "T"){ return "#FF0000"; }
-                        else if (d["sec_rev"] === "-"){ return "white"; }
-                        else    {                       return "orange"; }});
-            }
-            focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_pri
-                .append("text").attr("class","peak_label short user")
-                .text(function(d){
-                    if (d["user_pri"]==="low qual") {return "N";}
-                    else                            {return d["user_pri"];}})
-                .attr("opacity",function(d){
-                    if (d["user_pri"]==="low qual") {return 0.3;}
-                    else                            {return 0.8;}})
-                .attr("text-anchor", "middle")
-                .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",(58+rev))
-                .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "12px")//.attr("font-weight", "bold")
-                .attr("stroke",function(d) {
-                    if      (d["user_pri"] === "A"){ return "#33CC33"; }
-                    else if (d["user_pri"] === "C"){ return "#0000FF"; }
-                    else if (d["user_pri"] === "G"){ return "#000000"; }
-                    else if (d["user_pri"] === "T"){ return "#FF0000"; }
-                    else if (d["user_pri"] === "-"){ return "white"; }
-                    else    {                        return "orange"; }});
-            focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_sec
-                .append("text").attr("class","peak_label short user")
-                .text(function(d){
-                    if (d["user_sec"]==="low qual") {return "N";}
-                    else                            {return d["user_sec"].toLowerCase();}})
-                .attr("opacity",function(d){
-                    if (d["user_sec"]==="low qual") {return 0.3;}
-                    else                            {return 0.8;}})
-                .attr("text-anchor", "middle")
-                .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",(70+rev))
-                .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "12px")//.attr("font-weight", "bold")
-                .attr("stroke",function(d) {
-                    if      (d["user_sec"] === "A"){ return "#33CC33"; }
-                    else if (d["user_sec"] === "C"){ return "#0000FF"; }
-                    else if (d["user_sec"] === "G"){ return "#000000"; }
-                    else if (d["user_sec"] === "T"){ return "#FF0000"; }
-                    else if (d["user_sec"] === "-"){ return "white"; }
-                    else    {                        return "orange"; }});
+              instance.setPeakLabel(calls,"reference",0); 
+              instance.setPeakLabel(calls,"call",0);
+              instance.setPeakLabel(calls,"sec_fwd",0);
+              if(rev!==0){
+                  instance.setPeakLabel(calls,"call_rev",0);
+                  instance.setPeakLabel(calls,"sec_rev",0);
+              }
+              instance.setPeakLabel(calls,"user_pri",rev);
+              instance.setPeakLabel(calls,"user_sec",rev);
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
                 .append("text").attr("class","peak_label short")
                 .text(function(d){
@@ -604,7 +533,7 @@ HTMLWidgets.widget({
             }
 
         }else{
-            console.log(x)
+            //console.log(x)
   			if(x["helperdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["helperdat"]["max_y"]);
   			}else if(x.choices != instance.choices){
@@ -621,79 +550,11 @@ HTMLWidgets.widget({
                 instance.choices = x.choices;
                 instance.focus.selectAll(".user").remove();
                 instance.focus.selectAll(".sec").remove();
-
-                instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //secondary fwd
-                    .append("text").attr("class","peak_label short sec fwd")
-                    .text(function(d){return d["sec_fwd"].toLowerCase();})
-                    .attr("text-anchor", "middle")
-                    .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-                    .attr("y",38)
-                    .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px")
-                    .attr("stroke",function(d) {
-                        if      (d["sec_fwd"] === "A"){ return "#33CC33"; }
-                        else if (d["sec_fwd"] === "C"){ return "#0000FF"; }
-                        else if (d["sec_fwd"] === "G"){ return "#000000"; }
-                        else if (d["sec_fwd"] === "T"){ return "#FF0000"; }
-                        else if (d["sec_fwd"] === "-"){ return "white";   }
-                        else    {                    return "orange"; }});
-                if(rev!==0){
-                    instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //secondary rev
-                        .append("text").attr("class","peak_label short sec rev")
-                        .text(function(d){return d["sec_rev"].toLowerCase();})
-                        .attr("text-anchor", "middle")
-                        .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
-                        .on("click",function(d,i){instance.callShiny(d["id"]);})
-                        .attr("y",68)
-                        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px")
-                        .attr("stroke",function(d) {
-                            if      (d["sec_rev"] === "A"){ return "#33CC33"; }
-                            else if (d["sec_rev"] === "C"){ return "#0000FF"; }
-                            else if (d["sec_rev"] === "G"){ return "#000000"; }
-                            else if (d["sec_rev"] === "T"){ return "#FF0000"; }
-                            else if (d["sec_rev"] === "-"){ return "white"; }
-                            else    {                       return "orange"; }});
-                }
-                instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_pri
-                    .append("text").attr("class","peak_label short user")
-                    .text(function(d){
-                        if (d["user_pri"]==="low qual") {return "N";}
-                        else                            {return d["user_pri"];}})
-                    .attr("opacity",function(d){
-                        if (d["user_pri"]==="low qual") {return 0.3;}
-                        else                            {return 0.8;}})
-                    .attr("text-anchor", "middle")
-                    .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-                    .attr("y",(58+rev))
-                    .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "12px")//.attr("font-weight", "bold")
-                    .attr("stroke",function(d) {
-                        if      (d["user_pri"] === "A"){ return "#33CC33"; }
-                        else if (d["user_pri"] === "C"){ return "#0000FF"; }
-                        else if (d["user_pri"] === "G"){ return "#000000"; }
-                        else if (d["user_pri"] === "T"){ return "#FF0000"; }
-                        else if (d["user_pri"] === "-"){ return "white"; }
-                        else    {                        return "orange"; }});
-                instance.focus.append("g").selectAll("text.seq.user").data(calls).enter() //user_sec
-                    .append("text").attr("class","peak_label short user")
-                    .text(function(d){
-                        if (d["user_sec"]==="low qual") {return "N";}
-                        else                            {return d["user_sec"].toLowerCase();}})
-                    .attr("opacity",function(d){
-                        if (d["user_sec"]==="low qual") {return 0.3;}
-                        else                            {return 0.8;}})
-                    .attr("text-anchor", "middle")
-                    .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-                    .attr("y",(70+rev))
-                    .attr("fill", "black").attr("font-family", "sans-serif").attr("font-size", "12px")//.attr("font-weight", "bold")
-                    .attr("stroke",function(d) {
-                        if      (d["user_sec"] === "A"){ return "#33CC33"; }
-                        else if (d["user_sec"] === "C"){ return "#0000FF"; }
-                        else if (d["user_sec"] === "G"){ return "#000000"; }
-                        else if (d["user_sec"] === "T"){ return "#FF0000"; }
-                        else if (d["user_sec"] === "-"){ return "white"; }
-                        else    {                        return "orange"; }});
+                instance.setPeakLabel(calls,"sec_fwd",0);
+                if(rev!==0)instance.setPeakLabel(calls,"sec_rev",0);
+                instance.setPeakLabel(calls,"user_pri",rev);
+                instance.setPeakLabel(calls,"user_sec",rev);
+  
                 instance.focus.selectAll(".varind").remove();
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
                     .append("line").attr("class","peak_label short line varind")
