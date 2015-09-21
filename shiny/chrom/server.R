@@ -53,32 +53,37 @@ shinyServer(function(input,output,session) {
             }
 
             withProgress(message = paste('processing...',sep=" "), value = 1, {
-                # TODO - make sure shiny only allows ab1 files (???)
-                #        - otherwise chceck if file has correct format
 
-                tryCatch(
-                    g_abif <- sangerseqR::read.abif(fwd_file)@data,
-                    error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",e$message ))})
+#                 tryCatch(
+#                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
+#                     error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",e$message ))})
+#                 if(!is.null(rev_file)) {
+#                     tryCatch(
+#                         g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
+#                         error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",e$message ))})
+#                 }
+#                 else g_abif_rev <- NULL
+#                 called <- NULL
+#                 tryCatch(
+#                     called <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
+#                     error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
+
+                fwd_sangerseq <- readsangerseq(fwd_file)
+                fwd_basecalls <- makeBaseCalls(fwd_sangerseq,ratio=0.1)
                 if(!is.null(rev_file)) {
-                    tryCatch(
-                        g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
-                        error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",e$message ))})
-                }
-                else g_abif_rev <- NULL
-
-                res <- NULL
-                #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
+                    rev_sangerseq <- readsangerseq(rev_file)
+                    rev_basecalls <- makeBaseCalls(rev_sangerseq,ratio=0.1)}
+                else rev_basecalls <- NULL
+                called <- NULL
                 tryCatch(
-                    res <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
+                    called <- suppressWarnings(get_call_data(fwd_basecalls,rev_basecalls)),
                     error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
 
-                if(!is.null(res)){
-                    calls               <-  res$calls
-                    r                   <-  get_intensities(g_abif,g_abif_rev,calls=calls,deletions=res$deletions,norm=FALSE)
-                    calls               <-  r$calls
-                    g_intens            <<- r$intens
-                    g_intens_rev        <<- r$intens_rev
-                    calls               <-  annotate_calls(calls,g_intens,g_intens_rev)
+                if(!is.null(called)){
+                    intensified         <-  get_intensities(fwd_basecalls,rev_basecalls,calls=called$calls,deletions=called$deletions,norm=FALSE)
+                    calls               <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev)
+                    g_intens            <<- intensified$intens
+                    g_intens_rev        <<- intensified$intens_rev
                     g_max_y             <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                     #helper_intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
                         helperdat               <- list()
@@ -114,9 +119,21 @@ shinyServer(function(input,output,session) {
         if((loading_processed_files() != "not") & varcall() ) {
             #g_choices <<- call_variants
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls, g_choices, g_new_sample)
+            ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
             g_new_sample <<- FALSE
             return(ret)
+        }
+    })
+
+    output$aln <- renderPrint({
+        if(loading_processed_files() != "not" & varcall() ) {
+            cat(paste0(g_calls[,user_pri],collapse=""))
+            cat(paste("\n"))
+            cat(paste0(g_calls[,user_sec],collapse=""))
+            cat(paste("\n"))
+            pa <- pairwiseAlignment(paste0(g_calls[,user_pri],collapse=""), paste0(g_calls[,user_sec],collapse=""),type = "global-local")
+            writePairwiseAlignments(pa, block.width = 150)
+
         }
     })
 
