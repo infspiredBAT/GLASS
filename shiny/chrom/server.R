@@ -89,7 +89,6 @@ shinyServer(function(input,output,session) {
                         helperdat$new_sample    <- TRUE
                     g_helperdat         <<- helperdat
                     g_calls             <<- data.table(calls,key="id")
-                    #!this will be different if we have reverse
                     ret<-"loaded"
                     g_new_sample <<- TRUE
                 }

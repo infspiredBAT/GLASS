@@ -22,6 +22,13 @@ HTMLWidgets.widget({
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return heightScale(d)});
         //lines in the brush tool
+        //var noise_area = d3.svg.line()
+        //        .x(function(d){return widthScale(d[0]);})
+        //        .y(function(d){return heightScale(d[1]);});
+        var noise_area = d3.svg.area()
+                .x(function(d){return widthScale(d[0]);})
+                .y0(heightScale(0)+2)
+                .y1(function(d){return heightScale(d[1]);});
         var linec = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return height2Scale(d)});
@@ -52,7 +59,8 @@ HTMLWidgets.widget({
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
-            focus.selectAll("g").selectAll("path").attr("d", line);
+            focus.selectAll("g").selectAll(".path").attr("d", line);
+            focus.selectAll("g").selectAll(".area").attr("d",noise_area);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".q").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
             focus.selectAll(".line").attr("x1",function(d){return widthScale(d["trace_peak"]);})
@@ -70,7 +78,8 @@ HTMLWidgets.widget({
         function brushed() { redraw(); }
         function reHeight(domain_y){
             heightScale.domain([0,domain_y]);
-            focus.selectAll("g").selectAll("path").attr("d", line);
+            focus.selectAll("g").selectAll(".path").attr("d", line);
+            focus.selectAll("g").selectAll(".area").attr("d",noise_area);
         }
         //setting brush programmatically
         function setBrush(start,end){
@@ -111,7 +120,7 @@ HTMLWidgets.widget({
                     else if (d[label] === "G"){ return "#000000"; }
                     else if (d[label] === "T"){ return "#FF0000"; }
                     else if (d[label] === "-"){ return "white"; }
-                    else    {                         return "orange"; }});  
+                    else    {                   return "orange"; }});  
         }
         function showVarInMap(choices){
             //genomic
@@ -130,7 +139,7 @@ HTMLWidgets.widget({
       			        else if (d["reference"] === "G"){ return "#000000"; }
       			        else if (d["reference"] === "T"){ return "#FF0000"; }
       			        else if (d["reference"] === "-"){ return "white"; }
-      			        else    {                         return "yellow";  }});
+      			        else    {                         return "yellow"; }});
   			    // user
   			    context.selectAll("lines.choices").data(choices).enter()
   				      .append("line")
@@ -240,11 +249,45 @@ HTMLWidgets.widget({
             .on('→', brushMoveRight())
             .on('↓', brushZoomOut())
             );
+        transpose = function(a) {
+        
+          // Calculate the width and height of the Array
+          var w = a.length ? a.length : 0,
+            h = a[0] instanceof Array ? a[0].length : 0;
+        
+          // In case it is a zero matrix, no transpose routine needed.
+          if(h === 0 || w === 0) { return []; }
+        
+          /**
+           * @var {Number} i Counter
+           * @var {Number} j Counter
+           * @var {Array} t Transposed data is stored in this array.
+           */
+          var i, j, t = [];
+        
+          // Loop through every item in the outer array (height)
+          for(i=0; i<h; i++) {
+        
+            // Insert a new row (array)
+            t[i] = [];
+        
+            // Loop through every item per item in outer array (width)
+            for(j=0; j<w; j++) {
+        
+              // Save transposed data.
+              t[i][j] = a[j][i];
+            }
+          }
+        
+          return t;
+        };
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
             svg:     svg,
             line:    line,
+            noise_area: noise_area,
+            transpose: transpose,
             linec:   linec,
             context: context,
 	          brush:   brush,
@@ -292,6 +335,7 @@ HTMLWidgets.widget({
                 rev = 30;
             }
         if(instance.instanceCounter>=1){ //cleanup after previous sample
+            instance.focus.selectAll(".area").remove();
             instance.focus.selectAll(".line_f").remove();
             instance.focus.selectAll(".line_r").remove();
             instance.focus.selectAll(".peak_label").remove();
@@ -310,13 +354,14 @@ HTMLWidgets.widget({
 
   			var svg     = instance.svg;
   			var line    = instance.line;
+        var noise_area = noise_area;
   			var linec   = instance.linec;
   			var focus   = instance.focus;
   			var context = instance.context;
   			var brush   = instance.brush;
   			var widthScale  = instance.widthScale;
   			var heightScale = instance.heightScale;
-            var width2Scale = instance.width2Scale;
+        var width2Scale = instance.width2Scale;
   			var height2 = instance.height2;
 
   			widthScale.domain([0,domain_x]);
@@ -368,64 +413,73 @@ HTMLWidgets.widget({
   				.attr("x",function(d){return widthScale(d["start"]);})
   				.attr("y",60)
   				.attr("opacity",0.6)
-  				.text(function(d){return d["id"];}) // position labels !extract sequence coords
+  				.text(function(d){return d["id"];}) 
   				.attr("fill","black");
 
   			brush.x(width2Scale);
 
-  			var group_a = focus.append("g");  //why do I need a group for each line?
+  			var group_a = focus.append("g");  
   			var group_c = focus.append("g");
   			var group_g = focus.append("g");
   			var group_t = focus.append("g");
 
-            //forward strand
+        //forward strand
   			group_a.selectAll("path").data([intens["A"]]).enter()
   			    .append("path").attr("class","path line_f")
   				.attr("d",line)
   				.attr("fill","none")
   				.attr("stroke","#33CC33").attr("stroke-width",0.75);
   			group_c.selectAll("path").data([intens["C"]]).enter()
-  				.append("path").attr("class","line_f")
+  				.append("path").attr("class","path line_f")
   				.attr("d",line)
   				.attr("fill","none")
   				.attr("stroke","#0000FF").attr("stroke-width",0.75);
   			group_g.selectAll("path").data([intens["G"]]).enter()
-  				.append("path").attr("class","line_f")
+  				.append("path").attr("class","path line_f")
   				.attr("d",line)
   				.attr("fill","none")
   				.attr("stroke","#000000").attr("stroke-width",0.75);
   			group_t.selectAll("path").data([intens["T"]]).enter()
-  				.append("path").attr("class","line_f")
+  				.append("path").attr("class","path line_f")
   				.attr("d",line)
   				.attr("fill","none")
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
+        
+        
 
-            //reverse strand
-            if(intens_rev != ""){
-                var group_a_r = focus.append("g");
+        var a = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
+        //var a = [x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]
+        
+        var group_noise_f = focus.append("g");
+        group_noise_f.selectAll("path").data([a]).enter()
+            .append("path").attr("class","area").attr("d",noise_area)
+            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.3);
+        //reverse strand
+        if(intens_rev != ""){
+            var group_a_r = focus.append("g");
     	    	var group_c_r = focus.append("g");
   		    	var group_g_r = focus.append("g");
   		    	var group_t_r = focus.append("g");
-                group_a_r.selectAll("path").data([intens_rev["A"]]).enter()
+            group_a_r.selectAll("path").data([intens_rev["A"]]).enter()
         			.append("path").attr("class","path line_r")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#33CC33").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
       			group_c_r.selectAll("path").data([intens_rev["C"]]).enter()
-      				.append("path").attr("class","line_r")
+      				.append("path").attr("class","path line_r")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#0000FF").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
       			group_g_r.selectAll("path").data([intens_rev["G"]]).enter()
-      				.append("path").attr("class","line_r")
+      				.append("path").attr("class","path line_r")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#000000").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
       			group_t_r.selectAll("path").data([intens_rev["T"]]).enter()
-      			    .append("path").attr("class","line_r")
+      			    .append("path").attr("class","path line_r")
       				.attr("d",line)
       				.attr("fill","none")
       				.attr("stroke","#FF0000").attr("stroke-width",0.75)
