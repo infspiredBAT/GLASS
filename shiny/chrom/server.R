@@ -80,7 +80,7 @@ shinyServer(function(input,output,session) {
                     error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
 
                 if(!is.null(called)){
-                    intensified         <-  get_intensities(fwd_basecalls,rev_basecalls,calls=called$calls,deletions=called$deletions,norm=FALSE)
+                    intensified         <-  get_intensities(fwd_basecalls,rev_basecalls,called$trace_peak_fwd,called$trace_peak_rev,calls=called$calls,deletions=called$deletions,norm=FALSE)
                     calls               <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev)
                     g_intens            <<- intensified$intens
                     g_intens_rev        <<- intensified$intens_rev

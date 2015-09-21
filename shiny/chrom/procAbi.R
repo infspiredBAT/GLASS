@@ -10,6 +10,10 @@ trace_peak_me <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
     else if (mut_peak == iT) return(pT)
 }
 
+trace_peak_me2 <- function(i,p){
+    return(p[which.max(i)])
+}
+
 get_call_data <- function(data, data_rev){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     deletions <- list()
@@ -38,19 +42,16 @@ get_call_data <- function(data, data_rev){
 
         user_align <- get_fwd_rev_align(as.character(data@primarySeq),as.character(data_rev@primarySeq))
         res <- generate_ref(paste(user_align[[1]],collapse = ""))
+        intens_calls <- get_intens_calls(user_align[[2]],data@peakAmpMatrix,user_align[[3]],data_rev@peakAmpMatrix)
         calls <- data.table(id         = seq_along(user_align[[1]])
                             ,user_pri  = user_align[[1]]
                             ,call      = user_align[[2]]
                             ,call_rev  = user_align[[3]]
                             ,reference = user_align[[1]]
-                            ,pA_fwd    = data@peakPosMatrix[,1],pC_fwd = data@peakPosMatrix[,2],pG_fwd = data@peakPosMatrix[,3],pT_fwd = data@peakPosMatrix[,4]
-                            ,iA_fwd    = data@peakAmpMatrix[,1],iC_fwd = data@peakAmpMatrix[,2],iG_fwd = data@peakAmpMatrix[,3],iT_fwd = data@peakAmpMatrix[,4]
-                            ,pA_rev    = data_rev@peakPosMatrix[,1],pC_rev = data_rev@peakPosMatrix[,2],pG_rev = data_rev@peakPosMatrix[,3],pT_rev = data_rev@peakPosMatrix[,4]
-                            ,iA_rev    = data_rev@peakAmpMatrix[,1],iC_rev = data_rev@peakAmpMatrix[,2],iG_rev = data_rev@peakAmpMatrix[,3],iT_rev = data_rev@peakAmpMatrix[,4]
-                            ,quality   = qual
         )
-        calls[,trace_peak     := trace_peak_me(1,iA_fwd,iC_fwd,iG_fwd,iT_fwd,pA_fwd,pC_fwd,pG_fwd,pT_fwd),by=1:nrow(calls)]
-        calls[,trace_peak_rev := trace_peak_me(1,iA_rev,iC_rev,iG_rev,iT_rev,pA_rev,pC_rev,pG_rev,pT_rev),by=1:nrow(calls)]
+        calls <- cbind(calls,intens_calls)
+        trace_peak_fwd <- sapply(1:nrow(data@peakAmpMatrix),function(x) trace_peak_me2(data@peakAmpMatrix[x,],data@peakPosMatrix[x,]))
+        trace_peak_rev <- sapply(1:nrow(data_rev@peakAmpMatrix),function(x) trace_peak_me2(data_rev@peakAmpMatrix[x,],data_rev@peakAmpMatrix[x,]))
         setkey(res[[2]],id)
         if(length(res[[3]]) > 0) {
             setkey(calls,id)
@@ -66,7 +67,21 @@ get_call_data <- function(data, data_rev){
     data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
     data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
 
-    return(list(calls=calls,deletions=deletions))
+    return(list(calls=calls,deletions=deletions,trace_peak_fwd = trace_peak_fwd,trace_peak_rev = trace_peak_rev))
+}
+
+get_intens_calls <- function(calls_fwd,intens_fwd,calls_rev,intens_rev){
+    calls_intens_fwd <- numeric(length(calls_fwd))
+    res_fwd <- lapply(1:4,function(x) {
+        calls_intens_fwd[which(calls_fwd != "-")] <- intens_fwd[,x]
+        return(calls_intens_fwd)
+        })
+    calls_intens_rev <- numeric(length(calls_rev))
+    res_rev <- lapply(1:4,function(x) {
+        calls_intens_rev[which(calls_rev != "-")] <- intens_rev[,x]
+        return(calls_intens_rev)
+    })
+    return(data.table(iA_fwd    = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]],iA_rev    = res_rev[[1]],iC_rev = res_rev[[2]],iG_rev = res_rev[[3]],iT_rev = res_rev[[4]]))
 }
 
 generate_ref <-function(user_seq){
@@ -235,7 +250,7 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
 }
 
 # the function extracts the signal intesities for each channel
-get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) {
+get_intensities <- function(data,data_rev=NULL,trace_peak_fwd,trace_peak_rev,calls,deletions=NULL,norm=FALSE) {
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
     rev <- !(is.null(data_rev))
 
@@ -260,25 +275,26 @@ get_intensities <- function(data,data_rev=NULL,calls,deletions=NULL,norm=FALSE) 
     }
 
     #cliping the end of chromatogram after last call
-    if(nrow(intens) > max(calls[,trace_peak])){
-        intens <- intens[1:max(calls[,trace_peak])]
+    if(nrow(intens) > max(trace_peak_fwd)){
+        intens <- intens[1:max(trace_peak_fwd)]
     }
     #cliping the end of reverse chromatogram after last call + length of first trace peak in fwd so we get the same offset once we turn it over
-    offset <- calls[1,trace_peak]
+    offset <- trace_peak_fwd[1]
     if(rev){
-        if(nrow(intens_rev) > max(calls[,trace_peak_rev])+offset){
-            intens_rev <- intens_rev[1:max(calls[,trace_peak_rev])+offset]
+        if(nrow(intens_rev) > max(trace_peak_rev)+offset){
+            intens_rev <- intens_rev[1:max(trace_peak_rev)+offset]
         }
     }
 
+    
+    intens <- normalize_peak_width(intens,trace_peak_fwd,11)
     intens <- setnames(data.table(intens),c("A","C","G","T"))
-    # intens <- normalize_peak_width(intens,calls[,trace_peak],11)
-    calls  <- calls[,trace_peak:=rescale_call_positions(calls[,trace_peak],11)]
+    calls  <- calls[,trace_peak:=rescale_call_positions(trace_peak_fwd[1],nrow(calls),11)]
     if(rev){
+        intens_rev <- normalize_peak_width(intens_rev,trace_peak_rev,11)
         intens_rev <- setnames(data.table(intens_rev),c("T","G","C","A"))
-        # intens_rev <- normalize_peak_width(intens_rev,calls[,trace_peak_rev],11)
         intens_rev <- intens_rev[nrow(intens_rev):1]
-        calls      <- calls[,trace_peak_rev:=rescale_call_positions(calls[,trace_peak_rev],11)]
+        calls      <- calls[,trace_peak_rev:=rescale_call_positions(trace_peak_rev[1],nrow(calls),11)]
     }
 
     if(rev){
@@ -328,6 +344,6 @@ normalize_peak_width <- function(intensities, call_positions, intervening_length
     }
     return(apply(intensities, 2, function(x) interpolate(x, unique(call_positions), intervening_length)))
 }
-rescale_call_positions <- function(call_positions, intervening_length){
-    return(seq(from = call_positions[1], by = intervening_length + 1, length.out = length(call_positions)))
+rescale_call_positions <- function(call_positions_start, call_positions_length, intervening_length){
+    return(seq(from = call_positions_start, by = intervening_length + 1, length.out = call_positions_length))
 }
