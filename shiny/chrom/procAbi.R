@@ -1,6 +1,8 @@
 library(zoo)           #for the rolling mean function
 library(seqinr)
 
+g_base_noise <<- 10
+
 trace_peak_me <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
     mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[p])
          if (mut_peak == 0 ) return(NA)
@@ -41,13 +43,15 @@ get_call_data <- function(data, data_rev){
     } else {
 
         user_align <- get_fwd_rev_align(as.character(data@primarySeq),as.character(data_rev@primarySeq))
-        res <- generate_ref(paste(user_align[[1]],collapse = ""))
-        intens_calls <- get_intens_calls(user_align[[2]],data@peakAmpMatrix,user_align[[3]],data_rev@peakAmpMatrix)
-        calls <- data.table(id         = seq_along(user_align[[1]])
-                            ,user_pri  = user_align[[1]]
-                            ,call      = user_align[[2]]
-                            ,call_rev  = user_align[[3]]
-                            ,reference = user_align[[1]]
+        intens_calls <- get_intens_calls(user_align[[1]],data@peakAmpMatrix,user_align[[2]],data_rev@peakAmpMatrix)
+        consensus_seq <- create_consensus_seq(user_align[[1]],user_align[[2]],intens_calls)
+        res <- generate_ref(paste(consensus_seq,collapse = ""))
+        
+        calls <- data.table(id         = seq_along(consensus_seq)
+                            ,user_pri  = consensus_seq
+                            ,call      = user_align[[1]]
+                            ,call_rev  = user_align[[2]]
+                            ,reference = consensus_seq
         )
         calls <- cbind(calls,intens_calls)
         trace_peak_fwd <- sapply(1:nrow(data@peakAmpMatrix),function(x) trace_peak_me2(data@peakAmpMatrix[x,],data@peakPosMatrix[x,]))
@@ -68,6 +72,18 @@ get_call_data <- function(data, data_rev){
     data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
 
     return(list(calls=calls,deletions=deletions,trace_peak_fwd = trace_peak_fwd,trace_peak_rev = trace_peak_rev))
+}
+
+create_consensus_seq <- function(fwd_seq,rev_seq,intens_tab){
+    fwd_noise <- apply(intens_tab[,1:4,with = F],1,get_noise)
+    rev_noise <- apply(intens_tab[,5:8,with = F],1,get_noise)
+    consensus_seq <- fwd_seq
+    consensus_seq[which(fwd_noise > rev_noise)] <- rev_seq[which(fwd_noise > rev_noise)]
+    return(consensus_seq)
+}
+
+get_noise <- function(row){
+    return((mean(row[-which.max(row)]) + g_base_noise) / (row[which.max(row)]  + g_base_noise))
 }
 
 get_intens_calls <- function(calls_fwd,intens_fwd,calls_rev,intens_rev){
@@ -177,11 +193,9 @@ get_fwd_rev_align <- function(fwd_seq,rev_seq){
     fwd_offset <- start(pattern(align))
     rev_offset <- start(subject(align))
 
-    #construct consensus /higher quality wins/
-    cons_split <- fwd_split
-    # cons_split[which(fwd_split_qual < rev_split_qual)] <- rev_split[which(fwd_split_qual < rev_split_qual)]
 
-    return(list(cons_split,fwd_split,rev_split,fwd_offset,rev_offset))
+
+    return(list(fwd_split,rev_split,fwd_offset,rev_offset))
 }
 
 get_alignment <- function(data,user_seq,cores,type = "overlap"){
