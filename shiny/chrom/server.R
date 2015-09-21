@@ -107,7 +107,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not"){
             g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
             #g_calls     <<- retranslate(g_calls)
-            g_choices   <<- NULL
+            #g_choices   <<- NULL
             g_choices   <<- g_calls[user_pri != reference & user_pri != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
             g_varcall   <<- TRUE
         }
@@ -142,9 +142,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_variance != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_call_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_call_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_call_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"   quality ",quality,"\nfwd mut ",mut_peak_call_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_call_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     #    print("ref")
                     }
                 }, error = function(er){
@@ -292,6 +292,11 @@ shinyServer(function(input,output,session) {
         }
     })
 
+    s2n_slider_handler <- observe({
+        if(loading_processed_files()!= "not"){
+            session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
+        }
+    })
     goClick_handler <- observe({
       if(loading_processed_files() != "not") {
         if(is.null(input$posClick)) return()

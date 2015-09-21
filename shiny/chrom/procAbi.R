@@ -1,7 +1,7 @@
 library(zoo)           #for the rolling mean function
 library(seqinr)
 
-g_base_noise <<- 10
+g_base_noise <<- 2
 
 trace_peak_me <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
     mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[p])
@@ -31,6 +31,7 @@ get_call_data <- function(data, data_rev){
                            ,iA_fwd    = data@peakAmpMatrix[,1],iC_fwd = data@peakAmpMatrix[,2],iG_fwd = data@peakAmpMatrix[,3],iT_fwd = data@peakAmpMatrix[,4]
                            ,quality   = qual
         )
+        intens_calls <- get_intens_calls(pri,data@peakAmpMatrix)
         calls[,trace_peak := trace_peak_me(1,iA_fwd,iC_fwd,iG_fwd,iT_fwd,pA_fwd,pC_fwd,pG_fwd,pT_fwd),by=1:nrow(calls)]
         setkey(res[[2]],id)
         if(length(res[[3]]) > 0) {
@@ -39,6 +40,8 @@ get_call_data <- function(data, data_rev){
             data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
             calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_pri := "-"])
         }
+        trace_peak_fwd <- sapply(1:nrow(data@peakAmpMatrix),function(x) trace_peak_me2(data@peakAmpMatrix[x,],data@peakPosMatrix[x,]))
+        trace_peak_rev <- NULL
 
     } else {
 
@@ -83,21 +86,26 @@ create_consensus_seq <- function(fwd_seq,rev_seq,intens_tab){
 }
 
 get_noise <- function(row){
-    return((mean(row[-which.max(row)]) + g_base_noise) / (row[which.max(row)]  + g_base_noise))
+    return((mean(row[order(row)[c(1,2)]]) + g_base_noise) / (row[which.max(row)]  + g_base_noise))
 }
 
-get_intens_calls <- function(calls_fwd,intens_fwd,calls_rev,intens_rev){
+get_intens_calls <- function(calls_fwd,intens_fwd,calls_rev=NULL,intens_rev=NULL){
     calls_intens_fwd <- numeric(length(calls_fwd))
     res_fwd <- lapply(1:4,function(x) {
         calls_intens_fwd[which(calls_fwd != "-")] <- intens_fwd[,x]
         return(calls_intens_fwd)
         })
-    calls_intens_rev <- numeric(length(calls_rev))
-    res_rev <- lapply(4:1,function(x) {
-        calls_intens_rev[which(calls_rev != "-")] <- rev(intens_rev[,x])
-        return(calls_intens_rev)
-    })
-    return(data.table(iA_fwd    = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]],iA_rev    = res_rev[[1]],iC_rev = res_rev[[2]],iG_rev = res_rev[[3]],iT_rev = res_rev[[4]]))
+    if(!is.null(calls_rev)){
+        calls_intens_rev <- numeric(length(calls_rev))
+        res_rev <- lapply(4:1,function(x) {
+            calls_intens_rev[which(calls_rev != "-")] <- rev(intens_rev[,x])
+            return(calls_intens_rev)
+        })
+        return(data.table(iA_fwd = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]],iA_rev = res_rev[[1]],iC_rev = res_rev[[2]],iG_rev = res_rev[[3]],iT_rev = res_rev[[4]]))
+    
+    }
+    return(data.table(iA_fwd = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]]))
+    
 }
 
 generate_ref <-function(user_seq){

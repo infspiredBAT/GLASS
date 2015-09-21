@@ -25,10 +25,11 @@ HTMLWidgets.widget({
         //var noise_area = d3.svg.line()
         //        .x(function(d){return widthScale(d[0]);})
         //        .y(function(d){return heightScale(d[1]);});
+        var mult = 2;
         var noise_area = d3.svg.area()
                 .x(function(d){return widthScale(d[0]);})
                 .y0(heightScale(0)+2)
-                .y1(function(d){return heightScale(d[1]);});
+                .y1(function(d){return heightScale(d[1]*mult);});
         var linec = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return height2Scale(d)});
@@ -179,10 +180,18 @@ HTMLWidgets.widget({
                 setBrush(Number(message)-100,Number(message)+120);
             }
         );
+        Shiny.addCustomMessageHandler("mut_min",
+            function(message) {
+                mult = Number(message);
+                console.log(mult);
+                redraw();
+            }
+        );
         Shiny.addCustomMessageHandler("opac_f",
             function(message){
                 //console.log(message);
                 focus.selectAll(".line_f").attr("opacity",Number(message));
+                focus.selectAll("g").selectAll(".area_fwd").attr("opacity",Number(message)/5);
 //                focus.selectAll(".fwd").attr("opacity",Number(message));
             }
         );
@@ -190,6 +199,7 @@ HTMLWidgets.widget({
             function(message){
                 //console.log(message);
                 focus.selectAll(".line_r").attr("opacity",Number(message));
+                focus.selectAll("g").selectAll(".area_rev").attr("opacity",Number(message)/5);
 //                focus.selectAll(".rev").attr("opacity",Number(message));
             }
         );
@@ -447,19 +457,27 @@ HTMLWidgets.widget({
         
         
 
-        var a = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
+        var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
+        
         //var a = [x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]
         
-        var group_noise_f = focus.append("g");
-        group_noise_f.selectAll("path").data([a]).enter()
-            .append("path").attr("class","area").attr("d",noise_area)
-            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.3);
+        var group_noise_fwd = focus.append("g");
+        var group_noise_rev = focus.append("g");
+        group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
+            .append("path").attr("class","area area_fwd").attr("d",noise_area)
+            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.2);
+        
         //reverse strand
         if(intens_rev != ""){
+            var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
+            group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
+            .append("path").attr("class","area area_rev").attr("d",noise_area)
+            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.2);
             var group_a_r = focus.append("g");
     	    	var group_c_r = focus.append("g");
   		    	var group_g_r = focus.append("g");
   		    	var group_t_r = focus.append("g");
+            
             group_a_r.selectAll("path").data([intens_rev["A"]]).enter()
         			.append("path").attr("class","path line_r")
       				.attr("d",line)

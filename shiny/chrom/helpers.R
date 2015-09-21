@@ -91,7 +91,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         calls[    (mut_peak_pct_fwd > mut_min | mut_peak_pct_rev > mut_min)
                 & abs(mut_peak_pct_fwd - mut_peak_pct_rev) < mut_min
                 & (mut_s2n_abs_fwd > s2n_min | mut_s2n_abs_rev > s2n_min)
-                & mut_peak_call_fwd == mut_peak_call_rev
+                & mut_peak_call_fwd == mut_peak_call_rev 
                 & user_pri != "low qual"
                 & !set_by_user,
                 #c("user_pri", "user_sec") := list(paste(user_pri,tolower(mut_peak_call_fwd),sep=""), tolower(mut_peak_call_fwd))]
@@ -114,7 +114,9 @@ complement <- function(base){
     return (chartr("ATGC","TACG",base))
 }
 retranslate <- function(calls){
-    calls[coding_seq != 0]
+   
+    g_calls[coding_seq>0,AA_mod := rep(translate(g_calls[coding_seq>0,user_pri],frame=g_calls[coding_seq>0,ord_in_cod][1] -1),each=3)]
+    
 }
 
 #background noise absolute or relative to reference peak
