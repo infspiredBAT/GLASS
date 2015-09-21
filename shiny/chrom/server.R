@@ -106,7 +106,7 @@ shinyServer(function(input,output,session) {
     varcall <- reactive({
         if(loading_processed_files() != "not"){
             g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
-            #g_calls     <<- retranslate(g_calls)
+            g_calls     <<- retranslate(g_calls)
             #g_choices   <<- NULL
             g_choices   <<- g_calls[user_pri != reference & user_pri != "low qual" & trace_peak != "NA" & !is.na(gen_coord)]
             g_varcall   <<- TRUE

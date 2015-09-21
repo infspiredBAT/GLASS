@@ -115,7 +115,7 @@ complement <- function(base){
 }
 retranslate <- function(calls){
    
-    g_calls[coding_seq>0,AA_mod := rep(translate(g_calls[coding_seq>0,user_pri],frame=g_calls[coding_seq>0,ord_in_cod][1] -1),each=3)]
+    return(calls[coding_seq>0,AA_mod := rep(translate(calls[coding_seq>0,user_pri],frame=calls[coding_seq>0,ord_in_cod][1] -1),each=3)])
     
 }
 
