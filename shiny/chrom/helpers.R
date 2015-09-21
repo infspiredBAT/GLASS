@@ -48,16 +48,20 @@ annotate_calls <- function(calls,intens,intens_rev){
     if("call_rev" %in% colnames(calls)) calls[,ref_peak_abs_rev:=sum(iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
 
     #add information about the first and second highest peak
-    calls[,c("sample_peak_call_fwd","sample_peak_abs_fwd","sample_peak_pos_fwd") := i_w_p(1,iA_fwd,iC_fwd,iG_fwd,iT_fwd,pA_fwd,pC_fwd,pG_fwd,pT_fwd),by=1:nrow(calls)]
+    #calls[,c("sample_peak_call_fwd","sample_peak_abs_fwd","sample_peak_pos_fwd") := i_w_p(1,iA_fwd,iC_fwd,iG_fwd,iT_fwd,pA_fwd,pC_fwd,pG_fwd,pT_fwd),by=1:nrow(calls)]
+    calls[,c("sample_peak_call_fwd","sample_peak_abs_fwd") := i_wo_p(1,iA_fwd,iC_fwd,iG_fwd,iT_fwd),by=1:nrow(calls)]
     calls[,sample_peak_pct_fwd := ((100/ref_peak_abs_fwd)*sample_peak_abs_fwd)]
-    calls[,c("mut_peak_call_fwd","mut_peak_abs_fwd","mut_peak_pos_fwd") := i_w_p(2,iA_fwd,iC_fwd,iG_fwd,iT_fwd,pA_fwd,pC_fwd,pG_fwd,pT_fwd),by=1:nrow(calls)]
+    #calls[,c("mut_peak_call_fwd","mut_peak_abs_fwd","mut_peak_pos_fwd") := i_w_p(2,iA_fwd,iC_fwd,iG_fwd,iT_fwd,pA_fwd,pC_fwd,pG_fwd,pT_fwd),by=1:nrow(calls)]
+    calls[,c("mut_peak_call_fwd","mut_peak_abs_fwd") := i_wo_p(2,iA_fwd,iC_fwd,iG_fwd,iT_fwd),by=1:nrow(calls)]
     calls[,mut_peak_pct_fwd := ((100/ref_peak_abs_fwd)*mut_peak_abs_fwd)]
     calls[,mut_s2n_abs_fwd:=mut_peak_abs_fwd/noise_abs_fwd]
     calls[,sec_fwd:=sample_peak_call_fwd]                  #secondary call, threshold dependant
     if("call_rev" %in% colnames(calls)){
-        calls[,c("sample_peak_call_rev","sample_peak_abs_rev","sample_peak_pos_rev") := i_w_p(1,iA_rev,iC_rev,iG_rev,iT_rev,pA_rev,pC_rev,pG_rev,pT_rev),by=1:nrow(calls)]
+        #calls[,c("sample_peak_call_rev","sample_peak_abs_rev","sample_peak_pos_rev") := i_w_p(1,iA_rev,iC_rev,iG_rev,iT_rev,pA_rev,pC_rev,pG_rev,pT_rev),by=1:nrow(calls)]
+        calls[,c("sample_peak_call_rev","sample_peak_abs_rev") := i_wo_p(1,iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
         calls[,sample_peak_pct_rev := ((100/ref_peak_abs_rev)*sample_peak_abs_rev)]
-        calls[,c("mut_peak_call_rev","mut_peak_abs_rev","mut_peak_pos_rev") := i_w_p(2,iA_rev,iC_rev,iG_rev,iT_rev,pA_rev,pC_rev,pG_rev,pT_rev),by=1:nrow(calls)]
+        #calls[,c("mut_peak_call_rev","mut_peak_abs_rev","mut_peak_pos_rev") := i_w_p(2,iA_rev,iC_rev,iG_rev,iT_rev,pA_rev,pC_rev,pG_rev,pT_rev),by=1:nrow(calls)]
+        calls[,c("mut_peak_call_rev","mut_peak_abs_rev") := i_wo_p(2,iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
         calls[,mut_peak_pct_rev := ((100/ref_peak_abs_rev)*mut_peak_abs_rev)]
         calls[,mut_s2n_abs_rev:=mut_peak_abs_rev/noise_abs_rev]
         calls[,sec_rev:=sample_peak_call_rev]

@@ -51,7 +51,7 @@ get_call_data <- function(data, data_rev){
         )
         calls <- cbind(calls,intens_calls)
         trace_peak_fwd <- sapply(1:nrow(data@peakAmpMatrix),function(x) trace_peak_me2(data@peakAmpMatrix[x,],data@peakPosMatrix[x,]))
-        trace_peak_rev <- sapply(1:nrow(data_rev@peakAmpMatrix),function(x) trace_peak_me2(data_rev@peakAmpMatrix[x,],data_rev@peakAmpMatrix[x,]))
+        trace_peak_rev <- sapply(1:nrow(data_rev@peakAmpMatrix),function(x) trace_peak_me2(data_rev@peakAmpMatrix[x,],data_rev@peakPosMatrix[x,]))
         setkey(res[[2]],id)
         if(length(res[[3]]) > 0) {
             setkey(calls,id)
