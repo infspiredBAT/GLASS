@@ -77,8 +77,8 @@ get_intens_calls <- function(calls_fwd,intens_fwd,calls_rev,intens_rev){
         return(calls_intens_fwd)
         })
     calls_intens_rev <- numeric(length(calls_rev))
-    res_rev <- lapply(1:4,function(x) {
-        calls_intens_rev[which(calls_rev != "-")] <- intens_rev[,x]
+    res_rev <- lapply(4:1,function(x) {
+        calls_intens_rev[which(calls_rev != "-")] <- rev(intens_rev[,x])
         return(calls_intens_rev)
     })
     return(data.table(iA_fwd    = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]],iA_rev    = res_rev[[1]],iC_rev = res_rev[[2]],iG_rev = res_rev[[3]],iT_rev = res_rev[[4]]))
