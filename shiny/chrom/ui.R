@@ -82,6 +82,9 @@ shinyUI(
 			tabPanel('calls', value = 'call_table', icon = icon("table"),
 				 shiny::dataTableOutput("call_table")
  			),
+			tabPanel('aln', value = 'aln', icon = icon("table"),
+			     verbatimTextOutput("aln")
+			),
 			tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
 		         shiny::dataTableOutput("intens_table")
 			),
