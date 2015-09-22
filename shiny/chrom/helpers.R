@@ -91,7 +91,13 @@ complement <- function(base){
     return (chartr("ATGC","TACG",base))
 }
 retranslate <- function(calls){
-    return(calls[coding_seq>0,AA_mod := rep(translate(calls[coding_seq>0,user_sample],frame=calls[coding_seq>0,ord_in_cod][1] -1),each=3)])
+
+  coding <- calls[coding_seq>0,list(coding_seq,codon,ord_in_cod,user_sample)]
+  
+  while(coding[nrow(coding),ord_in_cod] != 3)
+  
+  return(calls[coding_seq>0,AA_mod := rep(translate(calls[coding_seq>0,user_sample],frame=calls[coding_seq>0,ord_in_cod][1] -1),each=3)])
+
 }
 
 #background noise absolute or relative to reference peak

@@ -2,6 +2,7 @@ library(zoo)           #for the rolling mean function
 library(seqinr)
 
 g_base_noise <<- 2
+g_calibration_length <<- 30
 
 trace_peak_me <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
     mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[p])
