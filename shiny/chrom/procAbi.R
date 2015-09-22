@@ -76,15 +76,18 @@ get_call_data <- function(data, data_rev){
 }
 
 create_consensus_seq <- function(fwd_seq,rev_seq,intens_tab){
+    intens_tab <- copy(intens_tab)
     fwd_noise <- apply(intens_tab[,1:4,with = F],1,get_noise)
     rev_noise <- apply(intens_tab[,5:8,with = F],1,get_noise)
+    fwd_noise[min(which(fwd_noise < 1)):(min(which(fwd_noise < 1)) + g_calibration_length)] <- 1
+    rev_noise[max(which(rev_noise < 1)):(max(which(rev_noise < 1)) - g_calibration_length)] <- 1
     consensus_seq <- fwd_seq
     consensus_seq[which(fwd_noise > rev_noise)] <- rev_seq[which(fwd_noise > rev_noise)]
     return(consensus_seq)
 }
 
 get_noise <- function(row){
-    return((mean(row[order(row)[c(1,2)]]) + g_base_noise) / (row[which.max(row)]  + g_base_noise))
+    return((mean(row[-which.max(row)]) + g_base_noise) / (row[which.max(row)]  + g_base_noise))
 }
 
 get_intens_calls <- function(calls_fwd,intens_fwd,calls_rev=NULL,intens_rev=NULL){
