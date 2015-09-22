@@ -48,15 +48,15 @@ HTMLWidgets.widget({
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 	      var brush = d3.svg.brush().on("brushend", brushed);
-        
-        var label_pos = {}        //map for pisitioning labels representing called bases 
-        label_pos["reference"] = 10;
-        label_pos["call"]      = 28;
-        label_pos["sec_fwd"]   = 38;
-        label_pos["call_rev"]  = 58;
-        label_pos["sec_rev"]   = 68;
-        label_pos["user_pri"]  = 58;  // + rev
-        label_pos["user_sec"]  = 70;  // + rev
+
+        var label_pos = {}        //map for pisitioning labels representing called bases
+        label_pos["reference"]      = 10;
+        label_pos["call"]           = 28;
+        label_pos["mut_call_fwd"]   = 38;
+        label_pos["call_rev"]       = 58;
+        label_pos["mut_call_rev"]   = 68;
+        label_pos["user_sample"]    = 58;  // + rev
+        label_pos["user_mut"]       = 70;  // + rev
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
@@ -91,19 +91,19 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("text.seq").data(calls).enter() //reference
   	            .append("text")
                 .attr("class",function(d){
-                    if(label.indexOf("sec") > -1){
-                        return "peak_label short sec";
+                    if(label.indexOf("mut") > -1){
+                        return "peak_label short mut";
                     }else if(label.indexOf("user")> -1){
                         return "peak_label short user";
-                    }else{return "peak_label short";}    
+                    }else{return "peak_label short";}
                 })
                 .text(function(d){
-                    if(label.indexOf("sec") > -1){
+                    if(label.indexOf("mut") > -1){
                         return d[label].toLowerCase();
                     }else if(label.indexOf("user") > -1 && d[label]==="low qual"){
                         return "N";}
                     else {
-                        return d[label];}  
+                        return d[label];}
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
@@ -121,7 +121,7 @@ HTMLWidgets.widget({
                     else if (d[label] === "G"){ return "#000000"; }
                     else if (d[label] === "T"){ return "#FF0000"; }
                     else if (d[label] === "-"){ return "white"; }
-                    else    {                   return "orange"; }});  
+                    else    {                   return "orange"; }});
         }
         function showVarInMap(choices){
             //genomic
@@ -151,11 +151,11 @@ HTMLWidgets.widget({
   				      .attr("y2",49)
   				      .attr("stroke-width",3)
   				      .attr("stroke",function(d) {
-  				          if      (d["user_pri"] === "A"){ return "#33CC33"; }
-  				          else if (d["user_pri"] === "C"){ return "#0000FF"; }
-  				          else if (d["user_pri"] === "G"){ return "#000000"; }
-  				          else if (d["user_pri"] === "T"){ return "#FF0000"; }
-  				          else if (d["user_pri"] === "-"){ return "white"; }
+  				          if      (d["user_sample"] === "A"){ return "#33CC33"; }
+  				          else if (d["user_sample"] === "C"){ return "#0000FF"; }
+  				          else if (d["user_sample"] === "G"){ return "#000000"; }
+  				          else if (d["user_sample"] === "T"){ return "#FF0000"; }
+  				          else if (d["user_sample"] === "-"){ return "white"; }
   				          else    {                        return "yellow";  }});
 /*
   			context.selectAll("text.choices.coord").data(choices).enter()
@@ -227,7 +227,7 @@ HTMLWidgets.widget({
                 if(from < 0){from=0};
                 to   = (ext[1]+ten);
                 //if(to > width){to = width}; must get the scales right to set boundaries
-              
+
                 setBrush(from,to);}
         };
         function brushMoveLeft(){
@@ -240,7 +240,7 @@ HTMLWidgets.widget({
                 if(from < 0){from=0};
                 to   = (ext[1]-(ext[0]-from));
                 setBrush(from,to);}
-          
+
         };
         function brushMoveRight(){
             return function(event) {
@@ -260,35 +260,35 @@ HTMLWidgets.widget({
             .on('↓', brushZoomOut())
             );
         transpose = function(a) {
-        
+
           // Calculate the width and height of the Array
           var w = a.length ? a.length : 0,
             h = a[0] instanceof Array ? a[0].length : 0;
-        
+
           // In case it is a zero matrix, no transpose routine needed.
           if(h === 0 || w === 0) { return []; }
-        
+
           /**
            * @var {Number} i Counter
            * @var {Number} j Counter
            * @var {Array} t Transposed data is stored in this array.
            */
           var i, j, t = [];
-        
+
           // Loop through every item in the outer array (height)
           for(i=0; i<h; i++) {
-        
+
             // Insert a new row (array)
             t[i] = [];
-        
+
             // Loop through every item per item in outer array (width)
             for(j=0; j<w; j++) {
-        
+
               // Save transposed data.
               t[i][j] = a[j][i];
             }
           }
-        
+
           return t;
         };
         //passing arguments
@@ -423,12 +423,12 @@ HTMLWidgets.widget({
   				.attr("x",function(d){return widthScale(d["start"]);})
   				.attr("y",60)
   				.attr("opacity",0.6)
-  				.text(function(d){return d["id"];}) 
+  				.text(function(d){return d["id"];})
   				.attr("fill","black");
 
   			brush.x(width2Scale);
 
-  			var group_a = focus.append("g");  
+  			var group_a = focus.append("g");
   			var group_c = focus.append("g");
   			var group_g = focus.append("g");
   			var group_t = focus.append("g");
@@ -454,19 +454,19 @@ HTMLWidgets.widget({
   				.attr("d",line)
   				.attr("fill","none")
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
-        
-        
+
+
 
         var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
-        
+
         //var a = [x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]
-        
+
         var group_noise_fwd = focus.append("g");
         var group_noise_rev = focus.append("g");
         group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
             .append("path").attr("class","area area_fwd").attr("d",noise_area)
             .attr("fill","#000000").attr("stroke","none").attr("opacity",0.2);
-        
+
         //reverse strand
         if(intens_rev != ""){
             var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
@@ -477,7 +477,7 @@ HTMLWidgets.widget({
     	    	var group_c_r = focus.append("g");
   		    	var group_g_r = focus.append("g");
   		    	var group_t_r = focus.append("g");
-            
+
             group_a_r.selectAll("path").data([intens_rev["A"]]).enter()
         			.append("path").attr("class","path line_r")
       				.attr("d",line)
@@ -520,15 +520,15 @@ HTMLWidgets.widget({
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
   		        .attr("y",-2)
   		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
-              instance.setPeakLabel(calls,"reference",0); 
+              instance.setPeakLabel(calls,"reference",0);
               instance.setPeakLabel(calls,"call",0);
-              instance.setPeakLabel(calls,"sec_fwd",0);
+              instance.setPeakLabel(calls,"mut_call_fwd",0);
               if(rev!==0){
                   instance.setPeakLabel(calls,"call_rev",0);
-                  instance.setPeakLabel(calls,"sec_rev",0);
+                  instance.setPeakLabel(calls,"mut_call_rev",0);
               }
-              instance.setPeakLabel(calls,"user_pri",rev);
-              instance.setPeakLabel(calls,"user_sec",rev);
+              instance.setPeakLabel(calls,"user_sample",rev);
+              instance.setPeakLabel(calls,"user_mut",rev);
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
                 .append("text").attr("class","peak_label short")
                 .text(function(d){
@@ -621,12 +621,12 @@ HTMLWidgets.widget({
                 instance.showVarInMap(choices);
                 instance.choices = x.choices;
                 instance.focus.selectAll(".user").remove();
-                instance.focus.selectAll(".sec").remove();
-                instance.setPeakLabel(calls,"sec_fwd",0);
-                if(rev!==0)instance.setPeakLabel(calls,"sec_rev",0);
-                instance.setPeakLabel(calls,"user_pri",rev);
-                instance.setPeakLabel(calls,"user_sec",rev);
-  
+                instance.focus.selectAll(".mut").remove();
+                instance.setPeakLabel(calls,"mut_call_fwd",0);
+                if(rev!==0)instance.setPeakLabel(calls,"mut_call_rev",0);
+                instance.setPeakLabel(calls,"user_sample",rev);
+                instance.setPeakLabel(calls,"user_mut",rev);
+
                 instance.focus.selectAll(".varind").remove();
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
                     .append("line").attr("class","peak_label short line varind")

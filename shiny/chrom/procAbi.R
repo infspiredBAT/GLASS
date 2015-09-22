@@ -19,17 +19,15 @@ trace_peak_me2 <- function(i,p){
 get_call_data <- function(data, data_rev){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     deletions <- list()
-    qual  <- NA
     if(is.null(data_rev)) {
         pri   <- as.character(data@primarySeq)
         res   <- generate_ref(pri)
         calls <- data.table(id        = seq_along(data@primarySeq)
-                           ,user_pri  = str_split(data@primarySeq,pattern="")[[1]][seq_along(data@primarySeq)]
+                           ,user_sample  = str_split(data@primarySeq,pattern="")[[1]][seq_along(data@primarySeq)]
                            ,call      = str_split(data@primarySeq,pattern="")[[1]][seq_along(data@primarySeq)]
                            ,reference = str_split(data@primarySeq,pattern="")[[1]][seq_along(data@primarySeq)]
                            ,pA_fwd    = data@peakPosMatrix[,1],pC_fwd = data@peakPosMatrix[,2],pG_fwd = data@peakPosMatrix[,3],pT_fwd = data@peakPosMatrix[,4]
                            ,iA_fwd    = data@peakAmpMatrix[,1],iC_fwd = data@peakAmpMatrix[,2],iG_fwd = data@peakAmpMatrix[,3],iT_fwd = data@peakAmpMatrix[,4]
-                           ,quality   = qual
         )
         intens_calls <- get_intens_calls(pri,data@peakAmpMatrix)
         calls[,trace_peak := trace_peak_me(1,iA_fwd,iC_fwd,iG_fwd,iT_fwd,pA_fwd,pC_fwd,pG_fwd,pT_fwd),by=1:nrow(calls)]
@@ -38,7 +36,7 @@ get_call_data <- function(data, data_rev){
             setkey(calls,id)
             add <- calls[as.integer(res[[3]]),]
             data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
-            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_pri := "-"])
+            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_sample := "-"])
         }
         trace_peak_fwd <- sapply(1:nrow(data@peakAmpMatrix),function(x) trace_peak_me2(data@peakAmpMatrix[x,],data@peakPosMatrix[x,]))
         trace_peak_rev <- NULL
@@ -49,9 +47,9 @@ get_call_data <- function(data, data_rev){
         intens_calls <- get_intens_calls(user_align[[1]],data@peakAmpMatrix,user_align[[2]],data_rev@peakAmpMatrix)
         consensus_seq <- create_consensus_seq(user_align[[1]],user_align[[2]],intens_calls)
         res <- generate_ref(paste(consensus_seq,collapse = ""))
-        
+
         calls <- data.table(id         = seq_along(consensus_seq)
-                            ,user_pri  = consensus_seq
+                            ,user_sample  = consensus_seq
                             ,call      = user_align[[1]]
                             ,call_rev  = user_align[[2]]
                             ,reference = consensus_seq
@@ -64,7 +62,7 @@ get_call_data <- function(data, data_rev){
             setkey(calls,id)
             add <- calls[as.integer(res[[3]]),]
             data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
-            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,call_rev := "-"][,user_pri := "-"])
+            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,call_rev := "-"][,user_sample := "-"])
         }
     }
 
@@ -102,10 +100,10 @@ get_intens_calls <- function(calls_fwd,intens_fwd,calls_rev=NULL,intens_rev=NULL
             return(calls_intens_rev)
         })
         return(data.table(iA_fwd = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]],iA_rev = res_rev[[1]],iC_rev = res_rev[[2]],iG_rev = res_rev[[3]],iT_rev = res_rev[[4]]))
-    
+
     }
     return(data.table(iA_fwd = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]]))
-    
+
 }
 
 generate_ref <-function(user_seq){
@@ -308,7 +306,7 @@ get_intensities <- function(data,data_rev=NULL,trace_peak_fwd,trace_peak_rev,cal
         }
     }
 
-    
+
     intens <- normalize_peak_width(intens,trace_peak_fwd,11)
     intens <- setnames(data.table(intens),c("A","C","G","T"))
     calls  <- calls[,trace_peak:=rescale_call_positions(trace_peak_fwd[1],nrow(calls),11)]
