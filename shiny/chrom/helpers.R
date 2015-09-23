@@ -49,13 +49,13 @@ annotate_calls <- function(calls,intens,intens_rev){
         calls[,mut_call_rev:=sample_peak_base_rev]
     }
     calls[,set_by_user:=FALSE]
-    calls[,cons:=user_sample]
+    calls[,cons:=user_pri]
     return(calls)
 }
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
-    calls[set_by_user == FALSE, user_sample := cons]
+    calls[set_by_user == FALSE, user_pri := cons]
     calls[set_by_user == FALSE, user_mut := cons]
 
     # calls[(rm7qual < qual_thres | quality < qual_thres) & set_by_user == FALSE, user_sample := "low qual"]
@@ -132,4 +132,39 @@ i_w_p <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
     else if (mut_peak == iC) return(list("C",mut_peak,pC))
     else if (mut_peak == iG) return(list("G",mut_peak,pG))
     else if (mut_peak == iT) return(list("T",mut_peak,pT))
+}
+
+report_hetero_indels <- function(calls){
+    rev <- !is.null(calls[["call_rev"]])
+    if(rev) {
+        secondary_seq <- paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = "")
+    } else secondary_seq <- paste(calls[["mut_call_fwd"]],collapse = "")
+    primary_seq <- paste(calls[["user_pri"]],collapse = "")
+    indel_align <- pairwiseAlignment(primary_seq, secondary_seq,type = "local",substitutionMatrix = sm,gapOpening = -20, gapExtension = -0.5)
+    writePairwiseAlignments(indel_align, block.width = 150)
+    cat("identified deletions:\n")
+    tab <- stringi::stri_locate_all_regex(compareStrings(indel_align),"[\\+]+")[[1]] + start(pattern(indel_align))
+    if(is.na(tab[1])) cat("no deletions")
+    else print(tab)
+    cat("identified insertions:\n")
+    tab <- stringi::stri_locate_all_regex(compareStrings(indel_align),"[\\-]+")[[1]]+ start(pattern(indel_align))
+    if(is.na(tab[1])) cat("no insertions")
+    else print(tab)
+}
+
+get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
+    names <- structure(1:4,names = c("A","C","G","T"))
+    sm <- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
+    pa <- pairwiseAlignment(gsub(" ","",paste(mut_fwd,collapse = "")), gsub(" ","",paste(mut_rev,collapse = "")),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+    fwd <- strsplit(as.character(pattern(pa)),"")[[1]]
+    rev <- strsplit(as.character(subject(pa)),"")[[1]]
+    fwd_i <- numeric(length(fwd))
+    rev_i <- numeric(length(rev))
+    fwd_start <- min(which(mut_fwd != " ")) + start(pattern(pa)) - 1
+    rev_start <- min(which(mut_rev != " ")) + start(subject(pa)) - 1
+    fwd_i[which(fwd != "-")] <- diag(as.matrix(intens_tab[,1:4,with = F])[fwd_start:(fwd_start + length(which(fwd != "-"))),names[fwd[which(fwd != "-")]]])
+    rev_i[which(rev != "-")] <- diag(as.matrix(intens_tab[,5:8,with = F])[rev_start:(rev_start + length(which(rev != "-"))),names[rev[which(rev != "-")]]])
+    cons <- fwd
+    cons[which(rev_i > fwd_i)] <- rev[which(rev_i > fwd_i)]
+    return(cons)
 }
