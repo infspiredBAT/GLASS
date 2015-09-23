@@ -27,7 +27,7 @@ get_call_data <- function(data, data_rev){
         qual    <- data$PCON.2
         res     <- generate_ref(data$PBAS.1)
         calls <- data.table(id         = seq_along(data$PLOC.1)
-                            ,user_pri   = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
+                            ,user_sample = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
                             ,call       = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
                             ,reference  = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
                             ,trace_peak = data$PLOC.1
@@ -38,14 +38,14 @@ get_call_data <- function(data, data_rev){
             setkey(calls,id)
             add <- calls[as.integer(res[[3]]),]
             data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
-            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_pri := "-"])
+            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,user_sample := "-"])
         }
 
     } else {
         user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,data$PCON.2,data_rev$PCON.2)
         res <- generate_ref(paste(user_align[[1]],collapse = ""))
         calls <- data.table(id              = seq_along(user_align[[1]])
-                            ,user_pri       = user_align[[1]]
+                            ,user_sample       = user_align[[1]]
                             ,call           = user_align[[2]]
                             ,call_rev       = user_align[[3]]
                             ,reference      = user_align[[1]]
@@ -60,7 +60,7 @@ get_call_data <- function(data, data_rev){
             setkey(calls,id)
             add <- calls[as.integer(res[[3]]),]
             data.table::set(add,NULL,"reference",unlist(strsplit(res[[2]][type == "I"][["replace"]],"")))
-            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,call_rev := "-"][,user_pri := "-"])
+            calls <- rbind(calls,add[,id := res[[3]]][,call := "-"][,call_rev := "-"][,user_sample := "-"])
         }
     }
 

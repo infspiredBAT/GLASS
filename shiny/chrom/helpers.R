@@ -49,13 +49,13 @@ annotate_calls <- function(calls,intens,intens_rev){
         calls[,mut_call_rev:=sample_peak_base_rev]
     }
     calls[,set_by_user:=FALSE]
-    calls[,cons:=user_pri]
+    calls[,cons:=user_sample]
     return(calls)
 }
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
-    calls[set_by_user == FALSE, user_pri := cons]
+    calls[set_by_user == FALSE, user_sample := cons]
     calls[set_by_user == FALSE, user_mut := cons]
 
     # calls[(rm7qual < qual_thres | quality < qual_thres) & set_by_user == FALSE, user_sample := "low qual"]
@@ -139,7 +139,7 @@ report_hetero_indels <- function(calls){
     if(rev) {
         secondary_seq <- paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = "")
     } else secondary_seq <- paste(calls[["mut_call_fwd"]],collapse = "")
-    primary_seq <- paste(calls[["user_pri"]],collapse = "")
+    primary_seq <- paste(calls[["user_sample"]],collapse = "")
     indel_align <- pairwiseAlignment(primary_seq, secondary_seq,type = "local",substitutionMatrix = sm,gapOpening = -20, gapExtension = -0.5)
     writePairwiseAlignments(indel_align, block.width = 150)
     cat("identified deletions:\n")

@@ -97,7 +97,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not"){
             g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
             g_calls     <<- retranslate(g_calls)
-            g_choices   <<- g_calls[user_pri != reference & trace_peak != "NA" & !is.na(gen_coord)]
+            g_choices   <<- g_calls[user_sample != reference & trace_peak != "NA" & !is.na(gen_coord)]
             g_varcall   <<- TRUE
         }
         return(g_varcall)
@@ -131,9 +131,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_variance != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_sample,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_sample,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -146,7 +146,7 @@ shinyServer(function(input,output,session) {
         input$execute_btn
         isolate({
             if(loading_processed_files() != "not") {
-                g_calls[id==as.numeric(input$choose_variance)]$user_pri <<- input$change_peak
+                g_calls[id==as.numeric(input$choose_variance)]$user_sample <<- input$change_peak
                 g_calls[id==as.numeric(input$choose_variance)]$set_by_user <<- TRUE
             }
         })
@@ -211,7 +211,7 @@ shinyServer(function(input,output,session) {
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
 
-                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,user_pri,call,reference)])
+                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,user_sample,call,reference)])
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
     }, options = list(dom = "t",orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2), orderable=F, title="")))
@@ -298,7 +298,7 @@ shinyServer(function(input,output,session) {
             if(length(g_selected) != 0) {
                 #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
                 for(i in as.numeric(g_selected)) {
-                    g_calls[id==i,]$user_pri <<- g_calls[id==i,]$reference
+                    g_calls[id==i,]$user_sample <<- g_calls[id==i,]$reference
                     g_calls[id==i,]$set_by_user <<- TRUE
                 }
                 #g_selected <<-  NULL
