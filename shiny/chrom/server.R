@@ -50,20 +50,27 @@ shinyServer(function(input,output,session) {
             }
 
             withProgress(message = paste('processing...',sep=" "), value = 1, {
-
-                fwd_sangerseq <- readsangerseq(fwd_file)
-                fwd_basecalls <- makeBaseCalls(fwd_sangerseq,ratio=0.1)#input$makeBaseCalls_ratio)
-                if(!is.null(rev_file)) {
-                    rev_sangerseq <- readsangerseq(rev_file)
-                    rev_basecalls <- makeBaseCalls(rev_sangerseq,ratio=0.1)}#input$makeBaseCalls_ratio)}
-                else rev_basecalls <- NULL
-                called <- NULL
+                # TODO - make sure shiny only allows ab1 files (???)
+                #        - otherwise chceck if file has correct format
+                
                 tryCatch(
-                    called <- suppressWarnings(get_call_data(fwd_basecalls,rev_basecalls)),
+                    g_abif <- sangerseqR::read.abif(fwd_file)@data,
+                    error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",e$message ))})
+                if(!is.null(rev_file)) {
+                    tryCatch(
+                        g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
+                        error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",e$message ))})
+                }
+                else g_abif_rev <- NULL
+                
+                res <- NULL
+                #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
+                tryCatch(
+                    called <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
                     error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
 
                 if(!is.null(called)){
-                    intensified         <-  get_intensities(fwd_basecalls,rev_basecalls,called$trace_peak_fwd,called$trace_peak_rev,calls=called$calls,deletions=called$deletions,norm=FALSE)
+                    intensified         <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE)
                     calls               <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev)
                     g_intens            <<- intensified$intens
                     g_intens_rev        <<- intensified$intens_rev
@@ -90,7 +97,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not"){
             g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
             g_calls     <<- retranslate(g_calls)
-            g_choices   <<- g_calls[user_sample != reference & trace_peak != "NA" & !is.na(gen_coord)]
+            g_choices   <<- g_calls[user_pri != reference & trace_peak != "NA" & !is.na(gen_coord)]
             g_varcall   <<- TRUE
         }
         return(g_varcall)
@@ -109,43 +116,10 @@ shinyServer(function(input,output,session) {
 
     output$aln <- renderPrint({
         if(loading_processed_files() != "not" & varcall() ) {
-            sm <- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
-
-#             cat(paste0(g_calls[,user_sample],collapse=""))
-#             cat(paste("\n"))
-#             cat(paste0(g_calls[,user_mut],collapse=""))
-#             cat(paste("\n"))
-            cat(paste("user_sample vs user_mut\n"))
-            pa <- pairwiseAlignment(paste0(g_calls[,user_sample],collapse=""), paste0(g_calls[,user_mut],collapse=""),type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
-            writePairwiseAlignments(pa, block.width = 150)
-
-#             cat(paste0(g_calls[call != "-",call],collapse=""))
-#             cat(paste("\n"))
-#             cat(paste0(g_calls[mut_call_fwd != " ",mut_call_fwd],collapse=""))
-#             cat(paste("\n"))
-            cat(paste("call vs mut_call_fwd\n"))
-            pa <- pairwiseAlignment(paste0(g_calls[call != "-",call],collapse=""), paste0(g_calls[mut_call_fwd != " ",mut_call_fwd],collapse=""),type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
-            writePairwiseAlignments(pa, block.width = 150)
-
-            if(!is.null(g_intens_rev)) {
-#                 cat(paste0(g_calls[call != "-",call],collapse=""))
-#                 cat(paste("\n"))
-#                 cat(paste0(g_calls[mut_call_fwd != " ",mut_call_fwd],collapse=""))
-#                 cat(paste("\n"))
-                cat(paste("call_rev vs mut_call_rev\n"))
-                pa <- pairwiseAlignment(paste0(g_calls[call_rev != "-",call_rev],collapse=""), paste0(g_calls[mut_call_rev != " ",mut_call_rev],collapse=""),type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
-                writePairwiseAlignments(pa, block.width = 150)
-
-#                 cat(paste0(g_calls[mut_call_fwd != " ",mut_call_fwd],collapse=""))
-#                 cat(paste("\n"))
-#                 cat(paste0(g_calls[mut_call_rev != " ",mut_call_rev],collapse=""))
-#                 cat(paste("\n"))
-                cat(paste("mut_call_fwd vs mut_call_rev\n"))
-                pa <- pairwiseAlignment(paste0(g_calls[mut_call_fwd != " ",mut_call_fwd],collapse=""), paste0(g_calls[mut_call_rev != " ",mut_call_rev],collapse=""),type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
-                writePairwiseAlignments(pa, block.width = 150)
-            }
+            return(report_trans_indels(g_calls))
         }
     })
+
 #     output$muts <- renderPrint({
 #         if(loading_processed_files() != "not" & varcall() ) {
 #             cat("soon")
@@ -157,9 +131,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_variance != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_sample,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_sample,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_pri,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -172,7 +146,7 @@ shinyServer(function(input,output,session) {
         input$execute_btn
         isolate({
             if(loading_processed_files() != "not") {
-                g_calls[id==as.numeric(input$choose_variance)]$user_sample <<- input$change_peak
+                g_calls[id==as.numeric(input$choose_variance)]$user_pri <<- input$change_peak
                 g_calls[id==as.numeric(input$choose_variance)]$set_by_user <<- TRUE
             }
         })
@@ -237,7 +211,7 @@ shinyServer(function(input,output,session) {
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
 
-                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,user_sample,call,reference)])
+                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,user_pri,call,reference)])
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
     }, options = list(dom = "t",orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2), orderable=F, title="")))
@@ -324,7 +298,7 @@ shinyServer(function(input,output,session) {
             if(length(g_selected) != 0) {
                 #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
                 for(i in as.numeric(g_selected)) {
-                    g_calls[id==i,]$user_sample <<- g_calls[id==i,]$reference
+                    g_calls[id==i,]$user_pri <<- g_calls[id==i,]$reference
                     g_calls[id==i,]$set_by_user <<- TRUE
                 }
                 #g_selected <<-  NULL
