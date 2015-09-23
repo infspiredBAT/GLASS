@@ -49,14 +49,21 @@ HTMLWidgets.widget({
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 	      var brush = d3.svg.brush().on("brushend", brushed);
 
-        var label_pos = {}        //map for pisitioning labels representing called bases
-        label_pos["reference"]      = 10;
-        label_pos["call"]           = 28;
-        label_pos["mut_call_fwd"]   = 38;
-        label_pos["call_rev"]       = 58;
-        label_pos["mut_call_rev"]   = 68;
-        label_pos["user_sample"]    = 58;  // + rev
-        label_pos["user_mut"]       = 70;  // + rev
+        var label_pos = {}        //map for pisitioning labels representing called base
+        
+        label_pos["reference"]      =  10;
+        label_pos["aa"]             =  24;
+        label_pos["call"]           =  40;
+        label_pos["mut_call_fwd"]   =  50;
+        label_pos["call_rev"]       =  70;
+        label_pos["mut_call_rev"]   =  80;
+        label_pos["user_sample"]    =  70;  // + rev
+        label_pos["user_mut"]       =  82;  // + rev
+        label_pos["aa_mod"]         = 100;  // + rev
+        label_pos["codon"]          = 122;  // + rev
+        label_pos["gen_coord"]      = 132;  // + rev
+        label_pos["intrex"]         = 142;  // + rev
+        
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
@@ -297,7 +304,8 @@ HTMLWidgets.widget({
             svg:     svg,
             line:    line,
             noise_area: noise_area,
-            transpose: transpose,
+            transpose:  transpose,
+            label_pos:  label_pos,
             linec:   linec,
             context: context,
 	          brush:   brush,
@@ -503,7 +511,7 @@ HTMLWidgets.widget({
       				.attr("stroke","#FF0000").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
             }
-
+            console.log(calls);
             //trace peak labels
             focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
   		        .append("rect").attr("class","peak_label q")
@@ -520,6 +528,17 @@ HTMLWidgets.widget({
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
   		        .attr("y",-2)
   		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
+            focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
+              .append("text").attr("class","peak_label short")
+              .text(function(d){
+                    if   (d["ord_in_cod"] == 1) {return d["AA_ref"].toUpperCase();}
+                    else {                       return ".";}})
+              .attr("text-anchor", "middle")
+              .attr("x",function(d){return widthScale(d["trace_peak"]);})
+              .on("click",function(d,i){instance.callShiny(d["id"]);})
+              .attr("y",instance.label_pos["aa"])
+              .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "11px")
+              .attr("stroke","#000000");
               instance.setPeakLabel(calls,"reference",0);
               instance.setPeakLabel(calls,"call",0);
               instance.setPeakLabel(calls,"mut_call_fwd",0);
@@ -530,14 +549,14 @@ HTMLWidgets.widget({
               instance.setPeakLabel(calls,"user_sample",rev);
               instance.setPeakLabel(calls,"user_mut",rev);
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
-                .append("text").attr("class","peak_label short")
+                .append("text").attr("class","peak_label short aa_mod")
                 .text(function(d){
-                    if   (d["ord_in_cod"] == 1) {return d["AA_ref"].toUpperCase();}
+                    if   (d["ord_in_cod"] == 1) {return d["AA_mod"];}
                     else {                       return ".";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",88+rev)
+                .attr("y",instance.label_pos["aa_mod"]+rev)
                 .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "11px")
                 .attr("stroke","#000000");
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
@@ -548,7 +567,7 @@ HTMLWidgets.widget({
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",(110+rev))
+                .attr("y",(instance.label_pos["codon"]+rev))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
                 .append("text").attr("class","peak_label")
@@ -556,7 +575,7 @@ HTMLWidgets.widget({
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",(120+rev))
+                .attr("y",(instance.label_pos["gen_coord"]+rev))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             focus.append("g").selectAll("text.exon_intron").data(calls).enter() //intrex
                 .append("text").attr("class","peak_label")
@@ -564,7 +583,7 @@ HTMLWidgets.widget({
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",(130+rev))
+                .attr("y",(instance.label_pos["intrex"]+rev))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             focus.selectAll(".peak_label").attr("visibility","hidden")
 /*
@@ -635,6 +654,18 @@ HTMLWidgets.widget({
                     .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
                     .attr("y2",280)
                     .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
+                instance.focus.selectAll("g").selectAll(".aa_mod").remove();
+                instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_mod
+                    .append("text").attr("class","peak_label short aa_mod")
+                    .text(function(d){
+                        if   (d["ord_in_cod"] == 1) {return d["AA_mod"];}
+                        else {                       return ".";}})
+                    .attr("text-anchor", "middle")
+                    .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
+                    .on("click",function(d,i){instance.callShiny(d["id"]);})
+                    .attr("y",instance.label_pos["aa_mod"]+rev)
+                    .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "11px")
+                    .attr("stroke","#000000");
 
   			} else { console.log(x) }
         }

@@ -97,6 +97,7 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not"){
             g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
             g_calls     <<- retranslate(g_calls)
+            
             g_choices   <<- g_calls[user_sample != reference & trace_peak != "NA" & !is.na(gen_coord)]
             g_varcall   <<- TRUE
         }
@@ -116,7 +117,7 @@ shinyServer(function(input,output,session) {
 
     output$aln <- renderPrint({
         if(loading_processed_files() != "not" & varcall() ) {
-            return(report_trans_indels(g_calls))
+            return(report_hetero_indels(g_calls))
         }
     })
 

@@ -2,7 +2,7 @@ annotate_calls <- function(calls,intens,intens_rev){
 
     #contains codons table
     load("../../data/codons.rdata")
-    calls <- merge(x = calls, y = codons[,list(gen_coord,codon,ord_in_cod,coding_seq,AA_ref=AA,AA_mod=AA)], by = "gen_coord", all.x = TRUE)
+    calls <- merge(x = calls, y = cod_table[,list(gen_coord,codon,ord_in_cod,coding_seq,AA_ref=AA,AA_mod=AA)], by = "gen_coord", all.x = TRUE)
     #reorder columns so that id is first (so that the checkbox from the shiny data table selects the correct value and the delete button knows what to delete)
     setcolorder(calls,c("id",colnames(calls)[-2]))
 
@@ -92,19 +92,19 @@ complement <- function(base){
 }
 retranslate <- function(calls){
 
-  coding <- calls[coding_seq>0,list(coding_seq,codon,ord_in_cod,user_sample)]
+  coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_sample)]
   push = 0
   while(coding[1,ord_in_cod]!=1){
-    coding<-rbind(coding,codons[coding_seq==(coding[1,coding_seq]-1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
+    coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
     setkey(coding,coding_seq)
     push = push +1
   }
   while(coding[nrow(coding),ord_in_cod] != 3){
-      coding<-rbind(coding,codons[coding_seq==(coding[nrow(coding),coding_seq]+1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
+      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
       setkey(coding,coding_seq)
   }
   trans <- translate(coding[,user_sample],frame = (coding[1,ord_in_cod]-1))
-  return(calls[coding_seq>0,AA_mod := rep(trans,each=3)[(1+push):(length(AA_mod)+push)]])
+  return(calls[ord_in_cod>0,AA_mod := rep(trans,each=3)[(1+push):(length(AA_mod)+push)]])
 
 }
 
@@ -146,7 +146,7 @@ report_hetero_indels <- function(calls){
     tab <- stringi::stri_locate_all_regex(compareStrings(indel_align),"[\\+]+")[[1]] + start(pattern(indel_align))
     if(is.na(tab[1])) cat("no deletions")
     else print(tab)
-    cat("identified insertions:\n")
+    cat("\nidentified insertions:\n")
     tab <- stringi::stri_locate_all_regex(compareStrings(indel_align),"[\\-]+")[[1]]+ start(pattern(indel_align))
     if(is.na(tab[1])) cat("no insertions")
     else print(tab)

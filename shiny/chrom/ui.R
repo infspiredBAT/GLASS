@@ -56,10 +56,11 @@ shinyUI(
 					column(1,
                         sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1),
 					    sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
-					    #sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12),
+					    
 					    #sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),
-					column(1
+					column(1,sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12)
+                 
 					),
 					column(1,
                         sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
