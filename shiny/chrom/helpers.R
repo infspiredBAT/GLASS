@@ -93,10 +93,18 @@ complement <- function(base){
 retranslate <- function(calls){
 
   coding <- calls[coding_seq>0,list(coding_seq,codon,ord_in_cod,user_sample)]
-  
-  while(coding[nrow(coding),ord_in_cod] != 3)
-  
-  return(calls[coding_seq>0,AA_mod := rep(translate(calls[coding_seq>0,user_sample],frame=calls[coding_seq>0,ord_in_cod][1] -1),each=3)])
+  push = 0
+  while(coding[1,ord_in_cod]!=1){
+    coding<-rbind(coding,codons[coding_seq==(coding[1,coding_seq]-1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
+    setkey(coding,coding_seq)
+    push = push +1
+  }
+  while(coding[nrow(coding),ord_in_cod] != 3){
+      coding<-rbind(coding,codons[coding_seq==(coding[nrow(coding),coding_seq]+1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
+      setkey(coding,coding_seq)
+  }
+  trans <- translate(coding[,user_sample],frame = (coding[1,ord_in_cod]-1))
+  return(calls[coding_seq>0,AA_mod := rep(trans,each=3)[(1+push):(length(AA_mod)+push)]])
 
 }
 
