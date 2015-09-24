@@ -77,6 +77,7 @@ shinyServer(function(input,output,session) {
                 else g_abif_rev <- NULL
 
                 res <- NULL
+                called <- NULL
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
                     called <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
