@@ -60,7 +60,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     calls[set_by_user == FALSE, user_sample := cons]
     calls[set_by_user == FALSE, user_mut := cons]
 
-    calls[quality <= qual_thres & set_by_user == FALSE, user_sample := "N"]
+    calls[rm7qual <= qual_thres & set_by_user == FALSE, user_sample := "N"]
 
     # mut
     if("call_rev" %in% colnames(calls)) {

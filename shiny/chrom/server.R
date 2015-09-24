@@ -305,8 +305,12 @@ shinyServer(function(input,output,session) {
 
     set_opacity <- observe({
         if(loading_processed_files() != "not"){
-            session$sendCustomMessage(type = "opac_f",message = paste0(input$opacity_fwd/100))
-            session$sendCustomMessage(type = "opac_r",message = paste0(input$opacity_rev/100))
+            opac_fwd <- 1 + (input$opacity/100)
+            opac_rev <- 1 - (input$opacity/100)
+            #if(opac_fwd>1)opac_fwd <- 1
+            #if(opac_rev>1)opac_rev <- 1
+            session$sendCustomMessage(type = "opac_f",message = paste0(opac_fwd))
+            session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
 

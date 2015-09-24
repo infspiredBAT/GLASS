@@ -106,7 +106,7 @@ generate_ref <-function(user_seq){
     ref_end <- as.numeric(sapply(ref_info,function(x) x[3]))
     refs <- DNAStringSet(refs[seq(2,length(refs),2)])
     align <- get_alignment(refs,user_seq,cores)
-    OK_align <- which(align$score / nchar(refs) > 0.8 | align$score > 50)
+    OK_align <- which(align$score / nchar(refs) > 0.85 | align$score > 50)
 
     seq_coverage <- logical(nchar(user_seq))
     for(index in OK_align[order(-(align$ref_starts + nchar(refs) - align$ref_ends - 1)[OK_align],align$score[OK_align],decreasing = T)]){

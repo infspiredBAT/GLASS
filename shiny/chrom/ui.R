@@ -55,12 +55,12 @@ shinyUI(
 					    sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
 					),
 					column(1,
-                        sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 50, value = 0),
+                        sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 50, value = 14),
                         sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 50, value = 12)
 					),
 					column(1,
-                        sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
-                        sliderInput("opacity_rev","rev trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5)
+                        #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
+                        sliderInput("opacity","trace opacity", ticks=FALSE, min = -100, max = 100, value = 0, step = 10)
                     ),
 					column(1,
                         sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 0, max = 200, value = 100, step = 10)
