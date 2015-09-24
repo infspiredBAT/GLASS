@@ -261,6 +261,11 @@ shinyServer(function(input,output,session) {
         }
     })
 
+    edit_indicator <- observe({
+        if(loading_processed_files() != "not") {
+          session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
+        }    
+    })
     goEdit_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$goEdit)) return()

@@ -47,7 +47,7 @@ HTMLWidgets.widget({
 	      var context = svg.append("g")
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-	      var brush = d3.svg.brush().on("brushend", brushed);
+	     var brush = d3.svg.brush().on("brushend", brushed);
 
         var label_pos = {}        //map for pisitioning labels representing called base
 
@@ -70,7 +70,8 @@ HTMLWidgets.widget({
             focus.selectAll("g").selectAll(".path").attr("d", line);
             focus.selectAll("g").selectAll(".area").attr("d",noise_area);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
-            focus.selectAll(".q").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
+            focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
+            focus.selectAll(".qual_rev").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".line").attr("x1",function(d){return widthScale(d["trace_peak"]);})
                                     .attr("x2",function(d){return widthScale(d["trace_peak"]);});
             //conditional visibility
@@ -79,7 +80,10 @@ HTMLWidgets.widget({
                 if(w==0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
                 focus.selectAll(".peak_label").attr("visibility","hidden");
-                if(w<800){focus.selectAll(".q").attr("visibility","visible")}
+                if(w<800){
+                  focus.selectAll(".qual_fwd").attr("visibility","visible");
+                  focus.selectAll(".qual_rev").attr("visibility","visible");
+                }
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
         }
@@ -101,7 +105,7 @@ HTMLWidgets.widget({
                     if(label.indexOf("mut") > -1){
                         return "peak_label short mut";
                     }else if(label.indexOf("user")> -1){
-                        return "peak_label short user";
+                        return "peak_label short user ".concat("id").concat(d["id"]);
                     }else{return "peak_label short";}
                 })
                 .text(function(d){
@@ -164,6 +168,22 @@ HTMLWidgets.widget({
   				          else if (d["user_sample"] === "T"){ return "#FF0000"; }
   				          else if (d["user_sample"] === "-"){ return "white"; }
   				          else    {                        return "yellow";  }});
+              context.selectAll("lines.choices").data(choices).enter()
+    			      .append("line")
+                .attr("class","varInMinimap context")
+  				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+  				      .attr("y1",38)
+  				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+  				      .attr("y2",49)
+  				      .attr("stroke-width",3)
+  				      .attr("stroke",function(d) {
+  				          if      (d["user_mut"] === "A"){ return "#33CC33"; }
+  				          else if (d["user_mut"] === "C"){ return "#0000FF"; }
+  				          else if (d["user_mut"] === "G"){ return "#000000"; }
+  				          else if (d["user_mut"] === "T"){ return "#FF0000"; }
+  				          else if (d["user_mut"] === "-"){ return "white"; }
+  				          else    {                        return "yellow";  }});
+                
 /*
   			context.selectAll("text.choices.coord").data(choices).enter()
   				.append("text").attr("class","varInMinimap")
@@ -181,7 +201,17 @@ HTMLWidgets.widget({
   		         .attr("y2",280)
   		         .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
         }
-
+        Shiny.addCustomMessageHandler("edit",
+            function(message) {
+                focus.selectAll(".".concat("id").concat(message))
+                .transition().delay(000).attr("opacity", 0)
+                .transition().delay(250).attr("opacity", 1)
+                .transition().delay(500).attr("opacity", 0)
+                .transition().delay(750).attr("opacity", 1)
+                .transition().delay(1000).attr("opacity", 0)
+                .transition().delay(1250).attr("opacity", 1);
+            }
+        );
         Shiny.addCustomMessageHandler("zoom",
             function(message) {
                 setBrush(Number(message)-100,Number(message)+120);
@@ -199,6 +229,7 @@ HTMLWidgets.widget({
                 //console.log(message);
                 focus.selectAll(".line_f").attr("opacity",Number(message));
                 focus.selectAll("g").selectAll(".area_fwd").attr("opacity",Number(message)/5);
+                focus.selectAll(".qual_fwd").attr("opacity",Number(message)*0.8);
 //                focus.selectAll(".fwd").attr("opacity",Number(message));
             }
         );
@@ -207,6 +238,7 @@ HTMLWidgets.widget({
                 //console.log(message);
                 focus.selectAll(".line_r").attr("opacity",Number(message));
                 focus.selectAll("g").selectAll(".area_rev").attr("opacity",Number(message)/5);
+                focus.selectAll(".qual_rev").attr("opacity",Number(message)*0.8);
 //                focus.selectAll(".rev").attr("opacity",Number(message));
             }
         );
@@ -513,21 +545,49 @@ HTMLWidgets.widget({
             }
             console.log(calls);
             //trace peak labels
-            focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
-  		        .append("rect").attr("class","peak_label q")
-  		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
-  		        .attr("y",0).attr("rx",1).attr("ry",1)
-  		        .attr("width",18)
-  		        .attr("height",function(d){return d["quality"];})
-  		        .attr("fill", "rgba(200,200,200,0.3)");
-            focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
-  		        .append("text").attr("class","peak_label")
-  		        .text(function(d){return d["quality"];})
-  		        .attr("text-anchor", "middle")
-  		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
-  		        .attr("y",-2)
-  		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
+            if(rev==0){
+                focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
+      		        .append("rect").attr("class","peak_label qual_fwd q")
+      		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
+      		        .attr("y",0).attr("rx",1).attr("ry",1)
+      		        .attr("width",18)
+      		        .attr("height",function(d){return d["quality"];})
+      		        .attr("fill", "rgba(200,200,200,0.3)");
+                focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
+      		        .append("text").attr("class","peak_label")
+      		        .text(function(d){return d["quality"];})
+      		        .attr("text-anchor", "middle")
+      		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                    .on("click",function(d,i){instance.callShiny(d["id"]);})
+      		        .attr("y",-2)
+      		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
+            }else{
+                focus.append("g").selectAll("qualities.fwd").data(calls).enter()  //quality box
+        	        .append("rect").attr("class","peak_label qual_fwd q")
+      		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
+      		        .attr("y",0).attr("rx",1).attr("ry",1)
+      		        .attr("width",9)
+      		        .attr("height",function(d){return d["rm7qual_fwd"];})
+      		        .attr("fill", "rgba(200,200,200,0.3)");
+                focus.append("g").selectAll("qualities.rev").data(calls).enter()  //quality box
+                  .append("rect").attr("class","peak_label  qual_rev q")
+      		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
+      		        .attr("y",0).attr("rx",1).attr("ry",1)
+      		        .attr("width",9)
+      		        .attr("height",function(d){return d["rm7qual_rev"];})
+      		        .attr("fill", "rgba(200,200,200,0.3)");  
+                  
+                focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
+      		        .append("text").attr("class","peak_label")
+      		        .text(function(d){return d["quality"];})
+      		        .attr("text-anchor", "middle")
+      		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                    .on("click",function(d,i){instance.callShiny(d["id"]);})
+      		        .attr("y",-2)
+      		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
+            }
+              
+              
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
               .append("text").attr("class","peak_label short")
               .text(function(d){
