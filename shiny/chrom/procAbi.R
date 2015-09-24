@@ -262,7 +262,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE) {
 
     rev <- !(is.null(data_rev))
 
-    intens     <- data.table(data$DATA.10,    data$DATA.12,    data$DATA.9,    data$DATA.11)
+    intens <- data.table(data$DATA.10,    data$DATA.12,    data$DATA.9,    data$DATA.11)
     if(rev) intens_rev <- data.table(data_rev$DATA.10,data_rev$DATA.12,data_rev$DATA.9,data_rev$DATA.11)
     else    intens_rev <- NULL
 
@@ -294,7 +294,6 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE) {
         }
     }
 
-
     intens <- normalize_peak_width(intens,data$PLOC.1,11)
     intens <- setnames(data.table(intens),c("A","C","G","T"))
     calls  <- calls[,trace_peak:=rescale_call_positions(data$PLOC.1[1],nrow(calls),11)]
@@ -305,7 +304,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE) {
         calls      <- calls[,trace_peak_rev:=rescale_call_positions(data_rev$PLOC.1[1],nrow(calls),11)]
     }
 
-    deletions     <- calls[call    =="-"][,id]
+    deletions <- calls[call=="-"][,id]
     if(rev) deletions_rev <- calls[call_rev=="-"][,id]
     else deletions_rev <- list()
 
@@ -318,7 +317,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE) {
         for(i in c(1:length(del_pos))){
             pos <- del_pos[i]
             for(i in 1:12){intens<-rbind(intens,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))}
-            rep <- rep -12
+            rep <- rep - 12
         }
         setkey(intens,id)
         intens[,id:=c(1:nrow(intens))]
@@ -333,7 +332,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE) {
         for(i in c(1:length(del_pos))){
             pos <- del_pos[i]
             for(i in 1:12){intens_rev<-rbind(intens_rev,list(A=0,C=0,G=0,T=0,id=(pos-6 +rep+ i/100)))}
-            rep <- rep -12
+            rep <- rep - 12
         }
         setkey(intens_rev,id)
         intens_rev[,id:=c(1:nrow(intens_rev))]
@@ -355,7 +354,7 @@ get_intens <-function(intens,vec,tag = "fwd"){
 }
 
 get_single_intens <- function(intens,call_vec){
-    res <- sapply(call_vec,function(x) get_window_intens(intens[max((x-6),0):min((x+6),length(intens))]))
+    res <- sapply(call_vec,function(x) get_window_intens(intens[max((x-5),0):min((x+5),length(intens))]))
     res[is.na(res)] <- 0
     return(res)
 }

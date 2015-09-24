@@ -38,17 +38,19 @@ shinyUI(
 					    # this should be replaced by direct interaction with graph or data table
 					    textInput("choose_variance","call position"),
 					    #selectInput("change_peak","user_mod it to",choices=list(empty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
-					    selectInput("change_peak","change it to",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
-                        actionButton("execute_btn","change", icon = icon("exchange"))
+					    selectInput("change_user_sample","sample variant to",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
+					    selectInput("change_user_mut","mutant variant to",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
+                        actionButton("change_btn","change", icon = icon("exchange"))
 					),
 					column(4,
 				        HTML(paste("messages and info will appear here", sep="")),
 					    verbatimTextOutput("infobox")
 					),
 					column(1,
-                        HTML(paste("hetero calls:")),verbatimTextOutput("hetero_calls"),
+                        # HTML(paste("hetero calls:")),verbatimTextOutput("hetero_calls"),
 					    HTML(paste("hetero aln %id:")),verbatimTextOutput("hetero_indel_pid"),
-					    HTML(paste("hetero ins/dels:")),verbatimTextOutput("hetero_indel_tab")
+					    HTML(paste("hetero ins/dels:")),verbatimTextOutput("hetero_indel_tab"),
+                        actionButton("incorporate_btn","incorporate", icon = icon("level-down"))
 					),
 					column(1,
                         sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1),
@@ -58,11 +60,11 @@ shinyUI(
                         sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 50, value = 14),
                         sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 50, value = 12)
 					),
-					column(1,
+					column(1
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
-                        sliderInput("opacity","trace opacity", ticks=FALSE, min = -100, max = 100, value = 0, step = 10)
                     ),
 					column(1,
+                        sliderInput("opacity","trace opacity", ticks=FALSE, min = -100, max = 100, value = 0, step = 10),
                         sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 0, max = 200, value = 100, step = 10)
 					)
 				),
