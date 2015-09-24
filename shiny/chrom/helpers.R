@@ -3,6 +3,7 @@ annotate_calls <- function(calls,intens,intens_rev){
     #contains codons table
     load("../../data/codons.rdata")
     calls <- merge(x = calls, y = cod_table[,list(gen_coord,codon,ord_in_cod,coding_seq,AA_ref=AA,AA_mod=AA)], by = "gen_coord", all.x = TRUE)
+    cod_table <<- cod_table
     #reorder columns so that id is first (so that the checkbox from the shiny data table selects the correct value and the delete button knows what to delete)
     setcolorder(calls,c("id",colnames(calls)[-2]))
 
@@ -55,33 +56,49 @@ annotate_calls <- function(calls,intens,intens_rev){
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
+    calls[set_by_user == FALSE, mut_call_fwd := sample_peak_base_fwd]
     calls[set_by_user == FALSE, user_sample := cons]
     calls[set_by_user == FALSE, user_mut := cons]
 
-    # calls[(rm7qual < qual_thres | quality < qual_thres) & set_by_user == FALSE, user_sample := "low qual"]
+    calls[quality <= qual_thres & set_by_user == FALSE, user_sample := "N"]
 
     # mut
     if("call_rev" %in% colnames(calls)) {
-        calls[    mut_peak_pct_fwd >= mut_min
-                & mut_s2n_abs_fwd >= s2n_min
-                # & abs(mut_peak_pct_fwd - mut_peak_pct_rev) < mut_min
-                # & mut_peak_base_fwd == mut_peak_base_rev
-                & !set_by_user,
-                c("mut_call_fwd", "user_mut") := list(mut_peak_base_fwd, mut_peak_base_fwd)
-                # user_mut := mut_call_fwd
-                ]
-        calls[    mut_peak_pct_rev >= mut_min
-                & mut_s2n_abs_rev >= s2n_min
-                & mut_peak_pct_rev > mut_peak_pct_fwd
-                & !set_by_user,
-                c("mut_call_rev", "user_mut") := list(mut_peak_base_rev, mut_peak_base_rev)
-                ]
+        # reset all but set_by_user
+        calls[set_by_user == FALSE, mut_call_rev := sample_peak_base_rev]
+        calls[
+            mut_peak_pct_fwd >= mut_min
+            & mut_s2n_abs_fwd >= s2n_min
+            ,mut_call_fwd := mut_peak_base_fwd
+            ]
+        calls[
+            mut_peak_pct_rev >= mut_min
+            & mut_s2n_abs_rev >= s2n_min
+            ,mut_call_rev := mut_peak_base_rev
+            ]
+        calls[
+            set_by_user == FALSE
+            ,user_mut := mut_call_fwd
+            ]
+        calls[
+            ((
+            mut_peak_pct_rev > mut_peak_pct_fwd
+            & mut_s2n_abs_rev > mut_s2n_abs_fwd
+            )
+            | user_mut == " "
+            )
+            & set_by_user == FALSE
+            ,user_mut := mut_call_rev
+            ]
     } else {
-        calls[    mut_peak_pct_fwd >= mut_min
-                & mut_s2n_abs_fwd >= s2n_min
-                & !set_by_user,
-                #user_sample := paste(user_sample,tolower(mut_peak_base_fwd),sep="")]
-                user_mut := mut_call_fwd
+        calls[
+            mut_peak_pct_fwd >= mut_min
+            & mut_s2n_abs_fwd >= s2n_min
+            ,mut_call_fwd := mut_peak_base_fwd
+            ]
+        calls[
+            set_by_user == FALSE
+            ,user_mut := mut_call_fwd
             ]
     }
     return(calls)
@@ -124,37 +141,41 @@ i_wo_p <- function(p,iA,iC,iG,iT){
     else if (mut_peak == iC) return(list("C",mut_peak))
     else if (mut_peak == iG) return(list("G",mut_peak))
     else if (mut_peak == iT) return(list("T",mut_peak))
+    else                     return(list(" ",mut_peak))
 }
-i_w_p <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
-    mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[p])
-         if (mut_peak == 0 ) return(list(" ",mut_peak,pA))
-    else if (mut_peak == iA) return(list("A",mut_peak,pA))
-    else if (mut_peak == iC) return(list("C",mut_peak,pC))
-    else if (mut_peak == iG) return(list("G",mut_peak,pG))
-    else if (mut_peak == iT) return(list("T",mut_peak,pT))
-}
+# i_w_p <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
+#     mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[p])
+#          if (mut_peak == 0 ) return(list(" ",mut_peak,pA))
+#     else if (mut_peak == iA) return(list("A",mut_peak,pA))
+#     else if (mut_peak == iC) return(list("C",mut_peak,pC))
+#     else if (mut_peak == iG) return(list("G",mut_peak,pG))
+#     else if (mut_peak == iT) return(list("T",mut_peak,pT))
+# }
 
 report_hetero_indels <- function(calls){
     rev <- !is.null(calls[["call_rev"]])
     if(rev) {
         secondary_seq <- paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = "")
-    } else secondary_seq <- paste(calls[["mut_call_fwd"]],collapse = "")
-    primary_seq <- paste(calls[["user_sample"]],collapse = "")
-    indel_align <- pairwiseAlignment(primary_seq, secondary_seq,type = "local",substitutionMatrix = sm,gapOpening = -20, gapExtension = -0.5)
-    writePairwiseAlignments(indel_align, block.width = 150)
-    cat("identified deletions:\n")
-    tab <- stringi::stri_locate_all_regex(compareStrings(indel_align),"[\\+]+")[[1]] + start(pattern(indel_align))
-    if(is.na(tab[1])) cat("no deletions")
-    else print(tab)
-    cat("\nidentified insertions:\n")
-    tab <- stringi::stri_locate_all_regex(compareStrings(indel_align),"[\\-]+")[[1]]+ start(pattern(indel_align))
-    if(is.na(tab[1])) cat("no insertions")
-    else print(tab)
+    } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
+    primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
+    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "local",substitutionMatrix = sm,gapOpening = -20, gapExtension = -0.5)
+    # writePairwiseAlignments(indel_align, block.width = 150)
+
+    # cat("identified deletions:\n")
+    hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln))
+#     if(is.na(hetero_indel_tab[1])) cat("no deletions")
+#     else print(hetero_indel_tab)
+#     cat("\nidentified insertions:\n")
+    hetero_ins_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\-]+")[[1]] + start(pattern(hetero_indel_aln))
+#     if(is.na(hetero_indel_tab[1])) cat("no insertions")
+#     else print(hetero_indel_tab)
+
+    hetero_indel_pid <- round(pid(hetero_indel_aln),1)
+    return(list(hetero_indel_aln, hetero_indel_pid, hetero_ins_tab, hetero_del_tab))
 }
 
 get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
     names <- structure(1:4,names = c("A","C","G","T"))
-    sm <- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
     pa <- pairwiseAlignment(gsub(" ","",paste(mut_fwd,collapse = "")), gsub(" ","",paste(mut_rev,collapse = "")),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
     fwd <- strsplit(as.character(pattern(pa)),"")[[1]]
     rev <- strsplit(as.character(subject(pa)),"")[[1]]

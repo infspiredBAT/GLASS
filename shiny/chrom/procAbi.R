@@ -6,32 +6,18 @@ g_calibration_length <<- 30
 
 sm <<- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
 
-
-trace_peak_me <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
-    mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[p])
-         if (mut_peak == 0 ) return(NA)
-    else if (mut_peak == iA) return(pA)
-    else if (mut_peak == iC) return(pC)
-    else if (mut_peak == iG) return(pG)
-    else if (mut_peak == iT) return(pT)
-}
-
-trace_peak_me2 <- function(i,p){
-    return(p[which.max(i)])
-}
-
 get_call_data <- function(data, data_rev){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
-    deletions <- list() 
+    deletions <- list()
     if(is.null(data_rev)) {
         qual    <- data$PCON.2
         res     <- generate_ref(data$PBAS.1)
-        calls <- data.table(id         = seq_along(data$PLOC.1)
+        calls <- data.table(id           = seq_along(data$PLOC.1)
                             ,user_sample = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
-                            ,call       = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
-                            ,reference  = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
-                            ,trace_peak = data$PLOC.1
-                            ,quality    = qual)
+                            ,call        = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
+                            ,reference   = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
+                            ,trace_peak  = data$PLOC.1
+                            ,quality     = qual)
         calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
         setkey(res[[2]],id)
         if(length(res[[3]]) > 0) {
@@ -45,7 +31,7 @@ get_call_data <- function(data, data_rev){
         user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,data$PCON.2,data_rev$PCON.2)
         res <- generate_ref(paste(user_align[[1]],collapse = ""))
         calls <- data.table(id              = seq_along(user_align[[1]])
-                            ,user_sample       = user_align[[1]]
+                            ,user_sample    = user_align[[1]]
                             ,call           = user_align[[2]]
                             ,call_rev       = user_align[[3]]
                             ,reference      = user_align[[1]]
@@ -177,7 +163,7 @@ get_coord <- function(seq_start,al_start,al_end,ref_start,ref_end,diffs){
 
 get_fwd_rev_align <- function(fwd_seq,rev_seq,fwd_qual,rev_qual){
     sm <- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
-    
+
     align <- pairwiseAlignment(pattern = reverseComplement(DNAString(rev_seq)), subject = fwd_seq,type = "overlap",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
     cons_length <- max(start(subject(align)), start(pattern(align))) - 1 + max(nchar(fwd_seq) - end(subject(align)), nchar(rev_seq) - end(pattern(align))) + nchar(as.character(subject(align)))
     fwd_split <- rep("-",cons_length)
@@ -189,16 +175,16 @@ get_fwd_rev_align <- function(fwd_seq,rev_seq,fwd_qual,rev_qual){
     if(start(pattern(align)) > 1) rev_split[1:(start(pattern(align)) - 1)] <- splitfr[[2]][1:(start(pattern(align)) - 1)]
     if(nchar(fwd_seq) - end(subject(align)) > 0) fwd_split[(length(fwd_split) - (nchar(fwd_seq) - end(subject(align))) + 1):length(fwd_split)] <- splitfr[[1]][(end(subject(align)) + 1):length(splitfr[[1]])]
     if(nchar(rev_seq) - end(pattern(align)) > 0) rev_split[(length(rev_split) - (nchar(rev_seq) - end(pattern(align))) + 1):length(rev_split)] <- splitfr[[2]][(end(pattern(align)) + 1):length(splitfr[[2]])]
-    
+
     #create quality scores corresponding with alignments
     fwd_split_qual <- rep(0,cons_length)
     rev_split_qual <- fwd_split_qual
     fwd_split_qual[which(fwd_split != "-")] <- fwd_qual
     rev_split_qual[which(rev_split != "-")] <- rev(rev_qual)
-    
+
     fwd_offset <- start(pattern(align))
     rev_offset <- start(subject(align))
-    
+
     #construct consensus /higher quality wins/
     cons_split <- fwd_split
     cons_split[which(fwd_split_qual < rev_split_qual)] <- rev_split[which(fwd_split_qual < rev_split_qual)]
@@ -273,9 +259,9 @@ get_alignment <- function(data,user_seq,cores,type = "overlap"){
 # the function extracts the signal intesities for each channel
 get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE) {
     #abi file documentation http://www.bioconductor.org/packages/release/bioc/vignettes/sangerseqR/inst/doc/sangerseq_walkthrough.pdf
-    
+
     rev <- !(is.null(data_rev))
-    
+
     intens     <- data.table(data$DATA.10,    data$DATA.12,    data$DATA.9,    data$DATA.11)
     if(rev) intens_rev <- data.table(data_rev$DATA.10,data_rev$DATA.12,data_rev$DATA.9,data_rev$DATA.11)
     else    intens_rev <- NULL
@@ -355,7 +341,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE) {
     }
 
     calls <- cbind(calls,get_intens(intens,calls[["trace_peak"]]))
-    if(rev) calls <- cbind(calls,get_intens(intens_rev,calls[["trace_peak"]],"rev"))    
+    if(rev) calls <- cbind(calls,get_intens(intens_rev,calls[["trace_peak"]],"rev"))
 
     return(list(intens=intens,intens_rev=intens_rev,calls=calls))
 }

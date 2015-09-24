@@ -50,7 +50,7 @@ HTMLWidgets.widget({
 	      var brush = d3.svg.brush().on("brushend", brushed);
 
         var label_pos = {}        //map for pisitioning labels representing called base
-        
+
         label_pos["reference"]      =  10;
         label_pos["aa"]             =  24;
         label_pos["call"]           =  40;
@@ -63,7 +63,7 @@ HTMLWidgets.widget({
         label_pos["codon"]          = 122;  // + rev
         label_pos["gen_coord"]      = 132;  // + rev
         label_pos["intrex"]         = 142;  // + rev
-        
+
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
@@ -473,14 +473,14 @@ HTMLWidgets.widget({
         var group_noise_rev = focus.append("g");
         group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
             .append("path").attr("class","area area_fwd").attr("d",noise_area)
-            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.2);
+            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.1);
 
         //reverse strand
         if(intens_rev != ""){
             var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
             group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
             .append("path").attr("class","area area_rev").attr("d",noise_area)
-            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.2);
+            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.1);
             var group_a_r = focus.append("g");
     	    	var group_c_r = focus.append("g");
   		    	var group_g_r = focus.append("g");

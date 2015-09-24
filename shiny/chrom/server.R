@@ -3,16 +3,20 @@ library(sangerseqR)
 source("procAbi.R")
 source("helpers.R")
 
-g_calls         <- NULL             #annotated basecall data
+g_calls                 <<- NULL             #annotated basecall data
 makeReactiveBinding("g_calls")
-g_intens        <- NULL             #intensities file
-g_intens_rev    <- NULL             #optional reverse intensities file
-g_helperdat     <- NULL             #helper data used in graphs
-g_choices       <- NULL
-g_selected      <- NULL
-g_selected_zoom_index <- 0
-g_max_y         <- NULL
-g_varcall       <- FALSE
+g_intens                <<- NULL             #intensities file
+g_intens_rev            <<- NULL             #optional reverse intensities file
+g_helperdat             <<- NULL             #helper data used in graphs
+g_choices               <<- NULL
+g_selected              <<- NULL
+g_selected_zoom_index   <<- 0
+g_max_y                 <<- NULL
+g_varcall               <<- FALSE
+g_hetero_calls          <<- 0
+g_hetero_indel_pid      <<- 0
+g_hetero_ins_tab        <<- NULL
+g_hetero_del_tab        <<- NULL
 
 shinyServer(function(input,output,session) {
 
@@ -36,23 +40,32 @@ shinyServer(function(input,output,session) {
             if(length(name)>=2){
                 if(gsub("F.*","F",name[1])==gsub("R.*","F",name[2])){
                     fwd_file <- get_file()$datapath[1]
+                    fwd_file_name <- name[1]
                     rev_file <- get_file()$datapath[2]
+                    rev_file_name <- name[2]
                 }else if(gsub("R.*","R",name[1])==gsub("F.*","R",name[2])){
                     fwd_file <- get_file()$datapath[2]
+                    fwd_file_name <- name[2]
                     rev_file <- get_file()$datapath[1]
+                    rev_file_name <- name[1]
                 }else{
                     fwd_file <- get_file()$datapath[1]
+                    fwd_file_name <- name[1]
                     rev_file <- NULL
+                    rev_file_name <- "-"
                 }
             }else{
                 fwd_file <- get_file()$datapath
+                fwd_file_name <- name
                 rev_file <- NULL
+                rev_file_name <- "-"
             }
+            g_files <<- paste0("fwd: ",fwd_file_name,"\nrev: ",rev_file_name,sep="")
 
             withProgress(message = paste('processing...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
-                
+
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
                     error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",e$message ))})
@@ -62,7 +75,7 @@ shinyServer(function(input,output,session) {
                         error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",e$message ))})
                 }
                 else g_abif_rev <- NULL
-                
+
                 res <- NULL
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
@@ -92,22 +105,32 @@ shinyServer(function(input,output,session) {
         }
         return("not")
     })
+    output$files <- renderPrint({
+        if(loading_processed_files() != "not") {
+            cat(g_files)
+        }
+    })
 
     varcall <- reactive({
         if(loading_processed_files() != "not"){
-            g_calls     <<- call_variants(g_calls,input$qual_thres,input$mut_min,input$s2n_min)
+            g_calls     <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             g_calls     <<- retranslate(g_calls)
-            
-            g_choices   <<- g_calls[user_sample != reference & trace_peak != "NA" & !is.na(gen_coord)]
-            g_varcall   <<- TRUE
+
+            g_choices   <<- g_calls[user_sample != "N" & user_sample != reference & trace_peak != "NA" & !is.na(gen_coord)]
+
+            rep <- report_hetero_indels(g_calls)
+            g_hetero_indel_aln <<- rep[[1]]
+            g_hetero_indel_pid <<- rep[[2]]
+            g_hetero_ins_tab   <<- rep[[3]]
+            g_hetero_del_tab   <<- rep[[4]]
+
+            g_varcall <<- TRUE
         }
         return(g_varcall)
     })
 
     output$plot <- renderChromatography({
-        #lg_calls
         if((loading_processed_files() != "not") & varcall() ) {
-            #g_choices <<- call_variants
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
             g_new_sample <<- FALSE
@@ -117,15 +140,25 @@ shinyServer(function(input,output,session) {
 
     output$aln <- renderPrint({
         if(loading_processed_files() != "not" & varcall() ) {
-            return(report_hetero_indels(g_calls))
+            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
+            cat("\nidentified insertions:\n")
+            if(is.na(g_hetero_ins_tab[1])) cat("no insertions")
+            else print(g_hetero_ins_tab)
+            cat("\nidentified deletions:\n")
+            if(is.na(g_hetero_del_tab[1])) cat("no deletions")
+            else print(g_hetero_del_tab)
         }
     })
-
-#     output$muts <- renderPrint({
-#         if(loading_processed_files() != "not" & varcall() ) {
-#             cat("soon")
-#         }
-#     })
+    output$hetero_indel_pid <- renderPrint({
+        if(loading_processed_files() != "not" & varcall() ) {
+            cat(g_hetero_indel_pid)
+        }
+    })
+    output$hetero_indel_tab <- renderPrint({
+        if(loading_processed_files() != "not" & varcall() ) {
+            cat((g_hetero_ins_tab[2]-g_hetero_ins_tab[1]+1),"/",(g_hetero_del_tab[2]-g_hetero_del_tab[1]+1))
+        }
+    })
 
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
@@ -152,43 +185,6 @@ shinyServer(function(input,output,session) {
             }
         })
     })
-
-#    output$chosenCheckboxes <- reactive({
-#        return(loading_processed_files() != "not" & !is.null(g_choices))
-#    })
-#    outputOptions(output, "chosenCheckboxes", suspendWhenHidden = F)
-
-#     output$table2 <- DT::renderDataTable({
-#         input$execute_btn
-#         input$delete_btn
-#         if(loading_processed_files() != "not" & !is.null(g_choices)) {
-#             DT::datatable(
-#                 g_choices,
-#                 rownames = checkboxRows(g_choices), escape = -1,
-#                 options = list(dom = 'ti')
-#             )
-#         }
-#     })
-
-#     variace_selected_2 <- observe({
-#         if(loading_processed_files() != "not") {
-#             g_selected <<- g_choices[input$table2_selected,id]
-#             #cat(input$table2_selected)
-#         }
-#     })
-
-#     add_checkboxes <- reactive({
-#         if(nrow(g_choices) > 0){
-#             input$execute_btn
-#             input$reset_btn
-#             checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")
-#             for(i in 1:nrow(g_choices)) {
-#                 if(g_choices[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
-#                 else checkboxes[i] <- paste0(checkboxes[i],">","")
-#             }
-#             return(checkboxes)
-#         }
-#     })
 
     add_checkboxes <- function(){
         checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")

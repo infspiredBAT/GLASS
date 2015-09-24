@@ -32,11 +32,11 @@ shinyUI(
 				fluidRow(
 					column(2,
 					    fileInput("select_file","",multiple=T,accept=c('.abi','.ab1')),
-					    textOutput("files")
+					    verbatimTextOutput("files")
 					),
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
-					    textInput("choose_variance","type call position"),
+					    textInput("choose_variance","call position"),
 					    #selectInput("change_peak","user_mod it to",choices=list(empty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
 					    selectInput("change_peak","change it to",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
                         actionButton("execute_btn","change", icon = icon("exchange"))
@@ -46,21 +46,17 @@ shinyUI(
 					    verbatimTextOutput("infobox")
 					),
 					column(1,
-                        HTML(paste("hetero calls:")),textOutput(""),
-					    HTML(paste("this:", sep="")),textOutput(""),
-					    HTML(paste("that:", sep="")),textOutput("")
-					       # sliderInput("makeBaseCalls_ratio","base call ratio", ticks=FALSE, min = 0.1, max = 1, value = 0.1, step = 0.05)
-                        # sliderInput("qual_thres","low qual thres", ticks=FALSE, min = 0, max = 50, value = 10)
-                        # sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
+                        HTML(paste("hetero calls:")),verbatimTextOutput("hetero_calls"),
+					    HTML(paste("hetero aln %id:")),verbatimTextOutput("hetero_indel_pid"),
+					    HTML(paste("hetero ins/dels:")),verbatimTextOutput("hetero_indel_tab")
 					),
 					column(1,
                         sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1),
 					    sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
-					    
-					    #sliderInput("aln_min","set min coverage for alignment", ticks=FALSE, min = 0, max = 1, value = 0.2)
 					),
-					column(1,sliderInput("rm7qual_thres","set rm7qual thres for trimming", ticks=FALSE, min = 0, max = 50, value = 12)
-                 
+					column(1,
+                        sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 50, value = 0),
+                        sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 50, value = 12)
 					),
 					column(1,
                         sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
@@ -68,7 +64,6 @@ shinyUI(
                     ),
 					column(1,
                         sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 0, max = 200, value = 100, step = 10)
-                        # sliderInput("intens_guide_line","set intens guideline rel height", ticks=FALSE, min = 0, max = 100, value = 50)
 					)
 				),
 				br(),
@@ -85,14 +80,14 @@ shinyUI(
 
 				br()
 			),
-			tabPanel('annotation', value = 'annotation', icon = icon("user-md")
+			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
+		         verbatimTextOutput("aln")
+			),
+			tabPanel('variant annotation', value = 'annotation', icon = icon("user-md")
 			),
 			tabPanel('calls', value = 'call_table', icon = icon("table"),
 				 shiny::dataTableOutput("call_table")
  			),
-			tabPanel('aln', value = 'aln', icon = icon("table"),
-			     verbatimTextOutput("aln")
-			),
 			tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
 		         shiny::dataTableOutput("intens_table")
 			),
