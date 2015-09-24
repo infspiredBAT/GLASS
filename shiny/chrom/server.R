@@ -68,11 +68,11 @@ shinyServer(function(input,output,session) {
 
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
-                    error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading forward input file, make sure you load an .abi file: ",e$message ))})
+                    error = function(e){output$infobox <- renderPrint(paste0("error while reading forward file, are you loading .abi ? ",e$message ))})
                 if(!is.null(rev_file)) {
                     tryCatch(
                         g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
-                        error = function(e){output$infobox <- renderPrint(paste0("An error occured while reading reverse input file, make sure you load an .abi file: ",e$message ))})
+                        error = function(e){output$infobox <- renderPrint(paste0("error while reading reverse file, are you loading .abi ? ",e$message ))})
                 }
                 else g_abif_rev <- NULL
 
@@ -81,7 +81,7 @@ shinyServer(function(input,output,session) {
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
                     called <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
-                    error = function(e){output$infobox <- renderPrint(paste0("An error occured while loading calls from abi file with the following error message: ",e$message ))})
+                    error = function(e){output$infobox <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
 
                 if(!is.null(called)){
                     intensified         <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE)
@@ -114,10 +114,10 @@ shinyServer(function(input,output,session) {
 
     varcall <- reactive({
         if(loading_processed_files() != "not"){
-            g_calls     <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
-            g_calls     <<- retranslate(g_calls)
-            g_choices   <<- get_choices(g_calls)
-            
+            g_calls   <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
+            g_calls   <<- retranslate(g_calls)
+            g_choices <<- get_choices(g_calls)
+
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
             g_hetero_indel_pid <<- rep[[2]]
@@ -165,9 +165,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_variance != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_sample,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_variance,paste0("ref ",reference,"   user ",user_sample,"   orig ",cons,"\n",exon_intron,"   @ ",gen_coord,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_variance,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -177,10 +177,21 @@ shinyServer(function(input,output,session) {
     })
 
     update_chosen_variances <- observe({
-        input$execute_btn
+        input$change_btn
         isolate({
             if(loading_processed_files() != "not") {
-                g_calls[id==as.numeric(input$choose_variance)]$user_sample <<- input$change_peak
+                if (input$change_user_sample != "") g_calls[id==as.numeric(input$choose_variance)]$user_sample <<- input$change_user_sample
+                if (input$change_user_mut != "") g_calls[id==as.numeric(input$choose_variance)]$user_mut <<- input$change_user_mut
+                g_calls[id==as.numeric(input$choose_variance)]$set_by_user <<- TRUE
+            }
+        })
+    })
+
+    incorporate_hetero_indels <- observe({
+        input$incorporate_btn
+        isolate({
+            if(loading_processed_files() != "not") {
+                if (input$change_user_mut != "") g_calls[id==as.numeric(input$choose_variance)]$user_mut <<- input$change_user_mut
                 g_calls[id==as.numeric(input$choose_variance)]$set_by_user <<- TRUE
             }
         })
@@ -198,7 +209,7 @@ shinyServer(function(input,output,session) {
     output$chosen_variances_table <- shiny::renderDataTable({
         if(varcall())
         if(!is.null(g_choices) && nrow(g_choices) > 0){
-            input$execute_btn
+            input$change_btn
             input$reset_btn
             if(loading_processed_files() != "not" & !is.null(g_choices)) {
 
@@ -208,7 +219,8 @@ shinyServer(function(input,output,session) {
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
 
-                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,coding,protein,user_sample,call,reference)])
+                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
+                # setnames(g_choices,)
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
     }, options = list(dom = "t",orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2), orderable=F, title="")))
