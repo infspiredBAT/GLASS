@@ -116,9 +116,8 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not"){
             g_calls     <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             g_calls     <<- retranslate(g_calls)
-
-            g_choices   <<- g_calls[user_sample != "N" & user_sample != reference & trace_peak != "NA" & !is.na(gen_coord)]
-
+            g_choices   <<- get_choices(g_calls)
+            
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
             g_hetero_indel_pid <<- rep[[2]]
@@ -209,7 +208,7 @@ shinyServer(function(input,output,session) {
                 add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
 
-                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,user_sample,call,reference)])
+                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list(id=id,coding,protein,user_sample,call,reference)])
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
     }, options = list(dom = "t",orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2), orderable=F, title="")))

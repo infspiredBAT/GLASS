@@ -152,6 +152,17 @@ i_wo_p <- function(p,iA,iC,iG,iT){
 #     else if (mut_peak == iT) return(list("T",mut_peak,pT))
 # }
 
+get_choices <- function(calls){
+    choices <- calls[user_sample != "N" & user_sample != reference & trace_peak != "NA" & !is.na(gen_coord)]
+    choices[,`:=`(coding="",protein="")]
+    choices[AA_ref!="",protein:=paste0("p.",codon,toupper(AA_ref),">",AA_mod)]
+    choices[user_sample!="-",coding:=paste0("c.",coding_seq,reference,">",user_sample)]
+    #choices[user_sample=="-",coding:=paste0("c.",coding_seq,reference,">",user_sample)]
+    
+    return(choices)
+    
+}
+
 report_hetero_indels <- function(calls){
     rev <- !is.null(calls[["call_rev"]])
     if(rev) {
