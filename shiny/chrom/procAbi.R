@@ -140,7 +140,7 @@ generate_ref <-function(user_seq){
 		,id = sort(c((align$start[OK_align][x] + 1):align$end[OK_align][x],add_insert(align$diffs[type == "I" & id == OK_align[x]]) - 1))
 		,gen_coord = get_coord(align$start[OK_align][x],align$ref_start[OK_align][x],align$ref_end[OK_align][x],ref_start[OK_align][x],ref_end[OK_align][x],align$diffs[type == "D" & id == OK_align[x]]))))
 
-    align$diffs[type == "D",t_pos := t_pos + 1]
+    #align$diffs[type == "D",t_pos := t_pos + 1]
     align$diffs <- align$diffs[id %in% OK_align,]
     return(list(user_seq_vs_genome,align$diffs,add_insert(align$diffs[type == "I"]) - 1))
 }
@@ -153,10 +153,10 @@ add_insert <- function(diffs){
 get_coord <- function(seq_start,al_start,al_end,ref_start,ref_end,diffs){
     coord <- (ref_start:ref_end)[al_start:al_end]
     if(nrow(diffs) > 0){
-        diffs[,t_pos := t_pos - seq_start + 1]
+        diffs[,t_pos := t_pos - seq_start]
         coord_out <- numeric(length(coord) + nrow(diffs))
         coord_out[-diffs[["t_pos"]]] <- coord
-        for(index in which(coord_out == 0)) coord_out[index] <- coord_out[index - 1] + 0.1
+        for(index in which(coord_out == 0)) coord_out[index] <- coord_out[index - 1] - 0.1
         return(coord_out)
     } else return(coord)
 }
