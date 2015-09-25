@@ -207,17 +207,19 @@ incorporate_hetero_indels_func <- function(calls){
         calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
         calls[,het_mut_s2n_abs_fwd :=  incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
         if(any(colnames(calls) == "call_rev")){
-            calls[,het_mut_call_rev :=  incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",F)]
-            calls[,het_mut_peak_pct_rev :=  incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",F)]
-            calls[,het_mut_s2n_abs_rev :=  incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",F)]
+            calls[,het_mut_call_rev :=  incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F)]
+            calls[,het_mut_peak_pct_rev :=  incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
+            calls[,het_mut_s2n_abs_rev :=  incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
             calls[
                 set_by_user == FALSE
                 ,c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)
                 ]
             calls[
                 ((
-                    het_mut_peak_pct_rev > het_mut_peak_pct_fwd
-                    & het_mut_s2n_abs_rev > het_mut_s2n_abs_fwd
+#                     het_mut_peak_pct_rev > het_mut_peak_pct_fwd
+#                     & het_mut_s2n_abs_rev > het_mut_s2n_abs_fwd
+                     quality_fwd < quality_rev
+#                    1:min(dels)
                 )
                 | user_mut == "-"
                 )

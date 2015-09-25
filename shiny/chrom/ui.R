@@ -50,7 +50,7 @@ shinyUI(
                         # HTML(paste("hetero calls:")),verbatimTextOutput("hetero_calls"),
 					    HTML(paste("hetero aln %id:")),verbatimTextOutput("hetero_indel_pid"),
 					    HTML(paste("hetero ins/dels:")),verbatimTextOutput("hetero_indel_tab"),
-                        actionButton("incorporate_btn","incorporate", icon = icon("level-down"))
+                        checkboxInput("incorporate_checkbox","incorporate", value = T)
 					),
 					column(1,
                         sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1),

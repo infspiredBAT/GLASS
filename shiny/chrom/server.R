@@ -115,14 +115,17 @@ shinyServer(function(input,output,session) {
     varcall <- reactive({
         if(loading_processed_files() != "not"){
             g_calls   <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
-            g_calls   <<- retranslate(g_calls)
-            g_choices <<- get_choices(g_calls)
-
+            
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
             g_hetero_indel_pid <<- rep[[2]]
             g_hetero_ins_tab   <<- rep[[3]]
             g_hetero_del_tab   <<- rep[[4]]
+            
+            if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
+
+            g_calls   <<- retranslate(g_calls)
+            g_choices <<- get_choices(g_calls)
 
             g_varcall <<- TRUE
         }
@@ -132,6 +135,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if((loading_processed_files() != "not") & varcall() ) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
+            
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
             g_new_sample <<- FALSE
             return(ret)
@@ -160,12 +164,12 @@ shinyServer(function(input,output,session) {
         }
     })
     
-    incorporate_hetero_indels <- observe({
-        input$incorporate_btn
-            if(isolate(loading_processed_files()) != "not") {
-                g_calls <<- incorporate_hetero_indels_func(g_calls)
-            }
-    })
+#     incorporate_hetero_indels <- observe({
+#         input$incorporate_btn
+#             if(isolate(loading_processed_files()) != "not") {
+#                 g_calls <<- incorporate_hetero_indels_func(g_calls)
+#             }
+#     })
 
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
