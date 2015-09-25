@@ -194,6 +194,61 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
     return(cons)
 }
 
+incorporate_hetero_indels_func <- function(calls){
+    
+    if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
+    else dels <- numeric()
+    
+    if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
+    else ins <- numeric()
+    
+    if(max(length(dels),length(ins)) != 0){
+        calls[,het_mut_call_fwd := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T)]
+        calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
+        calls[,het_mut_s2n_abs_fwd :=  incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
+        if(any(colnames(calls) == "call_rev")){
+            calls[,het_mut_call_rev :=  incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",F)]
+            calls[,het_mut_peak_pct_rev :=  incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",F)]
+            calls[,het_mut_s2n_abs_rev :=  incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",F)]
+            calls[
+                set_by_user == FALSE
+                ,c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)
+                ]
+            calls[
+                ((
+                    het_mut_peak_pct_rev > het_mut_peak_pct_fwd
+                    & het_mut_s2n_abs_rev > het_mut_s2n_abs_fwd
+                )
+                | user_mut == "-"
+                )
+                & set_by_user == FALSE
+                ,c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)
+                ] 
+        } else {
+            calls[
+                set_by_user == FALSE
+                ,user_mut := het_mut_call_fwd
+                ]
+        }
+        
+    } 
+    return(calls)
+}
+
+incorporate_single_vec <- function(vec,ins,dels,type,fwd){
+    if(type == "num") new_vec <- numeric(length(vec))
+    else new_vec <- rep("-",length(vec))
+    if(length(ins) > 0) vec <- vec[-ins]
+    if(fwd) {
+        vec <- vec[1:min(length(vec),length(new_vec) - length(dels))]
+        new_vec[setdiff(seq_along(new_vec),dels)] <- vec
+    } else {
+        vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
+        new_vec[setdiff(seq_along(new_vec),dels)] <- vec
+    }
+    return(new_vec)
+}
+
 #background noise absolute or relative to reference peak
 noise <- function(a,b,c,d,abs=FALSE){
     vec <- sort(c(a,b,c,d))

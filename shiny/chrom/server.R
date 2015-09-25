@@ -156,23 +156,15 @@ shinyServer(function(input,output,session) {
     })
     output$hetero_indel_tab <- renderPrint({
         if(loading_processed_files() != "not" & varcall() ) {
-            cat((g_hetero_ins_tab[2]-g_hetero_ins_tab[1]+1),"/",(g_hetero_del_tab[2]-g_hetero_del_tab[1]+1))
+            cat((g_hetero_ins_tab[,2]-g_hetero_ins_tab[,1]+1),"/",(g_hetero_del_tab[,2]-g_hetero_del_tab[,1]+1))
         }
     })
+    
     incorporate_hetero_indels <- observe({
         input$incorporate_btn
-        isolate({
-            if(loading_processed_files() != "not") {
-
-#                 cat("\nidentified insertions:\n")
-#                 if(is.na(g_hetero_ins_tab[1])) cat("no insertions")
-#                 else print(g_hetero_ins_tab)
-#                 cat("\nidentified deletions:\n")
-#                 if(is.na(g_hetero_del_tab[1])) cat("no deletions")
-#                 else print(g_hetero_del_tab)
-
+            if(isolate(loading_processed_files()) != "not") {
+                g_calls <<- incorporate_hetero_indels_func(g_calls)
             }
-        })
     })
 
     output$infobox <- renderPrint({
