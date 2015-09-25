@@ -159,6 +159,21 @@ shinyServer(function(input,output,session) {
             cat((g_hetero_ins_tab[2]-g_hetero_ins_tab[1]+1),"/",(g_hetero_del_tab[2]-g_hetero_del_tab[1]+1))
         }
     })
+    incorporate_hetero_indels <- observe({
+        input$incorporate_btn
+        isolate({
+            if(loading_processed_files() != "not") {
+
+#                 cat("\nidentified insertions:\n")
+#                 if(is.na(g_hetero_ins_tab[1])) cat("no insertions")
+#                 else print(g_hetero_ins_tab)
+#                 cat("\nidentified deletions:\n")
+#                 if(is.na(g_hetero_del_tab[1])) cat("no deletions")
+#                 else print(g_hetero_del_tab)
+
+            }
+        })
+    })
 
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
@@ -187,22 +202,12 @@ shinyServer(function(input,output,session) {
         })
     })
 
-    incorporate_hetero_indels <- observe({
-        input$incorporate_btn
-        isolate({
-            if(loading_processed_files() != "not") {
-                if (input$change_user_mut != "") g_calls[id==as.numeric(input$choose_variance)]$user_mut <<- input$change_user_mut
-                g_calls[id==as.numeric(input$choose_variance)]$set_by_user <<- TRUE
-            }
-        })
-    })
-
     add_checkboxes <- function(){
         checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")
-            for(i in 1:nrow(g_choices)) {
-                if(g_choices[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
-                else checkboxes[i] <- paste0(checkboxes[i],">","")
-            }
+        for(i in 1:nrow(g_choices)) {
+            if(g_choices[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
+            else checkboxes[i] <- paste0(checkboxes[i],">","")
+        }
         return(checkboxes)
     }
 
@@ -276,7 +281,7 @@ shinyServer(function(input,output,session) {
     edit_indicator <- observe({
         if(loading_processed_files() != "not") {
           session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
-        }    
+        }
     })
     goEdit_handler <- observe({
         if(loading_processed_files() != "not") {

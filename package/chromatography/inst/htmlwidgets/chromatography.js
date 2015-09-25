@@ -159,7 +159,7 @@ HTMLWidgets.widget({
   				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
   				      .attr("y1",26)
   				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y2",49)
+  				      .attr("y2",39)
   				      .attr("stroke-width",3)
   				      .attr("stroke",function(d) {
   				          if      (d["user_sample"] === "A"){ return "#33CC33"; }
@@ -172,7 +172,7 @@ HTMLWidgets.widget({
     			      .append("line")
                 .attr("class","varInMinimap context")
   				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y1",38)
+  				      .attr("y1",39)
   				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
   				      .attr("y2",49)
   				      .attr("stroke-width",3)
@@ -183,7 +183,7 @@ HTMLWidgets.widget({
   				          else if (d["user_mut"] === "T"){ return "#FF0000"; }
   				          else if (d["user_mut"] === "-"){ return "white"; }
   				          else    {                        return "yellow";  }});
-                
+
 /*
   			context.selectAll("text.choices.coord").data(choices).enter()
   				.append("text").attr("class","varInMinimap")
@@ -575,8 +575,8 @@ HTMLWidgets.widget({
       		        .attr("y",0).attr("rx",1).attr("ry",1)
       		        .attr("width",9)
       		        .attr("height",function(d){return d["rm7qual_rev"];})
-      		        .attr("fill", "rgba(200,200,200,0.3)");  
-                  
+      		        .attr("fill", "rgba(200,200,200,0.3)");
+
                 focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
       		        .append("text").attr("class","peak_label")
       		        .text(function(d){return d["quality"];})
@@ -586,8 +586,8 @@ HTMLWidgets.widget({
       		        .attr("y",-2)
       		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             }
-              
-              
+
+
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa
               .append("text").attr("class","peak_label short")
               .text(function(d){
