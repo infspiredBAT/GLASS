@@ -297,17 +297,21 @@ shinyServer(function(input,output,session) {
     goReset_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$goReset)) return()
-            updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
-            g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$cons
-            g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$cons
-            g_calls[id==input$goReset$id]$set_by_user <<- TRUE
+            isolate({
+                updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
+                g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$cons
+                g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$cons
+                g_calls[id==input$goReset$id]$set_by_user <<- TRUE
+            })
         }
     })
     goLock_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$goLock)) return()
-            updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
-            g_calls[id==input$goLock$id]$set_by_user <<- TRUE
+            isolate({
+                updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
+                g_calls[id==input$goLock$id]$set_by_user <<- TRUE
+            })   
         }
     })
     goClick_handler <- observe({
@@ -337,6 +341,12 @@ shinyServer(function(input,output,session) {
 #         })
 #     })
 
+    split_traces <- observe({
+        if(loading_processed_files() != "not"){
+            session$sendCustomMessage(type = "split",message = paste0(input$offset_traces_checkbox))
+            print(input$offset_traces_checkbox)
+        }
+    })
     set_opacity <- observe({
         if(loading_processed_files() != "not"){
             opac_fwd <- 1 + (input$opacity/100)
@@ -347,5 +357,6 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
+
 
 })

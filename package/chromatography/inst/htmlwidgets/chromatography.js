@@ -13,14 +13,23 @@ HTMLWidgets.widget({
             margin2 = {top: 430, right: 10, bottom: 20,  left: 40},
             width   = w - margin.left - margin.right,
             height  = h - margin.top  - margin.bottom,
+            half_height = height/2;
             height2 = h - margin2.top - margin2.bottom;
-        var widthScale   = d3.scale.linear().range([0,width]);
+        var widthScale   = d3.scale.linear().range([0,width]),
             width2Scale  = d3.scale.linear().range([0,width]),  //remains constant, to be used with context
             heightScale  = d3.scale.linear().range([height,0]),
-    	      height2Scale = d3.scale.linear().range([height2,0]);
-        var line = d3.svg.line()
+    	      height2Scale = d3.scale.linear().range([height2,0]),
+            heightScale_fwd_split = d3.scale.linear().range([half_height,0]),
+            heightScale_rev_split = d3.scale.linear().range([height,half_height]);
+            heightScale_fwd = heightScale;
+            heightScale_rev = heightScale;
+
+        var line_fwd = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
-            .y(function(d){return heightScale(d)});
+            .y(function(d){return heightScale_fwd(d)});
+        var line_rev = d3.svg.line()
+            .x(function(d,i){return widthScale(i)})
+            .y(function(d){return heightScale_rev(d)});
         //lines in the brush tool
         //var noise_area = d3.svg.line()
         //        .x(function(d){return widthScale(d[0]);})
@@ -64,11 +73,23 @@ HTMLWidgets.widget({
         label_pos["mut_call_fwd"]   = 145;
         label_pos["call_rev"]       = 170;
         label_pos["mut_call_rev"]   = 185;
-
+        function brushed() { redraw(); }
+        //setting brush programmatically
+        function setBrush(start,end){
+            context.call(brush.extent([start,end]));
+            redraw();
+        }
+        function reHeight(domain_y){
+            heightScale.domain([0,domain_y]);
+            focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
+            focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
+            focus.selectAll("g").selectAll(".area").attr("d",noise_area);
+        }
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
-            focus.selectAll("g").selectAll(".path").attr("d", line);
+            focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
+            focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
             focus.selectAll("g").selectAll(".area").attr("d",noise_area);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
@@ -88,17 +109,7 @@ HTMLWidgets.widget({
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
         }
-        function brushed() { redraw(); }
-        function reHeight(domain_y){
-            heightScale.domain([0,domain_y]);
-            focus.selectAll("g").selectAll(".path").attr("d",line);
-            focus.selectAll("g").selectAll(".area").attr("d",noise_area);
-        }
-        //setting brush programmatically
-        function setBrush(start,end){
-            context.call(brush.extent([start,end]));
-            redraw();
-        }
+        
         function setPeakLabel(calls,label,offset){
             focus.append("g").selectAll("text.seq").data(calls).enter() //reference
   	            .append("text")
@@ -182,16 +193,6 @@ HTMLWidgets.widget({
   				          else if (d["user_mut"] === "T"){ return "#FF0000"; }
   				          else if (d["user_mut"] === "-"){ return "white"; }
   				          else    {                        return "yellow";  }});
-
-/*
-  			context.selectAll("text.choices.coord").data(choices).enter()
-  				.append("text").attr("class","varInMinimap")
-  				.attr("x",function(d){return width2Scale(d["trace_peak"])+4;})
-  				.attr("y",30)
-  				.attr("opacity",0.6)
-  				.text(function(d){return d["id"];})
-  				.attr("fill","black");
-*/
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
   		         .append("line").attr("class","peak_label short line varind")
   		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
@@ -203,8 +204,8 @@ HTMLWidgets.widget({
         Shiny.addCustomMessageHandler("goto",
             function(message) {
                 setBrush(Number(message)-100,Number(message)+120);
-/*
-                focus.append("g").selectAll("position_indicator")  //position indicator
+
+ /*               focus.append("g").selectAll("position_indicator")  //position indicator
       		         .append("line").attr("class","peak_label short line varind")
       		         .attr("x1",function(d){return widthScale(Number(message));})
       		         .attr("y1",0)
@@ -226,6 +227,23 @@ HTMLWidgets.widget({
                 mult = Number(message);
                 console.log(mult);
                 redraw();
+            }
+        );
+        Shiny.addCustomMessageHandler("split",
+            function(message){
+                console.log(message);
+                if(message==="TRUE"){
+                    console.log(true);
+                    heightScale_fwd = heightScale_fwd_split;
+                    heightScale_rev = heightScale_rev_split;
+                    redraw()
+            
+                }else if(message==="FALSE"){
+                    console.log(false);
+                    heightScale_fwd = heightScale;
+                    heightScale_rev = heightScale;
+                    redraw()
+                }
             }
         );
         Shiny.addCustomMessageHandler("opac_f",
@@ -312,45 +330,14 @@ HTMLWidgets.widget({
             .on('→', brushMoveRight())
             .on('↓', brushZoomOut())
             );
-        transpose = function(a) {
 
-          // Calculate the width and height of the Array
-          var w = a.length ? a.length : 0,
-            h = a[0] instanceof Array ? a[0].length : 0;
-
-          // In case it is a zero matrix, no transpose routine needed.
-          if(h === 0 || w === 0) { return []; }
-
-          /**
-           * @var {Number} i Counter
-           * @var {Number} j Counter
-           * @var {Array} t Transposed data is stored in this array.
-           */
-          var i, j, t = [];
-
-          // Loop through every item in the outer array (height)
-          for(i=0; i<h; i++) {
-
-            // Insert a new row (array)
-            t[i] = [];
-
-            // Loop through every item per item in outer array (width)
-            for(j=0; j<w; j++) {
-
-              // Save transposed data.
-              t[i][j] = a[j][i];
-            }
-          }
-
-          return t;
-        };
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
             svg:     svg,
-            line:    line,
+            line_fwd: line_fwd,
+            line_rev: line_rev,
             noise_area: noise_area,
-            transpose:  transpose,
             label_pos:  label_pos,
             linec:   linec,
             context: context,
@@ -359,6 +346,8 @@ HTMLWidgets.widget({
             widthScale:  widthScale,
             width2Scale: width2Scale,
             heightScale: heightScale,
+            heightScale_fwd_split: heightScale_fwd_split,
+            heightScale_rev_split: heightScale_rev_split,
             width:   w,
             height:  h,
 	          height2: height2,
@@ -417,8 +406,9 @@ HTMLWidgets.widget({
   			instance.intrex = intrex;
 
   			var svg     = instance.svg;
-  			var line    = instance.line;
-        var noise_area = noise_area;
+  			var line_fwd   = instance.line_fwd;
+        var line_rev   = instance.line_rev;
+        var noise_area = instance.noise_area;
   			var linec   = instance.linec;
   			var focus   = instance.focus;
   			var context = instance.context;
@@ -426,12 +416,12 @@ HTMLWidgets.widget({
   			var widthScale  = instance.widthScale;
   			var heightScale = instance.heightScale;
         var width2Scale = instance.width2Scale;
-  			var height2 = instance.height2;
-
+  		
   			widthScale.domain([0,domain_x]);
   			width2Scale.domain([0,domain_x]);
   			heightScale.domain([0,domain_y]);
-  			height2Scale.domain([0,domain_y]);
+  	    instance.heightScale_fwd_split.domain([0,domain_y]);
+        instance.heightScale_rev_split.domain([0,domain_y]);
 
   			//visualise fullseq width
   			context
@@ -490,22 +480,22 @@ HTMLWidgets.widget({
         //forward strand
   			group_a.selectAll("path").data([intens["A"]]).enter()
   			    .append("path").attr("class","path line_f")
-  				.attr("d",line)
+  				.attr("d",line_fwd)
   				.attr("fill","none")
   				.attr("stroke","#33CC33").attr("stroke-width",0.75);
   			group_c.selectAll("path").data([intens["C"]]).enter()
   				.append("path").attr("class","path line_f")
-  				.attr("d",line)
+  				.attr("d",line_fwd)
   				.attr("fill","none")
   				.attr("stroke","#0000FF").attr("stroke-width",0.75);
   			group_g.selectAll("path").data([intens["G"]]).enter()
   				.append("path").attr("class","path line_f")
-  				.attr("d",line)
+  				.attr("d",line_fwd)
   				.attr("fill","none")
   				.attr("stroke","#000000").attr("stroke-width",0.75);
   			group_t.selectAll("path").data([intens["T"]]).enter()
   				.append("path").attr("class","path line_f")
-  				.attr("d",line)
+  				.attr("d",line_fwd)
   				.attr("fill","none")
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
 
@@ -533,25 +523,25 @@ HTMLWidgets.widget({
 
             group_a_r.selectAll("path").data([intens_rev["A"]]).enter()
         			.append("path").attr("class","path line_r")
-      				.attr("d",line)
+      				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#33CC33").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
       			group_c_r.selectAll("path").data([intens_rev["C"]]).enter()
       				.append("path").attr("class","path line_r")
-      				.attr("d",line)
+      				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#0000FF").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
       			group_g_r.selectAll("path").data([intens_rev["G"]]).enter()
       				.append("path").attr("class","path line_r")
-      				.attr("d",line)
+      				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#000000").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
       			group_t_r.selectAll("path").data([intens_rev["T"]]).enter()
       			    .append("path").attr("class","path line_r")
-      				.attr("d",line)
+      				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#FF0000").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
