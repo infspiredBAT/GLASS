@@ -2141,9 +2141,9 @@ th {
   text-align: left;
 }
 .table {
-  font-family: consolas;
-  font-size: 0.9em;
-  width: 100%;
+/*  font-family: consolas; */
+  font-size: 1.1em;
+  width: 100px;
   max-width: 100%;
 /*  margin-bottom: 18px; */
 }
