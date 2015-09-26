@@ -571,7 +571,7 @@ HTMLWidgets.widget({
       		        .attr("fill", "rgba(200,200,200,0.3)");
                 focus.append("g").selectAll("qualities.rev").data(calls).enter()  //quality box
                   .append("rect").attr("class","peak_label  qual_rev q")
-      		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
+      		        .attr("x",function(d){return (widthScale(d["trace_peak"]));})
       		        .attr("y",0).attr("rx",1).attr("ry",1)
       		        .attr("width",9)
       		        .attr("height",function(d){return d["rm7qual_rev"];})

@@ -216,11 +216,11 @@ shinyServer(function(input,output,session) {
 
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
-                add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
-                add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="zoom" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
+                #add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
+                add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="go to" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
 
-                cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
+                cbind(Pick=add_checkbox_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
                 # setnames(g_choices,)
             }
         } #else { output$infobox <- renderPrint({ cat("no variances") }) }
@@ -274,23 +274,26 @@ shinyServer(function(input,output,session) {
         }
     })
 
-    edit_indicator <- observe({
-        if(loading_processed_files() != "not") {
-          session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
-        }
-    })
-    goEdit_handler <- observe({
-        if(loading_processed_files() != "not") {
-            if(is.null(input$goEdit)) return()
-            updateTextInput(session,"choose_variance",value=paste0(input$goEdit$id))
-        }
-    })
+#     edit_indicator <- observe({
+#         if(loading_processed_files() != "not") {
+#           session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
+#         }
+#     })
+#     goEdit_handler <- observe({
+#         if(loading_processed_files() != "not") {
+#             if(is.null(input$goEdit)) return()
+#             updateTextInput(session,"choose_variance",value=paste0(input$goEdit$id))
+#             session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
+#         }
+#     })
 
     goZoom_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$goZoom)) return()
-            #cat(paste0(input$goZoom$id,","))
-            session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))
+            cat(paste0(input$goZoom$id,","))
+                updateTextInput(session,"choose_variance",value=paste0(input$goZoom$id))
+                session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
+                session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))            
         }
     })
 
