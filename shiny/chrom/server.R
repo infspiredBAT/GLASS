@@ -10,7 +10,7 @@ g_intens_rev            <<- NULL             #optional reverse intensities file
 g_helperdat             <<- NULL             #helper data used in graphs
 g_choices               <<- NULL
 g_selected              <<- NULL
-g_selected_zoom_index   <<- 0
+g_selected_goto_index   <<- 0
 g_max_y                 <<- NULL
 g_varcall               <<- FALSE
 g_hetero_calls          <<- 0
@@ -114,14 +114,14 @@ shinyServer(function(input,output,session) {
 
     varcall <- reactive({
         if(loading_processed_files() != "not"){
-            g_calls   <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
-            
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
+
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
             g_hetero_indel_pid <<- rep[[2]]
             g_hetero_ins_tab   <<- rep[[3]]
             g_hetero_del_tab   <<- rep[[4]]
-            
+
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
 
             g_calls   <<- retranslate(g_calls)
@@ -135,7 +135,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if((loading_processed_files() != "not") & varcall() ) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
-            
+
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
             g_new_sample <<- FALSE
             return(ret)
@@ -163,7 +163,7 @@ shinyServer(function(input,output,session) {
             cat((g_hetero_ins_tab[,2]-g_hetero_ins_tab[,1]+1),"/",(g_hetero_del_tab[,2]-g_hetero_del_tab[,1]+1))
         }
     })
-    
+
 #     incorporate_hetero_indels <- observe({
 #         input$incorporate_btn
 #             if(isolate(loading_processed_files()) != "not") {
@@ -173,12 +173,12 @@ shinyServer(function(input,output,session) {
 
     output$infobox <- renderPrint({
         if(loading_processed_files() != "not") {
-            if(input$choose_variance != "") {
+            if(input$choose_call_pos != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_variance,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_variance,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -187,13 +187,14 @@ shinyServer(function(input,output,session) {
         } else cat("load .abi/.ab1 file")
     })
 
-    update_chosen_variances <- observe({
+    update_chosen_variants <- observe({
         input$change_btn
         isolate({
             if(loading_processed_files() != "not") {
-                if (input$change_user_sample != "") g_calls[id==as.numeric(input$choose_variance)]$user_sample <<- input$change_user_sample
-                if (input$change_user_mut != "") g_calls[id==as.numeric(input$choose_variance)]$user_mut <<- input$change_user_mut
-                g_calls[id==as.numeric(input$choose_variance)]$set_by_user <<- TRUE
+                if (input$change_user_sample != "") g_calls[id==as.numeric(input$choose_call_pos)]$user_sample <<- input$change_user_sample
+                if (input$change_user_mut    != "") g_calls[id==as.numeric(input$choose_call_pos)]$user_mut    <<- input$change_user_mut
+                # g_calls[id==as.numeric(input$choose_call_pos)]$user_variant <<- input$change_variant
+                g_calls[id==as.numeric(input$choose_call_pos)]$set_by_user <<- TRUE
             }
         })
     })
@@ -207,7 +208,7 @@ shinyServer(function(input,output,session) {
         return(checkboxes)
     }
 
-    output$chosen_variances_table <- shiny::renderDataTable({
+    output$chosen_variants_table <- shiny::renderDataTable({
         if(varcall())
         if(!is.null(g_choices) && nrow(g_choices) > 0){
             input$change_btn
@@ -216,16 +217,19 @@ shinyServer(function(input,output,session) {
 
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
-                #add_edit_buttons <- paste0('<input type="button" class="go-edit" value="edit" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
-                add_zoom_buttons <- paste0('<input type="button" class="go-zoom" value="go to" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
                 add_checkbox_buttons <- add_checkboxes()
+                add_goto_buttons     <- paste0('<input type="button" class="go-goto"  value="goto"  name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
+                add_reset_buttons    <- paste0('<input type="button" class="go-reset" value="reset" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
+                add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
 
-                cbind(Pick=add_checkbox_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
-                # setnames(g_choices,)
+                # cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
+                cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_choices[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
+
             }
-        } #else { output$infobox <- renderPrint({ cat("no variances") }) }
-    }, options = list(dom = "t",orderClasses=c(-1,-2,-3), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2), orderable=F, title="")))
-    , escape=c(-1,-2,-3)
+        }
+    }
+    , options = list(dom = "t",orderClasses=c(-1,-2,-3,-4), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2,3), orderable=F, title="")))
+    , escape=c(-1,-2,-3,-4)
     , callback =
         "function(table) {
             table.on('change.dt', 'tr td input:checkbox', function() {
@@ -235,19 +239,27 @@ shinyServer(function(input,output,session) {
                     }).get())
                 }, 10);
             });
-            table.on('click', '.go-edit', function(e) {
+            table.on('click', '.go-goto', function(e) {
                 e.preventDefault();
                 $el = $(this);
                 var id_data = $el.data('id');
-                Shiny.onInputChange('goEdit', {
+                Shiny.onInputChange('goGoto', {
                     id: id_data
                 });
             });
-            table.on('click', '.go-zoom', function(e) {
+            table.on('click', '.go-reset', function(e) {
                 e.preventDefault();
                 $el = $(this);
                 var id_data = $el.data('id');
-                Shiny.onInputChange('goZoom', {
+                Shiny.onInputChange('goReset', {
+                    id: id_data
+                });
+            });
+            table.on('click', '.go-lock', function(e) {
+                e.preventDefault();
+                $el = $(this);
+                var id_data = $el.data('id');
+                Shiny.onInputChange('goLock', {
                     id: id_data
                 });
             });
@@ -256,44 +268,52 @@ shinyServer(function(input,output,session) {
 
     output$call_table <- shiny::renderDataTable({
     	if(loading_processed_files() != "not" & !is.null(g_calls)) { g_calls }
-    }, options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+    }
+    ,options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
-    output$intens_table <- shiny::renderDataTable({
-        if(loading_processed_files() != "not" & !is.null(g_intens)) { g_intens }
-    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+#     output$intens_table <- shiny::renderDataTable({
+#         if(loading_processed_files() != "not" & !is.null(g_intens)) { g_intens }
+#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+#
+#     output$intens_table_rev <- shiny::renderDataTable({
+#         if(loading_processed_files() != "not" & !is.null(g_intens_rev)) { g_intens_rev }
+#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
-    output$intens_table_rev <- shiny::renderDataTable({
-        if(loading_processed_files() != "not" & !is.null(g_intens_rev)) { g_intens_rev }
-    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-
-    variance_select <- observe({
+    variant_select <- observe({
         if(loading_processed_files() != "not") {
             g_selected <<- str_trim(input$rows)
-            g_selected_zoom_index <<- 0
-#            g_selected_edit_index <<- 0
+            g_selected_goto_index <<- 0
         }
     })
 
-#     edit_indicator <- observe({
-#         if(loading_processed_files() != "not") {
-#           session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
-#         }
-#     })
-#     goEdit_handler <- observe({
-#         if(loading_processed_files() != "not") {
-#             if(is.null(input$goEdit)) return()
-#             updateTextInput(session,"choose_variance",value=paste0(input$goEdit$id))
-#             session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
-#         }
-#     })
 
-    goZoom_handler <- observe({
+    goGoto_handler <- observe({
         if(loading_processed_files() != "not") {
-            if(is.null(input$goZoom)) return()
-            cat(paste0(input$goZoom$id,","))
-                updateTextInput(session,"choose_variance",value=paste0(input$goZoom$id))
-                session$sendCustomMessage(type = 'edit',message = paste0(input$choose_variance))
-                session$sendCustomMessage(type = 'zoom',message = paste0(g_calls[id==input$goZoom$id]$trace_peak))            
+            if(is.null(input$goGoto)) return()
+            session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==input$goGoto$id]$trace_peak))
+            updateTextInput(session,"choose_call_pos",value=paste0(input$goGoto$id))
+        }
+    })
+    goReset_handler <- observe({
+        if(loading_processed_files() != "not") {
+            if(is.null(input$goReset)) return()
+            updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
+            g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$cons
+            g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$cons
+            g_calls[id==input$goReset$id]$set_by_user <<- TRUE
+        }
+    })
+    goLock_handler <- observe({
+        if(loading_processed_files() != "not") {
+            if(is.null(input$goLock)) return()
+            updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
+            g_calls[id==input$goLock$id]$set_by_user <<- TRUE
+        }
+    })
+    goClick_handler <- observe({
+        if(loading_processed_files() != "not") {
+            if(is.null(input$posClick)) return()
+            updateTextInput(session,"choose_call_pos",value=paste0(input$posClick$id))
         }
     })
 
@@ -303,26 +323,19 @@ shinyServer(function(input,output,session) {
         }
     })
 
-    goClick_handler <- observe({
-      if(loading_processed_files() != "not") {
-        if(is.null(input$posClick)) return()
-        updateTextInput(session,"choose_variance",value=paste0(input$posClick$id))
-      }
-    })
-
-    reset_handler <- observe({
-        input$reset_btn
-        isolate({
-            if(length(g_selected) != 0) {
-                #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
-                for(i in as.numeric(g_selected)) {
-                    g_calls[id==i,]$user_sample <<- g_calls[id==i,]$reference
-                    g_calls[id==i,]$set_by_user <<- TRUE
-                }
-                #g_selected <<-  NULL
-            }
-        })
-    })
+#     reset_handler <- observe({
+#         input$reset_btn
+#         isolate({
+#             if(length(g_selected) != 0) {
+#                 #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
+#                 for(i in as.numeric(g_selected)) {
+#                     g_calls[id==i,]$user_sample <<- g_calls[id==i,]$reference
+#                     g_calls[id==i,]$set_by_user <<- TRUE
+#                 }
+#                 #g_selected <<-  NULL
+#             }
+#         })
+#     })
 
     set_opacity <- observe({
         if(loading_processed_files() != "not"){
