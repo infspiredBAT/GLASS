@@ -142,13 +142,14 @@ shinyServer(function(input,output,session) {
 
     output$aln <- renderPrint({
         if(loading_processed_files() != "not" & varcall() ) {
-            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
-            cat("\nidentified insertions:\n")
-            if(is.na(g_hetero_ins_tab[1])) cat("no insertions")
+            cat("primary vs secondary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
+            if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
             else print(g_hetero_ins_tab)
             cat("\nidentified deletions:\n")
-            if(is.na(g_hetero_del_tab[1])) cat("no deletions")
+            if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
             else print(g_hetero_del_tab)
+            cat("\n")
+            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
         }
     })
     output$hetero_indel_pid <- renderPrint({
@@ -308,7 +309,7 @@ shinyServer(function(input,output,session) {
             isolate({
                 updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
                 g_calls[id==input$goLock$id]$set_by_user <<- TRUE
-            })   
+            })
         }
     })
     goClick_handler <- observe({
