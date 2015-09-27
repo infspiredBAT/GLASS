@@ -19,7 +19,7 @@ HTMLWidgets.widget({
             width2Scale  = d3.scale.linear().range([0,width]),  //remains constant, to be used with context
             heightScale  = d3.scale.linear().range([height,0]),
     	      height2Scale = d3.scale.linear().range([height2,0]),
-            heightScale_fwd_split = d3.scale.linear().range([half_height,0]),
+            heightScale_fwd_split = d3.scale.linear().range([half_height,(2*half_height -  height)]),
             heightScale_rev_split = d3.scale.linear().range([height,half_height]);
             heightScale_fwd = heightScale;
             heightScale_rev = heightScale;
