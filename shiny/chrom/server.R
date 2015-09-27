@@ -126,7 +126,6 @@ shinyServer(function(input,output,session) {
 
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
-
             g_varcall <<- TRUE
         }
         return(g_varcall)

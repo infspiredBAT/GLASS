@@ -84,14 +84,10 @@ HTMLWidgets.widget({
             redraw();
         }
         function reHeight(domain_y){
-            heightScale.domain([0,domain_y]);
-            heightScale_fwd_split.domain([0,domain_y]);
-            heightScale_rev_split.domain([0,domain_y]);
-            
-            focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
-            focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
-            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
-            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
+            heightScale.domain([0,domain_y-1]);
+            heightScale_fwd_split.domain([0,domain_y-1]);
+            heightScale_rev_split.domain([0,domain_y-1]);
+            redraw();
         }
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
@@ -529,25 +525,25 @@ HTMLWidgets.widget({
       				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#33CC33").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,3,10,3");
+                    .attr("stroke-dasharray","20,3,10,1,10,1");
       			group_c_r.selectAll("path").data([intens_rev["C"]]).enter()
       				.append("path").attr("class","path line_r")
       				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#0000FF").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,3,10,3");
+                    .attr("stroke-dasharray","20,3,10,1,10,1");
       			group_g_r.selectAll("path").data([intens_rev["G"]]).enter()
       				.append("path").attr("class","path line_r")
       				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#000000").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,3,10,3");
+                    .attr("stroke-dasharray","20,3,10,1,10,1");
       			group_t_r.selectAll("path").data([intens_rev["T"]]).enter()
       			    .append("path").attr("class","path line_r")
       				.attr("d",line_rev)
       				.attr("fill","none")
       				.attr("stroke","#FF0000").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,3,10,3");
+                    .attr("stroke-dasharray","20,3,10,1,10,1");
             }
             //console.log(calls);
             //trace peak labels
@@ -707,6 +703,7 @@ HTMLWidgets.widget({
             //console.log(x)
   			if(x["helperdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["helperdat"]["max_y"]);
+          instance.max_y = x["helperdat"]["max_y"];
   			}else if(x.choices != instance.choices){
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
