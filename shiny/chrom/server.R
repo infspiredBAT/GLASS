@@ -344,7 +344,6 @@ shinyServer(function(input,output,session) {
     split_traces <- observe({
         if(loading_processed_files() != "not"){
             session$sendCustomMessage(type = "split",message = paste0(input$offset_traces_checkbox))
-            print(input$offset_traces_checkbox)
         }
     })
     set_opacity <- observe({

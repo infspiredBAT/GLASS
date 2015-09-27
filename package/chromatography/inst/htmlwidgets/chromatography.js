@@ -35,10 +35,14 @@ HTMLWidgets.widget({
         //        .x(function(d){return widthScale(d[0]);})
         //        .y(function(d){return heightScale(d[1]);});
         var mult = 2;
-        var noise_area = d3.svg.area()
+        var noise_area_fwd = d3.svg.area()
                 .x(function(d){return widthScale(d[0]);})
-                .y0(heightScale(0)+2)
-                .y1(function(d){return heightScale(d[1]*mult);});
+                .y0(function(d){return (heightScale_fwd(0)+2);})
+                .y1(function(d){return heightScale_fwd(d[1]*mult);});
+        var noise_area_rev = d3.svg.area()
+                .x(function(d){return widthScale(d[0]);})
+                .y0(function(d){return heightScale_rev(0)+2;})
+                .y1(function(d){return heightScale_rev(d[1]*mult);});
         var linec = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return height2Scale(d)});
@@ -83,14 +87,16 @@ HTMLWidgets.widget({
             heightScale.domain([0,domain_y]);
             focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
-            focus.selectAll("g").selectAll(".area").attr("d",noise_area);
+            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
+            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
         }
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
             focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
-            focus.selectAll("g").selectAll(".area").attr("d",noise_area);
+            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
+            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
             focus.selectAll(".qual_rev").attr("x",function(d){return widthScale(d["trace_peak"]);});
@@ -233,16 +239,13 @@ HTMLWidgets.widget({
             function(message){
                 console.log(message);
                 if(message==="TRUE"){
-                    console.log(true);
                     heightScale_fwd = heightScale_fwd_split;
                     heightScale_rev = heightScale_rev_split;
-                    redraw()
-            
+                    redraw();
                 }else if(message==="FALSE"){
-                    console.log(false);
                     heightScale_fwd = heightScale;
                     heightScale_rev = heightScale;
-                    redraw()
+                    redraw();
                 }
             }
         );
@@ -337,7 +340,8 @@ HTMLWidgets.widget({
             svg:     svg,
             line_fwd: line_fwd,
             line_rev: line_rev,
-            noise_area: noise_area,
+            noise_area_fwd: noise_area_fwd,
+            noise_area_rev: noise_area_rev,
             label_pos:  label_pos,
             linec:   linec,
             context: context,
@@ -408,7 +412,8 @@ HTMLWidgets.widget({
   			var svg     = instance.svg;
   			var line_fwd   = instance.line_fwd;
         var line_rev   = instance.line_rev;
-        var noise_area = instance.noise_area;
+        var noise_area_fwd = instance.noise_area_fwd;
+        var noise_area_rev = instance.noise_area_rev;
   			var linec   = instance.linec;
   			var focus   = instance.focus;
   			var context = instance.context;
@@ -498,23 +503,19 @@ HTMLWidgets.widget({
   				.attr("d",line_fwd)
   				.attr("fill","none")
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
-
-
+          
         var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
-
-        //var a = [x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]
-
         var group_noise_fwd = focus.append("g");
         var group_noise_rev = focus.append("g");
         group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
-            .append("path").attr("class","area area_fwd").attr("d",noise_area)
+            .append("path").attr("class","area area_fwd").attr("d",noise_area_fwd)
             .attr("fill","#000000").attr("stroke","none").attr("opacity",0.1);
 
         //reverse strand
         if(intens_rev != ""){
             var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
             group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
-            .append("path").attr("class","area area_rev").attr("d",noise_area)
+            .append("path").attr("class","area area_rev").attr("d",noise_area_rev)
             .attr("fill","#440000").attr("stroke","none").attr("opacity",0.1);
             var group_a_r = focus.append("g");
     	    	var group_c_r = focus.append("g");
