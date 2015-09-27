@@ -13,7 +13,7 @@ HTMLWidgets.widget({
             margin2 = {top: 430, right: 10, bottom: 20,  left: 40},
             width   = w - margin.left - margin.right,
             height  = h - margin.top  - margin.bottom,
-            half_height = height/2;
+            half_height = height/1.6;
             height2 = h - margin2.top - margin2.bottom;
         var widthScale   = d3.scale.linear().range([0,width]),
             width2Scale  = d3.scale.linear().range([0,width]),  //remains constant, to be used with context
@@ -85,6 +85,9 @@ HTMLWidgets.widget({
         }
         function reHeight(domain_y){
             heightScale.domain([0,domain_y]);
+            heightScale_fwd_split.domain([0,domain_y]);
+            heightScale_rev_split.domain([0,domain_y]);
+            
             focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
             focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
@@ -237,7 +240,6 @@ HTMLWidgets.widget({
         );
         Shiny.addCustomMessageHandler("split",
             function(message){
-                console.log(message);
                 if(message==="TRUE"){
                     heightScale_fwd = heightScale_fwd_split;
                     heightScale_rev = heightScale_rev_split;
@@ -547,7 +549,7 @@ HTMLWidgets.widget({
       				.attr("stroke","#FF0000").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,3,10,3");
             }
-            console.log(calls);
+            //console.log(calls);
             //trace peak labels
             if(rev==0){
                 focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
