@@ -121,39 +121,66 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
 complement <- function(base){
     return (chartr("ATGC","TACG",base))
 }
+ambig_minus <- function(ambig,ref){
+    ambig <- toupper(ambig)
+    ref   <- toupper(ref)
+    if(ambig == "S"){
+        if(ref == "G") return("C")
+        if(ref == "C") return("G")
+    }else if(ambig == "W"){
+        if(ref == "A") return("T")
+        if(ref== "T") return("A")
+    }else if(ambig == "R"){
+        if(ref=="A") return("G")
+        if(ref=="G") return("A")
+    }else if(ambig=="Y"){
+        if(ref=="C") return("T")
+        if(ref=="T") return("C")
+    }else if(ambig=="K"){
+        if(ref=="G") return("C")
+        if(ref=="C") return("G")
+    }else if(ambig=="M"){
+        if(ref=="A") return("C")
+        if(ref=="C") return("A")
+    }else return(ambig)
+}
 retranslate <- function(calls){
-
-  coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_sample)]
-  push = 0
-  while(coding[1,ord_in_cod]!=1){
-    coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
-    setkey(coding,coding_seq)
-    push = push +1
-  }
-  while(coding[nrow(coding),ord_in_cod] != 3){
-      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq,codon,ord_in_cod,user_sample=seq)])
+    
+    coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_sample,reference)]
+    push = 0
+    #get missing bases for the first frame if incomplete
+    while(coding[1,ord_in_cod]!=1){
+      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq,codon,ord_in_cod,user_sample=seq,reference=seq)])
       setkey(coding,coding_seq)
-  }
-  trans <- translate(coding[,user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
-  trans <- aaa(trans)
-  calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
-
-  coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_mut)]
-  push = 0
-  while(coding[1,ord_in_cod]!=1){
-    coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq,codon,ord_in_cod,user_mut=seq)])
-    setkey(coding,coding_seq)
-    push = push +1
-  }
-  while(coding[nrow(coding),ord_in_cod] != 3){
-      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq,codon,ord_in_cod,user_mut=seq)])
+      push = push +1
+    }
+    #get missing bases for the last frame if incomplete
+    while(coding[nrow(coding),ord_in_cod] != 3){
+        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq,codon,ord_in_cod,user_sample=seq,reference=seq)])
+        setkey(coding,coding_seq)
+    }
+    coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
+    trans <- translate(coding[,user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
+    trans <- aaa(trans)
+    calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
+  
+    coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_mut,reference)]
+    push = 0
+    while(coding[1,ord_in_cod]!=1){
+      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq,codon,ord_in_cod,user_mut=seq,reference=seq)])
       setkey(coding,coding_seq)
-  }
-  trans <- translate(coding[,user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
-  trans <- aaa(trans)
-  calls[ord_in_cod>0,aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
-
-  return(calls)
+      push = push +1
+    }
+    while(coding[nrow(coding),ord_in_cod] != 3){
+        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq,codon,ord_in_cod,user_mut=seq,reference=seq)])
+        setkey(coding,coding_seq)
+    }
+    coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
+    trans <- translate(coding[,user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
+    trans <- aaa(trans)
+    calls[ord_in_cod>0,aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
+  
+    return(calls)
 }
 
 get_choices <- function(calls){

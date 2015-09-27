@@ -135,7 +135,6 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if((loading_processed_files() != "not") & varcall() ) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
-
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
             g_new_sample <<- FALSE
             return(ret)
@@ -286,7 +285,6 @@ shinyServer(function(input,output,session) {
         }
     })
 
-
     goGoto_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$goGoto)) return()
@@ -356,6 +354,4 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
-
-
 })
