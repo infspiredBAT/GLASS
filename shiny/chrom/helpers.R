@@ -121,16 +121,16 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
 complement <- function(base){
     return (chartr("ATGC","TACG",base))
 }
-ambig_minus <- function(ambig,ref){
+ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes/SingleLetterCode.html
     ambig <- toupper(ambig)
     ref   <- toupper(ref)
-    if(ambig == "S"){
-        if(ref == "G") return("C")
-        if(ref == "C") return("G")
-    }else if(ambig == "W"){
-        if(ref == "A") return("T")
-        if(ref== "T") return("A")
-    }else if(ambig == "R"){
+    if(ambig=="S"){
+        if(ref=="G") return("C")
+        if(ref=="C") return("G")
+    }else if(ambig=="W"){
+        if(ref=="A") return("T")
+        if(ref=="T") return("A")
+    }else if(ambig=="R"){
         if(ref=="A") return("G")
         if(ref=="G") return("A")
     }else if(ambig=="Y"){
@@ -145,7 +145,7 @@ ambig_minus <- function(ambig,ref){
     }else return(ambig)
 }
 retranslate <- function(calls){
-    
+
     coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_sample,reference)]
     push = 0
     #get missing bases for the first frame if incomplete
@@ -163,7 +163,7 @@ retranslate <- function(calls){
     trans <- translate(coding[,user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     trans <- aaa(trans)
     calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
-  
+
     coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_mut,reference)]
     push = 0
     while(coding[1,ord_in_cod]!=1){
@@ -179,7 +179,7 @@ retranslate <- function(calls){
     trans <- translate(coding[,user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     trans <- aaa(trans)
     calls[ord_in_cod>0,aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
-  
+
     return(calls)
 }
 
@@ -214,7 +214,7 @@ report_hetero_indels <- function(calls){
         secondary_seq <- paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = "")
     } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
     primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
-    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "local",substitutionMatrix = sm,gapOpening = -20, gapExtension = -0.5)
+    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
     hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_ins_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\-]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_indel_pid <- round(pid(hetero_indel_aln),1)
@@ -223,7 +223,7 @@ report_hetero_indels <- function(calls){
 
 get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
     names <- structure(1:4,names = c("A","C","G","T"))
-    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd,collapse = "")), gsub("[ -]","",paste(mut_rev,collapse = "")),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd,collapse = "")), gsub("[ -]","",paste(mut_rev,collapse = "")),type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
     fwd <- strsplit(as.character(pattern(pa)),"")[[1]]
     rev <- strsplit(as.character(subject(pa)),"")[[1]]
     fwd_i <- numeric(length(fwd))
@@ -238,41 +238,21 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
 }
 
 incorporate_hetero_indels_func <- function(calls){
-
     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
     else dels <- numeric()
-
     if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
     else ins <- numeric()
-
     if(max(length(dels),length(ins)) != 0){
         calls[,het_mut_call_fwd := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T)]
         calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
         calls[,het_mut_s2n_abs_fwd :=  incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
+        calls[set_by_user == FALSE,c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
         if(any(colnames(calls) == "call_rev")){
             calls[,het_mut_call_rev :=  incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F)]
             calls[,het_mut_peak_pct_rev :=  incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
             calls[,het_mut_s2n_abs_rev :=  incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
-            calls[
-                set_by_user == FALSE
-                ,c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)
-                ]
-            calls[
-                (
-                quality_fwd < quality_rev
-                # 1:min(dels)
-                | user_mut == "-"
-                )
-                & set_by_user == FALSE
-                ,c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)
-                ]
-        } else {
-            calls[
-                set_by_user == FALSE
-                ,user_mut := het_mut_call_fwd
-                ]
+            calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE,c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
         }
-
     }
     return(calls)
 }
@@ -280,7 +260,6 @@ incorporate_hetero_indels_func <- function(calls){
 incorporate_single_vec <- function(vec,ins,dels,type,fwd){
     if(type == "num") new_vec <- numeric(length(vec))
     else new_vec <- rep("-",length(vec))
-    if(length(ins) > 0) vec <- vec[-ins]
     if(fwd) {
         vec <- vec[1:min(length(vec),length(new_vec) - length(dels))]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
@@ -288,6 +267,7 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd){
         vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     }
+    if(length(ins) > 0) vec <- vec[-ins]
     return(new_vec)
 }
 
