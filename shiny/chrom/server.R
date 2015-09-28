@@ -142,14 +142,13 @@ shinyServer(function(input,output,session) {
 
     output$aln <- renderPrint({
         if(loading_processed_files() != "not" & varcall() ) {
-            cat("primary vs secondary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
-            if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
+            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
+            cat("\nidentified insertions:\n")
+            if(is.na(g_hetero_ins_tab[1])) cat("no insertions")
             else print(g_hetero_ins_tab)
             cat("\nidentified deletions:\n")
-            if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
+            if(is.na(g_hetero_del_tab[1])) cat("no deletions")
             else print(g_hetero_del_tab)
-            cat("\n")
-            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
         }
     })
     output$hetero_indel_pid <- renderPrint({
@@ -182,6 +181,7 @@ shinyServer(function(input,output,session) {
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
                 })
+                session$sendCustomMessage(type = 'input_change',message = paste0(g_calls[id==input$choose_call_pos]$trace_peak))
             } else cat("")
         } else cat("load .abi/.ab1 file")
     })
@@ -309,13 +309,15 @@ shinyServer(function(input,output,session) {
             isolate({
                 updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
                 g_calls[id==input$goLock$id]$set_by_user <<- TRUE
-            })
+            })   
         }
     })
     goClick_handler <- observe({
         if(loading_processed_files() != "not") {
             if(is.null(input$posClick)) return()
-            updateTextInput(session,"choose_call_pos",value=paste0(input$posClick$id))
+            isolate({
+                updateTextInput(session,"choose_call_pos",value=paste0(input$posClick$id))
+            })
         }
     })
 

@@ -227,6 +227,13 @@ HTMLWidgets.widget({
 */
             }
         );
+        Shiny.addCustomMessageHandler("input_change",
+            function(message){
+                if(message<brush.extent()[0] || message>brush.extent()[1]){
+                   setBrush(Number(message)-100,Number(message)+120);
+                }               
+            }
+        );
         Shiny.addCustomMessageHandler("mut_min",
             function(message) {
                 mult = Number(message);

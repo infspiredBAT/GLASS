@@ -44,17 +44,17 @@ shinyUI(
                         actionButton("change_btn","change", icon = icon("exchange"))
 					),
 					column(4,
-				        HTML(paste("messages and info will appear here", sep="")),
+				      HTML(paste("messages and info will appear here", sep="")),
 					    verbatimTextOutput("infobox")
 					),
 					column(1,
 					    HTML(paste("hetero aln %id:")),verbatimTextOutput("hetero_indel_pid"),
 					    HTML(paste("hetero ins/dels:")),verbatimTextOutput("hetero_indel_tab"),
-                        checkboxInput("incorporate_checkbox","use detected hetero indels", value = F)
+              checkboxInput("incorporate_checkbox","use detected hetero indels", value = F)
 					),
 					column(1,
                         sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1),
-					    sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
+					              sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
 					),
 					column(1,
                         sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 60, value = 0),
