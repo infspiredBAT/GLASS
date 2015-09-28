@@ -96,6 +96,7 @@ HTMLWidgets.widget({
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
             focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
             focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
+            focus.selectAll(".scope").attr("x",function(d){return widthScale(d["trace_peak"])-12;});
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
             focus.selectAll(".qual_rev").attr("x",function(d){return widthScale(d["trace_peak"]);});
@@ -209,29 +210,19 @@ HTMLWidgets.widget({
         Shiny.addCustomMessageHandler("goto",
             function(message) {
                 setBrush(Number(message)-100,Number(message)+120);
-
- /*               focus.append("g").selectAll("position_indicator")  //position indicator
-      		         .append("line").attr("class","peak_label short line varind")
-      		         .attr("x1",function(d){return widthScale(Number(message));})
-      		         .attr("y1",0)
-      		         .attr("x2",function(d){return widthScale(Number(message));})
-      		         .attr("y2",180)
-      		         .attr("stroke-width",8).attr("stroke","rgba(0,0,255,0.1)").attr("stroke-dasharray",2);
-                focus.selectAll(".".concat("id").concat(message))
-                .transition().delay(000).attr("opacity", 0)
-                .transition().delay(250).attr("opacity", 1)
-                .transition().delay(500).attr("opacity", 0)
-                .transition().delay(750).attr("opacity", 1)
-                .transition().delay(1000).attr("opacity", 0)
-                .transition().delay(1250).attr("opacity", 1);
-*/
+                focus.selectAll(".scope").attr("opacity",0);
+                focus.selectAll(".".concat("scope").concat(message))
+                .transition().attr("opacity", 1);
             }
         );
         Shiny.addCustomMessageHandler("input_change",
             function(message){
                 if(message<brush.extent()[0] || message>brush.extent()[1]){
-                   setBrush(Number(message)-100,Number(message)+120);
-                }               
+                   setBrush(Number(message)-100,Number(message)+120);       
+                }
+                focus.selectAll(".scope").attr("opacity",0);
+                focus.selectAll(".".concat("scope").concat(message))
+                       .transition().attr("opacity", 1);
             }
         );
         Shiny.addCustomMessageHandler("mut_min",
@@ -508,7 +499,7 @@ HTMLWidgets.widget({
   				.attr("d",line_fwd)
   				.attr("fill","none")
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
-          
+        //noise indocator fwd
         var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
         var group_noise_fwd = focus.append("g");
         var group_noise_rev = focus.append("g");
@@ -518,6 +509,7 @@ HTMLWidgets.widget({
 
         //reverse strand
         if(intens_rev != ""){
+            //Noise indicator rev
             var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
             group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
             .append("path").attr("class","area area_rev").attr("d",noise_area_rev)
@@ -554,6 +546,12 @@ HTMLWidgets.widget({
             }
             //console.log(calls);
             //trace peak labels
+            focus.append("g").selectAll("scope").data(calls).enter()        //scope (position indicator)
+                 .append("rect").attr("class",function(d){return "scope ".concat("scope").concat(d["trace_peak"]);})
+                 .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
+                 .attr("y",-4).attr("rx",2).attr("ry",2)
+                 .attr("width",24).attr("height",instance.height-100)
+                 .attr("fill","rgba(63, 191, 191, 0.1)").attr("opacity",0);
             if(rev==0){
                 focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
       		        .append("rect").attr("class","peak_label qual_fwd q")
