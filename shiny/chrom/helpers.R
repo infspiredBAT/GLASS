@@ -53,14 +53,14 @@ annotate_calls <- function(calls,intens,intens_rev){
         # calls[,mut_call_rev:=sample_peak_base_rev]
         calls[,mut_call_rev:=call_rev]
 
-         calls[,sample_peak_pct := max(c(sample_peak_pct_fwd,sample_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)]
-         calls[,mut_peak_pct := mean(c(mut_peak_pct_fwd,mut_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)]
+        calls[,sample_peak_pct := max(c(sample_peak_pct_fwd,sample_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)]
+        calls[,mut_peak_pct := mean(c(mut_peak_pct_fwd,mut_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)]
     } else {
-         calls[,sample_peak_pct := sample_peak_pct_fwd]
-         calls[,mut_peak_pct := mut_peak_pct_fwd]
+        calls[,sample_peak_pct := sample_peak_pct_fwd]
+        calls[,mut_peak_pct := mut_peak_pct_fwd]
     }
     calls[,set_by_user:=FALSE]
-    calls[,cons:=user_sample]
+    calls[,user_sample_orig:=user_sample]
     return(calls)
 }
 
@@ -68,8 +68,8 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
     # calls[set_by_user == FALSE, mut_call_fwd := sample_peak_base_fwd]
     calls[set_by_user == FALSE, mut_call_fwd := call]
-    calls[set_by_user == FALSE, user_sample := cons]
-    calls[set_by_user == FALSE, user_mut := cons]
+    calls[set_by_user == FALSE, user_sample := user_sample_orig]
+    calls[set_by_user == FALSE, user_mut := user_sample_orig]
 
     # mut
     if("call_rev" %in% colnames(calls)) {
@@ -114,7 +114,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
             ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
     }
-    calls[quality <= qual_thres & set_by_user == FALSE, c("user_sample","user_mut") := "N"]
+    calls[quality < qual_thres & set_by_user == FALSE, c("user_sample","user_mut") := "N"]
     return(calls)
 }
 
@@ -160,7 +160,7 @@ retranslate <- function(calls){
         setkey(coding,coding_seq)
     }
     coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
-    trans <- translate(coding[,user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
+    trans <- translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     trans <- aaa(trans)
     calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 
@@ -176,9 +176,16 @@ retranslate <- function(calls){
         setkey(coding,coding_seq)
     }
     coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
-    trans <- translate(coding[,user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
+    trans <- translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     trans <- aaa(trans)
     calls[ord_in_cod>0,aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
+#     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
+#     else dels <- numeric()
+#     if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
+#     else ins <- numeric()
+#     if(max(length(dels),length(ins)) != 0){
+#         calls[,aa_mut := incorporate_single_vec(calls[["aa_mut"]],ins,dels,"char",T)]
+#     }
 
     return(calls)
 }
@@ -190,16 +197,24 @@ get_choices <- function(calls){
         choices[,mut_peak_pct := mround(mut_peak_pct,5),by=1:nrow(choices)]
 
         choices[,`:=`(coding = paste0("c.", coding_seq), protein="")]
-        # coding : 1st variant
+        # 1st variant
+            # mismatch
         choices[user_sample != reference & user_sample != "-", coding := paste0(coding, reference, ">", user_sample, "(", sample_peak_pct, "%)")]
-        choices[user_sample != reference & user_sample == "-", coding := paste0(coding, "del", reference,            "(", sample_peak_pct, "%)")]
-        choices[aa_sample   != aa_ref,                         protein:= paste0("p.", a(aa_ref), codon, a(aa_sample),"(", sample_peak_pct, "%)")]
-        # coding : 2nd variant
+            # del
+        choices[user_sample != reference & user_sample == "-", coding := paste0(coding, "del", reference)]#,            "(", sample_peak_pct, "%)")]
+            # protein
+        choices[aa_sample   != aa_ref,                         protein:= paste0("p.", aa_ref, codon, aa_sample,      "(", sample_peak_pct, "%)")]
+        # 2nd variant
+            # mismatch without 1st variant
         choices[user_mut != reference & user_sample == reference & user_mut != "-",                            coding := paste0(coding, reference, ">", user_mut, "(", mut_peak_pct, "%)")]
+            # mismatch with 1st variant
         choices[user_mut != reference & user_sample != reference & user_mut != user_sample  & user_mut != "-", coding := paste0(coding, user_mut,                 "(", mut_peak_pct, "%)")]
-        choices[user_mut != reference & user_mut != user_sample  & user_mut == "-",                            coding := paste0(coding, "del", reference,         "(", mut_peak_pct, "%)")]
-        choices[aa_mut   != aa_ref    & aa_sample == aa_ref,                                                   protein:= paste0("p.", a(aa_ref), codon, a(aa_mut),"(", mut_peak_pct, "%)")]
-        choices[aa_mut   != aa_ref    & aa_sample != aa_ref,                                                   protein:= paste0(protein, a(aa_mut),               "(", mut_peak_pct, "%)")]
+            # del
+        choices[user_mut != reference & user_mut != user_sample  & user_mut == "-",                            coding := paste0(coding, "del", reference)]#,         "(", mut_peak_pct, "%)")]
+            # protein without 1st variant
+        choices[aa_mut   != aa_ref    & aa_sample == aa_ref,                                                   protein:= paste0("p.", aa_ref, codon, aa_mut,      "(", mut_peak_pct, "%)")]
+            # protein with 1st variant
+        choices[aa_mut   != aa_ref    & aa_sample != aa_ref,                                                   protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
     }
     return(choices)
 }
@@ -215,6 +230,17 @@ report_hetero_indels <- function(calls){
     } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
     primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
     hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+#     # pattern/primary overhang/tail = secondary deletion
+#     if(start(pattern(hetero_indel_aln)) > start(subject(hetero_indel_aln))){
+#         overhang1 <- paste(replicate(start(pattern(hetero_indel_aln))-1, "+"), collapse = "") # stri_dup("abc",3) from stringi
+#     }
+#     # subject/secondary overhang/tail = secondary insertion
+#     else{
+#         overhang1 <- paste(replicate(start(subject(hetero_indel_aln))-1, "-"), collapse = "") # stri_dup("abc",3) from stringi
+#     }
+#     cmpStr_hetero_indel_aln <- paste(overhang1,compareStrings(hetero_indel_aln),sep="")
+#     hetero_del_tab <- stringi::stri_locate_all_regex(cmpStr_hetero_indel_aln,"[\\+]+")[[1]]
+#     hetero_ins_tab <- stringi::stri_locate_all_regex(cmpStr_hetero_indel_aln,"[\\-]+")[[1]]
     hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_ins_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\-]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_indel_pid <- round(pid(hetero_indel_aln),1)
@@ -244,13 +270,13 @@ incorporate_hetero_indels_func <- function(calls){
     else ins <- numeric()
     if(max(length(dels),length(ins)) != 0){
         calls[,het_mut_call_fwd := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T)]
-        calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
-        calls[,het_mut_s2n_abs_fwd :=  incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
+         calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
+#         calls[,het_mut_s2n_abs_fwd := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
         calls[set_by_user == FALSE,c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
         if(any(colnames(calls) == "call_rev")){
-            calls[,het_mut_call_rev :=  incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F)]
-            calls[,het_mut_peak_pct_rev :=  incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
-            calls[,het_mut_s2n_abs_rev :=  incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
+            calls[,het_mut_call_rev := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F)]
+             calls[,het_mut_peak_pct_rev := incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
+#             calls[,het_mut_s2n_abs_rev := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
             calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE,c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
         }
     }

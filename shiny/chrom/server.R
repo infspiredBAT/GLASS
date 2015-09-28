@@ -142,13 +142,14 @@ shinyServer(function(input,output,session) {
 
     output$aln <- renderPrint({
         if(loading_processed_files() != "not" & varcall() ) {
-            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
-            cat("\nidentified insertions:\n")
-            if(is.na(g_hetero_ins_tab[1])) cat("no insertions")
+            cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
+            if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
             else print(g_hetero_ins_tab)
             cat("\nidentified deletions:\n")
-            if(is.na(g_hetero_del_tab[1])) cat("no deletions")
+            if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
             else print(g_hetero_del_tab)
+            cat("\n")
+            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
         }
     })
     output$hetero_indel_pid <- renderPrint({
@@ -174,9 +175,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_call_pos != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",cons,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -297,8 +298,8 @@ shinyServer(function(input,output,session) {
             if(is.null(input$goReset)) return()
             isolate({
                 updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
-                g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$cons
-                g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$cons
+                g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
+                g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
                 g_calls[id==input$goReset$id]$set_by_user <<- TRUE
             })
         }
