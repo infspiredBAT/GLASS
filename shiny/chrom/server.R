@@ -310,7 +310,7 @@ shinyServer(function(input,output,session) {
             isolate({
                 updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
                 g_calls[id==input$goLock$id]$set_by_user <<- TRUE
-            })   
+            })
         }
     })
     goClick_handler <- observe({
@@ -344,7 +344,12 @@ shinyServer(function(input,output,session) {
 
     split_traces <- observe({
         if(loading_processed_files() != "not"){
-            session$sendCustomMessage(type = "split",message = paste0(input$offset_traces_checkbox))
+            session$sendCustomMessage(type = "split",message = paste0(input$split_traces_checkbox))
+        }
+    })
+    show_calls <- observe({
+        if(loading_processed_files() != "not"){
+            session$sendCustomMessage(type = "show",message = paste0(input$show_calls_checkbox))
         }
     })
     set_opacity <- observe({
