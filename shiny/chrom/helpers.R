@@ -88,18 +88,19 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
             ]
         calls[
             set_by_user == FALSE
-            & mut_call_fwd != call
+            # & mut_call_fwd != call
             ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
         calls[
-            ((
-            mut_peak_pct_rev > mut_peak_pct_fwd
-            & mut_s2n_abs_rev > mut_s2n_abs_fwd
-            )
-            | user_mut == "-"
-            )
+#             ((
+#             mut_peak_pct_rev > mut_peak_pct_fwd
+#             & mut_s2n_abs_rev > mut_s2n_abs_fwd
+#             )
+#             | user_mut == "-"
+#             )
+            quality_rev > quality_fwd
             & set_by_user == FALSE
-            & mut_call_rev != call_rev
+            # & mut_call_rev != call_rev
             ,c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
             ]
     } else {
@@ -229,7 +230,7 @@ report_hetero_indels <- function(calls){
         secondary_seq <- paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = "")
     } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
     primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
-    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
 #     # pattern/primary overhang/tail = secondary deletion
 #     if(start(pattern(hetero_indel_aln)) > start(subject(hetero_indel_aln))){
 #         overhang1 <- paste(replicate(start(pattern(hetero_indel_aln))-1, "+"), collapse = "") # stri_dup("abc",3) from stringi
@@ -249,7 +250,7 @@ report_hetero_indels <- function(calls){
 
 get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
     names <- structure(1:4,names = c("A","C","G","T"))
-    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd,collapse = "")), gsub("[ -]","",paste(mut_rev,collapse = "")),type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd,collapse = "")), gsub("[ -]","",paste(mut_rev,collapse = "")),type = "global",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
     fwd <- strsplit(as.character(pattern(pa)),"")[[1]]
     rev <- strsplit(as.character(subject(pa)),"")[[1]]
     fwd_i <- numeric(length(fwd))

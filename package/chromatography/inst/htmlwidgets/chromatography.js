@@ -115,7 +115,7 @@ HTMLWidgets.widget({
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
         }
-        
+
         function setPeakLabel(calls,label,offset){
             focus.append("g").selectAll("text.seq").data(calls).enter() //reference
   	            .append("text")
@@ -417,7 +417,7 @@ HTMLWidgets.widget({
   			var widthScale  = instance.widthScale;
   			var heightScale = instance.heightScale;
         var width2Scale = instance.width2Scale;
-  		
+
   			widthScale.domain([0,domain_x]);
   			width2Scale.domain([0,domain_x]);
   			heightScale.domain([0,domain_y]);
@@ -499,6 +499,7 @@ HTMLWidgets.widget({
   				.attr("d",line_fwd)
   				.attr("fill","none")
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
+
         //noise indocator fwd
         var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
         var group_noise_fwd = focus.append("g");
@@ -607,12 +608,12 @@ HTMLWidgets.widget({
               .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
               .attr("stroke","#000000");
               instance.setPeakLabel(calls,"reference",0);
-//              instance.setPeakLabel(calls,"call",0);
-//              instance.setPeakLabel(calls,"mut_call_fwd",0);
-//              if(rev!==0){
-//                  instance.setPeakLabel(calls,"call_rev",0);
-//                  instance.setPeakLabel(calls,"mut_call_rev",0);
-//              }
+              instance.setPeakLabel(calls,"call",0);
+              instance.setPeakLabel(calls,"mut_call_fwd",0);
+              if(rev!==0){
+                  instance.setPeakLabel(calls,"call_rev",0);
+                  instance.setPeakLabel(calls,"mut_call_rev",0);
+              }
               instance.setPeakLabel(calls,"user_sample",rev);
               instance.setPeakLabel(calls,"user_mut",rev);
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
@@ -723,8 +724,8 @@ HTMLWidgets.widget({
                 instance.choices = x.choices;
                 instance.focus.selectAll(".user").remove();
                 instance.focus.selectAll(".mut").remove();
-//                instance.setPeakLabel(calls,"mut_call_fwd",0);
-//                if(rev!==0)instance.setPeakLabel(calls,"mut_call_rev",0);
+                instance.setPeakLabel(calls,"mut_call_fwd",0);
+                if(rev!==0)instance.setPeakLabel(calls,"mut_call_rev",0);
                 instance.setPeakLabel(calls,"user_sample",rev);
                 instance.setPeakLabel(calls,"user_mut",rev);
 
