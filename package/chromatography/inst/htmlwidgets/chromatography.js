@@ -120,7 +120,9 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("text.seq").data(calls).enter() //reference
   	            .append("text")
                 .attr("class",function(d){
-                    if(label.indexOf("mut") > -1){
+                    if(label.indexOf("call") > -1){
+                        return "peak_label short call";
+                    }else if(label.indexOf("mut") > -1){
                         return "peak_label short mut";
                     }else if(label.indexOf("user")> -1){
                         return "peak_label short user ".concat("id").concat(d["id"]);
@@ -232,13 +234,27 @@ HTMLWidgets.widget({
                 redraw();
             }
         );
+        Shiny.addCustomMessageHandler("show",
+            function(message){
+                console.log(message);
+                if(message==="TRUE"){
+                    focus.selectAll(".call").attr("opacity",0.8);
+                    redraw();
+                }else if(message==="FALSE"){
+                    focus.selectAll(".call").attr("opacity",0);
+                    redraw();
+                }
+            }
+        );
         Shiny.addCustomMessageHandler("split",
             function(message){
                 if(message==="TRUE"){
                     heightScale_fwd = heightScale_fwd_split;
                     heightScale_rev = heightScale_rev_split;
+                    
                     redraw();
                 }else if(message==="FALSE"){
+                    split_peak_offset = 100;
                     heightScale_fwd = heightScale;
                     heightScale_rev = heightScale;
                     redraw();
@@ -277,7 +293,7 @@ HTMLWidgets.widget({
   		         .attr("stroke-width",8).attr("stroke","rgba(0,0,255,0.1)").attr("stroke-dasharray",2);
 */
         };
-        function brushZoomIn(){
+/*        function brushZoomIn(){
             return function(event) {
                 event.preventDefault();
                 var ext = brush.extent();
@@ -329,6 +345,7 @@ HTMLWidgets.widget({
             .on('→', brushMoveRight())
             .on('↓', brushZoomOut())
             );
+*/
 
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
@@ -614,6 +631,8 @@ HTMLWidgets.widget({
                   instance.setPeakLabel(calls,"call_rev",0);
                   instance.setPeakLabel(calls,"mut_call_rev",0);
               }
+              //default
+              focus.selectAll(".call").attr("opacity",0);
               instance.setPeakLabel(calls,"user_sample",rev);
               instance.setPeakLabel(calls,"user_mut",rev);
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
