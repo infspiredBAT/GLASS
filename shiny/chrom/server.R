@@ -68,11 +68,11 @@ shinyServer(function(input,output,session) {
 
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
-                    error = function(e){output$infobox <- renderPrint(paste0("error while reading forward file, are you loading .abi ? ",e$message ))})
+                    error = function(e){output$files <- renderPrint(paste0("error while reading forward file, are you loading .abi ? ",e$message ))})
                 if(!is.null(rev_file)) {
                     tryCatch(
                         g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
-                        error = function(e){output$infobox <- renderPrint(paste0("error while reading reverse file, are you loading .abi ? ",e$message ))})
+                        error = function(e){output$files <- renderPrint(paste0("error while reading reverse file, are you loading .abi ? ",e$message ))})
                 }
                 else g_abif_rev <- NULL
 
@@ -81,7 +81,7 @@ shinyServer(function(input,output,session) {
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
                     called <- suppressWarnings(get_call_data(g_abif,g_abif_rev)),
-                    error = function(e){output$infobox <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
+                    error = function(e){output$files <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
 
                 if(!is.null(called)){
                     intensified         <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE)
@@ -99,6 +99,7 @@ shinyServer(function(input,output,session) {
                     g_helperdat         <<- helperdat
                     g_calls             <<- data.table(calls,key="id")
                     ret<-"loaded"
+                    output$files <- renderPrint({cat(g_files)})
                     g_new_sample <<- TRUE
                 }
             })
