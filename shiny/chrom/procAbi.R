@@ -100,7 +100,7 @@ generate_ref <-function(user_seq){
     multiple_covered <- list()
 #     user_seq <- gsub("[^ACGT]","N",user_seq)
 
-    refs   <- readLines("../../data/ref_ex_in.fa")
+    refs   <- readLines("data/ref_ex_in.fa")
     ref_info <- gsub(">ref_","",perl = T,refs[seq(1,length(refs),2)])
     ref_info <- strsplit(ref_info,split = "_")
     ref_names <- sapply(ref_info,function(x) x[1])
