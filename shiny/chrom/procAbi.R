@@ -111,10 +111,10 @@ generate_ref <-function(user_seq){
     OK_align <- which(align$score / nchar(refs) > 0.85 | align$score > 50)
 
     seq_coverage <- logical(nchar(user_seq))
-    for(index in OK_align[order(-(align$ref_starts + nchar(refs) - align$ref_ends - 1)[OK_align],align$score[OK_align],decreasing = T)]){
+    for(index in OK_align[order((align$score / nchar(refs))[OK_align],align$score[OK_align],decreasing = T)]){
         if(any(seq_coverage[(align$start[index] + 1):align$end[index]])) {
             indeces <- which(!seq_coverage[(align$start[index] + 1):align$end[index]]) + align$start[index]
-            if(length(indeces > 50)) {
+            if(length(indeces > 50) && length(indeces)/ (align$end[index] - align$start[index]) > 0.6 ) {
                 align$starts[index] <- min(indeces) - 1
                 align$ends[index] <- max(indeces)
                 ref_indeces <- which(!seq_coverage[(align$start[index] + 1):align$end[index]]) + align$ref_start[index] - 1
@@ -148,7 +148,7 @@ generate_ref <-function(user_seq){
 }
 
 add_insert <- function(diffs){
-    if(nrow(diffs) > 0) return(unlist(lapply(1:nrow(diffs),function(x) diffs[["t_pos"]][x] + (1:nchar(diffs[["replace"]][x]))/10 )))
+    if(nrow(diffs) > 0) return(unlist(lapply(1:nrow(diffs),function(x) diffs[["t_pos"]][x] + (1:nchar(diffs[["replace"]][x]))/100 )))
     else return(numeric())
 }
 
@@ -158,7 +158,7 @@ get_coord <- function(seq_start,al_start,al_end,ref_start,ref_end,diffs){
         diffs[,t_pos := t_pos - seq_start]
         coord_out <- numeric(length(coord) + nrow(diffs))
         coord_out[-diffs[["t_pos"]]] <- coord
-        for(index in which(coord_out == 0)) coord_out[index] <- coord_out[index - 1] - 0.1
+        for(index in which(coord_out == 0)) coord_out[index] <- coord_out[index - 1] - 0.01
         return(coord_out)
     } else return(coord)
 }
