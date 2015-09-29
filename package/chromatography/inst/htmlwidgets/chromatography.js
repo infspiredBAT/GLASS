@@ -115,17 +115,20 @@ HTMLWidgets.widget({
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
         }
-
+        
         function setPeakLabel(calls,label,offset){
-            focus.append("g").selectAll("text.seq").data(calls).enter() //reference
-  	            .append("text")
-                .attr("class",function(d){
-                    if(label.indexOf("call") > -1){
+            //Bind data        
+            var text = focus.append("g").selectAll("text").data(calls)
+            //Ender
+            text = text.enter().append("text");
+            //Update  - not working correctly still have to remove old data 
+            text.attr("class",function(d){
+                    if(label.indexOf("user") > -1){
+                        return "peak_label short user ".concat("id").concat(d["id"]);                    
+                    }else if(label.indexOf("call") > -1){
                         return "peak_label short call";
-                    }else if(label.indexOf("mut") > -1){
+                    }else if(label.indexOf("mut")> -1){
                         return "peak_label short mut";
-                    }else if(label.indexOf("user")> -1){
-                        return "peak_label short user ".concat("id").concat(d["id"]);
                     }else{return "peak_label short";}
                 })
                 .text(function(d){
@@ -360,6 +363,7 @@ HTMLWidgets.widget({
             context: context,
 	          brush:   brush,
             focus:   focus,
+            redraw:  redraw,
             widthScale:  widthScale,
             width2Scale: width2Scale,
             heightScale: heightScale,
@@ -742,9 +746,6 @@ HTMLWidgets.widget({
                 instance.showVarInMap(choices);
                 instance.choices = x.choices;
                 instance.focus.selectAll(".user").remove();
-                instance.focus.selectAll(".mut").remove();
-                instance.setPeakLabel(calls,"mut_call_fwd",0);
-                if(rev!==0)instance.setPeakLabel(calls,"mut_call_rev",0);
                 instance.setPeakLabel(calls,"user_sample",rev);
                 instance.setPeakLabel(calls,"user_mut",rev);
 
@@ -781,6 +782,20 @@ HTMLWidgets.widget({
                     .attr("y",instance.label_pos["aa_mut"]+rev)
                     .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
                     .attr("stroke","#000000");
+                var w = instance.brush.extent()[1]-instance.brush.extent()[0] ;
+                var focus = instance.focus;
+                //conditional visibility !duplicate code! remove when setpeak label is fixed and instance.focus.selectAll(".user").remove(); is no longer required
+                if(w<260){
+                    focus.selectAll(".peak_label").attr("visibility","visible");
+                    if(w==0){focus.selectAll(".peak_label").attr("visibility","hidden");}
+                }else{
+                    focus.selectAll(".peak_label").attr("visibility","hidden");
+                    if(w<800){
+                      focus.selectAll(".qual_fwd").attr("visibility","visible");
+                      focus.selectAll(".qual_rev").attr("visibility","visible");
+                    }
+                    if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
+                }
 
   			} else { console.log(x) }
         }
