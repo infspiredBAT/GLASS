@@ -115,16 +115,16 @@ HTMLWidgets.widget({
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
         }
-        
+
         function setPeakLabel(calls,label,offset){
-            //Bind data        
+            //Bind data
             var text = focus.append("g").selectAll("text").data(calls)
             //Ender
             text = text.enter().append("text");
-            //Update  - not working correctly still have to remove old data 
+            //Update  - not working correctly still have to remove old data
             text.attr("class",function(d){
                     if(label.indexOf("user") > -1){
-                        return "peak_label short user ".concat("id").concat(d["id"]);                    
+                        return "peak_label short user ".concat("id").concat(d["id"]);
                     }else if(label.indexOf("call") > -1){
                         return "peak_label short call";
                     }else if(label.indexOf("mut")> -1){
@@ -207,9 +207,9 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
   		         .append("line").attr("class","peak_label short line varind")
   		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
-  		         .attr("y1",180)
+  		         .attr("y1",200)
   		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  		         .attr("y2",280)
+  		         .attr("y2",300)
   		         .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
         }
         Shiny.addCustomMessageHandler("goto",
@@ -223,7 +223,7 @@ HTMLWidgets.widget({
         Shiny.addCustomMessageHandler("input_change",
             function(message){
                 if(message<brush.extent()[0] || message>brush.extent()[1]){
-                   setBrush(Number(message)-100,Number(message)+120);       
+                   setBrush(Number(message)-100,Number(message)+120);
                 }
                 focus.selectAll(".scope").attr("opacity",0);
                 focus.selectAll(".".concat("scope").concat(message))
@@ -254,7 +254,7 @@ HTMLWidgets.widget({
                 if(message==="TRUE"){
                     heightScale_fwd = heightScale_fwd_split;
                     heightScale_rev = heightScale_rev_split;
-                    
+
                     redraw();
                 }else if(message==="FALSE"){
                     split_peak_offset = 100;
@@ -474,21 +474,25 @@ HTMLWidgets.widget({
   				.attr("width",function(d){return widthScale(d["end"]-d["start"]);})
   				.attr("height",50)
   				.attr("fill",function(d) {
-  				    if (/exon/.test(d["attr"])){ return "rgba(200,200,200,1.0)";
-  				    } else {                     return "rgba(230,230,230,1.0)"; }
+  				         if (/exon/.test(d["attr"])){                           return "rgba(200,200,200,1.0)";
+  				    } else if (/intron9/.test(d["attr"]) & d["length"] == 133){ return "rgba(255,205,205,1.0)";
+  				    } else {                                                    return "rgba(230,230,230,1.0)"; }
   				});
   			context.selectAll("text.intrex.name").data(intrex).enter()
   				.append("text").attr("class","context")
   				.attr("x",function(d){return widthScale(d["start"]);})
   				.attr("y",-2)
-  				.attr("opacity",0.6)
-  				.text(function(d){return d["attr"];})
-  				.attr("fill","black");
+  				.attr("opacity",0.8)
+  				.attr("fill","black")
+  				.text(function(d) {
+  				    if (/intron9/.test(d["attr"]) & d["length"] == 133){ return d["attr"]+" | "+"beta variant";
+  				    } else {                                             return d["attr"]; }
+  				});
   			context.selectAll("text.intrex.start").data(intrex).enter()
   				.append("text").attr("class","context")
   				.attr("x",function(d){return widthScale(d["start"]);})
   				.attr("y",60)
-  				.attr("opacity",0.6)
+  				.attr("opacity",0.8)
   				.text(function(d){return d["id"];})
   				.attr("fill","black");
 
@@ -571,9 +575,9 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("scope").data(calls).enter()        //scope (position indicator)
                  .append("rect").attr("class",function(d){return "scope ".concat("scope").concat(d["trace_peak"]);})
                  .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
-                 .attr("y",-4).attr("rx",2).attr("ry",2)
-                 .attr("width",24).attr("height",instance.height-100)
-                 .attr("fill","rgba(63, 191, 191, 0.1)").attr("opacity",0);
+                 .attr("y",-14).attr("rx",2).attr("ry",2)
+                 .attr("width",24).attr("height",instance.height-90)
+                 .attr("fill","rgba(150, 150, 255, 0.1)").attr("opacity",0);
             if(rev==0){
                 focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
       		        .append("rect").attr("class","peak_label qual_fwd q")
@@ -705,8 +709,8 @@ HTMLWidgets.widget({
 //				.attr("class", "x brush")
       			.call(brush).attr("class","context")
   				.selectAll("rect")
-  				.attr("y", -14)
-  				.attr("height", 78) //height2 + 10)
+  				.attr("y", -16)
+  				.attr("height", 80) //height2 + 10)
   				.attr("rx",3)
   				.attr("ry",3)
   				.attr("fill","rgba(255,255,255,0.3)")
@@ -753,9 +757,9 @@ HTMLWidgets.widget({
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
                     .append("line").attr("class","peak_label short line varind")
                     .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .attr("y1",180)
+                    .attr("y1",200)
                     .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .attr("y2",280)
+                    .attr("y2",300)
                     .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
 
                 instance.focus.selectAll("g").selectAll(".aa_sample").remove();

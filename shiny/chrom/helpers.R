@@ -76,8 +76,8 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         # reset all but set_by_user
         # calls[set_by_user == FALSE, mut_call_rev := sample_peak_base_rev]
         calls[set_by_user == FALSE, mut_call_rev := call_rev]
-        calls[
-            mut_peak_pct_fwd >= mut_min
+        calls[                                            
+            mut_peak_pct_fwd >= mut_min 
             & mut_s2n_abs_fwd >= s2n_min
             ,mut_call_fwd := mut_peak_base_fwd
             ]
@@ -193,6 +193,7 @@ retranslate <- function(calls){
 
 get_choices <- function(calls){
     choices <- calls[user_sample != "N" & (user_sample != reference | user_mut != reference) & trace_peak != "NA" & !is.na(gen_coord)]
+    choices <- choices[,{user_sample:=ambig_minus(user_sample,reference);user_mut:=ambig_minus(user_mut,reference)}]
     if (nrow(choices) > 0) {
         choices[,sample_peak_pct := mround(sample_peak_pct,5),by=1:nrow(choices)]
         choices[,mut_peak_pct := mround(mut_peak_pct,5),by=1:nrow(choices)]

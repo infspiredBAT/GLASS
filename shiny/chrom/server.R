@@ -92,7 +92,7 @@ shinyServer(function(input,output,session) {
                     #helper_intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
                         helperdat               <- list()
                         helperdat$helper_intrex <- list()
-                        helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","trace_peak","end"))
+                        helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
                         helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
                         helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                         helperdat$new_sample    <- TRUE
