@@ -9,6 +9,7 @@ g_intens                <<- NULL             #intensities file
 g_intens_rev            <<- NULL             #optional reverse intensities file
 g_helperdat             <<- NULL             #helper data used in graphs
 g_choices               <<- NULL
+g_view                  <<- NULL
 g_selected              <<- NULL
 g_selected_goto_index   <<- 0
 g_max_y                 <<- NULL
@@ -201,9 +202,9 @@ shinyServer(function(input,output,session) {
     })
 
     add_checkboxes <- function(){
-        checkboxes <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '"',"")
-        for(i in 1:nrow(g_choices)) {
-            if(g_choices[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
+        checkboxes <- paste0('<input type="checkbox" name="row', g_view$id, '" value="', g_view$id, '"',"")
+        for(i in 1:nrow(g_view)) {
+            if(g_view[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
             else checkboxes[i] <- paste0(checkboxes[i],">","")
         }
         return(checkboxes)
@@ -215,16 +216,19 @@ shinyServer(function(input,output,session) {
             input$change_btn
             input$reset_btn
             if(loading_processed_files() != "not" & !is.null(g_choices)) {
-
+               
+                g_view<<-get_view(g_choices)
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
                 add_checkbox_buttons <- add_checkboxes()
-                add_goto_buttons     <- paste0('<input type="button" class="go-goto"  value="goto"  name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
-                add_reset_buttons    <- paste0('<input type="button" class="go-reset" value="reset" name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
-                add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_choices$id,'" data-id="',g_choices$id,'"',">")
+                add_goto_buttons     <- paste0('<input type="button" class="go-goto"  value="goto"  name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
+                add_reset_buttons    <- paste0('<input type="button" class="go-reset" value="remove" name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
+                add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
 
                 # cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
-                cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_choices[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
+                
+                
+                cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
 
             }
         }
@@ -299,8 +303,11 @@ shinyServer(function(input,output,session) {
             if(is.null(input$goReset)) return()
             isolate({
                 updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
-                g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
-                g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
+                #reset button changed to remove variant
+                #g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
+                #g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
+                g_calls[id==input$goReset$id]$user_sample  <<- g_calls[id==input$goReset$id]$reference
+                g_calls[id==input$goReset$id]$user_mut     <<- g_calls[id==input$goReset$id]$reference
                 g_calls[id==input$goReset$id]$set_by_user <<- TRUE
             })
         }
@@ -363,4 +370,16 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
+    output$export_btn <- downloadHandler(
+        filename = function() {
+            paste('data-', Sys.Date(), '.csv', sep='')
+        },
+        content = function(con) {
+            out<-data.table()
+            for(i in 1:nrow(g_view)) {
+                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[id==i,list(id,gen_coord,coding,protein)]) 
+            }
+            write.csv(g_view, con)
+        }
+    )
 })

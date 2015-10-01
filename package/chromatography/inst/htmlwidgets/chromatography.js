@@ -21,9 +21,10 @@ HTMLWidgets.widget({
     	      height2Scale = d3.scale.linear().range([height2,0]),
             heightScale_fwd_split = d3.scale.linear().range([half_height,(2*half_height -  height)]),
             heightScale_rev_split = d3.scale.linear().range([height,half_height]);
-            heightScale_fwd = heightScale;
-            heightScale_rev = heightScale;
-
+            //heightScale_fwd = heightScale;
+            //heightScale_rev = heightScale;
+            heightScale_fwd = heightScale_fwd_split;
+            heightScale_rev = heightScale_rev_split;
         var line_fwd = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return heightScale_fwd(d)});
@@ -214,7 +215,7 @@ HTMLWidgets.widget({
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
-                setBrush(Number(message)-100,Number(message)+120);
+                setBrush(Number(message)-180,Number(message)+200);
                 focus.selectAll(".scope").attr("opacity",0);
                 focus.selectAll(".".concat("scope").concat(message))
                 .transition().attr("opacity", 1);
@@ -296,7 +297,7 @@ HTMLWidgets.widget({
   		         .attr("stroke-width",8).attr("stroke","rgba(0,0,255,0.1)").attr("stroke-dasharray",2);
 */
         };
-/*        function brushZoomIn(){
+       function brushZoomIn(){
             return function(event) {
                 event.preventDefault();
                 var ext = brush.extent();
@@ -343,12 +344,12 @@ HTMLWidgets.widget({
                 setBrush(from,to);}
         };
         d3.select('body').call(d3.keybinding()
-            .on('←', brushMoveLeft())
-            .on('↑', brushZoomIn())
-            .on('→', brushMoveRight())
-            .on('↓', brushZoomOut())
+            .on('a', brushMoveLeft())
+            .on('w', brushZoomIn())
+            .on('d', brushMoveRight())
+            .on('s', brushZoomOut())
             );
-*/
+
 
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*

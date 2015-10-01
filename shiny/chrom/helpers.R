@@ -147,17 +147,18 @@ ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes
 }
 retranslate <- function(calls){
 
-    coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_sample,reference)]
+    coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_sample,reference)]
+    setnames(coding,"V1","coding_seq")
     push = 0
     #get missing bases for the first frame if incomplete
     while(coding[1,ord_in_cod]!=1){
-      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq,codon,ord_in_cod,user_sample=seq,reference=seq)])
+      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])   
       setkey(coding,coding_seq)
       push = push +1
     }
     #get missing bases for the last frame if incomplete
     while(coding[nrow(coding),ord_in_cod] != 3){
-        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq,codon,ord_in_cod,user_sample=seq,reference=seq)])
+        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])
         setkey(coding,coding_seq)
     }
     coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
@@ -165,15 +166,16 @@ retranslate <- function(calls){
     suppressWarnings(trans <- aaa(trans))
     calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 
-    coding <- calls[ord_in_cod>0,list(coding_seq,codon,ord_in_cod,user_mut,reference)]
+    coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_mut,reference)]
+    setnames(coding,"V1","coding_seq")
     push = 0
     while(coding[1,ord_in_cod]!=1){
-      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq,codon,ord_in_cod,user_mut=seq,reference=seq)])
+      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
       setkey(coding,coding_seq)
       push = push +1
     }
     while(coding[nrow(coding),ord_in_cod] != 3){
-        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq,codon,ord_in_cod,user_mut=seq,reference=seq)])
+        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
         setkey(coding,coding_seq)
     }
     coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
@@ -193,8 +195,8 @@ retranslate <- function(calls){
 
 get_choices <- function(calls){
     choices <- calls[user_sample != "N" & (user_sample != reference | user_mut != reference) & trace_peak != "NA" & !is.na(gen_coord)]
-    choices <- choices[,{user_sample:=ambig_minus(user_sample,reference);user_mut:=ambig_minus(user_mut,reference)}]
     if (nrow(choices) > 0) {
+        choices <- choices[,`:=` (user_sample=ambig_minus(user_sample,reference),user_mut=ambig_minus(user_mut,reference)),by=1:nrow(choices)]
         choices[,sample_peak_pct := mround(sample_peak_pct,5),by=1:nrow(choices)]
         choices[,mut_peak_pct := mround(mut_peak_pct,5),by=1:nrow(choices)]
 
@@ -217,6 +219,35 @@ get_choices <- function(calls){
         choices[aa_mut   != aa_ref    & aa_sample == aa_ref,                                                   protein:= paste0("p.", aa_ref, codon, aa_mut,      "(", mut_peak_pct, "%)")]
             # protein with 1st variant
         choices[aa_mut   != aa_ref    & aa_sample != aa_ref,                                                   protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
+
+        #reanotate indels; flatten table
+        
+      }       
+    
+    return(choices)
+}
+
+get_view<-function(choices){
+    reps<-rle(choices$user_mut)
+    reps$csum <- cumsum(reps$length)
+    dtr <- data.table(length=reps$length,values=reps$values,csum=reps$csum)
+    if(nrow(dtr[values=="-"&length>=2,])>=1){
+        dtr[values=="-"&length>=2,`:=`(start=csum-length+1,end=csum)]
+        deletions <- dtr[values=="-"&length>=2,
+                         list(id=choices[start,]$id,
+                              ids=gsub(",","",toString(choices[,id[start:end]])), #Might need this for locks and resets
+                              start=start,                                       #to now which rows I'm replacing
+                              end=end,
+                              gen_coord=paste0(choices[start,]$gen_coord,"_",
+                                               choices[end,]$gen_coord),
+                              coding=paste0("c.",choices[start]$coding_seq,"_",
+                                            choices[end,]$coding_seq,"del",
+                                            gsub(", ","",toString(choices[,reference[start:end]]))))]
+        for(i in 1:nrow(deletions)){
+            choices<-choices[-c(deletions$start[[i]]:deletions$end[[i]])]
+        }
+        choices <- rbind(choices,deletions,fill=TRUE)
+        setkey(choices,id)
     }
     return(choices)
 }

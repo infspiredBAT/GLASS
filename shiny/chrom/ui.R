@@ -61,7 +61,7 @@ shinyUI(
                         sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
 					column(1,
-                        checkboxInput("split_traces_checkbox","split fwd/rev traces", value = F),
+                        checkboxInput("split_traces_checkbox","split fwd/rev traces", value = T),
                         checkboxInput("show_calls_checkbox","show fwd/rev calls", value = F)
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
                     ),
