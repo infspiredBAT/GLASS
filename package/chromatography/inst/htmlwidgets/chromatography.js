@@ -36,14 +36,15 @@ HTMLWidgets.widget({
         //        .x(function(d){return widthScale(d[0]);})
         //        .y(function(d){return heightScale(d[1]);});
         var mult = 2;
-        var noise_area_fwd = d3.svg.area()
+        //workshop
+      /*  var noise_area_fwd = d3.svg.area()
                 .x(function(d){return widthScale(d[0]);})
                 .y0(function(d){return (heightScale_fwd(0)+2);})
                 .y1(function(d){return heightScale_fwd(d[1]*mult);});
         var noise_area_rev = d3.svg.area()
                 .x(function(d){return widthScale(d[0]);})
                 .y0(function(d){return heightScale_rev(0)+2;})
-                .y1(function(d){return heightScale_rev(d[1]*mult);});
+                .y1(function(d){return heightScale_rev(d[1]*mult);}); */
         var linec = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return height2Scale(d)});
@@ -95,8 +96,9 @@ HTMLWidgets.widget({
             var w = brush.extent()[1]-brush.extent()[0] ;
             focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
-            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
-            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
+            //workshop
+            //focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
+            //focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
             focus.selectAll(".scope").attr("x",function(d){return widthScale(d["trace_peak"])-12;});
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
@@ -208,10 +210,10 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
   		         .append("line").attr("class","peak_label short line varind")
   		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
-  		         .attr("y1",200)
+  		         .attr("y1",150)
   		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  		         .attr("y2",300)
-  		         .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
+  		         .attr("y2",400)
+  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.25)").attr("stroke-dasharray",2);
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
@@ -357,8 +359,9 @@ HTMLWidgets.widget({
             svg:     svg,
             line_fwd: line_fwd,
             line_rev: line_rev,
-            noise_area_fwd: noise_area_fwd,
-            noise_area_rev: noise_area_rev,
+            //workshop
+            //noise_area_fwd: noise_area_fwd,
+            //noise_area_rev: noise_area_rev,
             label_pos:  label_pos,
             linec:   linec,
             context: context,
@@ -430,8 +433,9 @@ HTMLWidgets.widget({
   			var svg     = instance.svg;
   			var line_fwd   = instance.line_fwd;
         var line_rev   = instance.line_rev;
-        var noise_area_fwd = instance.noise_area_fwd;
-        var noise_area_rev = instance.noise_area_rev;
+        //workshop
+        //var noise_area_fwd = instance.noise_area_fwd;
+        //var noise_area_rev = instance.noise_area_rev;
   			var linec   = instance.linec;
   			var focus   = instance.focus;
   			var context = instance.context;
@@ -527,20 +531,24 @@ HTMLWidgets.widget({
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
 
         //noise indocator fwd
+        //workshop
+        /*
         var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
         var group_noise_fwd = focus.append("g");
         var group_noise_rev = focus.append("g");
         group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
             .append("path").attr("class","area area_fwd").attr("d",noise_area_fwd)
-            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.1);
+            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.1);   */
 
         //reverse strand
         if(intens_rev != ""){
             //Noise indicator rev
+            //workshop
+            /*
             var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
             group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
             .append("path").attr("class","area area_rev").attr("d",noise_area_rev)
-            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.1);
+            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.1);*/
             var group_a_r = focus.append("g");
     	    	var group_c_r = focus.append("g");
   		    	var group_g_r = focus.append("g");
@@ -758,10 +766,10 @@ HTMLWidgets.widget({
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
                     .append("line").attr("class","peak_label short line varind")
                     .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .attr("y1",200)
+                    .attr("y1",150)
                     .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .attr("y2",300)
-                    .attr("stroke-width",8).attr("stroke","rgba(255,0,255,0.15)").attr("stroke-dasharray",2);
+                    .attr("y2",400)
+                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.25)").attr("stroke-dasharray",2);
 
                 instance.focus.selectAll("g").selectAll(".aa_sample").remove();
                 instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
@@ -779,7 +787,7 @@ HTMLWidgets.widget({
                 instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_mut
                     .append("text").attr("class","peak_label short aa_mut")
                     .text(function(d){
-                        if   (d["ord_in_cod"] == 1) {return d["aa_mut"];}
+                        if   (d["mut_ord_in_cod"] == 1) {return d["aa_mut"];}
                         else {                       return "";}})
                     .attr("text-anchor", "right")
                     .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})

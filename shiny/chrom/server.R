@@ -1,5 +1,6 @@
 # library(shiny)
 library(sangerseqR)
+library(xlsx)
 source("procAbi.R")
 source("helpers.R")
 
@@ -116,8 +117,10 @@ shinyServer(function(input,output,session) {
 
     varcall <- reactive({
         if(loading_processed_files() != "not"){
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
-
+            #workshop
+            #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
+            #---
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,2)
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
             g_hetero_indel_pid <<- rep[[2]]
@@ -177,7 +180,7 @@ shinyServer(function(input,output,session) {
             if(input$choose_call_pos != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\tfwd Q ",quality_fwd,"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),"\trev Q ",quality_rev,sep="")])
                     } else {
                         cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
@@ -302,13 +305,23 @@ shinyServer(function(input,output,session) {
         if(loading_processed_files() != "not") {
             if(is.null(input$goReset)) return()
             isolate({
-                updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
-                #reset button changed to remove variant
-                #g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
-                #g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
-                g_calls[id==input$goReset$id]$user_sample  <<- g_calls[id==input$goReset$id]$reference
-                g_calls[id==input$goReset$id]$user_mut     <<- g_calls[id==input$goReset$id]$reference
-                g_calls[id==input$goReset$id]$set_by_user <<- TRUE
+                if(!is.na(g_view[id==input$goReset$id]$ids)){
+                    ids <- strsplit(g_view[id==input$goReset$id]$ids," ")[[1]]
+                    for( cid in ids){
+                        updateTextInput(session,"choose_call_pos",value=paste0(cid))
+                        g_calls[id==cid]$user_sample  <<- g_calls[id==cid]$reference
+                        g_calls[id==cid]$user_mut     <<- g_calls[id==cid]$reference
+                        g_calls[id==cid]$set_by_user <<- TRUE
+                    }
+                }else{
+                    updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
+                    #reset button changed to remove variant
+                    #g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
+                    #g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
+                    g_calls[id==input$goReset$id]$user_sample  <<- g_calls[id==input$goReset$id]$reference
+                    g_calls[id==input$goReset$id]$user_mut     <<- g_calls[id==input$goReset$id]$reference
+                    g_calls[id==input$goReset$id]$set_by_user <<- TRUE
+                    }
             })
         }
     })
@@ -329,12 +342,13 @@ shinyServer(function(input,output,session) {
             })
         }
     })
+    #workshop
 
-    s2n_slider_handler <- observe({
-        if(loading_processed_files()!= "not"){
-            session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
-        }
-    })
+#    s2n_slider_handler <- observe({
+#        if(loading_processed_files()!= "not"){
+#            session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
+#        }
+#    })
 
 #     reset_handler <- observe({
 #         input$reset_btn
@@ -372,14 +386,14 @@ shinyServer(function(input,output,session) {
     })
     output$export_btn <- downloadHandler(
         filename = function() {
-            paste('data-', Sys.Date(), '.csv', sep='')
+            paste('data-', Sys.Date(), '.xlsx', sep='')
         },
         content = function(con) {
             out<-data.table()
             for(i in 1:nrow(g_view)) {
-                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[id==i,list(id,gen_coord,coding,protein)]) 
+                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[id==i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)]) 
             }
-            write.csv(g_view, con)
+            write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
         }
     )
 })

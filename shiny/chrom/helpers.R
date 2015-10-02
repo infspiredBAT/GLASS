@@ -70,7 +70,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     calls[set_by_user == FALSE, mut_call_fwd := call]
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut := user_sample_orig]
-
+   
     # mut
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
@@ -79,30 +79,49 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         calls[                                            
             mut_peak_pct_fwd >= mut_min 
             & mut_s2n_abs_fwd >= s2n_min
+            #& quality_fwd >= qual_thres
             ,mut_call_fwd := mut_peak_base_fwd
             ]
         calls[
             mut_peak_pct_rev >= mut_min
             & mut_s2n_abs_rev >= s2n_min
+            #& quality_rev >= qual_thres
             ,mut_call_rev := mut_peak_base_rev
             ]
+#         calls[
+#             set_by_user == FALSE
+#             # & mut_call_fwd != call
+#             ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+#             ]
+        calls[mut_call_fwd!=reference
+              &mut_call_rev==reference
+              &quality_fwd > qual_thres
+              &set_by_user == FALSE,
+              c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+              ]
+        calls[mut_call_fwd==reference
+              &mut_call_rev!=reference
+              &quality_rev > qual_thres
+              &set_by_user == FALSE,
+              c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
+              ]
+        
         calls[
-            set_by_user == FALSE
-            # & mut_call_fwd != call
+            mut_call_fwd!=reference
+            &mut_call_rev!=reference
+            & set_by_user == FALSE
+            # & mut_call_rev != call_rev
             ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
         calls[
-#             ((
-#             mut_peak_pct_rev > mut_peak_pct_fwd
-#             & mut_s2n_abs_rev > mut_s2n_abs_fwd
-#             )
-#             | user_mut == "-"
-#             )
-            quality_rev > quality_fwd
+            mut_call_fwd!=reference
+            &mut_call_rev!=reference
+            &quality_rev > quality_fwd
             & set_by_user == FALSE
             # & mut_call_rev != call_rev
             ,c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
             ]
+        
     } else {
         calls[
             mut_peak_pct_fwd >= mut_min
@@ -163,6 +182,8 @@ retranslate <- function(calls){
     }
     coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
     trans <- translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
+    #Shift annotation of codons by '-'s
+    
     suppressWarnings(trans <- aaa(trans))
     calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 
@@ -179,9 +200,13 @@ retranslate <- function(calls){
         setkey(coding,coding_seq)
     }
     coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
+    ord<-rep(c(1,2,3),length(trans))
     trans <- translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     suppressWarnings(trans <- aaa(trans))
-    calls[ord_in_cod>0,aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
+    #create a string as long as trans rep(123),add them to ord in cod where user_mut != "-"s
+    calls[ord_in_cod>0 & user_mut == "-",mut_ord_in_cod:=0]
+    calls[ord_in_cod>0 &user_mut!="-",mut_ord_in_cod := ord[(1+push):(length(aa_mut)+push)]]
+    calls[mut_ord_in_cod>0 & user_mut != "-",aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
 #     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
 #     else dels <- numeric()
 #     if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
@@ -196,7 +221,10 @@ retranslate <- function(calls){
 get_choices <- function(calls){
     choices <- calls[user_sample != "N" & (user_sample != reference | user_mut != reference) & trace_peak != "NA" & !is.na(gen_coord)]
     if (nrow(choices) > 0) {
-        choices <- choices[,`:=` (user_sample=ambig_minus(user_sample,reference),user_mut=ambig_minus(user_mut,reference)),by=1:nrow(choices)]
+        #choices <- choices[,`:=` (user_sample=ambig_minus(user_sample,reference),user_mut=ambig_minus(user_mut,reference)),by=1:nrow(choices)]
+        choices[,ids:=NA,by=1:nrow(choices)]
+        choices[,user_sample:=ambig_minus(user_sample,reference),by=1:nrow(choices)]
+        choices[,user_mut:=ambig_minus(user_mut,reference),by=1:nrow(choices)]
         choices[,sample_peak_pct := mround(sample_peak_pct,5),by=1:nrow(choices)]
         choices[,mut_peak_pct := mround(mut_peak_pct,5),by=1:nrow(choices)]
 
@@ -218,7 +246,7 @@ get_choices <- function(calls){
             # protein without 1st variant
         choices[aa_mut   != aa_ref    & aa_sample == aa_ref,                                                   protein:= paste0("p.", aa_ref, codon, aa_mut,      "(", mut_peak_pct, "%)")]
             # protein with 1st variant
-        choices[aa_mut   != aa_ref    & aa_sample != aa_ref,                                                   protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
+        choices[aa_mut   != aa_ref    & aa_sample!= aa_ref & aa_sample != aa_mut,                              protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
 
         #reanotate indels; flatten table
         
@@ -227,6 +255,7 @@ get_choices <- function(calls){
     return(choices)
 }
 
+#remove consecutive single base deletions and replace them with one long deletion in table 
 get_view<-function(choices){
     reps<-rle(choices$user_mut)
     reps$csum <- cumsum(reps$length)
@@ -236,15 +265,19 @@ get_view<-function(choices){
         deletions <- dtr[values=="-"&length>=2,
                          list(id=choices[start,]$id,
                               ids=gsub(",","",toString(choices[,id[start:end]])), #Might need this for locks and resets
-                              start=start,                                       #to now which rows I'm replacing
+                              start=start,                                        #to now which rows I'm replacing
                               end=end,
                               gen_coord=paste0(choices[start,]$gen_coord,"_",
                                                choices[end,]$gen_coord),
                               coding=paste0("c.",choices[start]$coding_seq,"_",
                                             choices[end,]$coding_seq,"del",
-                                            gsub(", ","",toString(choices[,reference[start:end]]))))]
+                                            gsub(", ","",toString(choices[,reference[start:end]])))),by=1:nrow(dtr[values=="-"&length>=2,])]
+        deleted=0
         for(i in 1:nrow(deletions)){
-            choices<-choices[-c(deletions$start[[i]]:deletions$end[[i]])]
+            from <- deletions$start[[i]]-deleted
+            to   <- deletions$end[[i]]-deleted
+            choices<-choices[-c(from:to)]
+            deleted <- (deletions$end[[i]] - deletions$start[[i]] +1)
         }
         choices <- rbind(choices,deletions,fill=TRUE)
         setkey(choices,id)
