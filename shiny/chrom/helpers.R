@@ -205,6 +205,7 @@ retranslate <- function(calls){
     suppressWarnings(trans <- aaa(trans))
     #create a string as long as trans rep(123),add them to ord in cod where user_mut != "-"s
     calls[ord_in_cod>0 & user_mut == "-",mut_ord_in_cod:=0]
+    calls[ord_in_cod>0 & user_mut == "-",aa_mut:="-"]
     calls[ord_in_cod>0 &user_mut!="-",mut_ord_in_cod := ord[(1+push):(length(aa_mut)+push)]]
     calls[mut_ord_in_cod>0 & user_mut != "-",aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
 #     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
@@ -247,7 +248,8 @@ get_choices <- function(calls){
         choices[aa_mut   != aa_ref    & aa_sample == aa_ref,                                                   protein:= paste0("p.", aa_ref, codon, aa_mut,      "(", mut_peak_pct, "%)")]
             # protein with 1st variant
         choices[aa_mut   != aa_ref    & aa_sample!= aa_ref & aa_sample != aa_mut,                              protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
-
+        #choices[aa_mut != aa_ref & aa_sample== aa_ref & aa_mut=="-",                                           protein:= paste0("p.",aa_ref,codon,"fs")]
+        
         #reanotate indels; flatten table
         
       }       
@@ -271,7 +273,9 @@ get_view<-function(choices){
                                                choices[end,]$gen_coord),
                               coding=paste0("c.",choices[start]$coding_seq,"_",
                                             choices[end,]$coding_seq,"del",
-                                            gsub(", ","",toString(choices[,reference[start:end]])))),by=1:nrow(dtr[values=="-"&length>=2,])]
+                                            gsub(", ","",toString(choices[,reference[start:end]]))),
+                              protein=paste0("p.",choices[start,]$aa_ref,choices[start,]$codon,"fs")),
+                         by=1:nrow(dtr[values=="-"&length>=2,])]
         deleted=0
         for(i in 1:nrow(deletions)){
             from <- deletions$start[[i]]-deleted
