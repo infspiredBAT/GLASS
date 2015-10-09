@@ -118,10 +118,7 @@ shinyServer(function(input,output,session) {
 
     varcall <- reactive({
         if(loading_processed_files() != "not"){
-            #workshop
-            #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
-            #---
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,2)
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
             g_hetero_indel_pid <<- rep[[2]]
@@ -343,13 +340,12 @@ shinyServer(function(input,output,session) {
             })
         }
     })
-    #workshop
 
-#    s2n_slider_handler <- observe({
-#        if(loading_processed_files()!= "not"){
-#            session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
-#        }
-#    })
+    s2n_slider_handler <- observe({
+        if(loading_processed_files()!= "not"){
+            session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
+        }
+    })
 
 #     reset_handler <- observe({
 #         input$reset_btn

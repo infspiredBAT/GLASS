@@ -249,9 +249,7 @@ get_choices <- function(calls){
             # protein with 1st variant
         choices[aa_mut   != aa_ref    & aa_sample!= aa_ref & aa_sample != aa_mut,                              protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
         #choices[aa_mut != aa_ref & aa_sample== aa_ref & aa_mut=="-",                                           protein:= paste0("p.",aa_ref,codon,"fs")]
-        
-        #reanotate indels; flatten table
-        
+
       }       
     
     return(choices)

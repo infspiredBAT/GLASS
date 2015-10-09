@@ -23,7 +23,7 @@ shinyUI(
             tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
 
-		HTML("<font size=4em><b>genomePD/glass</b></font><font size=5em><b>TP53</b></font><font size=3em> | <i>workshop edition</i> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas</font><font size=2.0em> @ <a href=http://bat.infspire.org>bat.infspire.org</a> & the Medical Genomics Group | CEITEC MU | CESNET/MetaCentrum | ERIC </font>"),
+		HTML("<font size=4em><b>genomePD/glass</b></font><font size=5em><b>TP53</b></font><font size=3em> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas</font><font size=2.0em> @ <a href=http://bat.infspire.org>bat.infspire.org</a> & the Medical Genomics Group | CEITEC MU | CESNET/MetaCentrum | ERIC </font>"),
 
 		hr(),
 
@@ -53,22 +53,21 @@ shinyUI(
               checkboxInput("incorporate_checkbox","use detected hetero indels", value = F)
 					),
           
-					column(2,
+					column(1,
                         sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
-                 ,sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 60, value = 15)
-					    #,sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
+					              ,sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
 					),
-					#column(1,
-                        
+					column(1,
+					            sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 60, value = 15)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
-					#),
+					),
           column(1),
 					column(1,
                         checkboxInput("split_traces_checkbox","split fwd/rev traces", value = T),
                         checkboxInput("show_calls_checkbox","show fwd/rev calls", value = F)
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
                     ),
-					column(2,
+					column(1,
                         sliderInput("opacity","trace opacity", ticks=FALSE, min = -100, max = 100, value = 0, step = 10),
                         sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
 					)
