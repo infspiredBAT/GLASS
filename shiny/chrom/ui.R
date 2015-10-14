@@ -73,15 +73,11 @@ shinyUI(
 					)
 				),
 				br(),
-
+        
 				chromatographyOutput("plot"),
-
 				shiny::dataTableOutput("chosen_variants_table"),
-
 				conditionalPanel(condition=" output.chosen_variants_table ",
-# 				    actionButton("reset_btn","reset to ref", icon = icon("times"))
-#                     ,actionButton("confirm","confirm prediction",icon = icon("check"))
-				    downloadButton("export_btn","export")
+				downloadButton("export_btn","export")
 				),
 
 				br()

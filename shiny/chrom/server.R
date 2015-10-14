@@ -6,7 +6,7 @@ source("helpers.R")
 
 
 g_calls                 <<- NULL             #annotated basecall data
-makeReactiveBinding("g_calls")
+#makeReactiveBinding("g_calls")
 g_intens                <<- NULL             #intensities file
 g_intens_rev            <<- NULL             #optional reverse intensities file
 g_helperdat             <<- NULL             #helper data used in graphs
@@ -30,7 +30,7 @@ shinyServer(function(input,output,session) {
     })
 
     loading_processed_files <- reactive ({
-
+        calls <- ""
         if(!is.null(get_file())) {
             ret <- "not"
             g_varcall <<- FALSE
@@ -100,24 +100,21 @@ shinyServer(function(input,output,session) {
                         helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                         helperdat$new_sample    <- TRUE
                     g_helperdat         <<- helperdat
-                    g_calls             <<- data.table(calls,key="id")
+                    calls             <<- data.table(calls,key="id")
                     ret<-"loaded"
                     output$files <- renderPrint({cat(g_files)})
                     g_new_sample <<- TRUE
                 }
             })
-            return(ret)
         }
-        return("not")
+        return(calls)
     })
-    output$files <- renderPrint({
-        if(loading_processed_files() != "not") {
-            cat(g_files)
-        }
-    })
-
+    
     varcall <- reactive({
-        if(loading_processed_files() != "not"){
+        input$change_btn
+        calls<-loading_processed_files()
+        if(calls != ""){
+            if(is.null(g_calls)) g_calls <- calls
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
@@ -135,7 +132,7 @@ shinyServer(function(input,output,session) {
     })
 
     output$plot <- renderChromatography({
-        if((loading_processed_files() != "not") & varcall() ) {
+        if(varcall()) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
             g_new_sample <<- FALSE
@@ -143,25 +140,13 @@ shinyServer(function(input,output,session) {
         }
     })
 
-    output$aln <- renderPrint({
-        if(loading_processed_files() != "not" & varcall() ) {
-            cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
-            if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
-            else print(g_hetero_ins_tab)
-            cat("\nidentified deletions:\n")
-            if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
-            else print(g_hetero_del_tab)
-            cat("\n")
-            writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
-        }
-    })
     output$hetero_indel_pid <- renderPrint({
-        if(loading_processed_files() != "not" & varcall() ) {
+        if(varcall() ) {
             cat(g_hetero_indel_pid)
         }
     })
     output$hetero_indel_tab <- renderPrint({
-        if(loading_processed_files() != "not" & varcall() ) {
+        if(varcall() ) {
             cat((g_hetero_ins_tab[,2]-g_hetero_ins_tab[,1]+1),"/",(g_hetero_del_tab[,2]-g_hetero_del_tab[,1]+1))
         }
     })
@@ -174,7 +159,7 @@ shinyServer(function(input,output,session) {
 #     })
 
     output$infobox <- renderPrint({
-        if(loading_processed_files() != "not") {
+        #if(loading_processed_files() != "not") {
             if(input$choose_call_pos != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
@@ -187,13 +172,13 @@ shinyServer(function(input,output,session) {
                 })
                 session$sendCustomMessage(type = 'input_change',message = paste0(g_calls[id==input$choose_call_pos]$trace_peak))
             } else cat("")
-        } else cat("load .abi/.ab1 file")
+        #} else cat("load .abi/.ab1 file")  #!todo write this message somehwere else
     })
 
     update_chosen_variants <- observe({
         input$change_btn
         isolate({
-            if(loading_processed_files() != "not") {
+            if(varcall()) {
                 if (input$change_user_sample != "") g_calls[id==as.numeric(input$choose_call_pos)]$user_sample <<- input$change_user_sample
                 if (input$change_user_mut    != "") g_calls[id==as.numeric(input$choose_call_pos)]$user_mut    <<- input$change_user_mut
                 # g_calls[id==as.numeric(input$choose_call_pos)]$user_variant <<- input$change_variant
@@ -202,6 +187,9 @@ shinyServer(function(input,output,session) {
         })
     })
 
+    #
+    # DataTable stuff
+    #
     add_checkboxes <- function(){
         checkboxes <- paste0('<input type="checkbox" name="row', g_view$id, '" value="', g_view$id, '"',"")
         for(i in 1:nrow(g_view)) {
@@ -216,7 +204,7 @@ shinyServer(function(input,output,session) {
         if(!is.null(g_choices) && nrow(g_choices) > 0){
             input$change_btn
             input$reset_btn
-            if(loading_processed_files() != "not" & !is.null(g_choices)) {
+            if(varcall() & !is.null(g_choices)) {
                
                 g_view<<-get_view(g_choices)
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
@@ -227,8 +215,7 @@ shinyServer(function(input,output,session) {
                 add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
 
                 # cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
-                
-                
+                              
                 cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
 
             }
@@ -272,35 +259,22 @@ shinyServer(function(input,output,session) {
         }"
     )
 
-    output$call_table <- shiny::renderDataTable({
-    	if(loading_processed_files() != "not" & !is.null(g_calls)) { g_calls }
-    }
-    ,options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-
-#     output$intens_table <- shiny::renderDataTable({
-#         if(loading_processed_files() != "not" & !is.null(g_intens)) { g_intens }
-#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-#
-#     output$intens_table_rev <- shiny::renderDataTable({
-#         if(loading_processed_files() != "not" & !is.null(g_intens_rev)) { g_intens_rev }
-#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-
     variant_select <- observe({
-        if(loading_processed_files() != "not") {
+        if(varcall()) {
             g_selected <<- str_trim(input$rows)
             g_selected_goto_index <<- 0
         }
     })
 
     goGoto_handler <- observe({
-        if(loading_processed_files() != "not") {
+        if(varcall()) {
             if(is.null(input$goGoto)) return()
             session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==input$goGoto$id]$trace_peak))
             updateTextInput(session,"choose_call_pos",value=paste0(input$goGoto$id))
         }
     })
     goReset_handler <- observe({
-        if(loading_processed_files() != "not") {
+        if(varcall()) {
             if(is.null(input$goReset)) return()
             isolate({
                 if(!is.na(g_view[id==input$goReset$id]$ids)){
@@ -324,7 +298,7 @@ shinyServer(function(input,output,session) {
         }
     })
     goLock_handler <- observe({
-        if(loading_processed_files() != "not") {
+        if(varcall()) {
             if(is.null(input$goLock)) return()
             isolate({
                 updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
@@ -332,47 +306,41 @@ shinyServer(function(input,output,session) {
             })
         }
     })
+
+    #
+    # Input binding from JS
+    #
     goClick_handler <- observe({
-        if(loading_processed_files() != "not") {
-            if(is.null(input$posClick)) return()
+        if(varcall()) {
+            if(is.null(input$pos_click)) return()
             isolate({
-                updateTextInput(session,"choose_call_pos",value=paste0(input$posClick$id))
+                updateTextInput(session,"choose_call_pos",value=paste0(input$pos_click$id))
             })
         }
     })
-
+  
+    #
+    # Send message to JS
+    #
     s2n_slider_handler <- observe({
-        if(loading_processed_files()!= "not"){
+        if(varcall()){
             session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
         }
     })
 
-#     reset_handler <- observe({
-#         input$reset_btn
-#         isolate({
-#             if(length(g_selected) != 0) {
-#                 #g_choices <<- g_choices[-match(as.numeric(g_selected),gid)]
-#                 for(i in as.numeric(g_selected)) {
-#                     g_calls[id==i,]$user_sample <<- g_calls[id==i,]$reference
-#                     g_calls[id==i,]$set_by_user <<- TRUE
-#                 }
-#                 #g_selected <<-  NULL
-#             }
-#         })
-#     })
 
     split_traces <- observe({
-        if(loading_processed_files() != "not"){
+        if(varcall()){
             session$sendCustomMessage(type = "split",message = paste0(input$split_traces_checkbox))
         }
     })
     show_calls <- observe({
-        if(loading_processed_files() != "not"){
+        if(varcall()){
             session$sendCustomMessage(type = "show",message = paste0(input$show_calls_checkbox))
         }
     })
     set_opacity <- observe({
-        if(loading_processed_files() != "not"){
+        if(varcall()){
             opac_fwd <- 1 + (input$opacity/100)
             opac_rev <- 1 - (input$opacity/100)
             #if(opac_fwd>1)opac_fwd <- 1
@@ -381,6 +349,11 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
+
+
+    #
+    # EXPORT
+    #
     output$export_btn <- downloadHandler(
         filename = function() {
             paste('data-', Sys.Date(), '.xlsx', sep='')
@@ -393,4 +366,34 @@ shinyServer(function(input,output,session) {
             write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
         }
     )
+
+    #
+    # Other tabs
+    #
+    
+    output$aln <- renderPrint({
+      if(varcall() ) {
+          cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
+          if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
+          else print(g_hetero_ins_tab)
+          cat("\nidentified deletions:\n")
+          if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
+          else print(g_hetero_del_tab)
+          cat("\n")
+          writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
+      }
+    })
+
+    output$call_table <- shiny::renderDataTable({
+        if(varcall() & !is.null(g_calls)) { g_calls }
+    }
+    ,options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+
+#     output$intens_table <- shiny::renderDataTable({
+#         if(loading_processed_files() != "not" & !is.null(g_intens)) { g_intens }
+#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+#
+#     output$intens_table_rev <- shiny::renderDataTable({
+#         if(loading_processed_files() != "not" & !is.null(g_intens_rev)) { g_intens_rev }
+#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 })

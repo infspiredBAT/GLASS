@@ -287,7 +287,7 @@ HTMLWidgets.widget({
         );
         function callShiny(id,trace_peak){
             //console.log(message);
-            Shiny.onInputChange("posClick", {id: id});
+            Shiny.onInputChange("pos_click", {id: id});
 /*
             setBrush(Number(trace_peak)-100,Number(trace_peak)+120);
             focus.append("g").selectAll("position_indicator")  //position indicator
