@@ -22,45 +22,44 @@ g_hetero_ins_tab        <<- NULL
 g_hetero_del_tab        <<- NULL
 
 shinyServer(function(input,output,session) {
-
-    get_file <- reactive({
-        showReactLog()
-       # if (!is.null(input$select_file)) return(input$select_file$datapath)
-        if (!is.null(input$select_file)) return(input$select_file)
-        else return(NULL)
-    })
+    
+#     get_file <- reactive({
+#        # if (!is.null(input$select_file)) return(input$select_file$datapath)
+#         if (!is.null(input$select_file)) return(input$select_file)
+#         else return(NULL)
+#     })
 
     loading_processed_files <- reactive ({
         
-        calls <- ""
-        if(!is.null(get_file())) {
+        calls <- structure("error_reading_Rbin",class = "my_UI_exception")
+        if(!is.null(input$select_file)) {
             ret <- "not"
             g_varcall <<- FALSE
-            file <- get_file()$datapath
-            name <- get_file()$name
+            file <- input$select_file$datapath
+            name <- input$select_file$name
 
             #if multiple files uploaded we use the first to
             #check if we can distinguish forward and reverse
             #otherwise we only take the first file
             if(length(name)>=2){
                 if(gsub("F.*","F",name[1])==gsub("R.*","F",name[2])){
-                    fwd_file <- get_file()$datapath[1]
+                    fwd_file <- input$select_file$datapath[1]
                     fwd_file_name <- name[1]
-                    rev_file <- get_file()$datapath[2]
+                    rev_file <- input$select_file$datapath[2]
                     rev_file_name <- name[2]
                 }else if(gsub("R.*","R",name[1])==gsub("F.*","R",name[2])){
-                    fwd_file <- get_file()$datapath[2]
+                    fwd_file <- input$select_file$datapath[2]
                     fwd_file_name <- name[2]
-                    rev_file <- get_file()$datapath[1]
+                    rev_file <- input$select_file$datapath[1]
                     rev_file_name <- name[1]
                 }else{
-                    fwd_file <- get_file()$datapath[1]
+                    fwd_file <- input$select_file$datapath[1]
                     fwd_file_name <- name[1]
                     rev_file <- NULL
                     rev_file_name <- "-"
                 }
             }else{
-                fwd_file <- get_file()$datapath
+                fwd_file <- input$select_file$datapath
                 fwd_file_name <- name
                 rev_file <- NULL
                 rev_file_name <- "-"
@@ -106,16 +105,17 @@ shinyServer(function(input,output,session) {
                     ret<-"loaded"
                     output$files <- renderPrint({cat(g_files)})
                     g_new_sample <<- TRUE
-                }
+                } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
         }
         return(calls)
     })
     
     varcall <- reactive({
-        input$change_btn
-        calls<-loading_processed_files()
-        if(calls != ""){
+        if(class(loading_processed_files())[1] != "my_UI_exception") {
+            update_chosen_variants()
+            goReset_handler()
+            calls<-loading_processed_files()
             
             if(is.null(g_calls)) g_calls <- calls
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
@@ -124,14 +124,14 @@ shinyServer(function(input,output,session) {
             g_hetero_indel_pid <<- rep[[2]]
             g_hetero_ins_tab   <<- rep[[3]]
             g_hetero_del_tab   <<- rep[[4]]
-
+            
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
-
+            
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
-            g_varcall <<- TRUE
-        }
-        return(g_varcall)
+            return(TRUE)
+            
+        } else return(FALSE)
     })
 
     output$plot <- renderChromatography({
@@ -179,16 +179,17 @@ shinyServer(function(input,output,session) {
         #} else cat("load .abi/.ab1 file")  #!todo write this message somehwere else
     })
 
-    update_chosen_variants <- observe({
+    update_chosen_variants <- reactive({
         input$change_btn
         isolate({
-            if(varcall()) {
+            if(!is.null(g_calls[["id"]])){
                 if (input$change_user_sample != "") g_calls[id==as.numeric(input$choose_call_pos)]$user_sample <<- input$change_user_sample
                 if (input$change_user_mut    != "") g_calls[id==as.numeric(input$choose_call_pos)]$user_mut    <<- input$change_user_mut
                 # g_calls[id==as.numeric(input$choose_call_pos)]$user_variant <<- input$change_variant
                 g_calls[id==as.numeric(input$choose_call_pos)]$set_by_user <<- TRUE
             }
         })
+        return(T)
     })
 
     #
@@ -277,30 +278,34 @@ shinyServer(function(input,output,session) {
             updateTextInput(session,"choose_call_pos",value=paste0(input$goGoto$id))
         }
     })
-    goReset_handler <- observe({
-        if(varcall()) {
-            if(is.null(input$goReset)) return()
-            isolate({
-                if(!is.na(g_view[id==input$goReset$id]$ids)){
-                    ids <- strsplit(g_view[id==input$goReset$id]$ids," ")[[1]]
-                    for( cid in ids){
-                        updateTextInput(session,"choose_call_pos",value=paste0(cid))
-                        g_calls[id==cid]$user_sample  <<- g_calls[id==cid]$reference
-                        g_calls[id==cid]$user_mut     <<- g_calls[id==cid]$reference
-                        g_calls[id==cid]$set_by_user <<- TRUE
+
+    goReset_handler <- reactive({
+        #if(varcall()) {
+            if(!is.null(input$goReset)){
+                isolate({
+                    if(!is.na(g_view[id==input$goReset$id]$ids)){
+                        ids <- strsplit(g_view[id==input$goReset$id]$ids," ")[[1]]
+                        for( cid in ids){
+                            updateTextInput(session,"choose_call_pos",value=paste0(cid))
+                            g_calls[id==cid]$user_sample  <<- g_calls[id==cid]$reference
+                            g_calls[id==cid]$user_mut     <<- g_calls[id==cid]$reference
+                            g_calls[id==cid]$set_by_user <<- TRUE
+                        }
+                    }else{
+                        updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
+                        #reset button changed to remove variant
+                        #g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
+                        #g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
+                        g_calls[id==input$goReset$id]$user_sample  <<- g_calls[id==input$goReset$id]$reference
+                        g_calls[id==input$goReset$id]$user_mut     <<- g_calls[id==input$goReset$id]$reference
+                        g_calls[id==input$goReset$id]$set_by_user <<- TRUE
                     }
-                }else{
-                    updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
-                    #reset button changed to remove variant
-                    #g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
-                    #g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
-                    g_calls[id==input$goReset$id]$user_sample  <<- g_calls[id==input$goReset$id]$reference
-                    g_calls[id==input$goReset$id]$user_mut     <<- g_calls[id==input$goReset$id]$reference
-                    g_calls[id==input$goReset$id]$set_by_user <<- TRUE
-                    }
-            })
-        }
+                }) 
+            } 
+            return(T) 
+        #}
     })
+
     goLock_handler <- observe({
         if(varcall()) {
             if(is.null(input$goLock)) return()
