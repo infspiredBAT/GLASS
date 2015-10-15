@@ -4,7 +4,7 @@ library(xlsx)
 source("procAbi.R")
 source("helpers.R")
 
-
+options(shiny.reactlog=TRUE)
 g_calls                 <<- NULL             #annotated basecall data
 #makeReactiveBinding("g_calls")
 g_intens                <<- NULL             #intensities file
@@ -24,12 +24,14 @@ g_hetero_del_tab        <<- NULL
 shinyServer(function(input,output,session) {
 
     get_file <- reactive({
+        showReactLog()
        # if (!is.null(input$select_file)) return(input$select_file$datapath)
         if (!is.null(input$select_file)) return(input$select_file)
         else return(NULL)
     })
 
     loading_processed_files <- reactive ({
+        
         calls <- ""
         if(!is.null(get_file())) {
             ret <- "not"
@@ -114,6 +116,7 @@ shinyServer(function(input,output,session) {
         input$change_btn
         calls<-loading_processed_files()
         if(calls != ""){
+            
             if(is.null(g_calls)) g_calls <- calls
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             rep <- report_hetero_indels(g_calls)
@@ -132,6 +135,7 @@ shinyServer(function(input,output,session) {
     })
 
     output$plot <- renderChromatography({
+        
         if(varcall()) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)

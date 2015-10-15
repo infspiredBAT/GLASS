@@ -8,6 +8,7 @@ library(stringi)
 #require(DT)
 
 shinyUI(
+    
     fluidPage(theme = "simplex.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
             tags$title("genomePD/glass"),
