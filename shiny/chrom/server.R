@@ -4,7 +4,7 @@ library(xlsx)
 source("procAbi.R")
 source("helpers.R")
 
-options(shiny.reactlog=TRUE)
+#options(shiny.reactlog=TRUE)
 g_calls                 <<- NULL             #annotated basecall data
 #makeReactiveBinding("g_calls")
 g_intens                <<- NULL             #intensities file
@@ -134,8 +134,7 @@ shinyServer(function(input,output,session) {
         } else return(FALSE)
     })
 
-    output$plot <- renderChromatography({
-        
+    output$plot <- renderChromatography({       
         if(varcall()) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
@@ -272,11 +271,9 @@ shinyServer(function(input,output,session) {
     })
 
     goGoto_handler <- observe({
-        if(varcall()) {
-            if(is.null(input$goGoto)) return()
-            session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==input$goGoto$id]$trace_peak))
-            updateTextInput(session,"choose_call_pos",value=paste0(input$goGoto$id))
-        }
+        if(is.null(input$goGoto)) return()
+        session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==input$goGoto$id]$trace_peak))
+        updateTextInput(session,"choose_call_pos",value=paste0(input$goGoto$id))
     })
 
     goReset_handler <- reactive({
@@ -307,41 +304,35 @@ shinyServer(function(input,output,session) {
     })
 
     goLock_handler <- observe({
-        if(varcall()) {
-            if(is.null(input$goLock)) return()
-            isolate({
-                updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
-                g_calls[id==input$goLock$id]$set_by_user <<- TRUE
-            })
-        }
+        if(is.null(input$goLock)) return()
+        isolate({
+            updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
+            g_calls[id==input$goLock$id]$set_by_user <<- TRUE
+        })
     })
 
     #
     # Input binding from JS
     #
     goClick_handler <- observe({
-        if(varcall()) {
-            if(is.null(input$pos_click)) return()
-            isolate({
-                updateTextInput(session,"choose_call_pos",value=paste0(input$pos_click$id))
-            })
-        }
+        if(is.null(input$pos_click)) return()
+        isolate({
+            updateTextInput(session,"choose_call_pos",value=paste0(input$pos_click$id))
+        })
     })
   
     #
     # Send message to JS
     #
     s2n_slider_handler <- observe({
-        if(varcall()){
             session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
-        }
     })
 
 
     split_traces <- observe({
-        if(varcall()){
+       # if(varcall()){
             session$sendCustomMessage(type = "split",message = paste0(input$split_traces_checkbox))
-        }
+        #}
     })
     show_calls <- observe({
         if(varcall()){
