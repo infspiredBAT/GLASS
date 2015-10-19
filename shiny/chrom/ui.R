@@ -8,7 +8,7 @@ library(stringi)
 #require(DT)
 
 shinyUI(
-    
+
     fluidPage(theme = "simplex.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
             tags$title("genomePD/glass"),
@@ -53,7 +53,7 @@ shinyUI(
 					    HTML(paste("hetero ins/dels:")),verbatimTextOutput("hetero_indel_tab"),
               checkboxInput("incorporate_checkbox","use detected hetero indels", value = F)
 					),
-          
+
 					column(1,
                         sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
 					              ,sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
@@ -64,8 +64,8 @@ shinyUI(
 					),
           column(1),
 					column(1,
-                        checkboxInput("split_traces_checkbox","split fwd/rev traces", value = T),
-                        checkboxInput("show_calls_checkbox","show fwd/rev calls", value = F)
+                        checkboxInput("join_traces_checkbox","join F/R traces", value = F),
+                        checkboxInput("show_calls_checkbox","show F/R calls", value = F)
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
                     ),
 					column(1,
@@ -74,7 +74,7 @@ shinyUI(
 					)
 				),
 				br(),
-        
+
 				chromatographyOutput("plot"),
 				shiny::dataTableOutput("chosen_variants_table"),
 				conditionalPanel(condition=" output.chosen_variants_table ",

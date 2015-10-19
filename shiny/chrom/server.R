@@ -22,7 +22,7 @@ g_hetero_ins_tab        <<- NULL
 g_hetero_del_tab        <<- NULL
 
 shinyServer(function(input,output,session) {
-    
+
 #     get_file <- reactive({
 #        # if (!is.null(input$select_file)) return(input$select_file$datapath)
 #         if (!is.null(input$select_file)) return(input$select_file)
@@ -30,7 +30,7 @@ shinyServer(function(input,output,session) {
 #     })
 
     loading_processed_files <- reactive ({
-        
+
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
         if(!is.null(input$select_file)) {
             ret <- "not"
@@ -111,13 +111,13 @@ shinyServer(function(input,output,session) {
         g_calls   <<- NULL
         return(calls)
     })
-    
+
     varcall <- reactive({
         if(class(loading_processed_files())[1] != "my_UI_exception") {
             update_chosen_variants()
             goReset_handler()
             calls<-loading_processed_files()
-            
+
             if(is.null(g_calls)) g_calls <- calls
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             rep <- report_hetero_indels(g_calls)
@@ -125,20 +125,20 @@ shinyServer(function(input,output,session) {
             g_hetero_indel_pid <<- rep[[2]]
             g_hetero_ins_tab   <<- rep[[3]]
             g_hetero_del_tab   <<- rep[[4]]
-            
+
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
-            
+
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
             return(TRUE)
-            
+
         } else return(FALSE)
     })
 
     #
     # Render functions reacting to varcall
     #
-    output$plot <- renderChromatography({       
+    output$plot <- renderChromatography({
         if(varcall()) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
             ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
@@ -170,9 +170,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_call_pos != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\tfwd Q ",quality_fwd,"\nrev mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),"\trev Q ",quality_rev,sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nF  mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"  \tQ ",quality_fwd,"\nR  mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),"  \tQ ",quality_rev,sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nfwd mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nF  mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -216,7 +216,7 @@ shinyServer(function(input,output,session) {
             input$change_btn
             input$reset_btn
             if(varcall() & !is.null(g_choices)) {
-               
+
                 g_view<<-get_view(g_choices)
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
@@ -226,7 +226,7 @@ shinyServer(function(input,output,session) {
                 add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
 
                 # cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
-                              
+
                 cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
 
             }
@@ -307,9 +307,9 @@ shinyServer(function(input,output,session) {
                         g_calls[id==input$goReset$id]$user_mut     <<- g_calls[id==input$goReset$id]$reference
                         g_calls[id==input$goReset$id]$set_by_user <<- TRUE
                     }
-                }) 
-            } 
-            return(T) 
+                })
+            }
+            return(T)
         #}
     })
 
@@ -330,7 +330,7 @@ shinyServer(function(input,output,session) {
             updateTextInput(session,"choose_call_pos",value=paste0(input$pos_click$id))
         })
     })
-  
+
     #
     # Send message to JS
     #
@@ -339,9 +339,9 @@ shinyServer(function(input,output,session) {
     })
 
 
-    split_traces <- observe({
+    join_traces <- observe({
        # if(varcall()){
-            session$sendCustomMessage(type = "split",message = paste0(input$split_traces_checkbox))
+            session$sendCustomMessage(type = "join",message = paste0(input$join_traces_checkbox))
         #}
     })
     show_calls <- observe({
@@ -371,7 +371,7 @@ shinyServer(function(input,output,session) {
         content = function(con) {
             out<-data.table()
             for(i in 1:nrow(g_view)) {
-                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[id==i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)]) 
+                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[id==i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
             }
             write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
         }
@@ -380,7 +380,7 @@ shinyServer(function(input,output,session) {
     #
     # Other tabs
     #
-    
+
     output$aln <- renderPrint({
       if(varcall() ) {
           cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")

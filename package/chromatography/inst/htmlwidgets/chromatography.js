@@ -44,7 +44,7 @@ HTMLWidgets.widget({
         var noise_area_rev = d3.svg.area()
                 .x(function(d){return widthScale(d[0]);})
                 .y0(function(d){return heightScale_rev(0)+2;})
-                .y1(function(d){return heightScale_rev(d[1]*mult);}); 
+                .y1(function(d){return heightScale_rev(d[1]*mult);});
         var linec = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return height2Scale(d)});
@@ -96,7 +96,7 @@ HTMLWidgets.widget({
             var w = brush.extent()[1]-brush.extent()[0] ;
             focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
-          
+
             focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
             focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
             focus.selectAll(".scope").attr("x",function(d){return widthScale(d["trace_peak"])-12;});
@@ -213,7 +213,7 @@ HTMLWidgets.widget({
   		         .attr("y1",150)
   		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
   		         .attr("y2",400)
-  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.25)").attr("stroke-dasharray",2);
+  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.2)").attr("stroke-dasharray",2);
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
@@ -252,14 +252,13 @@ HTMLWidgets.widget({
                 }
             }
         );
-        Shiny.addCustomMessageHandler("split",
+        Shiny.addCustomMessageHandler("join",
             function(message){
-                if(message==="TRUE"){
+                if(message==="FALSE"){
                     heightScale_fwd = heightScale_fwd_split;
                     heightScale_rev = heightScale_rev_split;
-
                     redraw();
-                }else if(message==="FALSE"){
+                }else if(message==="TRUE"){
                     split_peak_offset = 100;
                     heightScale_fwd = heightScale;
                     heightScale_rev = heightScale;
@@ -529,13 +528,13 @@ HTMLWidgets.widget({
   				.attr("stroke","#FF0000").attr("stroke-width",0.75);
 
         //noise indocator fwd
-        
+
         var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
         var group_noise_fwd = focus.append("g");
         var group_noise_rev = focus.append("g");
         group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
             .append("path").attr("class","area area_fwd").attr("d",noise_area_fwd)
-            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.1);  
+            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.1);
 
         //reverse strand
         if(intens_rev != ""){
@@ -581,7 +580,7 @@ HTMLWidgets.widget({
                  .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
                  .attr("y",-14).attr("rx",2).attr("ry",2)
                  .attr("width",24).attr("height",instance.height-90)
-                 .attr("fill","rgba(150, 150, 255, 0.1)").attr("opacity",0);
+                 .attr("fill","rgba(150, 150, 255, 0.2)").attr("opacity",0);
             if(rev==0){
                 focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
       		        .append("rect").attr("class","peak_label qual_fwd q")
@@ -764,7 +763,7 @@ HTMLWidgets.widget({
                     .attr("y1",150)
                     .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
                     .attr("y2",400)
-                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.25)").attr("stroke-dasharray",2);
+                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.2)").attr("stroke-dasharray",2);
 
                 instance.focus.selectAll("g").selectAll(".aa_sample").remove();
                 instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
