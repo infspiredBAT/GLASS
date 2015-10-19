@@ -251,7 +251,7 @@ get_choices <- function(calls){
         #choices[aa_mut != aa_ref & aa_sample== aa_ref & aa_mut=="-",                                           protein:= paste0("p.",aa_ref,codon,"fs")]
 
       }       
-    
+    setkey(choices,id)
     return(choices)
 }
 
@@ -284,6 +284,7 @@ get_view<-function(choices){
         choices <- rbind(choices,deletions,fill=TRUE)
         setkey(choices,id)
     }
+    
     return(choices)
 }
 

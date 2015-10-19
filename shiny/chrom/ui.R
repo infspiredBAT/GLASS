@@ -91,12 +91,12 @@ shinyUI(
 			tabPanel('calls', value = 'call_table', icon = icon("table"),
 				 shiny::dataTableOutput("call_table")
  			)
-# 			tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
-# 		         shiny::dataTableOutput("intens_table")
-# 			),
-#             tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
-#                  shiny::dataTableOutput("intens_table_rev")
-#             )
+			,tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
+		         shiny::dataTableOutput("intens_table")
+			)
+           ,tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
+                 shiny::dataTableOutput("intens_table_rev")
+            )
 		)
     )
 )

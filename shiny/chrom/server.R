@@ -108,6 +108,7 @@ shinyServer(function(input,output,session) {
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
         }
+        g_calls   <<- NULL
         return(calls)
     })
     
@@ -134,6 +135,9 @@ shinyServer(function(input,output,session) {
         } else return(FALSE)
     })
 
+    #
+    # Render functions reacting to varcall
+    #
     output$plot <- renderChromatography({       
         if(varcall()) {
             g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
@@ -178,6 +182,9 @@ shinyServer(function(input,output,session) {
         #} else cat("load .abi/.ab1 file")  #!todo write this message somehwere else
     })
 
+    #
+    # Change single / Change button
+    #
     update_chosen_variants <- reactive({
         input$change_btn
         isolate({
@@ -270,6 +277,9 @@ shinyServer(function(input,output,session) {
         }
     })
 
+    #
+    # data table buttons
+    #
     goGoto_handler <- observe({
         if(is.null(input$goGoto)) return()
         session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==input$goGoto$id]$trace_peak))
@@ -389,11 +399,11 @@ shinyServer(function(input,output,session) {
     }
     ,options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
-#     output$intens_table <- shiny::renderDataTable({
-#         if(loading_processed_files() != "not" & !is.null(g_intens)) { g_intens }
-#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-#
-#     output$intens_table_rev <- shiny::renderDataTable({
-#         if(loading_processed_files() != "not" & !is.null(g_intens_rev)) { g_intens_rev }
-#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+    output$intens_table <- shiny::renderDataTable({
+        if(loading_processed_files() != "not" & !is.null(g_intens)) { g_intens }
+    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+
+    output$intens_table_rev <- shiny::renderDataTable({
+        if(loading_processed_files() != "not" & !is.null(g_intens_rev)) { g_intens_rev }
+    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 })
