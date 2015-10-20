@@ -69,8 +69,8 @@ shinyUI(
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
                     ),
 					column(1,
-                        sliderInput("opacity","trace opacity", ticks=FALSE, min = -100, max = 100, value = 0, step = 10),
-                        sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
+                           conditionalPanel(condition = "output.reverse",sliderInput("opacity","trace opacity", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
+                        ,sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
 					)
 				),
 				br(),

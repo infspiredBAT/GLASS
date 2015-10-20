@@ -118,7 +118,10 @@ shinyServer(function(input,output,session) {
             goReset_handler()
             calls<-loading_processed_files()
 
-            if(is.null(g_calls)) g_calls <- calls
+            if(is.null(g_calls)){ 
+                g_calls <- calls
+                setkey(g_calls,id)
+            }
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
@@ -400,10 +403,14 @@ shinyServer(function(input,output,session) {
     ,options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
     output$intens_table <- shiny::renderDataTable({
-        if(loading_processed_files() != "not" & !is.null(g_intens)) { g_intens }
+        if(varcall() & !is.null(g_intens)) { g_intens }
     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
     output$intens_table_rev <- shiny::renderDataTable({
-        if(loading_processed_files() != "not" & !is.null(g_intens_rev)) { g_intens_rev }
+        if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+
+    output$reverse <- reactive({
+        nrow(input$select_file)
+    })
 })
