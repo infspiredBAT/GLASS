@@ -28,7 +28,7 @@ shinyServer(function(input,output,session) {
 #         if (!is.null(input$select_file)) return(input$select_file)
 #         else return(NULL)
 #     })
-
+    
     loading_processed_files <- reactive ({
 
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
@@ -343,9 +343,9 @@ shinyServer(function(input,output,session) {
 
 
     join_traces <- observe({
-       # if(varcall()){
-            session$sendCustomMessage(type = "join",message = paste0(input$join_traces_checkbox))
-        #}
+        loading_processed_files()
+        if(is.null(g_intens_rev))   session$sendCustomMessage(type = "join",message = "TRUE")
+        else                        session$sendCustomMessage(type = "join",message = paste0(input$join_traces_checkbox))
     })
     show_calls <- observe({
         if(varcall()){
@@ -409,8 +409,12 @@ shinyServer(function(input,output,session) {
     output$intens_table_rev <- shiny::renderDataTable({
         if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-
+    
+    #used for conditional display of options for double strand data
     output$reverse <- reactive({
-        nrow(input$select_file)
+        loading_processed_files()
+        return(!is.null(g_intens_rev))
     })
+    #not shure why but I need this here to make it work (regirsters the output variable?)
+    outputOptions(output, 'reverse', suspendWhenHidden=FALSE) 
 })

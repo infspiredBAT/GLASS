@@ -236,13 +236,13 @@ HTMLWidgets.widget({
         Shiny.addCustomMessageHandler("mut_min",
             function(message) {
                 mult = Number(message);
-                console.log(mult);
+                //console.log(mult);
                 redraw();
             }
         );
         Shiny.addCustomMessageHandler("show",
             function(message){
-                console.log(message);
+                //console.log(message);
                 if(message==="TRUE"){
                     focus.selectAll(".call").attr("opacity",0.8);
                     redraw();
