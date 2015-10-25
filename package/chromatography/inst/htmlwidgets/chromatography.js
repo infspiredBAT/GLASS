@@ -421,11 +421,11 @@ HTMLWidgets.widget({
   			var intens_guide_line = x["intens_guide_line"];
   			var calls       = HTMLWidgets.dataframeToD3(x["calls"]);
   			var choices     = HTMLWidgets.dataframeToD3(x["choices"]);
-  			var domain_y    = x["helperdat"]["max_y"];
+  			var domain_y    = x["intrexdat"]["max_y"];
   			instance.max_y  = domain_y;
-  			var domain_x    = x["helperdat"]["max_x"];
+  			var domain_x    = x["intrexdat"]["max_x"];
   			instance.max_x  = domain_x;
-  			var intrex      = HTMLWidgets.dataframeToD3(x["helperdat"]["helper_intrex"])
+  			var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"])
   			instance.intrex = intrex;
 
   			var svg     = instance.svg;
@@ -476,9 +476,12 @@ HTMLWidgets.widget({
   				.attr("width",function(d){return widthScale(d["end"]-d["start"]);})
   				.attr("height",50)
   				.attr("fill",function(d) {
-  				         if (/exon/.test(d["attr"])){                           return "rgba(200,200,200,1.0)";
-  				    } else if (/intron9/.test(d["attr"]) & d["length"] == 133){ return "rgba(255,205,205,1.0)";
-  				    } else {                                                    return "rgba(230,230,230,1.0)"; }
+  				           if (d["splicevar"] != ''){   return "rgba(255,205,205,1.0)";
+  				    } else if (/exon/.test(d["attr"])){ return "rgba(200,200,200,1.0)";
+  				    } else {                            return "rgba(230,230,230,1.0)"; }
+//  				           if (/exon/.test(d["attr"])){                         return "rgba(200,200,200,1.0)";
+//  				    } else if (/intron9/.test(d["attr"]) & d["length"] == 133){ return "rgba(255,205,205,1.0)";
+//  				    } else {                                                    return "rgba(230,230,230,1.0)"; }
   				});
   			context.selectAll("text.intrex.name").data(intrex).enter()
   				.append("text").attr("class","context")
@@ -487,8 +490,9 @@ HTMLWidgets.widget({
   				.attr("opacity",0.8)
   				.attr("fill","black")
   				.text(function(d) {
-  				    if (/intron9/.test(d["attr"]) & d["length"] == 133){ return d["attr"]+" | "+"beta variant";
-  				    } else {                                             return d["attr"]; }
+  				    return d["attr"]+d["splicevar"];
+//  				    if (/intron9/.test(d["attr"]) & d["length"] == 133){ return d["attr"]+" | "+"beta variant";
+//  				    } else {                                             return d["attr"]; }
   				});
   			context.selectAll("text.intrex.start").data(intrex).enter()
   				.append("text").attr("class","context")
@@ -737,9 +741,9 @@ HTMLWidgets.widget({
 
         }else{
             //console.log(x)
-  			if(x["helperdat"]["max_y"]!= instance.max_y){
-  				instance.reHeight(x["helperdat"]["max_y"]);
-          instance.max_y = x["helperdat"]["max_y"];
+  			if(x["intrexdat"]["max_y"]!= instance.max_y){
+  				instance.reHeight(x["intrexdat"]["max_y"]);
+          instance.max_y = x["intrexdat"]["max_y"];
   			}else if(x.choices != instance.choices){
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var calls   = HTMLWidgets.dataframeToD3(x["calls"]);

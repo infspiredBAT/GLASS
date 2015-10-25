@@ -64,20 +64,25 @@ annotate_calls <- function(calls,intens,intens_rev){
     return(calls)
 }
 
+splice_variants <- function(intrexdat){
+    intrexdat$intrex$splicevar <- mapply(function(x,y) if (x == 'intron9' & abs(133 - y) <= 1) { '|beta variant' } else { '' }, intrexdat$intrex$attr, intrexdat$intrex$length)
+    return(intrexdat)
+}
+
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
     # calls[set_by_user == FALSE, mut_call_fwd := sample_peak_base_fwd]
     calls[set_by_user == FALSE, mut_call_fwd := call]
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut := user_sample_orig]
-   
+
     # mut
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
         # calls[set_by_user == FALSE, mut_call_rev := sample_peak_base_rev]
         calls[set_by_user == FALSE, mut_call_rev := call_rev]
-        calls[                                            
-            mut_peak_pct_fwd >= mut_min 
+        calls[
+            mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min
             #& quality_fwd >= qual_thres
             ,mut_call_fwd := mut_peak_base_fwd
@@ -105,7 +110,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
               &set_by_user == FALSE,
               c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
               ]
-        
+
         calls[
             mut_call_fwd!=reference
             &mut_call_rev!=reference
@@ -121,7 +126,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
             # & mut_call_rev != call_rev
             ,c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
             ]
-        
+
     } else {
         calls[
             mut_peak_pct_fwd >= mut_min
@@ -171,7 +176,7 @@ retranslate <- function(calls){
     push = 0
     #get missing bases for the first frame if incomplete
     while(coding[1,ord_in_cod]!=1){
-      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])   
+      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])
       setkey(coding,coding_seq)
       push = push +1
     }
@@ -183,7 +188,7 @@ retranslate <- function(calls){
     coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
     trans <- translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     #Shift annotation of codons by '-'s
-    
+
     suppressWarnings(trans <- aaa(trans))
     calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 
@@ -250,12 +255,12 @@ get_choices <- function(calls){
         choices[aa_mut   != aa_ref    & aa_sample!= aa_ref & aa_sample != aa_mut,                              protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
         #choices[aa_mut != aa_ref & aa_sample== aa_ref & aa_mut=="-",                                           protein:= paste0("p.",aa_ref,codon,"fs")]
 
-      }       
+      }
     setkey(choices,id)
     return(choices)
 }
 
-#remove consecutive single base deletions and replace them with one long deletion in table 
+#remove consecutive single base deletions and replace them with one long deletion in table
 get_view<-function(choices){
     reps<-rle(choices$user_mut)
     reps$csum <- cumsum(reps$length)
@@ -284,7 +289,7 @@ get_view<-function(choices){
         choices <- rbind(choices,deletions,fill=TRUE)
         setkey(choices,id)
     }
-    
+
     return(choices)
 }
 

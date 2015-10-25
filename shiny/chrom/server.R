@@ -9,7 +9,7 @@ g_calls                 <<- NULL             #annotated basecall data
 #makeReactiveBinding("g_calls")
 g_intens                <<- NULL             #intensities file
 g_intens_rev            <<- NULL             #optional reverse intensities file
-g_helperdat             <<- NULL             #helper data used in graphs
+g_intrexdat             <<- NULL             #intrex data used in graphs
 g_choices               <<- NULL
 g_view                  <<- NULL
 g_selected              <<- NULL
@@ -28,12 +28,12 @@ shinyServer(function(input,output,session) {
 #         if (!is.null(input$select_file)) return(input$select_file)
 #         else return(NULL)
 #     })
-    
+
     loading_processed_files <- reactive ({
 
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
         if(!is.null(input$select_file)) {
-            ret <- "not"
+            # ret <- "not"
             g_varcall <<- FALSE
             file <- input$select_file$datapath
             name <- input$select_file$name
@@ -64,7 +64,7 @@ shinyServer(function(input,output,session) {
                 rev_file <- NULL
                 rev_file_name <- "-"
             }
-            g_files <<- paste0("fwd: ",fwd_file_name,"\nrev: ",rev_file_name,sep="")
+            g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,sep="")
 
             withProgress(message = paste('processing...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
@@ -88,27 +88,28 @@ shinyServer(function(input,output,session) {
                     error = function(e){output$files <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
 
                 if(!is.null(called)){
-                    intensified         <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE)
-                    calls               <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev)
-                    g_intens            <<- intensified$intens
-                    g_intens_rev        <<- intensified$intens_rev
-                    g_max_y             <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
-                    #helper_intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
-                        helperdat               <- list()
-                        helperdat$helper_intrex <- list()
-                        helperdat$helper_intrex <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
-                        helperdat$helper_intrex <- setnames(merge(helperdat$helper_intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-                        helperdat$max_x         <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
-                        helperdat$new_sample    <- TRUE
-                    g_helperdat         <<- helperdat
-                    calls             <<- data.table(calls,key="id")
-                    ret<-"loaded"
-                    output$files <- renderPrint({cat(g_files)})
+                    intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE)
+                    calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev)
+                    g_intens     <<- intensified$intens
+                    g_intens_rev <<- intensified$intens_rev
+                    g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
+                    #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
+                        intrexdat            <- list()
+                        intrexdat$intrex     <- list()
+                        intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
+                        intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+                        intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
+                        intrexdat$new_sample <- TRUE
+                    # g_intrexdat  <<- intrexdat
+                    g_intrexdat  <<- splice_variants(intrexdat)
+                    calls        <<- data.table(calls,key="id")
+                    output$files <-  renderPrint({cat(g_files)})
                     g_new_sample <<- TRUE
+                    # ret          <-"loaded"
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
         }
-        g_calls   <<- NULL
+        g_calls <<- NULL
         return(calls)
     })
 
@@ -118,7 +119,7 @@ shinyServer(function(input,output,session) {
             goReset_handler()
             calls<-loading_processed_files()
 
-            if(is.null(g_calls)){ 
+            if(is.null(g_calls)){
                 g_calls <- calls
                 setkey(g_calls,id)
             }
@@ -143,8 +144,8 @@ shinyServer(function(input,output,session) {
     #
     output$plot <- renderChromatography({
         if(varcall()) {
-            g_helperdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_helperdat,g_calls,g_choices,g_new_sample)
+            g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
+            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample)
             g_new_sample <<- FALSE
             return(ret)
         }
@@ -173,9 +174,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_call_pos != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nF  mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"  \tQ ",quality_fwd,"\nR  mut ",mut_peak_base_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),"  \tQ ",quality_rev,sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nF  mut ",mut_peak_base_fwd,"  Q ",quality_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nR  mut ",mut_peak_base_rev,"  Q ",quality_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nF  mut ",mut_peak_base_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"   ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"  max.peak% ",round(sample_peak_pct,1),"\n",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\nF  mut ",mut_peak_base_fwd,"  Q ",quality_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -409,12 +410,12 @@ shinyServer(function(input,output,session) {
     output$intens_table_rev <- shiny::renderDataTable({
         if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-    
+
     #used for conditional display of options for double strand data
     output$reverse <- reactive({
         loading_processed_files()
         return(!is.null(g_intens_rev))
     })
     #not shure why but I need this here to make it work (regirsters the output variable?)
-    outputOptions(output, 'reverse', suspendWhenHidden=FALSE) 
+    outputOptions(output, 'reverse', suspendWhenHidden=FALSE)
 })

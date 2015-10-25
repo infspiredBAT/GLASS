@@ -37,7 +37,9 @@ shinyUI(
 				fluidRow(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
-					    textInput("choose_call_pos","call position"),
+                        tags$div(title="the absolute position of a call, nothing to do with genomic or codon numbering\n\nyou can either type a number, or it will show by interacting with glass",
+                            textInput("choose_call_pos","call position [?]")
+                        ),
 					    # selectInput("change_peak","user_mod it to",choices=list(empty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
 					    selectInput("change_user_sample","change 1st variant",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
 					    selectInput("change_user_mut","change 2nd variant",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
@@ -49,9 +51,15 @@ shinyUI(
 					    verbatimTextOutput("infobox")
 					),
 					column(1,
-					    HTML(paste("hetero aln %id:")),verbatimTextOutput("hetero_indel_pid"),
-					    HTML(paste("hetero ins/dels:")),verbatimTextOutput("hetero_indel_tab"),
-                        checkboxInput("incorporate_checkbox","use detected hetero indels", value = F)
+                        tags$div(title="the % identity of the alignment between the sequences of the primary and mutation calls\n\nif this low and there are many variants reported, there might be a heterozygous indel",
+    					    HTML(paste("hetero aln %id [?]")),verbatimTextOutput("hetero_indel_pid")
+    					),
+                        tags$div(title="distinct insertion / deletion (in that order) events, and their lengths in nt",
+    					    HTML(paste("hetero ins/dels [?]")),verbatimTextOutput("hetero_indel_tab")
+    					),
+                        tags$div(title="if there are indel events above, use them to try and correct the variant calling",
+                            checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
+                        )
 					),
 
 					column(1
@@ -96,7 +104,7 @@ shinyUI(
 			,tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
 		         shiny::dataTableOutput("intens_table")
 			)
-           ,tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
+            ,tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
                  shiny::dataTableOutput("intens_table_rev")
             )
 		)
