@@ -210,10 +210,10 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
   		         .append("line").attr("class","peak_label short line varind")
   		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
-  		         .attr("y1",150)
+  		         .attr("y1",140)
   		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
   		         .attr("y2",400)
-  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.2)").attr("stroke-dasharray",2);
+  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.12)").attr("stroke-dasharray","2,8");
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
@@ -584,7 +584,7 @@ HTMLWidgets.widget({
                  .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
                  .attr("y",-14).attr("rx",2).attr("ry",2)
                  .attr("width",24).attr("height",instance.height-90)
-                 .attr("fill","rgba(150, 150, 255, 0.2)").attr("opacity",0);
+                 .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
             if(rev==0){
                 focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
       		        .append("rect").attr("class","peak_label qual_fwd q")
@@ -721,7 +721,7 @@ HTMLWidgets.widget({
   				.attr("rx",3)
   				.attr("ry",3)
   				.attr("fill","rgba(255,255,255,0.3)")
-  				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","2,6")
+  				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
   				.attr("opacity",0.6);
 
             //In SVG, z-index is defined by the order the element appears in the document
@@ -764,10 +764,10 @@ HTMLWidgets.widget({
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
                     .append("line").attr("class","peak_label short line varind")
                     .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .attr("y1",150)
+                    .attr("y1",140)
                     .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
                     .attr("y2",400)
-                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.2)").attr("stroke-dasharray",2);
+                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.12)").attr("stroke-dasharray","2,8");
 
                 instance.focus.selectAll("g").selectAll(".aa_sample").remove();
                 instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample

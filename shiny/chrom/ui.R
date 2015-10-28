@@ -24,13 +24,14 @@ shinyUI(
             tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
 
-		HTML("<font size=4em><b>genomePD/glass</b></font><font size=5em><b>TP53</b></font><font size=3em> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas</font><font size=2.0em> @ <a href=http://bat.infspire.org>bat.infspire.org</a> & the Medical Genomics Group | CEITEC MU | CESNET/MetaCentrum | ERIC </font>"),
+		HTML("<b><font size=3em>genomePD/ </font><font size=5em>glass</font></b><font size=3em> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas</font><font size=2.0em> @ <a href=http://bat.infspire.org>bat.infspire.org</a> & the Medical Genomics Group | CEITEC MU | CESNET/MetaCentrum | ERIC </font>"),
 
 		hr(),
 
 		fluidRow(
+			column(1, selectInput("gene","",choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
-			column(10,verbatimTextOutput("files"))
+			column(9,verbatimTextOutput("files"))
 		),
 		tabsetPanel(id = 'tab',
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
@@ -72,7 +73,7 @@ shinyUI(
 					),
                     column(1),
 					column(1
-					    ,checkboxInput("show_calls_checkbox","show calls", value = F)
+					    ,checkboxInput("show_calls_checkbox","show all calls", value = F)
 					    ,conditionalPanel(condition = "output.reverse",
                                           checkboxInput("join_traces_checkbox","join F/R traces", value = F))
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
