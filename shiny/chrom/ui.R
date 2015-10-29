@@ -64,16 +64,20 @@ shinyUI(
 					),
 
 					column(1
-                        ,sliderInput("mut_min","min peak% for mut", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
-					    ,sliderInput("s2n_min","min signal/noise", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
-					),
-					column(1
-					    ,sliderInput("qual_thres_to_call","qual thres to call", ticks=FALSE, min = 0, max = 60, value = 15)
+					    ,sliderInput("qual_thres_to_call","call: min quality", ticks=FALSE, min = 0, max = 60, value = 15)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
+					),
+					column(1,
+                        tags$div(title="min % of peak for mutation to be called",
+                            sliderInput("mut_min","mut: min peak% [?]", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
+                        ),
+                        tags$div(title="min signal to noise ratio for mutation to be called",
+    					    sliderInput("s2n_min","mut: min S/N [?]", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
+                        )
 					),
                     column(1),
 					column(1
-					    ,checkboxInput("show_calls_checkbox","show all calls", value = F)
+					    ,checkboxInput("show_calls_checkbox","show F/R calls", value = F)
 					    ,conditionalPanel(condition = "output.reverse",
                                           checkboxInput("join_traces_checkbox","join F/R traces", value = F))
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),

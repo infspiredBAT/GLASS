@@ -71,15 +71,13 @@ splice_variants <- function(intrexdat){
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
-    # calls[set_by_user == FALSE, mut_call_fwd := sample_peak_base_fwd]
-    calls[set_by_user == FALSE, mut_call_fwd := call]
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
-    calls[set_by_user == FALSE, user_mut := user_sample_orig]
-
+    calls[set_by_user == FALSE, user_mut    := user_sample_orig]
     # mut
+    # reset all but set_by_user
+    calls[set_by_user == FALSE, mut_call_fwd := call]
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
-        # calls[set_by_user == FALSE, mut_call_rev := sample_peak_base_rev]
         calls[set_by_user == FALSE, mut_call_rev := call_rev]
         calls[
               mut_peak_pct_fwd >= mut_min
@@ -103,14 +101,14 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         calls[
               mut_call_fwd != reference
             & mut_call_rev == reference
-            & quality_fwd > qual_thres
+            & quality_fwd >= qual_thres
             & set_by_user == FALSE,
             c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
         calls[
               mut_call_fwd == reference
             & mut_call_rev != reference
-            & quality_rev > qual_thres
+            & quality_rev >= qual_thres
             & set_by_user == FALSE
             , c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
             ]
@@ -129,7 +127,6 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
             # & mut_call_rev != call_rev
             , c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
             ]
-
     } else {
         calls[
               mut_peak_pct_fwd >= mut_min
