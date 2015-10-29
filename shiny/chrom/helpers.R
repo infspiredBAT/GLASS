@@ -82,63 +82,64 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         # calls[set_by_user == FALSE, mut_call_rev := sample_peak_base_rev]
         calls[set_by_user == FALSE, mut_call_rev := call_rev]
         calls[
-            mut_peak_pct_fwd >= mut_min
-            & mut_s2n_abs_fwd >= s2n_min 
+              mut_peak_pct_fwd >= mut_min
+            & mut_s2n_abs_fwd >= s2n_min
             & mut_peak_base_fwd != reference
             #& quality_fwd >= qual_thres
-            ,mut_call_fwd := mut_peak_base_fwd     #do not change this in case
+            , mut_call_fwd := mut_peak_base_fwd     #do not change this in case
             ]
         calls[
-            mut_peak_pct_rev >= mut_min
+              mut_peak_pct_rev >= mut_min
             & mut_s2n_abs_rev >= s2n_min
             & mut_peak_base_rev != reference
             #& quality_rev >= qual_thres
-            ,mut_call_rev := mut_peak_base_rev
+            , mut_call_rev := mut_peak_base_rev
             ]
 #         calls[
 #             set_by_user == FALSE
 #             # & mut_call_fwd != call
 #             ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
 #             ]
-        calls[mut_call_fwd!=reference
-              &mut_call_rev==reference
-              &quality_fwd > qual_thres
-              &set_by_user == FALSE,
-              c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
-              ]
-        calls[mut_call_fwd==reference
-              &mut_call_rev!=reference
-              &quality_rev > qual_thres
-              &set_by_user == FALSE,
-              c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
-              ]
-
         calls[
-            mut_call_fwd!=reference
-            &mut_call_rev!=reference
-            & set_by_user == FALSE
-            # & mut_call_rev != call_rev
-            ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+              mut_call_fwd != reference
+            & mut_call_rev == reference
+            & quality_fwd > qual_thres
+            & set_by_user == FALSE,
+            c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
         calls[
-            mut_call_fwd!=reference
-            &mut_call_rev!=reference
-            &quality_rev > quality_fwd
+              mut_call_fwd == reference
+            & mut_call_rev != reference
+            & quality_rev > qual_thres
+            & set_by_user == FALSE
+            , c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
+            ]
+        calls[
+              mut_call_fwd != reference
+            & mut_call_rev != reference
             & set_by_user == FALSE
             # & mut_call_rev != call_rev
-            ,c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
+            , c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+            ]
+        calls[
+              mut_call_fwd != reference
+            & mut_call_rev != reference
+            & quality_rev > quality_fwd
+            & set_by_user == FALSE
+            # & mut_call_rev != call_rev
+            , c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
             ]
 
     } else {
         calls[
-            mut_peak_pct_fwd >= mut_min
+              mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min
-            ,mut_call_fwd := mut_peak_base_fwd
+            , mut_call_fwd := mut_peak_base_fwd
             ]
         calls[
-            set_by_user == FALSE
+              set_by_user == FALSE
             & mut_call_fwd != call
-            ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+            , c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
     }
     calls[quality < qual_thres & set_by_user == FALSE, c("user_sample","user_mut") := "N"]
