@@ -4931,14 +4931,14 @@ a.thumbnail.active {
   background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .shiny-progress .progress-text {
-  top: 50px;
-  left: 15px;
-  height: 36px;
-  background-color: #DDD;
-  border: 2px solid #777;
-  border-radius: 5px;
+  top: 10px;
+  left: 10px;
+  height: 40px;
+  background-color: #FFF;
+  border: 1px solid #777;
+  border-radius: 4px;
   font-size: 20px;
-  opacity: 1;
+  opacity: 0.8;
 }
 .shiny-progress .progress-message {
   color: red;

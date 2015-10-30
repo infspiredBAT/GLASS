@@ -11,10 +11,12 @@ annotate_calls <- function(calls,intens,intens_rev){
 
     #calculate the noise levels
     calls[,noise_abs_fwd:=noise(iA_fwd,iC_fwd,iG_fwd,iT_fwd,TRUE),by=1:nrow(calls)]
-    calls[,noise_rel_fwd:=noise(iA_fwd,iC_fwd,iG_fwd,iT_fwd,FALSE),by=1:nrow(calls)]
+    # calls[,noise_rel_fwd:=noise(iA_fwd,iC_fwd,iG_fwd,iT_fwd,FALSE),by=1:nrow(calls)]
+    calls[,roll_noise_mean_ratio_fwd := rollapply(calls$noise_abs_fwd, 11, function(x) (mean(x[1:5])+1)/(mean(x[7:11])+1), fill = "1")]
     if("call_rev" %in% colnames(calls)){
         calls[,noise_abs_rev:=noise(iA_rev,iC_rev,iG_rev,iT_rev,TRUE),by=1:nrow(calls)]
-        calls[,noise_rel_rev:=noise(iA_rev,iC_rev,iG_rev,iT_rev,FALSE),by=1:nrow(calls)]
+        # calls[,noise_rel_rev:=noise(iA_rev,iC_rev,iG_rev,iT_rev,FALSE),by=1:nrow(calls)]
+        calls[,roll_noise_mean_ratio_rev := rollapply(calls$noise_abs_rev, 11, function(x) (mean(x[1:5])+1)/(mean(x[7:11])+1), fill = "1")]
     }
 
 #     #precalculate neighbourhood  (absolute,relative)x(forward,reverse)
@@ -64,6 +66,13 @@ annotate_calls <- function(calls,intens,intens_rev){
     return(calls)
 }
 
+get_noisy_neighbors <- function(calls){
+    # noisy_neighbors <- calls[user_sample != "N" & (roll_noise_mean_ratio_fwd > 5 & roll_noise_mean_ratio_rev < 0.1) & trace_peak != "NA" & !is.na(gen_coord)]
+    noisy_neighbors <- calls[(roll_noise_mean_ratio_fwd > 5 & roll_noise_mean_ratio_rev < 0.1) & trace_peak != "NA" & !is.na(gen_coord)]
+    setkey(noisy_neighbors,id)
+    return(noisy_neighbors)
+}
+
 splice_variants <- function(intrexdat){
     intrexdat$intrex$splicevar <- mapply(function(x,y) if (x == 'intron9' & abs(133 - y) <= 1) { '|beta variant' } else { '' }, intrexdat$intrex$attr, intrexdat$intrex$length)
     return(intrexdat)
@@ -83,10 +92,10 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
         calls[
             mut_peak_pct_fwd >= mut_min
-            & mut_s2n_abs_fwd >= s2n_min 
+            & mut_s2n_abs_fwd >= s2n_min
             & mut_peak_base_fwd != reference
             #& quality_fwd >= qual_thres
-            ,mut_call_fwd := mut_peak_base_fwd     
+            ,mut_call_fwd := mut_peak_base_fwd
             ]
         calls[
             mut_peak_pct_rev >= mut_min
@@ -340,7 +349,7 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
     return(cons)
 }
 
-#reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels indels  
+#reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels indels
 incorporate_hetero_indels_func <- function(calls){
     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
     else dels <- numeric()
@@ -362,12 +371,12 @@ incorporate_hetero_indels_func <- function(calls){
 }
 
 incorporate_single_vec <- function(vec,ins,dels,type,fwd){
-    
-    
-    
+
+
+
     if(type == "num") new_vec <- numeric(length(vec))
     else new_vec <- rep("-",length(vec))
-    
+
     if(fwd) {
         rem = NULL
         for(i in 1:length(dels)){

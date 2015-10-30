@@ -94,7 +94,7 @@ HTMLWidgets.widget({
         function redraw()  {
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             var w = brush.extent()[1]-brush.extent()[0] ;
-            focus.selectAll("g").selectAll(".line_f").attr("d", line_fwd);
+            focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
 
             focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
@@ -158,14 +158,14 @@ HTMLWidgets.widget({
                     else if (d[label] === "-"){ return "black"; }
                     else    {                   return "orange"; }});
         }
-        function showVarInMap(choices){
+        function showVarInMinimap(choices){
             //genomic
             //console.log("changing choices");
             context.selectAll("lines.choices").data(choices).enter()
     			      .append("line")
-                .attr("class","varInMinimap context")
+                .attr("class","minimap context")
       			    .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-      			    .attr("y1",1)
+      			    .attr("y1",4)
       			    .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
       			    .attr("y2",24)
       			    .attr("stroke-width",3)
@@ -179,11 +179,11 @@ HTMLWidgets.widget({
   			    // user
   			    context.selectAll("lines.choices").data(choices).enter()
   				      .append("line")
-                .attr("class","varInMinimap context")
+                .attr("class","minimap context")
   				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
   				      .attr("y1",26)
   				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y2",39)
+  				      .attr("y2",38)
   				      .attr("stroke-width",3)
   				      .attr("stroke",function(d) {
   				          if      (d["user_sample"] === "A"){ return "#33CC33"; }
@@ -194,11 +194,11 @@ HTMLWidgets.widget({
   				          else    {                           return "yellow";  }});
               context.selectAll("lines.choices").data(choices).enter()
     			      .append("line")
-                .attr("class","varInMinimap context")
+                .attr("class","minimap context")
   				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y1",39)
+  				      .attr("y1",38)
   				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y2",49)
+  				      .attr("y2",46)
   				      .attr("stroke-width",3)
   				      .attr("stroke",function(d) {
   				          if      (d["user_mut"] === "A"){ return "#33CC33"; }
@@ -208,12 +208,30 @@ HTMLWidgets.widget({
   				          else if (d["user_mut"] === "-"){ return "white"; }
   				          else    {                        return "yellow";  }});
             focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
-  		         .append("line").attr("class","peak_label short line varind")
+  		         .append("line").attr("class","peak_label short line var_noise_indic")
   		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
   		         .attr("y1",140)
   		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
   		         .attr("y2",400)
-  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.12)").attr("stroke-dasharray","2,8");
+  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
+        }
+        function showNoiseInMinimap(noisy_neighbors){
+            context.selectAll("lines.noisy_neighbors").data(noisy_neighbors).enter()
+    			      .append("line")
+                .attr("class","minimap context")
+      			    .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+      			    .attr("y1",-3)
+      			    .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+      			    .attr("y2",3)
+      			    .attr("stroke-width",3)
+      			    .attr("stroke", "brown");
+            focus.append("g").selectAll("noise_indicator").data(noisy_neighbors).enter()  //noise indicator
+  		         .append("line").attr("class","peak_label short line var_noise_indic")
+  		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
+  		         .attr("y1",140)
+  		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
+  		         .attr("y2",400)
+  		         .attr("stroke-width",10).attr("stroke","brown").attr("opacity",0.2).attr("stroke-dasharray","1,3");
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
@@ -290,7 +308,7 @@ HTMLWidgets.widget({
 /*
             setBrush(Number(trace_peak)-100,Number(trace_peak)+120);
             focus.append("g").selectAll("position_indicator")  //position indicator
-  		         .append("line").attr("class","peak_label short line varind")
+  		         .append("line").attr("class","peak_label short line var_noise_indic")
   		         .attr("x1",function(d){return widthScale(Number(trace_peak));})
   		         .attr("y1",0)
   		         .attr("x2",function(d){return widthScale(Number(trace_peak));})
@@ -378,7 +396,8 @@ HTMLWidgets.widget({
             reHeight: reHeight,
             setBrush: setBrush,
             setPeakLabel: setPeakLabel,
-            showVarInMap: showVarInMap,
+            showVarInMinimap: showVarInMinimap,
+            showNoiseInMinimap: showNoiseInMinimap,
             callShiny: callShiny
         }
     },
@@ -421,6 +440,7 @@ HTMLWidgets.widget({
   			var intens_guide_line = x["intens_guide_line"];
   			var calls       = HTMLWidgets.dataframeToD3(x["calls"]);
   			var choices     = HTMLWidgets.dataframeToD3(x["choices"]);
+  			var noisy_neighbors     = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
   			var domain_y    = x["intrexdat"]["max_y"];
   			instance.max_y  = domain_y;
   			var domain_x    = x["intrexdat"]["max_x"];
@@ -486,7 +506,7 @@ HTMLWidgets.widget({
   			context.selectAll("text.intrex.name").data(intrex).enter()
   				.append("text").attr("class","context")
   				.attr("x",function(d){return widthScale(d["start"]);})
-  				.attr("y",-2)
+  				.attr("y",-4)
   				.attr("opacity",0.8)
   				.attr("fill","black")
   				.text(function(d) {
@@ -497,7 +517,7 @@ HTMLWidgets.widget({
   			context.selectAll("text.intrex.start").data(intrex).enter()
   				.append("text").attr("class","context")
   				.attr("x",function(d){return widthScale(d["start"]);})
-  				.attr("y",60)
+  				.attr("y",62)
   				.attr("opacity",0.8)
   				.text(function(d){return d["id"];})
   				.attr("fill","black");
@@ -727,7 +747,8 @@ HTMLWidgets.widget({
             //In SVG, z-index is defined by the order the element appears in the document
             //http://stackoverflow.com/questions/17786618/how-to-use-z-index-in-svg-elements
             //the vars on the minimap are shown last sto that they stay on to
-            instance.showVarInMap(choices);
+            instance.showVarInMinimap(choices);
+            instance.showNoiseInMinimap(noisy_neighbors);
 	          //zooming in so that the first view is not ugly dense graph
 
             if (typeof choices[0] !== 'undefined') {
@@ -746,6 +767,7 @@ HTMLWidgets.widget({
           instance.max_y = x["intrexdat"]["max_y"];
   			}else if(x.choices != instance.choices){
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
+                var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
                 var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
                 var rev = 0;  //offset on labels in case we have alternative reference
                 if(x["intens_rev"] !== null){
@@ -753,21 +775,30 @@ HTMLWidgets.widget({
                     rev = 1;
                 }
                 instance.focus.selectAll(".peak_label short line").remove();
-                instance.context.selectAll(".varInMinimap").remove();
-                instance.showVarInMap(choices);
+                instance.context.selectAll(".minimap").remove();
+                instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
+                instance.showNoiseInMinimap(noisy_neighbors);
+                instance.noisy_neighbors = x.noisy_neighbors;
                 instance.focus.selectAll(".user").remove();
                 instance.setPeakLabel(calls,"user_sample",rev);
                 instance.setPeakLabel(calls,"user_mut",rev);
 
-                instance.focus.selectAll(".varind").remove();
+                instance.focus.selectAll(".var_noise_indic").remove();
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
-                    .append("line").attr("class","peak_label short line varind")
+                    .append("line").attr("class","peak_label short line var_noise_indic")
                     .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
                     .attr("y1",140)
                     .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
                     .attr("y2",400)
-                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.12)").attr("stroke-dasharray","2,8");
+                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
+                instance.focus.append("g").selectAll("noise_indicator").data(noisy_neighbors).enter()  //noise indicator
+      		         .append("line").attr("class","peak_label short line var_noise_indic")
+      		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
+      		         .attr("y1",140)
+      		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
+      		         .attr("y2",400)
+      		         .attr("stroke-width",10).attr("stroke","brown").attr("opacity",0.2).attr("stroke-dasharray","1,3");
 
                 instance.focus.selectAll("g").selectAll(".aa_sample").remove();
                 instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample

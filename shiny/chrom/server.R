@@ -11,6 +11,7 @@ g_intens                <<- NULL             #intensities file
 g_intens_rev            <<- NULL             #optional reverse intensities file
 g_intrexdat             <<- NULL             #intrex data used in graphs
 g_choices               <<- NULL
+g_noisy_neighbors       <<- NULL
 g_view                  <<- NULL
 g_selected              <<- NULL
 g_selected_goto_index   <<- 0
@@ -134,6 +135,7 @@ shinyServer(function(input,output,session) {
 
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
+            g_noisy_neighbors <<- get_noisy_neighbors(g_calls)
             return(TRUE)
 
         } else return(FALSE)
@@ -145,7 +147,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample)
+            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors)
             g_new_sample <<- FALSE
             return(ret)
         }
