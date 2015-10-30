@@ -247,27 +247,30 @@ get_choices <- function(calls){
         choices[,mut_peak_pct := mround(mut_peak_pct,5),by=1:nrow(choices)]
 
         choices[,`:=`(coding = paste0("c.", coding_seq), protein="")]
-        # 1st variant
-            # mismatch
-        choices[user_sample != reference & user_sample != "-", coding := paste0(coding, reference, ">", user_sample, "(", sample_peak_pct, "%)")]
-            # del
-        choices[user_sample != reference & user_sample == "-", coding := paste0(coding, "del", reference)]#,            "(", sample_peak_pct, "%)")]
-            # protein
-        choices[aa_sample   != aa_ref,                         protein:= paste0("p.", aa_ref, codon, aa_sample,      "(", sample_peak_pct, "%)")]
-        # 2nd variant
-            # mismatch without 1st variant
-        choices[user_mut != reference & user_sample == reference & user_mut != "-",                            coding := paste0(coding, reference, ">", user_mut, "(", mut_peak_pct, "%)")]
-            # mismatch with 1st variant
-        choices[user_mut != reference & user_sample != reference & user_mut != user_sample  & user_mut != "-", coding := paste0(coding, user_mut,                 "(", mut_peak_pct, "%)")]
-            # del
-        choices[user_mut != reference & user_mut != user_sample  & user_mut == "-",                            coding := paste0(coding, "del", reference)]#,         "(", mut_peak_pct, "%)")]
-            # protein without 1st variant
-        choices[aa_mut   != aa_ref    & aa_sample == aa_ref,                                                   protein:= paste0("p.", aa_ref, codon, aa_mut,      "(", mut_peak_pct, "%)")]
-            # protein with 1st variant
-        choices[aa_mut   != aa_ref    & aa_sample!= aa_ref & aa_sample != aa_mut,                              protein:= paste0(protein, aa_mut,                  "(", mut_peak_pct, "%)")]
+    # 1st variant
+        # mismatch
+        choices[user_sample != reference & user_sample != "-" & reference   != "-", coding := paste0(coding, reference, ">", user_sample)]#, "(", sample_peak_pct, "%)")]
+        # ins
+        choices[user_sample != reference & reference   == "-",                      coding := paste0(coding, "ins", user_sample)]#,          "(", sample_peak_pct, "%)")]
+        # del
+        choices[user_sample != reference & user_sample == "-",                      coding := paste0(coding, "del", reference)]#,            "(", sample_peak_pct, "%)")]
+        # protein
+        choices[aa_sample   != aa_ref,                                              protein:= paste0("p.", aa_ref, codon, aa_sample)]#,      "(", sample_peak_pct, "%)")]
+    # 2nd variant
+        # mismatch without 1st variant
+        choices[user_mut != reference & user_sample == reference   & user_mut    != "-" & reference   != "-",      coding := paste0(coding, reference, ">", user_mut)]#, "(", mut_peak_pct, "%)")]
+        # mismatch with 1st variant
+        choices[user_mut != reference & user_sample != reference   & user_mut    != user_sample & user_mut != "-", coding := paste0(coding, ">", user_mut)]#,                 "(", mut_peak_pct, "%)")]
+        # ins
+        choices[user_mut != reference & user_mut    != user_sample & reference   == "-",                           coding := paste0(coding, "ins", user_mut)]#,         "(", mut_peak_pct, "%)")]
+        # del
+        choices[user_mut != reference & user_mut    != user_sample & user_mut    == "-",                           coding := paste0(coding, "del", reference)]#,         "(", mut_peak_pct, "%)")]
+        # protein without 1st variant
+        choices[aa_mut   != aa_ref    & aa_sample   == aa_ref,                                                     protein:= paste0("p.", aa_ref, codon, aa_mut)]#,      "(", mut_peak_pct, "%)")]
+        # protein with 1st variant
+        choices[aa_mut   != aa_ref    & aa_sample   != aa_ref      & aa_sample   != aa_mut,                        protein:= paste0(protein, aa_mut)]#,                  "(", mut_peak_pct, "%)")]
         #choices[aa_mut != aa_ref & aa_sample== aa_ref & aa_mut=="-",                                           protein:= paste0("p.",aa_ref,codon,"fs")]
-
-      }
+    }
     setkey(choices,id)
     return(choices)
 }
