@@ -176,7 +176,7 @@ shinyServer(function(input,output,session) {
                     if(!is.null(g_intens_rev)) {
                         cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"    ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"    max.peak% ",round(sample_peak_pct,1),"\n ",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\n\nF  mut ",mut_peak_base_fwd,"  \tQ ",quality_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nR  mut ",mut_peak_base_rev,"  \tQ ",quality_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"    ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"    max.peak% ",round(sample_peak_pct,1),"\n ",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\n\nF  mut ",mut_peak_base_fwd,"  \tQ ",quality_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"    ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"    max.peak% ",round(sample_peak_pct,1),"\n ",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\n\nF  mut ",mut_peak_base_fwd,"  \tQ ",quality,    "  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")

@@ -72,7 +72,7 @@ splice_variants <- function(intrexdat){
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
     # calls[set_by_user == FALSE, mut_call_fwd := sample_peak_base_fwd]
-    calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls)]
+    calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls[set_by_user==FALSE,])]
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut := user_sample_orig]
 
@@ -80,13 +80,13 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
         # calls[set_by_user == FALSE, mut_call_rev := sample_peak_base_rev]
-        calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls)]
+        calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
         calls[
             mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min 
             & mut_peak_base_fwd != reference
             #& quality_fwd >= qual_thres
-            ,mut_call_fwd := mut_peak_base_fwd     #do not change this in case
+            ,mut_call_fwd := mut_peak_base_fwd     
             ]
         calls[
             mut_peak_pct_rev >= mut_min
@@ -133,6 +133,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         calls[
             mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min
+            & mut_peak_base_fwd != reference
             ,mut_call_fwd := mut_peak_base_fwd
             ]
         calls[
@@ -339,6 +340,7 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
     return(cons)
 }
 
+#reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels indels  
 incorporate_hetero_indels_func <- function(calls){
     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
     else dels <- numeric()
@@ -360,16 +362,26 @@ incorporate_hetero_indels_func <- function(calls){
 }
 
 incorporate_single_vec <- function(vec,ins,dels,type,fwd){
+    
+    
+    
     if(type == "num") new_vec <- numeric(length(vec))
     else new_vec <- rep("-",length(vec))
+    
     if(fwd) {
+        rem = NULL
+        for(i in 1:length(dels)){
+            if(g_calls[id==dels[i],mut_call_fwd] =="-")  #picking up a deletion already present in fwd calls
+                rem = c(rem,i)
+        }
+        if(!is.null(rem)) dels <- dels[-rem]
         vec <- vec[1:min(length(vec),length(new_vec) - length(dels))]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     } else {
         vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     }
-    if(length(ins) > 0) vec <- vec[-ins]
+    if(length(ins) > 0) new_vec <- new_vec[-ins]
     return(new_vec)
 }
 
