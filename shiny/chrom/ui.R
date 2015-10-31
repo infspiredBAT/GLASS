@@ -52,27 +52,27 @@ shinyUI(
 					    verbatimTextOutput("infobox")
 					),
 					column(1,
-                        tags$div(title="the % identity of the alignment between the sequences of the primary and mutation calls\n\nif this low and there are many variants reported, there might be a heterozygous indel",
-    					    HTML(paste("hetero aln %id [?]")),verbatimTextOutput("hetero_indel_pid")
+                        tags$div(title="the % identity of the alignment between the sequences of the primary and mutation calls,\nand distinct insertion / deletion (in that order) events, and their lengths in nt\n\nif this low and there are many variants reported, there might be a heterozygous indel",
+    					    HTML(paste("hetero aln info [?]")),verbatimTextOutput("hetero_indel_pid")
     					),
-                        tags$div(title="distinct insertion / deletion (in that order) events, and their lengths in nt",
-    					    HTML(paste("hetero ins/dels [?]")),verbatimTextOutput("hetero_indel_tab")
-    					),
+#                         tags$div(title="distinct insertion / deletion (in that order) events, and their lengths in nt",
+#     					    HTML(paste("hetero ins/dels [?]")),verbatimTextOutput("hetero_indel_tab")
+#     					),
                         tags$div(title="if there are indel events above, use them to try and correct the variant calling",
                             checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
                         )
 					),
 
 					column(1
-					    ,sliderInput("qual_thres_to_call","call: min quality", ticks=FALSE, min = 0, max = 60, value = 30)
+					    ,sliderInput("qual_thres_to_call","call: min quality", ticks=FALSE, min = 0, max = 60, value = 20)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
 					column(1,
                         tags$div(title="min % of peak for mutation to be called",
-                            sliderInput("mut_min","mut: min peak% [?]", ticks=FALSE, min = 0, max = 50, value = 30, step = 0.5, round = 1)
+                            sliderInput("mut_min","mut: min peak% [?]", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
                         ),
                         tags$div(title="min signal to noise ratio for mutation to be called",
-    					    sliderInput("s2n_min","mut: min S/N [?]", ticks=FALSE, min = 0, max = 10, value = 3, step = 0.1, round = 1)
+    					    sliderInput("s2n_min","mut: min S/N [?]", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
                         )
 					),
                     column(1),

@@ -12,11 +12,13 @@ annotate_calls <- function(calls,intens,intens_rev){
     #calculate the noise levels
     calls[,noise_abs_fwd:=noise(iA_fwd,iC_fwd,iG_fwd,iT_fwd,TRUE),by=1:nrow(calls)]
     # calls[,noise_rel_fwd:=noise(iA_fwd,iC_fwd,iG_fwd,iT_fwd,FALSE),by=1:nrow(calls)]
-    calls[,roll_noise_mean_ratio_fwd := rollapply(calls$noise_abs_fwd, 11, function(x) (mean(x[1:5])+1)/(mean(x[7:11])+1), fill = "1")]
+    calls[,roll_noise_abs_mean_ratio_fwd := rollapply(calls$noise_abs_fwd, 11, function(x) (mean(x[1:5])+0)/(mean(x[7:11])+0), fill = "1")]
+    # calls[,roll_noise_rel_mean_ratio_fwd := rollapply(calls$noise_rel_fwd, 11, function(x) (mean(x[1:5])+1)/(mean(x[7:11])+1), fill = "1")]
     if("call_rev" %in% colnames(calls)){
         calls[,noise_abs_rev:=noise(iA_rev,iC_rev,iG_rev,iT_rev,TRUE),by=1:nrow(calls)]
         # calls[,noise_rel_rev:=noise(iA_rev,iC_rev,iG_rev,iT_rev,FALSE),by=1:nrow(calls)]
-        calls[,roll_noise_mean_ratio_rev := rollapply(calls$noise_abs_rev, 11, function(x) (mean(x[1:5])+1)/(mean(x[7:11])+1), fill = "1")]
+        calls[,roll_noise_abs_mean_ratio_rev := rollapply(calls$noise_abs_rev, 11, function(x) (mean(x[1:5])+0)/(mean(x[7:11])+0), fill = "1")]
+        # calls[,roll_noise_rel_mean_ratio_rev := rollapply(calls$noise_rel_rev, 11, function(x) (mean(x[1:5])+1)/(mean(x[7:11])+1), fill = "1")]
     }
 
 #     #precalculate neighbourhood  (absolute,relative)x(forward,reverse)
@@ -55,7 +57,7 @@ annotate_calls <- function(calls,intens,intens_rev){
         # calls[,mut_call_rev:=sample_peak_base_rev]
         calls[,mut_call_rev:=call_rev]
 
-        calls[,sample_peak_pct := max(c(sample_peak_pct_fwd,sample_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)]
+        suppressWarnings(calls[,sample_peak_pct := max(c(sample_peak_pct_fwd,sample_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)])
         calls[,mut_peak_pct := mean(c(mut_peak_pct_fwd,mut_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)]
     } else {
         calls[,sample_peak_pct := sample_peak_pct_fwd]
@@ -67,8 +69,17 @@ annotate_calls <- function(calls,intens,intens_rev){
 }
 
 get_noisy_neighbors <- function(calls){
-    # noisy_neighbors <- calls[user_sample != "N" & (roll_noise_mean_ratio_fwd > 5 & roll_noise_mean_ratio_rev < 0.1) & trace_peak != "NA" & !is.na(gen_coord)]
-    noisy_neighbors <- calls[(roll_noise_mean_ratio_fwd > 5 & roll_noise_mean_ratio_rev < 0.1) & trace_peak != "NA" & !is.na(gen_coord)]
+    if("call_rev" %in% colnames(calls)){
+        noisy_neighbors <- calls[trace_peak != "NA" & !is.na(gen_coord) & call != "-" & call_rev != "-"
+                                 & roll_noise_abs_mean_ratio_fwd > 0 & roll_noise_abs_mean_ratio_fwd < 10 & roll_noise_abs_mean_ratio_rev > 0 & roll_noise_abs_mean_ratio_rev < 10
+                                 & roll_noise_abs_mean_ratio_fwd / roll_noise_abs_mean_ratio_rev >= 5
+                                ]
+    } else {
+        noisy_neighbors <- calls[trace_peak != "NA" & !is.na(gen_coord) & call != "-"
+                                 & roll_noise_abs_mean_ratio_fwd > 0 & roll_noise_abs_mean_ratio_fwd < 10
+                                 & roll_noise_abs_mean_ratio_fwd >= 2
+                                ]
+    }
     setkey(noisy_neighbors,id)
     return(noisy_neighbors)
 }
@@ -330,8 +341,8 @@ report_hetero_indels <- function(calls){
 #     cmpStr_hetero_indel_aln <- paste(overhang1,compareStrings(hetero_indel_aln),sep="")
 #     hetero_del_tab <- stringi::stri_locate_all_regex(cmpStr_hetero_indel_aln,"[\\+]+")[[1]]
 #     hetero_ins_tab <- stringi::stri_locate_all_regex(cmpStr_hetero_indel_aln,"[\\-]+")[[1]]
-    hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_ins_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\-]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
+    hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_indel_pid <- round(pid(hetero_indel_aln),1)
     return(list(hetero_indel_aln, hetero_indel_pid, hetero_ins_tab, hetero_del_tab))
 }

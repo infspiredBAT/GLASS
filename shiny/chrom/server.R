@@ -101,12 +101,11 @@ shinyServer(function(input,output,session) {
                         intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
                         intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                         intrexdat$new_sample <- TRUE
-                    # g_intrexdat  <<- intrexdat
-                    g_intrexdat  <<- splice_variants(intrexdat)
-                    calls        <<- data.table(calls,key="id")
-                    output$files <-  renderPrint({cat(g_files)})
-                    g_new_sample <<- TRUE
-                    # ret          <-"loaded"
+                    g_intrexdat       <<- splice_variants(intrexdat)
+                    calls             <<- data.table(calls,key="id")
+                    g_noisy_neighbors <<- get_noisy_neighbors(calls)
+                    output$files      <-  renderPrint({cat(g_files)})
+                    g_new_sample      <<- TRUE
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
         }
@@ -135,7 +134,6 @@ shinyServer(function(input,output,session) {
 
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
-            g_noisy_neighbors <<- get_noisy_neighbors(g_calls)
             return(TRUE)
 
         } else return(FALSE)
@@ -155,21 +153,9 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            cat(g_hetero_indel_pid)
+            cat(g_hetero_indel_pid,"%\n",(g_hetero_ins_tab[,2]-g_hetero_ins_tab[,1]+1),"/",(g_hetero_del_tab[,2]-g_hetero_del_tab[,1]+1))
         }
     })
-    output$hetero_indel_tab <- renderPrint({
-        if(varcall() ) {
-            cat((g_hetero_ins_tab[,2]-g_hetero_ins_tab[,1]+1),"/",(g_hetero_del_tab[,2]-g_hetero_del_tab[,1]+1))
-        }
-    })
-
-#     incorporate_hetero_indels <- observe({
-#         input$incorporate_btn
-#             if(isolate(loading_processed_files()) != "not") {
-#                 g_calls <<- incorporate_hetero_indels_func(g_calls)
-#             }
-#     })
 
     output$infobox <- renderPrint({
         #if(loading_processed_files() != "not") {
@@ -233,7 +219,7 @@ shinyServer(function(input,output,session) {
 
                 # cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
 
-                cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
+                cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
 
             }
         }
@@ -341,7 +327,7 @@ shinyServer(function(input,output,session) {
     # Send message to JS
     #
     s2n_slider_handler <- observe({
-            session$sendCustomMessage(type = 'mut_min',message = paste0(input$s2n_min))
+            session$sendCustomMessage(type = 's2n_min',message = paste0(input$s2n_min))
     })
 
 

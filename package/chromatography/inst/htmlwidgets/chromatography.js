@@ -251,7 +251,7 @@ HTMLWidgets.widget({
                        .transition().attr("opacity", 1);
             }
         );
-        Shiny.addCustomMessageHandler("mut_min",
+        Shiny.addCustomMessageHandler("s2n_min",
             function(message) {
                 mult = Number(message);
                 //console.log(mult);
@@ -558,7 +558,7 @@ HTMLWidgets.widget({
         var group_noise_rev = focus.append("g");
         group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
             .append("path").attr("class","area area_fwd").attr("d",noise_area_fwd)
-            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.1);
+            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15);
 
         //reverse strand
         if(intens_rev != ""){
@@ -566,7 +566,7 @@ HTMLWidgets.widget({
             var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
             group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
             .append("path").attr("class","area area_rev").attr("d",noise_area_rev)
-            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.1);
+            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15);
             var group_a_r = focus.append("g");
     	    	var group_c_r = focus.append("g");
   		    	var group_g_r = focus.append("g");
