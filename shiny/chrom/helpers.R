@@ -232,10 +232,14 @@ retranslate <- function(calls){
     trans <- translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     suppressWarnings(trans <- aaa(trans))
     #create a string as long as trans rep(123),add them to ord in cod where user_mut != "-"s
-    calls[ord_in_cod>0 & user_mut == "-",mut_ord_in_cod:=0]
-    calls[ord_in_cod>0 & user_mut == "-",aa_mut:="-"]
-    calls[ord_in_cod>0 &user_mut!="-",mut_ord_in_cod := ord[(1+push):(length(aa_mut)+push)]]
-    calls[mut_ord_in_cod>0 & user_mut != "-",aa_mut := rep(trans,each=3)[(1+push):(length(aa_mut)+push)]]
+    calls[ord_in_cod>0 & user_mut    == "-", mut_ord_in_cod    := 0  ]
+    calls[ord_in_cod>0 & user_sample == "-", sample_ord_in_cod := 0  ]
+    calls[ord_in_cod>0 & user_mut    == "-", aa_mut            := "-"]
+    calls[ord_in_cod>0 & user_sample == "-", aa_sample         := "-"]
+    calls[ord_in_cod>0 & user_mut       != "-", mut_ord_in_cod    := ord[(1+push):(length(aa_mut)   +push)]      ]
+    calls[ord_in_cod>0 & user_sample    != "-", sample_ord_in_cod := ord[(1+push):(length(aa_sample)+push)]      ]
+    calls[mut_ord_in_cod>0   & user_mut != "-", aa_mut    := rep(trans,each=3)[(1+push):(length(aa_mut)   +push)]]
+    calls[sample_ord_in_cod>0& user_mut != "-", aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 #     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
 #     else dels <- numeric()
 #     if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))

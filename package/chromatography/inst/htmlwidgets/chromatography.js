@@ -63,6 +63,7 @@ HTMLWidgets.widget({
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 	     var brush = d3.svg.brush().on("brushend", brushed);
+         var join = false;
 
         var label_pos = {}        //map for pisitioning labels representing called base
 
@@ -270,19 +271,23 @@ HTMLWidgets.widget({
                 }
             }
         );
-        Shiny.addCustomMessageHandler("join",
-            function(message){
-                if(message==="FALSE"){
+        function joinView(join){
+            if(message==="FALSE"){
                     heightScale_fwd = heightScale_fwd_split;
                     heightScale_rev = heightScale_rev_split;
                     redraw();
+                    join = false;
                 }else if(message==="TRUE"){
                     split_peak_offset = 100;
                     heightScale_fwd = heightScale;
                     heightScale_rev = heightScale;
                     redraw();
+                    join = true;    
+        }
+        Shiny.addCustomMessageHandler("join",
+            function(message){
+                joinView(message);
                 }
-            }
         );
         Shiny.addCustomMessageHandler("opac_f",
             function(message){
@@ -381,7 +386,8 @@ HTMLWidgets.widget({
             label_pos:  label_pos,
             linec:   linec,
             context: context,
-	          brush:   brush,
+	        brush:   brush,
+            join:    join,
             focus:   focus,
             redraw:  redraw,
             widthScale:  widthScale,
@@ -391,7 +397,7 @@ HTMLWidgets.widget({
             heightScale_rev_split: heightScale_rev_split,
             width:   w,
             height:  h,
-	          height2: height2,
+	        height2: height2,
             instanceCounter: instanceCounter,
             reHeight: reHeight,
             setBrush: setBrush,
@@ -400,7 +406,7 @@ HTMLWidgets.widget({
             showNoiseInMinimap: showNoiseInMinimap,
             callShiny: callShiny
         }
-    },
+    }
 
     resize: function(el, width, height, instance) {
         if (instance.lastValue) {
@@ -450,22 +456,22 @@ HTMLWidgets.widget({
 
   			var svg     = instance.svg;
   			var line_fwd   = instance.line_fwd;
-        var line_rev   = instance.line_rev;
-        var noise_area_fwd = instance.noise_area_fwd;
-        var noise_area_rev = instance.noise_area_rev;
+            var line_rev   = instance.line_rev;
+            var noise_area_fwd = instance.noise_area_fwd;
+            var noise_area_rev = instance.noise_area_rev;
   			var linec   = instance.linec;
   			var focus   = instance.focus;
   			var context = instance.context;
   			var brush   = instance.brush;
   			var widthScale  = instance.widthScale;
   			var heightScale = instance.heightScale;
-        var width2Scale = instance.width2Scale;
+            var width2Scale = instance.width2Scale;
 
   			widthScale.domain([0,domain_x]);
   			width2Scale.domain([0,domain_x]);
   			heightScale.domain([0,domain_y]);
-  	    instance.heightScale_fwd_split.domain([0,domain_y]);
-        instance.heightScale_rev_split.domain([0,domain_y]);
+  	        instance.heightScale_fwd_split.domain([0,domain_y]);
+            instance.heightScale_rev_split.domain([0,domain_y]);
 
   			//visualise fullseq width
   			context
@@ -673,7 +679,7 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
                 .append("text").attr("class","peak_label short aa_sample")
                 .text(function(d){
-                    if   (d["ord_in_cod"] == 1) {return d["aa_sample"];}
+                    if   (d["sample_ord_in_cod"] == 1) {return d["aa_sample"];}
                     else {                       return "";}})
                 .attr("text-anchor", "right")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
@@ -684,7 +690,7 @@ HTMLWidgets.widget({
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_mut
                 .append("text").attr("class","peak_label short aa_mut")
                 .text(function(d){
-                    if   (d["ord_in_cod"] == 1) {return d["aa_mut"];}
+                    if   (d["mut_ord_in_cod"] == 1) {return d["aa_mut"];}
                     else {                       return "";}})
                 .attr("text-anchor", "right")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
@@ -761,7 +767,7 @@ HTMLWidgets.widget({
             }
 
         }else{
-            //console.log(x)
+            console.log("render");
   			if(x["intrexdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["intrexdat"]["max_y"]);
           instance.max_y = x["intrexdat"]["max_y"];
@@ -794,9 +800,9 @@ HTMLWidgets.widget({
                     .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
                 instance.focus.append("g").selectAll("noise_indicator").data(noisy_neighbors).enter()  //noise indicator
       		         .append("line").attr("class","peak_label short line var_noise_indic")
-      		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
+      		         .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
       		         .attr("y1",140)
-      		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
+      		         .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
       		         .attr("y2",400)
       		         .attr("stroke-width",10).attr("stroke","brown").attr("opacity",0.2).attr("stroke-dasharray","1,3");
 
@@ -804,8 +810,8 @@ HTMLWidgets.widget({
                 instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
                     .append("text").attr("class","peak_label short aa_sample")
                     .text(function(d){
-                        if   (d["ord_in_cod"] == 1) {return d["aa_sample"];}
-                        else {                       return "";}})
+                        if   (d["sample_ord_in_cod"] == 1) {return d["aa_sample"];}
+                        else {                             return "";}})
                     .attr("text-anchor", "right")
                     .attr("x",function(d){return instance.widthScale(d["trace_peak"]);})
                     .on("click",function(d,i){instance.callShiny(d["id"]);})
