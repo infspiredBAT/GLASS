@@ -272,18 +272,20 @@ HTMLWidgets.widget({
             }
         );
         function joinView(join){
-            if(message==="FALSE"){
-                    heightScale_fwd = heightScale_fwd_split;
-                    heightScale_rev = heightScale_rev_split;
-                    redraw();
-                    join = false;
-                }else if(message==="TRUE"){
-                    split_peak_offset = 100;
-                    heightScale_fwd = heightScale;
-                    heightScale_rev = heightScale;
-                    redraw();
-                    join = true;    
+            if(join==="FALSE"){
+                heightScale_fwd = heightScale_fwd_split;
+                heightScale_rev = heightScale_rev_split;
+                redraw();
+                join = false;
+            }else if(join==="TRUE"){
+                split_peak_offset = 100;
+                heightScale_fwd = heightScale;
+                heightScale_rev = heightScale;
+                redraw();
+                join = true;
+            }
         }
+        
         Shiny.addCustomMessageHandler("join",
             function(message){
                 joinView(message);
@@ -388,6 +390,7 @@ HTMLWidgets.widget({
             context: context,
 	        brush:   brush,
             join:    join,
+            joinView:joinView,
             focus:   focus,
             redraw:  redraw,
             widthScale:  widthScale,
@@ -406,7 +409,7 @@ HTMLWidgets.widget({
             showNoiseInMinimap: showNoiseInMinimap,
             callShiny: callShiny
         }
-    }
+    },
 
     resize: function(el, width, height, instance) {
         if (instance.lastValue) {
@@ -603,7 +606,15 @@ HTMLWidgets.widget({
       				.attr("stroke","#FF0000").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,1,10,1");
             }
-            //console.log(calls);
+            
+            //on single strand always show "join view"
+            if(intens_rev != ""){
+                instance.joinView(true);
+            }else{
+                instance.joinView(instance.join);
+            }
+            
+
             //trace peak labels
             focus.append("g").selectAll("scope").data(calls).enter()        //scope (position indicator)
                  .append("rect").attr("class",function(d){return "scope ".concat("scope").concat(d["trace_peak"]);})
