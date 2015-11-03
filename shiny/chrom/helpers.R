@@ -169,6 +169,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
 complement <- function(base){
     return (chartr("ATGC","TACG",base))
 }
+
 ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes/SingleLetterCode.html
     ambig <- toupper(ambig)
     ref   <- toupper(ref)
@@ -192,8 +193,10 @@ ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes
         if(ref=="C") return("A")
     }else return(ambig)
 }
+
 retranslate <- function(calls){
 
+    # SAMPLE
     coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_sample,reference)]
     setnames(coding,"V1","coding_seq")
     push = 0
@@ -211,10 +214,13 @@ retranslate <- function(calls){
     coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
     trans <- translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     #Shift annotation of codons by '-'s
+    ord_sample<-rep(c(1,2,3),length(trans))
+    suppressWarnings(trans_sample <- aaa(trans))
+#!
+    # calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
+#!
 
-    suppressWarnings(trans <- aaa(trans))
-    calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
-
+    # MUT
     coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_mut,reference)]
     setnames(coding,"V1","coding_seq")
     push = 0
@@ -228,18 +234,22 @@ retranslate <- function(calls){
         setkey(coding,coding_seq)
     }
     coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
-    ord<-rep(c(1,2,3),length(trans))
+#!
+    # ord<-rep(c(1,2,3),length(trans))
+#!
     trans <- translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
-    suppressWarnings(trans <- aaa(trans))
+    ord_mut<-rep(c(1,2,3),length(trans))
+    suppressWarnings(trans_mut <- aaa(trans))
+
     #create a string as long as trans rep(123),add them to ord in cod where user_mut != "-"s
-    calls[ord_in_cod>0 & user_mut    == "-", mut_ord_in_cod    := 0  ]
-    calls[ord_in_cod>0 & user_sample == "-", sample_ord_in_cod := 0  ]
-    calls[ord_in_cod>0 & user_mut    == "-", aa_mut            := "-"]
-    calls[ord_in_cod>0 & user_sample == "-", aa_sample         := "-"]
-    calls[ord_in_cod>0 & user_mut       != "-", mut_ord_in_cod    := ord[(1+push):(length(aa_mut)   +push)]      ]
-    calls[ord_in_cod>0 & user_sample    != "-", sample_ord_in_cod := ord[(1+push):(length(aa_sample)+push)]      ]
-    calls[mut_ord_in_cod>0   & user_mut != "-", aa_mut    := rep(trans,each=3)[(1+push):(length(aa_mut)   +push)]]
-    calls[sample_ord_in_cod>0& user_mut != "-", aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
+    calls[ord_in_cod>0        & user_sample == "-", sample_ord_in_cod := 0  ]
+    calls[ord_in_cod>0        & user_mut    == "-", mut_ord_in_cod    := 0  ]
+    calls[ord_in_cod>0        & user_sample == "-", aa_sample         := "-"]
+    calls[ord_in_cod>0        & user_mut    == "-", aa_mut            := "-"]
+    calls[ord_in_cod>0        & user_sample != "-", sample_ord_in_cod := ord_sample[(1+push):(length(aa_sample)+push)]]
+    calls[ord_in_cod>0        & user_mut    != "-", mut_ord_in_cod    := ord_mut[(1+push):(length(aa_mut)      +push)]]
+    calls[sample_ord_in_cod>0 & user_sample != "-", aa_sample         := rep(trans_sample,each=3)[(1+push):(length(aa_sample)+push)]]
+    calls[mut_ord_in_cod>0    & user_mut    != "-", aa_mut            := rep(trans_mut,each=3)[(1+push):(length(aa_mut)      +push)]]
 #     if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
 #     else dels <- numeric()
 #     if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
