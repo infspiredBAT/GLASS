@@ -387,18 +387,19 @@ incorporate_hetero_indels_func <- function(calls){
 incorporate_single_vec <- function(vec,ins,dels,type,fwd){
 
     #insertions shift coordinates, we have to adjust to match with reference
-    for(i in 1:length(ins)){
-        for(j in 1:length(ins)){
-            if(ins[i] < ins[j]) ins[j] <- ins[j]  - 1
-        }
-        for(k in 1:length(dels)){
-            if(ins[i]< dels[k]) dels[k]<- dels[k] - 1
+    if(length(ins)>0){
+        for(i in 1:length(ins)){
+            for(j in 1:length(ins)){
+                if(ins[i] < ins[j]) ins[j] <- ins[j]  - 1
+            }
+            for(k in 1:length(dels)){
+                if(ins[i]< dels[k]) dels[k]<- dels[k] - 1
+            }
         }
     }
 
     if(type == "num") new_vec <- numeric(length(vec))
     else new_vec <- rep("-",length(vec))
-
     if(fwd) {
         rem = NULL
         for(i in 1:length(dels)){
@@ -412,8 +413,6 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd){
         vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     }
-    
-    
     rem = NULL
     if(length(ins) > 0){
         if(any(colnames(calls) == "call_rev")){     #check if the newly discovered insertion is not accounted for
@@ -425,6 +424,7 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd){
         if(!is.null(rem)) ins <- ins[-rem]
         new_vec <- new_vec[-ins]
         if(!fwd) new_vec <- c(rep("-",length(ins)),new_vec)
+        else c(new_vec,rep("-",length(ins)))
     }
     return(new_vec)
 }
