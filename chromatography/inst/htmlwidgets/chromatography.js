@@ -18,7 +18,7 @@ HTMLWidgets.widget({
         var widthScale   = d3.scale.linear().range([0,width]),
             width2Scale  = d3.scale.linear().range([0,width]),  //remains constant, to be used with context
             heightScale  = d3.scale.linear().range([height,0]),
-    	      height2Scale = d3.scale.linear().range([height2,0]),
+    	    height2Scale = d3.scale.linear().range([height2,0]),
             heightScale_fwd_split = d3.scale.linear().range([half_height,(2*half_height -  height)]),
             heightScale_rev_split = d3.scale.linear().range([height,half_height]);
             //heightScale_fwd = heightScale;
@@ -285,7 +285,7 @@ HTMLWidgets.widget({
                 join = "TRUE";
             }
         }
-        
+
         Shiny.addCustomMessageHandler("join",
             function(message){
                 joinView(message);
@@ -606,14 +606,14 @@ HTMLWidgets.widget({
       				.attr("stroke","#FF0000").attr("stroke-width",0.75)
                     .attr("stroke-dasharray","20,3,10,1,10,1");
             }
-            
+
             //on single strand always show "join view"
             if(intens_rev != ""){
                 instance.joinView(instance.join);
             }else{
                 instance.joinView("TRUE");
             }
-            
+
 
             //trace peak labels
             focus.append("g").selectAll("scope").data(calls).enter()        //scope (position indicator)

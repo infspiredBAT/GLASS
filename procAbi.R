@@ -7,22 +7,22 @@ library(DescTools) # StrPos()
 
 sm <<- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
 
-get_call_data <- function(data, data_rev,single_rev){
+get_call_data <- function(data,data_rev,single_rev,glassed_ref){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     deletions <- list()
     if(is.null(data_rev)) {
         qual  <- data$PCON.2
         if(single_rev) {
-            res   <- generate_ref(complement(reverse(data$PBAS.1)))
+            res   <- generate_ref(complement(reverse(data$PBAS.1)),glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
                                 ,user_sample = str_split(complement(data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
                                 ,call        = str_split(complement(data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
                                 ,reference   = str_split(complement(data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual[length(qual):1]
-                                ) 
+                                )
         }else{
-            res   <- generate_ref(data$PBAS.1)
+            res   <- generate_ref(data$PBAS.1,glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
                                 ,user_sample = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,call        = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
@@ -42,7 +42,7 @@ get_call_data <- function(data, data_rev,single_rev){
     } else {
 
         user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,data$PCON.2,data_rev$PCON.2)
-        res <- generate_ref(paste(user_align[[1]],collapse = ""))
+        res <- generate_ref(paste(user_align[[1]],collapse = ""),glassed_ref)
         calls <- data.table(id              = seq_along(user_align[[1]])
                             ,user_sample    = user_align[[1]]
                             ,call           = user_align[[2]]
@@ -107,7 +107,7 @@ align_intens_calls <- function(calls_fwd,intens_fwd,calls_rev=NULL,intens_rev=NU
     return(data.table(iA_fwd = res_fwd[[1]],iC_fwd = res_fwd[[2]],iG_fwd = res_fwd[[3]],iT_fwd = res_fwd[[4]]))
 }
 
-generate_ref <-function(user_seq){
+generate_ref <-function(user_seq,glassed_ref){
     ref_aln_cover_init <- 0.75 # 0.85
     ref_aln_score_init <- 50 # 50
     ref_aln_lngth_gaps <- 50 # 50
@@ -119,7 +119,7 @@ generate_ref <-function(user_seq){
     multiply_covered <- list()
 #     user_seq <- gsub("[^ACGT]","N",user_seq)
 
-    refs   <- readLines("data/ref_ex_in.fa")
+    refs   <- readLines(glassed_ref)
     ref_info <- gsub(">ref_","",perl = T,refs[seq(1,length(refs),2)])
     ref_info <- strsplit(ref_info,split = "_")
     ref_names <- sapply(ref_info,function(x) x[1])
@@ -275,11 +275,11 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
 
     rev <- !(is.null(data_rev))
 
-    intens <- data.table(data[paste0("DATA.",toString(8+StrPos(data$FWO,"A")),sep="")][[1]],    
-                         data[paste0("DATA.",toString(8+StrPos(data$FWO,"C")),sep="")][[1]],    
-                         data[paste0("DATA.",toString(8+StrPos(data$FWO,"G")),sep="")][[1]],    
+    intens <- data.table(data[paste0("DATA.",toString(8+StrPos(data$FWO,"A")),sep="")][[1]],
+                         data[paste0("DATA.",toString(8+StrPos(data$FWO,"C")),sep="")][[1]],
+                         data[paste0("DATA.",toString(8+StrPos(data$FWO,"G")),sep="")][[1]],
                          data[paste0("DATA.",toString(8+StrPos(data$FWO,"T")),sep="")][[1]])
-    
+
     if(rev) intens_rev <- data.table(data_rev[paste0("DATA.",toString(8+StrPos(data$FWO,"A")),sep="")][[1]],
                                      data_rev[paste0("DATA.",toString(8+StrPos(data$FWO,"C")),sep="")][[1]],
                                      data_rev[paste0("DATA.",toString(8+StrPos(data$FWO,"G")),sep="")][[1]],
@@ -305,7 +305,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
     #cliping the end of chromatogram after last call
     if(single_rev){
         offset <- data$PLOC.1[1] +2
-        intens <- intens[1:max(data$PLOC.1)+offset]        
+        intens <- intens[1:max(data$PLOC.1)+offset]
     }else{
         if(nrow(intens) > max(data$PLOC.1)){
             intens <- intens[1:max(data$PLOC.1)]
@@ -318,7 +318,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
             intens_rev <- intens_rev[1:max(data_rev$PLOC.1)+offset]
         }
     }
-    
+
     intens <- normalize_peak_width(intens,data$PLOC.1,11)
     intens <- setnames(data.table(intens),c("A","C","G","T"))
     calls  <- calls[,trace_peak:=rescale_call_positions(data$PLOC.1[1],nrow(calls),11)]
@@ -329,7 +329,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
         calls      <- calls[,trace_peak_rev:=rescale_call_positions(data_rev$PLOC.1[1],nrow(calls),11)]
     }
     if(single_rev){
-        intens <- intens[nrow(intens):1,]    
+        intens <- intens[nrow(intens):1,]
         intens <- setnames(data.table(intens),c("T","G","C","A"))
     }
     deletions <- calls[call=="-"][,id]

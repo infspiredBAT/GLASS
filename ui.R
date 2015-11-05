@@ -29,9 +29,9 @@ shinyUI(
 		hr(),
 
 		fluidRow(
-			column(1, selectInput("gene","",choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
+			column(1, selectInput("gene_of_interest","",choices=list("TP53"="TP53"),multiple=FALSE,selectize=F,size=1)),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
-			column(9,verbatimTextOutput("files"))
+			column(9, verbatimTextOutput("files"))
 		),
 		tabsetPanel(id = 'tab',
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
@@ -93,9 +93,8 @@ shinyUI(
 				chromatographyOutput("plot"),
 				shiny::dataTableOutput("chosen_variants_table"),
 				conditionalPanel(condition=" output.chosen_variants_table ",
-				downloadButton("export_btn","export")
+				    downloadButton("export_btn","export")
 				),
-
 				br()
 			),
 			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),

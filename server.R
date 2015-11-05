@@ -64,17 +64,17 @@ shinyServer(function(input,output,session) {
                 fwd_file <- input$select_file$datapath
                 fwd_file_name <- name
                 rev_file <- NULL
-                rev_file_name <- "-"  
-                base <- sapply(strsplit(basename(fwd_file_name),"\\."), 
-                               function(x) paste(x[1:(length(x)-1)], collapse=".")) 
-                if(substr(base,nchar(base),nchar(base))=="R"){
-                    g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,sep="")
-                    single_rev <- TRUE
-                }else{
-                    g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,sep="")
-                }
+                rev_file_name <- "-"
             }
-            
+            base <- sapply(strsplit(basename(fwd_file_name),"\\."),
+                           function(x) paste(x[1:(length(x)-1)], collapse="."))
+            if(substr(base,nchar(base),nchar(base))=="R"){
+                g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,sep="")
+                single_rev <- TRUE
+            }else{
+                g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,sep="")
+            }
+
             withProgress(message = paste('processing...',sep=" "), value = 1, {
                 # TODO - make sure shiny only allows ab1 files (???)
                 #        - otherwise chceck if file has correct format
@@ -92,13 +92,15 @@ shinyServer(function(input,output,session) {
                 res <- NULL
                 called <- NULL
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
+                glassed_ref <- paste("data/refs/",input$gene_of_interest,".glassed.intrex.fasta",sep="")
+                glassed_cod <- paste("data/refs/",input$gene_of_interest,".glassed.codons.rdata",sep="")
                 tryCatch(
-                    called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev)),
+                    called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,glassed_ref)),
                     error = function(e){output$files <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
 
                 if(!is.null(called)){
                     intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE,single_rev)
-                    calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev)
+                    calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,glassed_cod)
                     g_intens     <<- intensified$intens
                     g_intens_rev <<- intensified$intens_rev
                     g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))

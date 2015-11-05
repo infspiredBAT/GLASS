@@ -1,7 +1,7 @@
-annotate_calls <- function(calls,intens,intens_rev){
+annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
 
     #contains codons table
-    load("data/codons.rdata")
+    load(glassed_cod)
     calls <- merge(x = calls, y = cod_table[,list(gen_coord,codon,ord_in_cod,coding_seq,aa_ref=AA)], by = "gen_coord", all.x = TRUE)
     calls[aa_ref != "",aa_ref:=aaa(toupper(aa_ref))]
     calls[,c("aa_sample","aa_mut"):=aa_ref]
