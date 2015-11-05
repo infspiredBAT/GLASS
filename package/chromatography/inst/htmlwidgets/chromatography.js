@@ -63,7 +63,7 @@ HTMLWidgets.widget({
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 	     var brush = d3.svg.brush().on("brushend", brushed);
-         var join = false;
+         var join = "FALSE";
 
         var label_pos = {}        //map for pisitioning labels representing called base
 
@@ -276,13 +276,13 @@ HTMLWidgets.widget({
                 heightScale_fwd = heightScale_fwd_split;
                 heightScale_rev = heightScale_rev_split;
                 redraw();
-                join = false;
+                join = "FALSE";
             }else if(join==="TRUE"){
                 split_peak_offset = 100;
                 heightScale_fwd = heightScale;
                 heightScale_rev = heightScale;
                 redraw();
-                join = true;
+                join = "TRUE";
             }
         }
         
@@ -609,9 +609,9 @@ HTMLWidgets.widget({
             
             //on single strand always show "join view"
             if(intens_rev != ""){
-                instance.joinView(true);
-            }else{
                 instance.joinView(instance.join);
+            }else{
+                instance.joinView("TRUE");
             }
             
 

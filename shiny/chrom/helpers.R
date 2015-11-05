@@ -167,7 +167,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
 }
 
 complement <- function(base){
-    return (chartr("ATGC","TACG",base))
+    return (chartr("ATGCRYKMBVDH","TACGYRMKVBHD",base))
 }
 
 ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes/SingleLetterCode.html
