@@ -302,36 +302,45 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
 #         intens<-intens/f_intens
 #     }
 
-    #cliping the end of chromatogram after last call
-    if(single_rev){
-        offset <- data$PLOC.1[1] +2
-        intens <- intens[1:max(data$PLOC.1)+offset]
+    #cliping the end of forward chromatogram after last call
+    if(single_rev){ #single reverse abi will be flipped over
+        offset <- data$PLOC.1[1]
+        #if(nrow(intens) > max(data$PLOC.1)){
+        #    intens <- intens[1:max(data$PLOC.1)+offset]
+        #}
     }else{
         if(nrow(intens) > max(data$PLOC.1)){
             intens <- intens[1:max(data$PLOC.1)]
         }
     }
-    #cliping the end of reverse chromatogram after last call + length of first trace peak in fwd so we get the same offset once we turn it over
-    offset <- data$PLOC.1[1]
+
+
+    #cliping the end of reverse chromatogram after last call + length of first trace peak in fwd so we get the same offset once we flip it over
     if(rev){
+        offset <- data$PLOC.1[1]
         if(nrow(intens_rev) > max(data_rev$PLOC.1)+offset){
             intens_rev <- intens_rev[1:max(data_rev$PLOC.1)+offset]
         }
     }
 
     intens <- normalize_peak_width(intens,data$PLOC.1,11)
-    intens <- setnames(data.table(intens),c("A","C","G","T"))
     calls  <- calls[,trace_peak:=rescale_call_positions(data$PLOC.1[1],nrow(calls),11)]
+    if(single_rev){
+        intens <- setnames(data.table(intens),c("T","G","C","A"))
+        deletions <- calls[call=="-"]
+        intens <- intens[1:(max(calls$trace_peak) - (nrow(deletions))*11 + data$PLOC.1[1])]
+        intens <- intens[nrow(intens):1,]
+    } else {
+        intens <- setnames(data.table(intens),c("A","C","G","T"))
+    }
+    
     if(rev){
         intens_rev <- normalize_peak_width(intens_rev,data_rev$PLOC.1,11)
         intens_rev <- setnames(data.table(intens_rev),c("T","G","C","A"))
         intens_rev <- intens_rev[nrow(intens_rev):1]
         calls      <- calls[,trace_peak_rev:=rescale_call_positions(data_rev$PLOC.1[1],nrow(calls),11)]
     }
-    if(single_rev){
-        intens <- intens[nrow(intens):1,]
-        intens <- setnames(data.table(intens),c("T","G","C","A"))
-    }
+    
     deletions <- calls[call=="-"][,id]
     if(rev) deletions_rev <- calls[call_rev=="-"][,id]
     else deletions_rev <- list()
@@ -366,7 +375,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
         intens_rev[,id:=c(1:nrow(intens_rev))]
         setkey(intens_rev,id)
     }
-
+    
     calls <- cbind(calls,get_intens(intens,calls[["trace_peak"]]))
     if(rev) calls <- cbind(calls,get_intens(intens_rev,calls[["trace_peak"]],"rev"))
 
@@ -375,6 +384,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
 
 get_intens <-function(intens,vec,tag = "fwd"){
     names <- c("A","C","G","T")
+    #if(single_rev) names <- c("T","C","G","A")
     res <- lapply(names,function(x) get_single_intens(intens[[x]],vec))
 
     if(tag == "fwd") return(data.table(iA_fwd = res[[1]],iC_fwd = res[[2]],iG_fwd = res[[3]],iT_fwd = res[[4]]))
