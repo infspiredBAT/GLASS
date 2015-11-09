@@ -16,7 +16,6 @@ g_view                  <<- NULL
 g_selected              <<- NULL
 g_selected_goto_index   <<- 0
 g_max_y                 <<- NULL
-g_varcall               <<- FALSE
 g_hetero_calls          <<- 0
 g_hetero_indel_pid      <<- 0
 g_hetero_ins_tab        <<- NULL
@@ -34,8 +33,6 @@ shinyServer(function(input,output,session) {
 
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
         if(!is.null(input$select_file)) {
-            # ret <- "not"
-            g_varcall <<- FALSE
             file <- input$select_file$datapath
             name <- input$select_file$name
             single_rev <- FALSE
@@ -112,7 +109,7 @@ shinyServer(function(input,output,session) {
                         intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
                         intrexdat$new_sample <- TRUE
                     g_intrexdat       <<- splice_variants(intrexdat)
-                    calls             <<- data.table(calls,key="id")
+                    calls             <-  data.table(calls,key="id")
                     g_noisy_neighbors <<- get_noisy_neighbors(calls)
                     output$files      <-  renderPrint({cat(g_files)})
                     g_new_sample      <<- TRUE
@@ -127,19 +124,19 @@ shinyServer(function(input,output,session) {
         if(class(loading_processed_files())[1] != "my_UI_exception") {
             update_chosen_variants()
             goReset_handler()
-            calls<-loading_processed_files()
 
+            calls<-loading_processed_files()
             if(is.null(g_calls)){
-                g_calls <- calls
+                g_calls <<- calls
                 setkey(g_calls,id)
             }
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
+
             rep <- report_hetero_indels(g_calls)
             g_hetero_indel_aln <<- rep[[1]]
             g_hetero_indel_pid <<- rep[[2]]
             g_hetero_ins_tab   <<- rep[[3]]
             g_hetero_del_tab   <<- rep[[4]]
-
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
 
             g_calls   <<- retranslate(g_calls)
@@ -172,9 +169,9 @@ shinyServer(function(input,output,session) {
             if(input$choose_call_pos != "") {
                 tryCatch({
                     if(!is.null(g_intens_rev)) {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"    ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"    max.peak% ",round(sample_peak_pct,1),"\n ",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\n\nF  mut ",mut_peak_base_fwd,"  \tQ ",quality_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nR  mut ",mut_peak_base_rev,"  \tQ ",quality_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"    ref ",reference,"   user ",user_sample,"    max.peak% ",round(sample_peak_pct,1),"\n ",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\n\nF  mut ",mut_peak_base_fwd,"  \tQ ",quality_fwd,"  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),"\nR  mut ",mut_peak_base_rev,"  \tQ ",quality_rev,"  \tpeak% ",round(mut_peak_pct_rev,digits=1),"  \tS/N ",round(mut_s2n_abs_rev,digits=1),sep="")])
                     } else {
-                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"    ref ",reference,"   call ",user_sample_orig,"   user ",user_sample,"    max.peak% ",round(sample_peak_pct,1),"\n ",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\n\nF  mut ",mut_peak_base_fwd,"  \tQ ",quality,    "  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
+                        cat(g_calls[id == input$choose_call_pos,paste0("pos ",id,"    ref ",reference,"   user ",user_sample,"    max.peak% ",round(sample_peak_pct,1),"\n ",exon_intron,"  @genomic ",gen_coord,"  @coding ",coding_seq,"  @codon ",codon,"\n\n   mut ",mut_peak_base_fwd,"  \tQ ",quality,    "  \tpeak% ",round(mut_peak_pct_fwd,digits=1),"  \tS/N ",round(mut_s2n_abs_fwd,digits=1),sep="")])
                     }
                 }, error = function(er){
                     if(grepl("NAs introduced",er)) cat("type an integer number")
@@ -296,17 +293,15 @@ shinyServer(function(input,output,session) {
                         ids <- strsplit(g_view[id==input$goReset$id]$ids," ")[[1]]
                         for( cid in ids){
                             updateTextInput(session,"choose_call_pos",value=paste0(cid))
-                            g_calls[id==cid]$user_sample  <<- g_calls[id==cid]$reference
-                            g_calls[id==cid]$user_mut     <<- g_calls[id==cid]$reference
+                            g_calls[id==cid]$user_sample <<- g_calls[id==cid]$reference
+                            g_calls[id==cid]$user_mut    <<- g_calls[id==cid]$reference
                             g_calls[id==cid]$set_by_user <<- TRUE
                         }
                     }else{
                         updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
                         #reset button changed to remove variant
-                        #g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$user_sample_orig
-                        #g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$user_sample_orig
-                        g_calls[id==input$goReset$id]$user_sample  <<- g_calls[id==input$goReset$id]$reference
-                        g_calls[id==input$goReset$id]$user_mut     <<- g_calls[id==input$goReset$id]$reference
+                        g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$reference
+                        g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$reference
                         g_calls[id==input$goReset$id]$set_by_user <<- TRUE
                     }
                 })

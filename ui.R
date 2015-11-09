@@ -64,7 +64,7 @@ shinyUI(
 					),
 
 					column(1
-					    ,sliderInput("qual_thres_to_call","call: min quality", ticks=FALSE, min = 0, max = 60, value = 20)
+					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 20)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
 					column(1,
@@ -77,15 +77,15 @@ shinyUI(
 					),
                     column(1),
 					column(1
-					    ,checkboxInput("show_calls_checkbox","show F/R calls", value = F)
+					    ,checkboxInput("show_calls_checkbox","show calls", value = F)
 					    ,conditionalPanel(condition = "output.reverse",
-                                          checkboxInput("join_traces_checkbox","join F/R traces", value = F))
+                                          checkboxInput("join_traces_checkbox","join traces", value = F))
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
                     ),
 					column(1
-                        ,sliderInput("max_y_p","rel peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
+                        ,sliderInput("max_y_p","peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
 					    ,conditionalPanel(condition = "output.reverse",
-					                      sliderInput("opacity","F/R trace opacity", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
+					                      sliderInput("opacity","R <trace opacity> F", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
 					)
 				),
 				br(),

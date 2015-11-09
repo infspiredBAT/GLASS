@@ -46,7 +46,6 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
     calls[,c("mut_peak_base_fwd","mut_peak_abs_fwd") := i_wo_p(2,iA_fwd,iC_fwd,iG_fwd,iT_fwd),by=1:nrow(calls)]
     calls[,mut_peak_pct_fwd := ((100/ref_peak_abs_fwd)*mut_peak_abs_fwd)]
     calls[,mut_s2n_abs_fwd:=mut_peak_abs_fwd/noise_abs_fwd]
-    # calls[,mut_call_fwd:=sample_peak_base_fwd]
     calls[,mut_call_fwd:=call]
     if("call_rev" %in% colnames(calls)){
         calls[,c("sample_peak_base_rev","sample_peak_abs_rev") := i_wo_p(1,iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
@@ -54,7 +53,6 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
         calls[,c("mut_peak_base_rev","mut_peak_abs_rev") := i_wo_p(2,iA_rev,iC_rev,iG_rev,iT_rev),by=1:nrow(calls)]
         calls[,mut_peak_pct_rev := ((100/ref_peak_abs_rev)*mut_peak_abs_rev)]
         calls[,mut_s2n_abs_rev:=mut_peak_abs_rev/noise_abs_rev]
-        # calls[,mut_call_rev:=sample_peak_base_rev]
         calls[,mut_call_rev:=call_rev]
 
         suppressWarnings(calls[,sample_peak_pct := max(c(sample_peak_pct_fwd,sample_peak_pct_rev),na.rm=TRUE),by=1:nrow(calls)])
@@ -64,7 +62,8 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
         calls[,mut_peak_pct := mut_peak_pct_fwd]
     }
     calls[,set_by_user:=FALSE]
-    calls[,user_sample_orig:=user_sample]
+    # calls[,user_sample_orig:=user_sample]
+    calls[set_by_user == FALSE, user_sample_orig := ambig_minus(user_sample,reference),by=1:nrow(calls[set_by_user==FALSE,])]
     return(calls)
 }
 
@@ -91,77 +90,82 @@ splice_variants <- function(intrexdat){
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
-    # calls[set_by_user == FALSE, mut_call_fwd := sample_peak_base_fwd]
-    calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls[set_by_user==FALSE,])]
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
-    calls[set_by_user == FALSE, user_mut := user_sample_orig]
-
+    calls[set_by_user == FALSE, user_mut    := user_sample_orig]
+    calls[set_by_user == FALSE, mut_call_fwd := call]
+    # calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls[set_by_user==FALSE,])]
     # mut
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
-        # calls[set_by_user == FALSE, mut_call_rev := sample_peak_base_rev]
-        calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
+        calls[set_by_user == FALSE, mut_call_rev := call_rev]
+        # calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
+        # initialising mut calls
         calls[
-            mut_peak_pct_fwd >= mut_min
+              mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min
             & mut_peak_base_fwd != reference
             #& quality_fwd >= qual_thres
-            ,mut_call_fwd := mut_peak_base_fwd
+            , mut_call_fwd := mut_peak_base_fwd
             ]
+        calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(mut_call_fwd,reference),by=1:nrow(calls[set_by_user==FALSE,])]
         calls[
-            mut_peak_pct_rev >= mut_min
+              mut_peak_pct_rev >= mut_min
             & mut_s2n_abs_rev >= s2n_min
             & mut_peak_base_rev != reference
             #& quality_rev >= qual_thres
-            ,mut_call_rev := mut_peak_base_rev
+            , mut_call_rev := mut_peak_base_rev
             ]
+        calls[set_by_user == FALSE, mut_call_rev := ambig_minus(mut_call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
 #         calls[
-#             set_by_user == FALSE
-#             # & mut_call_fwd != call
-#             ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+#               set_by_user == FALSE
+#             #& mut_call_fwd != call
+#             , c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
 #             ]
-        calls[mut_call_fwd!=reference
-              &mut_call_rev==reference
-              &quality_fwd > qual_thres
-              &set_by_user == FALSE,
-              c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
-              ]
-        calls[mut_call_fwd==reference
-              &mut_call_rev!=reference
-              &quality_rev > qual_thres
-              &set_by_user == FALSE,
-              c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
-              ]
-
+        # setting user muts based on reference and quality
         calls[
-            mut_call_fwd!=reference
-            &mut_call_rev!=reference
+              mut_call_fwd!=reference
+            & mut_call_rev==reference
+            & quality_fwd > qual_thres
             & set_by_user == FALSE
-            # & mut_call_rev != call_rev
-            ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+            , c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
         calls[
-            mut_call_fwd!=reference
-            &mut_call_rev!=reference
-            &quality_rev > quality_fwd
+              mut_call_fwd==reference
+            & mut_call_rev!=reference
+            & quality_rev > qual_thres
+            & set_by_user == FALSE
+            , c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
+            ]
+        calls[
+              mut_call_fwd!=reference
+            & mut_call_rev!=reference
             & set_by_user == FALSE
             # & mut_call_rev != call_rev
-            ,c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
+            , c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
-
+        calls[
+              mut_call_fwd!=reference
+            & mut_call_rev!=reference
+            & quality_rev > quality_fwd
+            & set_by_user == FALSE
+            # & mut_call_rev != call_rev
+            , c("user_mut","mut_peak_pct") := list(mut_call_rev,mut_peak_pct_rev)
+            ]
     } else {
         calls[
-            mut_peak_pct_fwd >= mut_min
+              mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min
             & mut_peak_base_fwd != reference
-            ,mut_call_fwd := mut_peak_base_fwd
+            , mut_call_fwd := mut_peak_base_fwd
             ]
+        calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(mut_call_fwd,reference),by=1:nrow(calls[set_by_user==FALSE,])]
         calls[
-            set_by_user == FALSE
+              set_by_user == FALSE
             & mut_call_fwd != call
-            ,c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
+            , c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
             ]
     }
+    # masking low quality
     calls[quality < qual_thres & set_by_user == FALSE, c("user_sample","user_mut") := "N"]
     return(calls)
 }
@@ -196,15 +200,15 @@ ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes
 
 retranslate <- function(calls){
 
-    # SAMPLE
+    # USER SAMPLE
     coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_sample,reference)]
     setnames(coding,"V1","coding_seq")
     push = 0
     #get missing bases for the first frame if incomplete
     while(coding[1,ord_in_cod]!=1){
-      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])
-      setkey(coding,coding_seq)
-      push = push +1
+        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])
+        setkey(coding,coding_seq)
+        push = push +1
     }
     #get missing bases for the last frame if incomplete
     while(coding[nrow(coding),ord_in_cod] != 3){
@@ -216,27 +220,23 @@ retranslate <- function(calls){
     #Shift annotation of codons by '-'s
     ord_sample<-rep(c(1,2,3),length(trans))
     suppressWarnings(trans_sample <- aaa(trans))
-#!
-    # calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
-#!
+#! # calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 
-    # MUT
+    # USER MUT
     coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_mut,reference)]
     setnames(coding,"V1","coding_seq")
     push = 0
     while(coding[1,ord_in_cod]!=1){
-      coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
-      setkey(coding,coding_seq)
-      push = push +1
+        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
+        setkey(coding,coding_seq)
+        push = push +1
     }
     while(coding[nrow(coding),ord_in_cod] != 3){
         coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
         setkey(coding,coding_seq)
     }
     coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
-#!
-    # ord<-rep(c(1,2,3),length(trans))
-#!
+#! # ord<-rep(c(1,2,3),length(trans))
     trans <- translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     ord_mut<-rep(c(1,2,3),length(trans))
     suppressWarnings(trans_mut <- aaa(trans))
@@ -384,15 +384,15 @@ incorporate_hetero_indels_func <- function(calls){
     if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
     else ins <- numeric()
     if(max(length(dels),length(ins)) != 0){
-        calls[,het_mut_call_fwd := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T)]
-         calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
+        calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T)]
+        calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
 #         calls[,het_mut_s2n_abs_fwd := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
-        calls[set_by_user == FALSE,c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+        calls[set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
         if(any(colnames(calls) == "call_rev")){
-            calls[,het_mut_call_rev := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F)]
-             calls[,het_mut_peak_pct_rev := incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
+            calls[,het_mut_call_rev     := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F)]
+            calls[,het_mut_peak_pct_rev := incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
 #             calls[,het_mut_s2n_abs_rev := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
-            calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE,c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
+            calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
         }
     }
     return(calls)
