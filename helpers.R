@@ -429,7 +429,7 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd){
     }
     rem = NULL
     if(length(ins) > 0){
-        if(any(colnames(calls) == "call_rev")){     #check if the newly discovered insertion is not accounted for
+        if(any(colnames(g_calls) == "call_rev")){     #check if the newly discovered insertion is not accounted for
             for( i in 1:length(ins)){
                 if(g_calls[id==ins[i],mut_call_rev]=="-")
                     rem = c(rem,i)
