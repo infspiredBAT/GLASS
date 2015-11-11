@@ -343,7 +343,7 @@ report_hetero_indels <- function(calls){
         secondary_seq <- gsub("[ -]","",paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = ""))
     } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
     primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
-    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global-local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global-local",substitutionMatrix = sm,gapOpening = -15, gapExtension = -1)
 #     # pattern/primary overhang/tail = secondary deletion
 #     if(start(pattern(hetero_indel_aln)) > start(subject(hetero_indel_aln))){
 #         overhang1 <- paste(replicate(start(pattern(hetero_indel_aln))-1, "+"), collapse = "") # stri_dup("abc",3) from stringi
@@ -408,7 +408,7 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd){
         vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     }
-    if(length(ins) > 0) vec <- vec[-ins]
+    if(length(ins) > 0) new_vec <- new_vec[-ins]
     return(new_vec)
 }
 

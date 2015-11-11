@@ -31,6 +31,7 @@ HTMLWidgets.widget({
         var line_rev = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return heightScale_rev(d)});
+        var call_opacity = 0;
         //lines in the brush tool
         //var noise_area = d3.svg.line()
         //        .x(function(d){return widthScale(d[0]);})
@@ -401,6 +402,7 @@ HTMLWidgets.widget({
             width:   w,
             height:  h,
 	        height2: height2,
+            call_opacity: call_opacity,
             instanceCounter: instanceCounter,
             reHeight: reHeight,
             setBrush: setBrush,
@@ -450,6 +452,12 @@ HTMLWidgets.widget({
   			var calls       = HTMLWidgets.dataframeToD3(x["calls"]);
   			var choices     = HTMLWidgets.dataframeToD3(x["choices"]);
   			var noisy_neighbors     = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
+            var show_calls  = x["show_calls"];
+            if(show_calls){
+                instance.call_opacity = 0.8;
+            }else{
+                instance.call_opacity = 0;
+            }
   			var domain_y    = x["intrexdat"]["max_y"];
   			instance.max_y  = domain_y;
   			var domain_x    = x["intrexdat"]["max_x"];
@@ -684,7 +692,7 @@ HTMLWidgets.widget({
                   instance.setPeakLabel(calls,"mut_call_rev",0);
               }
               //default
-              focus.selectAll(".call").attr("opacity",0);
+              focus.selectAll(".call").attr("opacity",instance.call_opacity);
               instance.setPeakLabel(calls,"user_sample",rev);
               instance.setPeakLabel(calls,"user_mut",rev);
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
@@ -781,7 +789,7 @@ HTMLWidgets.widget({
             console.log("render");
   			if(x["intrexdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["intrexdat"]["max_y"]);
-          instance.max_y = x["intrexdat"]["max_y"];
+                instance.max_y = x["intrexdat"]["max_y"];
   			}else if(x.choices != instance.choices){
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
@@ -791,6 +799,13 @@ HTMLWidgets.widget({
                     var intens_rev = x["intens_rev"];
                     rev = 1;
                 }
+                var show_calls  = x["show_calls"];
+                if(show_calls){
+                    instance.call_opacity = 0.8;
+                }else{
+                    instance.call_opacity = 0;
+                }
+                instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
                 instance.focus.selectAll(".peak_label short line").remove();
                 instance.context.selectAll(".minimap").remove();
                 instance.showVarInMinimap(choices);

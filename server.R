@@ -152,7 +152,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors)
+            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox)
             g_new_sample <<- FALSE
             return(ret)
         }
@@ -165,6 +165,7 @@ shinyServer(function(input,output,session) {
     })
 
     output$infobox <- renderPrint({
+        input$qual_thres_to_call
         #if(loading_processed_files() != "not") {
             if(input$choose_call_pos != "") {
                 tryCatch({
@@ -341,11 +342,13 @@ shinyServer(function(input,output,session) {
         if(is.null(g_intens_rev))   session$sendCustomMessage(type = "join",message = "TRUE")
         else                        session$sendCustomMessage(type = "join",message = paste0(input$join_traces_checkbox))
     })
-    show_calls <- observe({
-        if(varcall()){
-            session$sendCustomMessage(type = "show",message = paste0(input$show_calls_checkbox))
-        }
-    })
+    
+#     show_calls <- observe({
+#         if(varcall()){
+#             session$sendCustomMessage(type = "show",message = paste0(input$show_calls_checkbox))
+#         }
+#     })
+
     set_opacity <- observe({
         if(varcall()){
             opac_fwd <- 1 + (input$opacity/100)
