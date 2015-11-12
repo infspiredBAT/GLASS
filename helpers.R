@@ -343,7 +343,7 @@ report_hetero_indels <- function(calls){
         secondary_seq <- gsub("[ -]","",paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = ""))
     } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
     primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
-    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global-local",substitutionMatrix = sm,gapOpening = -20, gapExtension = -1)
+    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global-local",substitutionMatrix = sm,gapOpening = -15, gapExtension = -1)
 #     # pattern/primary overhang/tail = secondary deletion
 #     if(start(pattern(hetero_indel_aln)) > start(subject(hetero_indel_aln))){
 #         overhang1 <- paste(replicate(start(pattern(hetero_indel_aln))-1, "+"), collapse = "") # stri_dup("abc",3) from stringi
@@ -399,47 +399,16 @@ incorporate_hetero_indels_func <- function(calls){
 }
 
 incorporate_single_vec <- function(vec,ins,dels,type,fwd){
-
-    #insertions shift coordinates, we have to adjust to match with reference
-    if(length(ins)>0){
-        for(i in 1:length(ins)){
-            for(j in 1:length(ins)){
-                if(ins[i] < ins[j]) ins[j] <- ins[j]  - 1
-            }
-            for(k in 1:length(dels)){
-                if(ins[i]< dels[k]) dels[k]<- dels[k] - 1
-            }
-        }
-    }
-
     if(type == "num") new_vec <- numeric(length(vec))
     else new_vec <- rep("-",length(vec))
     if(fwd) {
-        rem = NULL
-        for(i in 1:length(dels)){
-            if(g_calls[id==dels[i],mut_call_fwd] =="-")  #picking up a deletion already present in fwd calls
-                rem = c(rem,i)
-        }
-        if(!is.null(rem)) dels <- dels[-rem]
         vec <- vec[1:min(length(vec),length(new_vec) - length(dels))]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     } else {
         vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     }
-    rem = NULL
-    if(length(ins) > 0){
-        if(any(colnames(g_calls) == "call_rev")){     #check if the newly discovered insertion is not accounted for
-            for( i in 1:length(ins)){
-                if(g_calls[id==ins[i],mut_call_rev]=="-")
-                    rem = c(rem,i)
-            }
-        }
-        if(!is.null(rem)) ins <- ins[-rem]
-        new_vec <- new_vec[-ins]
-        if(!fwd) new_vec <- c(rep("-",length(ins)),new_vec)
-        else c(new_vec,rep("-",length(ins)))
-    }
+    if(length(ins) > 0) new_vec <- new_vec[-ins]
     return(new_vec)
 }
 
