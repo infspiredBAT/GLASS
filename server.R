@@ -35,36 +35,43 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$select_file)) {
             file <- input$select_file$datapath
             name <- input$select_file$name
+            full_name <- input$select_file$name
             single_rev <- FALSE
-
+            
+            #getting rid of the date in names
+            for(i in 1:length(name)){
+                name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
+            }
             #if multiple files uploaded we use the first to
             #check if we can distinguish forward and reverse
             #otherwise we only take the first file
             if(length(name)>=2){
                 if(gsub("F.*","F",name[1])==gsub("R.*","F",name[2])){
                     fwd_file <- input$select_file$datapath[1]
-                    fwd_file_name <- name[1]
+                    fwd_file_name <- full_name[1]
                     rev_file <- input$select_file$datapath[2]
-                    rev_file_name <- name[2]
+                    rev_file_name <- full_name[2]
                 }else if(gsub("R.*","R",name[1])==gsub("F.*","R",name[2])){
                     fwd_file <- input$select_file$datapath[2]
-                    fwd_file_name <- name[2]
+                    fwd_file_name <- full_name[2]
                     rev_file <- input$select_file$datapath[1]
-                    rev_file_name <- name[1]
+                    rev_file_name <- full_name[1]
                 }else{
                     fwd_file <- input$select_file$datapath[1]
-                    fwd_file_name <- name[1]
+                    fwd_file_name <- full_name[1]
                     rev_file <- NULL
                     rev_file_name <- "-"
                 }
+            base <- ""    
             }else{ #only one file selected
                 fwd_file <- input$select_file$datapath
-                fwd_file_name <- name
+                fwd_file_name <- full_name
                 rev_file <- NULL
                 rev_file_name <- "-"
+                base <- sapply(strsplit(basename(name),"\\."),
+                               function(x) paste(x[1:(length(x)-1)], collapse="."))
             }
-            base <- sapply(strsplit(basename(fwd_file_name),"\\."),
-                           function(x) paste(x[1:(length(x)-1)], collapse="."))
+            
             if(substr(base,nchar(base),nchar(base))=="R"){
                 g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,sep="")
                 single_rev <- TRUE
