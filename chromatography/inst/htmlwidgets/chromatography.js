@@ -66,7 +66,7 @@ HTMLWidgets.widget({
 	     var brush = d3.svg.brush().on("brushend", brushed);
          var join = "FALSE";
 
-        var label_pos = {}        //map for pisitioning labels representing called base
+        var label_pos = {};        //map for pisitioning labels representing called base
 
         label_pos["reference"]      =  10;
         label_pos["aa"]             =  25;
@@ -123,6 +123,7 @@ HTMLWidgets.widget({
 
         function setPeakLabel(calls,label,offset){
             //Bind data
+            console.log(label);
             var text = focus.append("g").selectAll("text").data(calls)
             //Ender
             text = text.enter().append("text");
@@ -131,8 +132,13 @@ HTMLWidgets.widget({
                     if(label.indexOf("user") > -1){
                         return "peak_label short user ".concat("id").concat(d["id"]);
                     }else if(label.indexOf("call") > -1){
+                        if(label.indexOf("mut_call_rev") > -1){
+                            return "peak_label short call mut_rev";
+                        }else if(label.indexOf("call_rev") > -1){
+                            return "peak_label short call rev";
+                        }
                         return "peak_label short call";
-                    }else if(label.indexOf("mut")> -1){
+                    }else if(label.indexOf("mut") > -1){
                         return "peak_label short mut";
                     }else{return "peak_label short";}
                 })
@@ -147,7 +153,12 @@ HTMLWidgets.widget({
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .on("click",function(d,i){callShiny(d["id"],d["trace_peak"]);})
-                .attr("y",label_pos[label]+offset)
+                .attr("y",function(d){
+                                if(label.indexOf("rev") > -1){
+                                    return((join=="FALSE")*110 + label_pos[label]+offset);
+                                }else{
+                                    return(label_pos[label]+offset);
+                                }})
                 .attr("fill", "black")
                 .attr("opacity", 0.8)
                 .attr("font-family", "sans-serif")
@@ -272,23 +283,29 @@ HTMLWidgets.widget({
                 }
             }
         );
-        function joinView(join){
-            if(join==="FALSE"){
+        function joinView(j){
+            j = typeof j !== 'undefined' ? j : join;
+            console.log((j=="FALSE")*100);
+            console.log(label_pos["call_rev"]);
+            focus.selectAll(".rev")
+                 .attr("y",(j=="FALSE")*110 + label_pos["call_rev"]);
+            focus.selectAll(".mut_rev")
+                 .attr("y",(j=="FALSE")*110 + label_pos["mut_call_rev"]);
+            if(j==="FALSE"){
                 heightScale_fwd = heightScale_fwd_split;
                 heightScale_rev = heightScale_rev_split;
-                redraw();
-                join = "FALSE";
-            }else if(join==="TRUE"){
+                redraw();               
+            }else if(j==="TRUE"){
                 split_peak_offset = 100;
                 heightScale_fwd = heightScale;
                 heightScale_rev = heightScale;
                 redraw();
-                join = "TRUE";
             }
         }
 
         Shiny.addCustomMessageHandler("join",
             function(message){
+                join = message;
                 joinView(message);
                 }
         );
@@ -615,9 +632,11 @@ HTMLWidgets.widget({
                     .attr("stroke-dasharray","20,3,10,1,10,1");
             }
 
+            console.log("newjoin");
+            console.log(instance.join);
             //on single strand always show "join view"
             if(intens_rev != ""){
-                instance.joinView(instance.join);
+                instance.joinView();
             }else{
                 instance.joinView("TRUE");
             }
@@ -693,8 +712,8 @@ HTMLWidgets.widget({
               }
               //default
               focus.selectAll(".call").attr("opacity",instance.call_opacity);
-              instance.setPeakLabel(calls,"user_sample",rev);
-              instance.setPeakLabel(calls,"user_mut",rev);
+              instance.setPeakLabel(calls,"user_sample",0);
+              instance.setPeakLabel(calls,"user_mut",0);
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
                 .append("text").attr("class","peak_label short aa_sample")
                 .text(function(d){
@@ -794,7 +813,7 @@ HTMLWidgets.widget({
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
                 var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
-                var rev = 0;  //offset on labels in case we have alternative reference
+                var rev = 0;  //offset on labels in case we have alternative reference ??
                 if(x["intens_rev"] !== null){
                     var intens_rev = x["intens_rev"];
                     rev = 1;
@@ -813,8 +832,9 @@ HTMLWidgets.widget({
                 instance.showNoiseInMinimap(noisy_neighbors);
                 instance.noisy_neighbors = x.noisy_neighbors;
                 instance.focus.selectAll(".user").remove();
-                instance.setPeakLabel(calls,"user_sample",rev);
-                instance.setPeakLabel(calls,"user_mut",rev);
+                instance.setPeakLabel(calls,"user_sample",0);
+                instance.setPeakLabel(calls,"user_mut",0);
+                //instance.setPeakLabel(calls,"call_rev",rev);
 
                 instance.focus.selectAll(".var_noise_indic").remove();
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
