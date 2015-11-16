@@ -98,7 +98,8 @@ shinyUI(
 				br()
 			),
 			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
-		         verbatimTextOutput("aln")
+		         verbatimTextOutput("aln"),
+		         plotOutput('het_histogram',height = 600)
 			),
 # 			tabPanel('variant annotation', value = 'annotation', icon = icon("user-md")
 # 			),

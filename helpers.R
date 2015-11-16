@@ -340,38 +340,58 @@ mround <- function(x,base){
 report_hetero_indels <- function(calls){
     rev <- !is.null(calls[["call_rev"]])
     if(rev) {
-        secondary_seq <- gsub("[ -]","",paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]),collapse = ""))
+        secondary_seq <- gsub("[ -]","",paste(get_consensus_mut(calls[["mut_call_fwd"]],calls[["mut_call_rev"]],calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)],calls[["user_sample"]]),collapse = ""))
     } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
     primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
-    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "global-local",substitutionMatrix = sm,gapOpening = -15, gapExtension = -1)
-#     # pattern/primary overhang/tail = secondary deletion
-#     if(start(pattern(hetero_indel_aln)) > start(subject(hetero_indel_aln))){
-#         overhang1 <- paste(replicate(start(pattern(hetero_indel_aln))-1, "+"), collapse = "") # stri_dup("abc",3) from stringi
-#     }
-#     # subject/secondary overhang/tail = secondary insertion
-#     else{
-#         overhang1 <- paste(replicate(start(subject(hetero_indel_aln))-1, "-"), collapse = "") # stri_dup("abc",3) from stringi
-#     }
-#     cmpStr_hetero_indel_aln <- paste(overhang1,compareStrings(hetero_indel_aln),sep="")
-#     hetero_del_tab <- stringi::stri_locate_all_regex(cmpStr_hetero_indel_aln,"[\\+]+")[[1]]
-#     hetero_ins_tab <- stringi::stri_locate_all_regex(cmpStr_hetero_indel_aln,"[\\-]+")[[1]]
+    hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "overlap",substitutionMatrix = sm,gapOpening = -15, gapExtension = -1)
+    
     hetero_ins_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\-]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
-    hetero_indel_pid <- round(pid(hetero_indel_aln),1)
-    return(list(hetero_indel_aln, hetero_indel_pid, hetero_ins_tab, hetero_del_tab))
+    
+    is.in.primery <- apply(hetero_ins_tab,1,function(x) all(x %in% which(calls[["user_sample"]] == "-")))
+    
+    if(length(hetero_ins_tab[which(!is.in.primery),2]) > 0){
+        move_vec <- numeric(nchar(primary_seq))
+        move_vec[hetero_ins_tab[which(!is.in.primery),2] + 1] <- -(hetero_ins_tab[which(!is.in.primery),2]-hetero_ins_tab[which(!is.in.primery),1])-1
+        move_vec <- cumsum(move_vec)
+        hetero_del_tab <- apply(hetero_del_tab,c(1,2),function(x) x + move_vec[x])
+        hetero_ins_tab <- apply(hetero_ins_tab,c(1,2),function(x) x + move_vec[x])
+    }
+    
+    
+    is.in.reference <- apply(hetero_del_tab,1,function(x) all(x %in% which(calls[["reference"]] == "-")))
+    
+    ins_counts <- sum(hetero_ins_tab[which(!is.in.primery),2]-hetero_ins_tab[which(!is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(is.in.reference),2]-hetero_del_tab[which(is.in.reference),1]+1,na.rm = T)
+    del_counts <- sum(hetero_ins_tab[which(is.in.primery),2]-hetero_ins_tab[which(is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(!is.in.reference),2]-hetero_del_tab[which(!is.in.reference),1]+1,na.rm = T)
+    
+    # if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = )
+    if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = hetero_ins_tab[which(!is.in.primery),1],seq = stri_sub(secondary_seq,hetero_ins_tab[which(!is.in.primery),1],hetero_ins_tab[which(!is.in.primery),2]))
+    else g_minor_het_insertions <<- data.table::data.table()
+    g_hetero_indel_aln <<- hetero_indel_aln
+    g_hetero_indel_pid <<- round(pid(hetero_indel_aln),1)
+    g_hetero_ins_tab   <<- hetero_ins_tab
+    g_hetero_del_tab   <<- hetero_del_tab
+    g_hetero_indel_report <<- paste0(g_hetero_indel_pid,"%\n",ins_counts,"/",del_counts)
+    
 }
 
-get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab){
-    names <- structure(1:4,names = c("A","C","G","T"))
-    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd,collapse = "")), gsub("[ -]","",paste(mut_rev,collapse = "")),type = "global",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
+    if(length(which(primery_seq == "-")) > 0){
+        mut_fwd <- mut_fwd[-which(primery_seq == "-")]
+        mut_rev <- mut_rev[-which(primery_seq == "-")]
+    }
+    names <- structure(c(1,1:4),names = c("N","A","C","G","T"))
+    pa <- pairwiseAlignment(gsub("[ -]","N",paste(mut_fwd,collapse = "")), gsub("[ -]","N",paste(mut_rev,collapse = "")),type = "overlap",substitutionMatrix = sm,gapOpening = -10, gapExtension = -1)
     fwd <- strsplit(as.character(pattern(pa)),"")[[1]]
     rev <- strsplit(as.character(subject(pa)),"")[[1]]
     fwd_i <- numeric(length(fwd))
     rev_i <- numeric(length(rev))
-    fwd_start <- min(which(mut_fwd != " ")) + start(pattern(pa)) - 1
-    rev_start <- min(which(mut_rev != " ")) + start(subject(pa)) - 1
-    fwd_i[which(fwd != "-")] <- diag(as.matrix(intens_tab[,1:4,with = F])[fwd_start:(fwd_start + length(which(fwd != "-"))),names[fwd[which(fwd != "-")]]])
-    rev_i[which(rev != "-")] <- diag(as.matrix(intens_tab[,5:8,with = F])[rev_start:(rev_start + length(which(rev != "-"))),names[rev[which(rev != "-")]]])
+    fwd_start <- min(which(mut_fwd != "-")) + start(pattern(pa)) - 1
+    rev_start <- min(which(mut_rev != "-")) + start(subject(pa)) - 1
+    fwd_matrix <- as.matrix(intens_tab[,1:4,with = F])
+    rev_matrix <- as.matrix(intens_tab[,5:8,with = F])
+    fwd_i[which(fwd != "-")] <- diag(fwd_matrix[start(pattern(pa)):nrow(fwd_matrix),names[fwd[which(fwd != "-")]]])
+    rev_i[which(rev != "-")] <- diag(rev_matrix[start(subject(pa)):nrow(rev_matrix),names[rev[which(rev != "-")]]])
     cons <- fwd
     cons[which(rev_i > fwd_i)] <- rev[which(rev_i > fwd_i)]
     return(cons)
@@ -384,23 +404,42 @@ incorporate_hetero_indels_func <- function(calls){
     if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
     else ins <- numeric()
     if(max(length(dels),length(ins)) != 0){
-        calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T)]
+        calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T,calls[["sample_peak_base_fwd"]])]
         calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
 #         calls[,het_mut_s2n_abs_fwd := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
         calls[set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
         if(any(colnames(calls) == "call_rev")){
-            calls[,het_mut_call_rev     := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F)]
+            calls[,het_mut_call_rev     := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F,calls[["sample_peak_base_rev"]])]
             calls[,het_mut_peak_pct_rev := incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
 #             calls[,het_mut_s2n_abs_rev := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
             calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
         }
     }
+    if(nrow(g_minor_het_insertions) > 0){
+        get_ins_data_table <- function(pos,seq){
+            ins_seq <- strsplit(seq,"")[[1]]
+            ins_tab <- calls[rep(pos,length(ins_seq)),]
+            ins_tab[,id := id + seq_along(id)/10]
+            ins_tab[,user_sample := "-"][,reference := "-"]
+            return(ins_tab)
+        }
+        
+        ins_tabs <- lapply(1:nrow(g_minor_het_insertions),function(x) get_ins_data_table(g_minor_het_insertions$pos[x],g_minor_het_insertions$seq[x]))
+        calls <- rbindlist(c(list(calls),ins_tabs))
+    } 
     return(calls)
 }
 
-incorporate_single_vec <- function(vec,ins,dels,type,fwd){
-    if(type == "num") new_vec <- numeric(length(vec))
-    else new_vec <- rep("-",length(vec))
+incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
+    orig_vec <- vec
+    if(type == "num") elem <- 0
+    else elem <- "-"
+    new_vec <- rep(elem,length(vec))
+    if(length(ins) > 0) {
+        vec <- vec[-ins]
+        if(fwd) vec <- c(vec,rep(elem,length(ins)))
+        else vec <- c(rep(elem,length(ins)),vec)
+    }
     if(fwd) {
         vec <- vec[1:min(length(vec),length(new_vec) - length(dels))]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
@@ -408,8 +447,23 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd){
         vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     }
-    if(length(ins) > 0) new_vec <- new_vec[-ins]
-    return(new_vec)
+    if(type == "char"){
+        move_vec <- numeric(length(new_vec))
+        if(fwd){
+            move_vec[ins] <- -1
+            move_vec[dels] <- 1
+            move_vec <- cumsum(move_vec)
+        } else {
+            move_vec[ins] <- 1
+            move_vec[dels] <- -1
+            move_vec <- rev(cumsum(rev(move_vec)))
+        }
+        replace <- setdiff(which(orig_vec == primarySeq) + move_vec[which(orig_vec == primarySeq)],c(ins,dels))
+        replace <- replace[replace < length(primarySeq)]
+        replace <- replace[replace > 0]
+        new_vec[replace] <- primarySeq[replace]
+    }
+    return(new_vec) 
 }
 
 #background noise absolute or relative to reference peak
@@ -438,3 +492,53 @@ i_wo_p <- function(p,iA,iC,iG,iT){
 #     else if (mut_peak == iG) return(list("G",mut_peak,pG))
 #     else if (mut_peak == iT) return(list("T",mut_peak,pT))
 # }
+
+
+get_expected_het_indels <- function(calls){
+    min_het_pct <- 0.04
+    
+    rev <- !is.null(calls[["call_rev"]])
+    
+    if(rev) intens_tab <- calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]
+    else intens_tab <- calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd)]
+    
+    fwd_matrix <- as.matrix(intens_tab[,1:4,with = F])
+    fwd_matrix2 <- fwd_matrix / rowSums(fwd_matrix)
+    fwd_matrix2[which(is.na(fwd_matrix2))] <- 0
+    sec_fwd_vec <- apply(fwd_matrix2,1,function(x) max(x[-which.max(x)]))
+    
+    if(rev){
+        rev_matrix <- as.matrix(intens_tab[,5:8,with = F])
+        rev_matrix2 <- rev_matrix / rowSums(rev_matrix)
+        rev_matrix2[which(is.na(rev_matrix2))] <- 0
+        sec_rev_vec <- apply(rev_matrix2,1,function(x) max(x[-which.max(x)]))
+        sec_vec <- c(sec_fwd_vec,sec_rev_vec)
+    } else {
+        sec_vec <- sec_fwd_vec
+    }
+    
+    
+    hst <- hist(sec_vec,breaks = 100,plot = F)
+    
+    xz <- as.zoo(hst$density)
+    min <- rollapply(xz, 9, function(x) which.min(x)==5)
+    max <- rollapply(xz, 9, function(x) which.max(x)==5)
+    
+    max <- index(max)[which(max)]
+    max <- max[max > which(hst$breaks > min_het_pct)[1]]
+    max_dens <- rollapply(xz, 9, sum)[max]
+    best_max <- index(max_dens)[which.max(max_dens)]
+    
+    min <- index(min)[which(min)]
+    min <- min[min < best_max]
+    if(length(min) == 0){
+        g_expected_het_indel <<- list(min = 0,max = 0,hist = hst)
+        return()
+    }
+
+    best_min <- rev(min)[which.min(rev(hst$density[min]))]
+    
+    if(max_dens[which(index(max_dens) == best_max)] > 8){
+        g_expected_het_indel <<- list(min = hst$breaks[best_min + 1],max = hst$breaks[best_max + 1],hist = hst)
+    } else  g_expected_het_indel <<- list(min = 0,max = 0,hist = hst)
+}
