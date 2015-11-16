@@ -20,6 +20,7 @@ g_hetero_calls          <<- 0
 g_hetero_indel_pid      <<- 0
 g_hetero_ins_tab        <<- NULL
 g_hetero_del_tab        <<- NULL
+g_expected_het_indel    <<- NULL
 
 shinyServer(function(input,output,session) {
 
@@ -132,12 +133,10 @@ shinyServer(function(input,output,session) {
             }
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
 
-            rep <- report_hetero_indels(g_calls)
-            g_hetero_indel_aln <<- rep[[1]]
-            g_hetero_indel_pid <<- rep[[2]]
-            g_hetero_ins_tab   <<- rep[[3]]
-            g_hetero_del_tab   <<- rep[[4]]
+            report_hetero_indels(g_calls)
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
+            
+            get_expected_het_indels(g_calls)
 
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
@@ -160,7 +159,10 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            cat(g_hetero_indel_pid,"%\n",(g_hetero_ins_tab[,2]-g_hetero_ins_tab[,1]+1),"/",(g_hetero_del_tab[,2]-g_hetero_del_tab[,1]+1))
+            if(is.null(g_expected_het_indel)) het_indel_info <- paste0("no detected hetero indel\n")
+            else het_indel_info <- paste0("detected hetero indel with min around ",g_expected_het_indel[[1]],"%\n")
+            cat(het_indel_info)
+            cat(g_hetero_indel_report)
         }
     })
 
@@ -393,6 +395,16 @@ shinyServer(function(input,output,session) {
           writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
       }
     })
+    
+    output$het_histogram <- renderPlot({
+        if(varcall() ) {
+            if(!is.null(g_expected_het_indel)){
+                plot(g_expected_het_indel$hist)
+                if(g_expected_het_indel$min != 0) abline(v = g_expected_het_indel$min,col = "red")
+                #if(g_expected_het_indel$max != 0) abline(v = g_expected_het_indel$max,col = "orange")
+            }
+        }
+    },height = 600)
 
     output$call_table <- shiny::renderDataTable({
         if(varcall() & !is.null(g_calls)) { g_calls }
