@@ -167,7 +167,7 @@ shinyServer(function(input,output,session) {
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
             if(is.null(g_expected_het_indel)) het_indel_info <- paste0("no detected hetero indel\n")
-            else het_indel_info <- paste0("detected hetero indel with min around ",g_expected_het_indel[[1]],"%\n")
+            else het_indel_info <- paste0("detected hetero indel with min around ",g_expected_het_indel[[1]] * 100,"%\n")
             cat(het_indel_info)
             cat(g_hetero_indel_report)
         }

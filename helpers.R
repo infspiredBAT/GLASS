@@ -424,8 +424,10 @@ incorporate_hetero_indels_func <- function(calls){
             return(ins_tab)
         }
         
-        ins_tabs <- lapply(1:nrow(g_minor_het_insertions),function(x) get_ins_data_table(g_minor_het_insertions$pos[x],g_minor_het_insertions$seq[x]))
-        calls <- rbindlist(c(list(calls),ins_tabs))
+        if(nrow(g_minor_het_insertions[!is.na(pos)])>0){
+            ins_tabs <- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(g_minor_het_insertions[!is.na(pos),]$pos[x],g_minor_het_insertions$seq[x]))
+            calls <- rbindlist(c(list(calls),ins_tabs))
+        }
     } 
     return(calls)
 }
