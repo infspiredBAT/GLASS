@@ -1,0 +1,669 @@
+LOCUS       NM_017617               9309 bp    mRNA    linear   PRI 15-MAR-2015
+DEFINITION  Homo sapiens notch 1 (NOTCH1), mRNA.
+ACCESSION   NM_017617
+VERSION     NM_017617.3  GI:148833507
+KEYWORDS    RefSeq.
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini;
+            Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 9309)
+  AUTHORS   Lee SH, Lee S, Yang H, Song S, Kim K, Saunders TL, Yoon JK, Koh GY
+            and Kim I.
+  TITLE     Notch pathway targets proangiogenic regulator Sox17 to restrict
+            angiogenesis
+  JOURNAL   Circ. Res. 115 (2), 215-226 (2014)
+   PUBMED   24755984
+  REMARK    GeneRIF: In mice, transfection with exogenous human Notch1
+            intracellular domain suppressed Sox17 expression at the vascular
+            front during postnatal retinal angiogenesis and inversely regulates
+            Sox17 expression mainly at the post-transcriptional level.
+REFERENCE   2  (bases 1 to 9309)
+  AUTHORS   Riches JC, O'Donovan CJ, Kingdon SJ, McClanahan F, Clear AJ,
+            Neuberg DS, Werner L, Croce CM, Ramsay AG, Rassenti LZ, Kipps TJ
+            and Gribben JG.
+  TITLE     Trisomy 12 chronic lymphocytic leukemia cells exhibit upregulation
+            of integrin signaling that is modulated by NOTCH1 mutations
+  JOURNAL   Blood 123 (26), 4101-4110 (2014)
+   PUBMED   24829201
+  REMARK    GeneRIF: trisomy 12 CLL cells exhibit functional upregulation of
+            integrin signaling, with beta2-integrin expression being modulated
+            by NOTCH1 mutation status.
+REFERENCE   3  (bases 1 to 9309)
+  AUTHORS   Xiong Y, Zhang YY, Wu YY, Wang XD, Wan LH, Li L and Zhou LM.
+  TITLE     Correlation of over-expressions of miR-21 and Notch-1 in human
+            colorectal cancer with clinical stages
+  JOURNAL   Life Sci. 106 (1-2), 19-24 (2014)
+   PUBMED   24780321
+  REMARK    GeneRIF: Notch-1 is overexpressed in colorectal cancer tissues,
+            particularly in advanced stages.
+REFERENCE   4  (bases 1 to 9309)
+  AUTHORS   Taylor P, Takeuchi H, Sheppard D, Chillakuri C, Lea SM, Haltiwanger
+            RS and Handford PA.
+  TITLE     Fringe-mediated extension of O-linked fucose in the ligand-binding
+            region of Notch1 increases binding to mammalian Notch ligands
+  JOURNAL   Proc. Natl. Acad. Sci. U.S.A. 111 (20), 7290-7295 (2014)
+   PUBMED   24803430
+  REMARK    GeneRIF: Notch1 binding to Notch ligands is increased by
+            fringe-mediated extension of O-linked fucose in the ligand-binding
+            region
+REFERENCE   5  (bases 1 to 9309)
+  AUTHORS   Brooks,Y.S., Ostano,P., Jo,S.H., Dai,J., Getsios,S., Dziunycz,P.,
+            Hofbauer,G.F., Cerveny,K., Chiorino,G., Lefort,K. and Dotto,G.P.
+  TITLE     Multifactorial ERbeta and NOTCH1 control of squamous
+            differentiation and cancer
+  JOURNAL   J. Clin. Invest. 124 (5), 2260-2276 (2014)
+   PUBMED   24743148
+  REMARK    GeneRIF: Experimentally increased ERbeta expression or treatment
+            with ERbeta agonists inhibited proliferation of SCC cells and
+            promoted NOTCH1 expression and squamous differentiation
+REFERENCE   6  (bases 1 to 9309)
+  AUTHORS   Guan E, Wang J, Laborda J, Norcross M, Baeuerle PA and Hoffman T.
+  TITLE     T cell leukemia-associated human Notch/translocation-associated
+            Notch homologue has I kappa B-like activity and physically
+            interacts with nuclear factor-kappa B proteins in T cells
+  JOURNAL   J. Exp. Med. 183 (5), 2025-2032 (1996)
+   PUBMED   8642313
+REFERENCE   7  (bases 1 to 9309)
+  AUTHORS   Larsson C, Lardelli M, White I and Lendahl U.
+  TITLE     The human NOTCH1, 2, and 3 genes are located at chromosome
+            positions 9q34, 1p13-p11, and 19p13.2-p13.1 in regions of
+            neoplasia-associated translocation
+  JOURNAL   Genomics 24 (2), 253-258 (1994)
+   PUBMED   7698746
+REFERENCE   8  (bases 1 to 9309)
+  AUTHORS   Milner LA, Kopan R, Martin DI and Bernstein ID.
+  TITLE     A human homologue of the Drosophila developmental gene, Notch, is
+            expressed in CD34+ hematopoietic precursors
+  JOURNAL   Blood 83 (8), 2057-2062 (1994)
+   PUBMED   7512837
+REFERENCE   9  (bases 1 to 9309)
+  AUTHORS   Weinmaster G, Roberts VJ and Lemke G.
+  TITLE     A homolog of Drosophila Notch expressed during mammalian
+            development
+  JOURNAL   Development 113 (1), 199-205 (1991)
+   PUBMED   1764995
+REFERENCE   10 (bases 1 to 9309)
+  AUTHORS   Ellisen LW, Bird J, West DC, Soreng AL, Reynolds TC, Smith SD and
+            Sklar J.
+  TITLE     TAN-1, the human homolog of the Drosophila notch gene, is broken by
+            chromosomal translocations in T lymphoblastic neoplasms
+  JOURNAL   Cell 66 (4), 649-661 (1991)
+   PUBMED   1831692
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence was derived from AF308602.1, AL592301.14,
+            CN431067.1, DA324222.1, AB209873.1 and BC013208.1.
+            This sequence is a reference standard in the RefSeqGene project.
+            On Jun 14, 2007 this sequence version replaced gi:27894367.
+            
+            Summary: This gene encodes a member of the Notch family. Members of
+            this Type 1 transmembrane protein family share structural
+            characteristics including an extracellular domain consisting of
+            multiple epidermal growth factor-like (EGF) repeats, and an
+            intracellular domain consisting of multiple, different domain
+            types. Notch family members play a role in a variety of
+            developmental processes by controlling cell fate decisions. The
+            Notch signaling network is an evolutionarily conserved
+            intercellular signaling pathway which regulates interactions
+            between physically adjacent cells. In Drosophilia, notch
+            interaction with its cell-bound ligands (delta, serrate)
+            establishes an intercellular signaling pathway that plays a key
+            role in development. Homologues of the notch-ligands have also been
+            identified in human, but precise interactions between these ligands
+            and the human notch homologues remain to be determined. This
+            protein is cleaved in the trans-Golgi network, and presented on the
+            cell surface as a heterodimer. This protein functions as a receptor
+            for membrane bound ligands, and may play multiple roles during
+            development. [provided by RefSeq, Jul 2008].
+            
+            Publication Note:  This RefSeq record includes a subset of the
+            publications that are available for this gene. Please see the Gene
+            record to access additional publications.
+            
+            ##Evidence-Data-START##
+            RNAseq introns :: mixed/partial sample support SAMEA1965299,
+                              SAMEA1966682 [ECO:0000350]
+            ##Evidence-Data-END##
+            COMPLETENESS: complete on the 3' end.
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+            1-311               AF308602.1         1-311
+            312-312             AL589824.14        167432-167432       c
+            313-558             AF308602.1         313-558
+            559-559             AL589824.14        166657-166657       c
+            560-844             AF308602.1         560-844
+            845-851             CN431067.1         88-94
+            852-1070            AF308602.1         852-1070
+            1071-1384           CN431067.1         314-627
+            1385-1621           DA324222.1         28-264
+            1622-9294           AB209873.1         159-7831
+            9295-9309           BC013208.1         3480-3494
+FEATURES             Location/Qualifiers
+     source          1..9309
+                     /organism="Homo sapiens"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="9"
+                     /map="9q34.3"
+     gene            1..9309
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /note="notch 1"
+                     /db_xref="GeneID:4851"
+                     /db_xref="HGNC:HGNC:7881"
+                     /db_xref="MIM:190198"
+     CDS             1..7668
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /note="translocation-associated notch protein TAN-1;
+                     neurogenic locus notch homolog protein 1; Notch homolog 1,
+                     translocation-associated"
+                     /codon_start=1
+                     /product="neurogenic locus notch homolog protein 1
+                     preproprotein"
+                     /protein_id="NP_060087.3"
+                     /db_xref="GI:148833508"
+                     /db_xref="CCDS:CCDS43905.1"
+                     /db_xref="GeneID:4851"
+                     /db_xref="HGNC:HGNC:7881"
+                     /db_xref="MIM:190198"
+                     /translation="MPPLLAPLLCLALLPALAARGPRCSQPGETCLNGGKCEAANGTE
+                     ACVCGGAFVGPRCQDPNPCLSTPCKNAGTCHVVDRRGVADYACSCALGFSGPLCLTPL
+                     DNACLTNPCRNGGTCDLLTLTEYKCRCPPGWSGKSCQQADPCASNPCANGGQCLPFEA
+                     SYICHCPPSFHGPTCRQDVNECGQKPGLCRHGGTCHNEVGSYRCVCRATHTGPNCERP
+                     YVPCSPSPCQNGGTCRPTGDVTHECACLPGFTGQNCEENIDDCPGNNCKNGGACVDGV
+                     NTYNCRCPPEWTGQYCTEDVDECQLMPNACQNGGTCHNTHGGYNCVCVNGWTGEDCSE
+                     NIDDCASAACFHGATCHDRVASFYCECPHGRTGLLCHLNDACISNPCNEGSNCDTNPV
+                     NGKAICTCPSGYTGPACSQDVDECSLGANPCEHAGKCINTLGSFECQCLQGYTGPRCE
+                     IDVNECVSNPCQNDATCLDQIGEFQCICMPGYEGVHCEVNTDECASSPCLHNGRCLDK
+                     INEFQCECPTGFTGHLCQYDVDECASTPCKNGAKCLDGPNTYTCVCTEGYTGTHCEVD
+                     IDECDPDPCHYGSCKDGVATFTCLCRPGYTGHHCETNINECSSQPCRHGGTCQDRDNA
+                     YLCFCLKGTTGPNCEINLDDCASSPCDSGTCLDKIDGYECACEPGYTGSMCNINIDEC
+                     AGNPCHNGGTCEDGINGFTCRCPEGYHDPTCLSEVNECNSNPCVHGACRDSLNGYKCD
+                     CDPGWSGTNCDINNNECESNPCVNGGTCKDMTSGYVCTCREGFSGPNCQTNINECASN
+                     PCLNQGTCIDDVAGYKCNCLLPYTGATCEVVLAPCAPSPCRNGGECRQSEDYESFSCV
+                     CPTGWQGQTCEVDINECVLSPCRHGASCQNTHGGYRCHCQAGYSGRNCETDIDDCRPN
+                     PCHNGGSCTDGINTAFCDCLPGFRGTFCEEDINECASDPCRNGANCTDCVDSYTCTCP
+                     AGFSGIHCENNTPDCTESSCFNGGTCVDGINSFTCLCPPGFTGSYCQHDVNECDSQPC
+                     LHGGTCQDGCGSYRCTCPQGYTGPNCQNLVHWCDSSPCKNGGKCWQTHTQYRCECPSG
+                     WTGLYCDVPSVSCEVAAQRQGVDVARLCQHGGLCVDAGNTHHCRCQAGYTGSYCEDLV
+                     DECSPSPCQNGATCTDYLGGYSCKCVAGYHGVNCSEEIDECLSHPCQNGGTCLDLPNT
+                     YKCSCPRGTQGVHCEINVDDCNPPVDPVSRSPKCFNNGTCVDQVGGYSCTCPPGFVGE
+                     RCEGDVNECLSNPCDARGTQNCVQRVNDFHCECRAGHTGRRCESVINGCKGKPCKNGG
+                     TCAVASNTARGFICKCPAGFEGATCENDARTCGSLRCLNGGTCISGPRSPTCLCLGPF
+                     TGPECQFPASSPCLGGNPCYNQGTCEPTSESPFYRCLCPAKFNGLLCHILDYSFGGGA
+                     GRDIPPPLIEEACELPECQEDAGNKVCSLQCNNHACGWDGGDCSLNFNDPWKNCTQSL
+                     QCWKYFSDGHCDSQCNSAGCLFDGFDCQRAEGQCNPLYDQYCKDHFSDGHCDQGCNSA
+                     ECEWDGLDCAEHVPERLAAGTLVVVVLMPPEQLRNSSFHFLRELSRVLHTNVVFKRDA
+                     HGQQMIFPYYGREEELRKHPIKRAAEGWAAPDALLGQVKASLLPGGSEGGRRRRELDP
+                     MDVRGSIVYLEIDNRQCVQASSQCFQSATDVAAFLGALASLGSLNIPYKIEAVQSETV
+                     EPPPPAQLHFMYVAAAAFVLLFFVGCGVLLSRKRRRQHGQLWFPEGFKVSEASKKKRR
+                     EPLGEDSVGLKPLKNASDGALMDDNQNEWGDEDLETKKFRFEEPVVLPDLDDQTDHRQ
+                     WTQQHLDAADLRMSAMAPTPPQGEVDADCMDVNVRGPDGFTPLMIASCSGGGLETGNS
+                     EEEEDAPAVISDFIYQGASLHNQTDRTGETALHLAARYSRSDAAKRLLEASADANIQD
+                     NMGRTPLHAAVSADAQGVFQILIRNRATDLDARMHDGTTPLILAARLAVEGMLEDLIN
+                     SHADVNAVDDLGKSALHWAAAVNNVDAAVVLLKNGANKDMQNNREETPLFLAAREGSY
+                     ETAKVLLDHFANRDITDHMDRLPRDIAQERMHHDIVRLLDEYNLVRSPQLHGAPLGGT
+                     PTLSPPLCSPNGYLGSLKPGVQGKKVRKPSSKGLACGSKEAKDLKARRKKSQDGKGCL
+                     LDSSGMLSPVDSLESPHGYLSDVASPPLLPSPFQQSPSVPLNHLPGMPDTHLGIGHLN
+                     VAAKPEMAALGGGGRLAFETGPPRLSHLPVASGTSTVLGSSSGGALNFTVGGSTSLNG
+                     QCEWLSRLQSGMVPNQYNPLRGSVAPGPLSTQAPSLQHGMVGPLHSSLAASALSQMMS
+                     YQGLPSTRLATQPHLVQTQQVQPQNLQMQQQNLQPANIQQQQSLQPPPPPPQPHLGVS
+                     SAASGHLGRSFLSGEPSQADVQPLGPSSLAVHTILPQESPALPTSLPSSLVPPVTAAQ
+                     FLTPPSQHSYSSPVDNTPSHQLQVPEHPFLTPSPESPDQWSSSSPHSNVSDWSEGVSS
+                     PPTSMQSQIARIPEAFK"
+     sig_peptide     1..54
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="COORDINATES: ab initio prediction:SignalP:4.0"
+     proprotein      55..7665
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /product="notch1 proprotein"
+     mat_peptide     55..5208
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /product="notch1 N-terminal extracellular peptide"
+     misc_feature    4345..4467
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: LNR 1"
+     misc_feature    4468..4593
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: LNR 2"
+     misc_feature    4594..4713
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: LNR 3"
+     misc_feature    4990..4995
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="non-experimental evidence, no additional
+                     details recorded"
+                     /note="Cleavage, by furin-like protease (By similarity);
+                     propagated from UniProtKB/Swiss-Prot (P46531.4); cleavage
+                     site"
+     misc_feature    5128..5133
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="non-experimental evidence, no additional
+                     details recorded"
+                     /note="Cleavage, by ADAM17 (By similarity); propagated
+                     from UniProtKB/Swiss-Prot (P46531.4); cleavage site"
+     misc_feature    5158..5163
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="Cleavage, by ADAM17; propagated from
+                     UniProtKB/Swiss-Prot (P46531.4); cleavage site"
+     misc_feature    5206..5268
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="non-experimental evidence, no additional
+                     details recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     transmembrane region"
+     mat_peptide     5209..7665
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /product="notch1 C-terminal transmembrane and cytoplasmic"
+     misc_feature    5779..5868
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: ANK 1"
+     misc_feature    5839..5865
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="non-experimental evidence, no additional
+                     details recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: HIF1AN-binding (By similarity)"
+     misc_feature    5863..5865
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="(3S)-3-hydroxyasparagine, by HIF1AN, partial;
+                     propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     hydroxylation site"
+     misc_feature    5878..5970
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: ANK 2"
+     misc_feature    5980..6069
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: ANK 3"
+     misc_feature    6040..6066
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="non-experimental evidence, no additional
+                     details recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: HIF1AN-binding (By similarity)"
+     misc_feature    6079..6168
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: ANK 4"
+     misc_feature    6178..6267
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /experiment="experimental evidence, no additional details
+                     recorded"
+                     /note="propagated from UniProtKB/Swiss-Prot (P46531.4);
+                     Region: ANK 5"
+     exon            1..61
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            62..140
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            141..403
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            404..742
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            743..865
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            866..1099
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            1100..1255
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            1256..1441
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            1442..1555
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            1556..1669
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            1670..1903
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            1904..2014
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            2015..2207
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            2208..2353
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            2354..2467
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            2468..2587
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            2588..2740
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            2741..2969
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            2970..3171
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            3172..3325
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            3326..3510
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            3511..3643
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            3644..3901
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            3902..4014
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            4015..4586
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            4587..5018
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            5019..5167
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            5168..5384
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     STS             5301..5470
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /standard_name="PMC85812P1"
+                     /db_xref="UniSTS:273494"
+     exon            5385..5472
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            5473..5638
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     STS             5548..5651
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /standard_name="D19S235E"
+                     /db_xref="UniSTS:147513"
+     exon            5639..5934
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            5935..6082
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            6083..6180
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     exon            6181..9295
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /inference="alignment:Splign:1.39.8"
+     STS             6262..6927
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /standard_name="PMC140667P1"
+                     /db_xref="UniSTS:270956"
+     STS             6624..6980
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /standard_name="PMC122602P2"
+                     /db_xref="UniSTS:270401"
+     STS             6916..7068
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /standard_name="STS-M73980"
+                     /db_xref="UniSTS:55062"
+     STS             9070..9294
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+                     /standard_name="RH80945"
+                     /db_xref="UniSTS:86410"
+     regulatory      9273..9278
+                     /regulatory_class="polyA_signal_sequence"
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+     polyA_site      9295
+                     /gene="NOTCH1"
+                     /gene_synonym="AOS5; AOVD1; hN1; TAN1"
+ORIGIN      
+        1 atgccgccgc tcctggcgcc cctgctctgc ctggcgctgc tgcccgcgct cgccgcacga
+       61 ggcccgcgat gctcccagcc cggtgagacc tgcctgaatg gcgggaagtg tgaagcggcc
+      121 aatggcacgg aggcctgcgt ctgtggcggg gccttcgtgg gcccgcgatg ccaggacccc
+      181 aacccgtgcc tcagcacccc ctgcaagaac gccgggacat gccacgtggt ggaccgcaga
+      241 ggcgtggcag actatgcctg cagctgtgcc ctgggcttct ctgggcccct ctgcctgaca
+      301 cccctggaca atgcctgcct caccaacccc tgccgcaacg ggggcacctg cgacctgctc
+      361 acgctgacgg agtacaagtg ccgctgcccg cccggctggt cagggaaatc gtgccagcag
+      421 gctgacccgt gcgcctccaa cccctgcgcc aacggtggcc agtgcctgcc cttcgaggcc
+      481 tcctacatct gccactgccc acccagcttc catggcccca cctgccggca ggatgtcaac
+      541 gagtgtggcc agaagcccgg gctttgccgc cacggaggca cctgccacaa cgaggtcggc
+      601 tcctaccgct gcgtctgccg cgccacccac actggcccca actgcgagcg gccctacgtg
+      661 ccctgcagcc cctcgccctg ccagaacggg ggcacctgcc gccccacggg cgacgtcacc
+      721 cacgagtgtg cctgcctgcc aggcttcacc ggccagaact gtgaggaaaa tatcgacgat
+      781 tgtccaggaa acaactgcaa gaacgggggt gcctgtgtgg acggcgtgaa cacctacaac
+      841 tgccgctgcc cgccagagtg gacaggtcag tactgtaccg aggatgtgga cgagtgccag
+      901 ctgatgccaa atgcctgcca gaacggcggg acctgccaca acacccacgg tggctacaac
+      961 tgcgtgtgtg tcaacggctg gactggtgag gactgcagcg agaacattga tgactgtgcc
+     1021 agcgccgcct gcttccacgg cgccacctgc catgaccgtg tggcctcctt ctactgcgag
+     1081 tgtccccatg gccgcacagg tctgctgtgc cacctcaacg acgcatgcat cagcaacccc
+     1141 tgtaacgagg gctccaactg cgacaccaac cctgtcaatg gcaaggccat ctgcacctgc
+     1201 ccctcggggt acacgggccc ggcctgcagc caggacgtgg atgagtgctc gctgggtgcc
+     1261 aacccctgcg agcatgcggg caagtgcatc aacacgctgg gctccttcga gtgccagtgt
+     1321 ctgcagggct acacgggccc ccgatgcgag atcgacgtca acgagtgcgt ctcgaacccg
+     1381 tgccagaacg acgccacctg cctggaccag attggggagt tccagtgcat ctgcatgccc
+     1441 ggctacgagg gtgtgcactg cgaggtcaac acagacgagt gtgccagcag cccctgcctg
+     1501 cacaatggcc gctgcctgga caagatcaat gagttccagt gcgagtgccc cacgggcttc
+     1561 actgggcatc tgtgccagta cgatgtggac gagtgtgcca gcaccccctg caagaatggt
+     1621 gccaagtgcc tggacggacc caacacttac acctgtgtgt gcacggaagg gtacacgggg
+     1681 acgcactgcg aggtggacat cgatgagtgc gaccccgacc cctgccacta cggctcctgc
+     1741 aaggacggcg tcgccacctt cacctgcctc tgccgcccag gctacacggg ccaccactgc
+     1801 gagaccaaca tcaacgagtg ctccagccag ccctgccgcc acgggggcac ctgccaggac
+     1861 cgcgacaacg cctacctctg cttctgcctg aaggggacca caggacccaa ctgcgagatc
+     1921 aacctggatg actgtgccag cagcccctgc gactcgggca cctgtctgga caagatcgat
+     1981 ggctacgagt gtgcctgtga gccgggctac acagggagca tgtgtaacat caacatcgat
+     2041 gagtgtgcgg gcaacccctg ccacaacggg ggcacctgcg aggacggcat caatggcttc
+     2101 acctgccgct gccccgaggg ctaccacgac cccacctgcc tgtctgaggt caatgagtgc
+     2161 aacagcaacc cctgcgtcca cggggcctgc cgggacagcc tcaacgggta caagtgcgac
+     2221 tgtgaccctg ggtggagtgg gaccaactgt gacatcaaca acaatgagtg tgaatccaac
+     2281 ccttgtgtca acggcggcac ctgcaaagac atgaccagtg gctacgtgtg cacctgccgg
+     2341 gagggcttca gcggtcccaa ctgccagacc aacatcaacg agtgtgcgtc caacccatgt
+     2401 ctgaaccagg gcacgtgtat tgacgacgtt gccgggtaca agtgcaactg cctgctgccc
+     2461 tacacaggtg ccacgtgtga ggtggtgctg gccccgtgtg cccccagccc ctgcagaaac
+     2521 ggcggggagt gcaggcaatc cgaggactat gagagcttct cctgtgtctg ccccacgggc
+     2581 tggcaagggc agacctgtga ggtcgacatc aacgagtgcg ttctgagccc gtgccggcac
+     2641 ggcgcatcct gccagaacac ccacggcggc taccgctgcc actgccaggc cggctacagt
+     2701 gggcgcaact gcgagaccga catcgacgac tgccggccca acccgtgtca caacgggggc
+     2761 tcctgcacag acggcatcaa cacggccttc tgcgactgcc tgcccggctt ccggggcact
+     2821 ttctgtgagg aggacatcaa cgagtgtgcc agtgacccct gccgcaacgg ggccaactgc
+     2881 acggactgcg tggacagcta cacgtgcacc tgccccgcag gcttcagcgg gatccactgt
+     2941 gagaacaaca cgcctgactg cacagagagc tcctgcttca acggtggcac ctgcgtggac
+     3001 ggcatcaact cgttcacctg cctgtgtcca cccggcttca cgggcagcta ctgccagcac
+     3061 gatgtcaatg agtgcgactc acagccctgc ctgcatggcg gcacctgtca ggacggctgc
+     3121 ggctcctaca ggtgcacctg cccccagggc tacactggcc ccaactgcca gaaccttgtg
+     3181 cactggtgtg actcctcgcc ctgcaagaac ggcggcaaat gctggcagac ccacacccag
+     3241 taccgctgcg agtgccccag cggctggacc ggcctttact gcgacgtgcc cagcgtgtcc
+     3301 tgtgaggtgg ctgcgcagcg acaaggtgtt gacgttgccc gcctgtgcca gcatggaggg
+     3361 ctctgtgtgg acgcgggcaa cacgcaccac tgccgctgcc aggcgggcta cacaggcagc
+     3421 tactgtgagg acctggtgga cgagtgctca cccagcccct gccagaacgg ggccacctgc
+     3481 acggactacc tgggcggcta ctcctgcaag tgcgtggccg gctaccacgg ggtgaactgc
+     3541 tctgaggaga tcgacgagtg cctctcccac ccctgccaga acgggggcac ctgcctcgac
+     3601 ctccccaaca cctacaagtg ctcctgccca cggggcactc agggtgtgca ctgtgagatc
+     3661 aacgtggacg actgcaatcc ccccgttgac cccgtgtccc ggagccccaa gtgctttaac
+     3721 aacggcacct gcgtggacca ggtgggcggc tacagctgca cctgcccgcc gggcttcgtg
+     3781 ggtgagcgct gtgaggggga tgtcaacgag tgcctgtcca atccctgcga cgcccgtggc
+     3841 acccagaact gcgtgcagcg cgtcaatgac ttccactgcg agtgccgtgc tggtcacacc
+     3901 gggcgccgct gcgagtccgt catcaatggc tgcaaaggca agccctgcaa gaatgggggc
+     3961 acctgcgccg tggcctccaa caccgcccgc gggttcatct gcaagtgccc tgcgggcttc
+     4021 gagggcgcca cgtgtgagaa tgacgctcgt acctgcggca gcctgcgctg cctcaacggc
+     4081 ggcacatgca tctccggccc gcgcagcccc acctgcctgt gcctgggccc cttcacgggc
+     4141 cccgaatgcc agttcccggc cagcagcccc tgcctgggcg gcaacccctg ctacaaccag
+     4201 gggacctgtg agcccacatc cgagagcccc ttctaccgtt gcctgtgccc cgccaaattc
+     4261 aacgggctct tgtgccacat cctggactac agcttcgggg gtggggccgg gcgcgacatc
+     4321 cccccgccgc tgatcgagga ggcgtgcgag ctgcccgagt gccaggagga cgcgggcaac
+     4381 aaggtctgca gcctgcagtg caacaaccac gcgtgcggct gggacggcgg tgactgctcc
+     4441 ctcaacttca atgacccctg gaagaactgc acgcagtctc tgcagtgctg gaagtacttc
+     4501 agtgacggcc actgtgacag ccagtgcaac tcagccggct gcctcttcga cggctttgac
+     4561 tgccagcgtg cggaaggcca gtgcaacccc ctgtacgacc agtactgcaa ggaccacttc
+     4621 agcgacgggc actgcgacca gggctgcaac agcgcggagt gcgagtggga cgggctggac
+     4681 tgtgcggagc atgtacccga gaggctggcg gccggcacgc tggtggtggt ggtgctgatg
+     4741 ccgccggagc agctgcgcaa cagctccttc cacttcctgc gggagctcag ccgcgtgctg
+     4801 cacaccaacg tggtcttcaa gcgtgacgca cacggccagc agatgatctt cccctactac
+     4861 ggccgcgagg aggagctgcg caagcacccc atcaagcgtg ccgccgaggg ctgggccgca
+     4921 cctgacgccc tgctgggcca ggtgaaggcc tcgctgctcc ctggtggcag cgagggtggg
+     4981 cggcggcgga gggagctgga ccccatggac gtccgcggct ccatcgtcta cctggagatt
+     5041 gacaaccggc agtgtgtgca ggcctcctcg cagtgcttcc agagtgccac cgacgtggcc
+     5101 gcattcctgg gagcgctcgc ctcgctgggc agcctcaaca tcccctacaa gatcgaggcc
+     5161 gtgcagagtg agaccgtgga gccgcccccg ccggcgcagc tgcacttcat gtacgtggcg
+     5221 gcggccgcct ttgtgcttct gttcttcgtg ggctgcgggg tgctgctgtc ccgcaagcgc
+     5281 cggcggcagc atggccagct ctggttccct gagggcttca aagtgtctga ggccagcaag
+     5341 aagaagcggc gggagcccct cggcgaggac tccgtgggcc tcaagcccct gaagaacgct
+     5401 tcagacggtg ccctcatgga cgacaaccag aatgagtggg gggacgagga cctggagacc
+     5461 aagaagttcc ggttcgagga gcccgtggtt ctgcctgacc tggacgacca gacagaccac
+     5521 cggcagtgga ctcagcagca cctggatgcc gctgacctgc gcatgtctgc catggccccc
+     5581 acaccgcccc agggtgaggt tgacgccgac tgcatggacg tcaatgtccg cgggcctgat
+     5641 ggcttcaccc cgctcatgat cgcctcctgc agcgggggcg gcctggagac gggcaacagc
+     5701 gaggaagagg aggacgcgcc ggccgtcatc tccgacttca tctaccaggg cgccagcctg
+     5761 cacaaccaga cagaccgcac gggcgagacc gccttgcacc tggccgcccg ctactcacgc
+     5821 tctgatgccg ccaagcgcct gctggaggcc agcgcagatg ccaacatcca ggacaacatg
+     5881 ggccgcaccc cgctgcatgc ggctgtgtct gccgacgcac aaggtgtctt ccagatcctg
+     5941 atccggaacc gagccacaga cctggatgcc cgcatgcatg atggcacgac gccactgatc
+     6001 ctggctgccc gcctggccgt ggagggcatg ctggaggacc tcatcaactc acacgccgac
+     6061 gtcaacgccg tagatgacct gggcaagtcc gccctgcact gggccgccgc cgtgaacaat
+     6121 gtggatgccg cagttgtgct cctgaagaac ggggctaaca aagatatgca gaacaacagg
+     6181 gaggagacac ccctgtttct ggccgcccgg gagggcagct acgagaccgc caaggtgctg
+     6241 ctggaccact ttgccaaccg ggacatcacg gatcatatgg accgcctgcc gcgcgacatc
+     6301 gcacaggagc gcatgcatca cgacatcgtg aggctgctgg acgagtacaa cctggtgcgc
+     6361 agcccgcagc tgcacggagc cccgctgggg ggcacgccca ccctgtcgcc cccgctctgc
+     6421 tcgcccaacg gctacctggg cagcctcaag cccggcgtgc agggcaagaa ggtccgcaag
+     6481 cccagcagca aaggcctggc ctgtggaagc aaggaggcca aggacctcaa ggcacggagg
+     6541 aagaagtccc aggacggcaa gggctgcctg ctggacagct ccggcatgct ctcgcccgtg
+     6601 gactccctgg agtcacccca tggctacctg tcagacgtgg cctcgccgcc actgctgccc
+     6661 tccccgttcc agcagtctcc gtccgtgccc ctcaaccacc tgcctgggat gcccgacacc
+     6721 cacctgggca tcgggcacct gaacgtggcg gccaagcccg agatggcggc gctgggtggg
+     6781 ggcggccggc tggcctttga gactggccca cctcgtctct cccacctgcc tgtggcctct
+     6841 ggcaccagca ccgtcctggg ctccagcagc ggaggggccc tgaatttcac tgtgggcggg
+     6901 tccaccagtt tgaatggtca atgcgagtgg ctgtcccggc tgcagagcgg catggtgccg
+     6961 aaccaataca accctctgcg ggggagtgtg gcaccaggcc ccctgagcac acaggccccc
+     7021 tccctgcagc atggcatggt aggcccgctg cacagtagcc ttgctgccag cgccctgtcc
+     7081 cagatgatga gctaccaggg cctgcccagc acccggctgg ccacccagcc tcacctggtg
+     7141 cagacccagc aggtgcagcc acaaaactta cagatgcagc agcagaacct gcagccagca
+     7201 aacatccagc agcagcaaag cctgcagccg ccaccaccac caccacagcc gcaccttggc
+     7261 gtgagctcag cagccagcgg ccacctgggc cggagcttcc tgagtggaga gccgagccag
+     7321 gcagacgtgc agccactggg ccccagcagc ctggcggtgc acactattct gccccaggag
+     7381 agccccgccc tgcccacgtc gctgccatcc tcgctggtcc cacccgtgac cgcagcccag
+     7441 ttcctgacgc ccccctcgca gcacagctac tcctcgcctg tggacaacac ccccagccac
+     7501 cagctacagg tgcctgagca ccccttcctc accccgtccc ctgagtcccc tgaccagtgg
+     7561 tccagctcgt ccccgcattc caacgtctcc gactggtccg agggcgtctc cagccctccc
+     7621 accagcatgc agtcccagat cgcccgcatt ccggaggcct tcaagtaaac ggcgcgcccc
+     7681 acgagacccc ggcttccttt cccaagcctt cgggcgtctg tgtgcgctct gtggatgcca
+     7741 gggccgacca gaggagcctt tttaaaacac atgtttttat acaaaataag aacgaggatt
+     7801 ttaatttttt ttagtattta tttatgtact tttattttac acagaaacac tgccttttta
+     7861 tttatatgta ctgttttatc tggccccagg tagaaacttt tatctattct gagaaaacaa
+     7921 gcaagttctg agagccaggg ttttcctacg taggatgaaa agattcttct gtgtttataa
+     7981 aatataaaca aagattcatg atttataaat gccatttatt tattgattcc ttttttcaaa
+     8041 atccaaaaag aaatgatgtt ggagaaggga agttgaacga gcatagtcca aaaagctcct
+     8101 ggggcgtcca ggccgcgccc tttccccgac gcccacccaa ccccaagcca gcccggccgc
+     8161 tccaccagca tcacctgcct gttaggagaa gctgcatcca gaggcaaacg gaggcaaagc
+     8221 tggctcacct tccgcacgcg gattaatttg catctgaaat aggaaacaag tgaaagcata
+     8281 tgggttagat gttgccatgt gttttagatg gtttcttgca agcatgcttg tgaaaatgtg
+     8341 ttctcggagt gtgtatgcca agagtgcacc catggtacca atcatgaatc tttgtttcag
+     8401 gttcagtatt atgtagttgt tcgttggtta tacaagttct tggtccctcc agaaccaccc
+     8461 cggccccctg cccgttcttg aaatgtaggc atcatgcatg tcaaacatga gatgtgtgga
+     8521 ctgtggcact tgcctgggtc acacacggag gcatcctacc cttttctggg gaaagacact
+     8581 gcctgggctg accccggtgg cggccccagc acctcagcct gcacagtgtc ccccaggttc
+     8641 cgaagaagat gctccagcaa cacagcctgg gccccagctc gcgggacccg accccccgtg
+     8701 ggctcccgtg ttttgtagga gacttgccag agccgggcac attgagctgt gcaacgccgt
+     8761 gggctgcgtc ctttggtcct gtccccgcag ccctggcagg gggcatgcgg tcgggcaggg
+     8821 gctggaggga ggcgggggct gcccttgggc cacccctcct agtttgggag gagcagattt
+     8881 ttgcaatacc aagtatagcc tatggcagaa aaaatgtctg taaatatgtt tttaaaggtg
+     8941 gattttgttt aaaaaatctt aatgaatgag tctgttgtgt gtcatgccag tgagggacgt
+     9001 cagacttggc tcagctcggg gagccttagc cgcccatgca ctggggacgc tccgctgccg
+     9061 tgccgcctgc actcctcagg gcagcctccc ccggctctac gggggccgcg tggtgccatc
+     9121 cccagggggc atgaccagat gcgtcccaag atgttgattt ttactgtgtt ttataaaata
+     9181 gagtgtagtt tacagaaaaa gactttaaaa gtgatctaca tgaggaactg tagatgatgt
+     9241 atttttttca tcttttttgt taactgattt gcaataaaaa tgatactgat ggtgaaaaaa
+     9301 aaaaaaaaa
+//
+
