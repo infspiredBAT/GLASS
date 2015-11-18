@@ -141,7 +141,7 @@ shinyServer(function(input,output,session) {
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             
             #remove added minor het ins
-            if(!is.null(g_minor_het_insertions$added)){
+            if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
                 for(i in nrow(g_minor_het_insertions))
                 {
                     added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
