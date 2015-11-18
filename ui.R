@@ -29,7 +29,7 @@ shinyUI(
 		hr(),
 
 		fluidRow(
-			column(1, selectInput("gene_of_interest","",choices=list("TP53"="TP53","NOTCH1"="NOTCH1"),multiple=FALSE,selectize=F,size=1)),
+			column(1, selectInput("gene_of_interest","",choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
 			column(9, verbatimTextOutput("files"))
 		),
