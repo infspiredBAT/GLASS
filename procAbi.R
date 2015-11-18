@@ -1,6 +1,5 @@
 library(zoo)       # for the rolling mean function
 library(seqinr)    # https://cran.r-project.org/web/packages/seqinr/seqinr.pdf
-library(DescTools) # StrPos()
 
 # g_base_noise <<- 2
 # g_calibration_length <<- 30
@@ -274,15 +273,15 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
 
     rev <- !(is.null(data_rev))
 
-    intens <- data.table(data[paste0("DATA.",toString(8+StrPos(data$FWO,"A")),sep="")][[1]],
-                         data[paste0("DATA.",toString(8+StrPos(data$FWO,"C")),sep="")][[1]],
-                         data[paste0("DATA.",toString(8+StrPos(data$FWO,"G")),sep="")][[1]],
-                         data[paste0("DATA.",toString(8+StrPos(data$FWO,"T")),sep="")][[1]])
+    intens <- data.table(data[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="A")),sep="")][[1]],
+                         data[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="C")),sep="")][[1]],
+                         data[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="G")),sep="")][[1]],
+                         data[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="T")),sep="")][[1]])
 
-    if(rev) intens_rev <- data.table(data_rev[paste0("DATA.",toString(8+StrPos(data$FWO,"A")),sep="")][[1]],
-                                     data_rev[paste0("DATA.",toString(8+StrPos(data$FWO,"C")),sep="")][[1]],
-                                     data_rev[paste0("DATA.",toString(8+StrPos(data$FWO,"G")),sep="")][[1]],
-                                     data_rev[paste0("DATA.",toString(8+StrPos(data$FWO,"T")),sep="")][[1]])
+    if(rev) intens_rev <- data.table(data_rev[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="A")),sep="")][[1]],
+                                     data_rev[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="C")),sep="")][[1]],
+                                     data_rev[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="G")),sep="")][[1]],
+                                     data_rev[paste0("DATA.",toString(8+which(strsplit(data$FWO,split='')[[1]]=="T")),sep="")][[1]])
     else    intens_rev <- NULL
 
     #!!out of date
