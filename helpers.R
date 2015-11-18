@@ -179,22 +179,28 @@ ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes
     ref   <- toupper(ref)
     if(ambig=="S"){
         if(ref=="G") return("C")
-        if(ref=="C") return("G")
+        else if(ref=="C") return("G")
+        else return(ambig)
     }else if(ambig=="W"){
         if(ref=="A") return("T")
-        if(ref=="T") return("A")
+        else if(ref=="T") return("A")
+        else return(ambig)
     }else if(ambig=="R"){
         if(ref=="A") return("G")
-        if(ref=="G") return("A")
+        else if(ref=="G") return("A")
+        else return(ambig)
     }else if(ambig=="Y"){
         if(ref=="C") return("T")
-        if(ref=="T") return("C")
+        else if(ref=="T") return("C")
+        else return(ambig)
     }else if(ambig=="K"){
         if(ref=="G") return("T")
-        if(ref=="T") return("G")
+        else if(ref=="T") return("G")
+        else return(ambig)
     }else if(ambig=="M"){
         if(ref=="A") return("C")
-        if(ref=="C") return("A")
+        else if(ref=="C") return("A")
+        else return(ambig)
     }else return(ambig)
 }
 
@@ -329,7 +335,6 @@ get_view<-function(choices){
         choices <- rbind(choices,deletions,fill=TRUE)
         setkey(choices,id)
     }
-
     return(choices)
 }
 
@@ -415,7 +420,7 @@ incorporate_hetero_indels_func <- function(calls){
             calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
         }
     }
-    if(nrow(g_minor_het_insertions) > 0){
+    if(nrow(g_minor_het_insertions[!is.na(pos)]) > 0){
         get_ins_data_table <- function(pos,seq){
             ins_seq <- strsplit(seq,"")[[1]]
             ins_tab <- calls[rep(pos,length(ins_seq)),]
@@ -426,6 +431,8 @@ incorporate_hetero_indels_func <- function(calls){
         
         if(nrow(g_minor_het_insertions[!is.na(pos)])>0){
             ins_tabs <- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(g_minor_het_insertions[!is.na(pos),]$pos[x],g_minor_het_insertions$seq[x]))
+            g_minor_het_insertions$added <<- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
+            #g_minor_het_insertions$added = rbindlist(ins_tabs)$id;
             calls <- rbindlist(c(list(calls),ins_tabs))
         }
     } 

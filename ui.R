@@ -51,7 +51,7 @@ shinyUI(
 				        HTML(paste("messages and info will appear here", sep="")),
 					    verbatimTextOutput("infobox")
 					),
-					column(1,
+					column(2,
                         tags$div(title="the % identity of the alignment between the sequences of the primary and mutation calls,\nand distinct insertion / deletion (in that order) events, and their lengths in nt\n\nif this low and there are many variants reported, there might be a heterozygous indel",
     					    HTML(paste("hetero aln info [?]")),verbatimTextOutput("hetero_indel_pid")
     					),

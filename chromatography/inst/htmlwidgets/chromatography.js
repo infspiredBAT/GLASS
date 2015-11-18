@@ -146,6 +146,7 @@ HTMLWidgets.widget({
                 })
                 .text(function(d){
                     if(label.indexOf("mut") > -1){
+                        if(typeof(d[label])=='undefined'){ console.log(label);console.log(d);}
                         return d[label].toLowerCase();
 //                    }else if(label.indexOf("user") > -1 && d[label]==="low qual"){
 //                        return "N";
@@ -836,7 +837,9 @@ HTMLWidgets.widget({
                 instance.focus.selectAll(".mut_rev").remove();
                 //instance.setPeakLabel(calls,"")
                 instance.setPeakLabel(calls,"mut_call_fwd",instance.call_opacity);
-                instance.setPeakLabel(calls,"mut_call_rev",instance.call_opacity);
+                if(rev){
+                    instance.setPeakLabel(calls,"mut_call_rev",instance.call_opacity);
+                }
 
                 instance.focus.selectAll(".var_noise_indic").remove();
                 instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
