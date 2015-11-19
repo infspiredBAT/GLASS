@@ -63,7 +63,7 @@ HTMLWidgets.widget({
 	      var context = svg.append("g")
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-	     var brush = d3.svg.brush().on("brush", brushed);
+	     var brush = d3.svg.brush().on("brushend", brushed);
          var join = "FALSE";
 
         var label_pos = {};        //map for pisitioning labels representing called base
