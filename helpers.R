@@ -424,7 +424,7 @@ incorporate_hetero_indels_func <- function(calls){
         get_ins_data_table <- function(pos,seq){
             ins_seq <- strsplit(seq,"")[[1]]
             ins_tab <- calls[rep(pos,length(ins_seq)),]
-            ins_tab[,id := id + seq_along(id)/10]
+            ins_tab[,id := id + seq_along(id)/100]
             ins_tab[,user_sample := "-"][,reference := "-"]
             return(ins_tab)
         }
@@ -475,6 +475,30 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
     return(new_vec) 
 }
 
+
+add_intensities <- function(added){
+    
+    #update intensities
+    id <- g_calls[id == as.integer(added[1]),]$trace_peak + 6
+    add<-data.table("id"=id + (1:(length(added)*12)/1000),"A"=0,"C"=0,"G"=0,"T"=0)
+    g_intens     <<- rbind(g_intens,     add)
+    g_intens_rev <<- rbind(g_intens_rev, add)
+    setkey(g_intens,     id)
+    setkey(g_intens_rev, id) #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
+    #update peak positions in calls table
+    
+    #update intrex
+    g_intrexdat$max_x <<- nrow(g_intens)
+    
+}
+
+remove_intensities <- function(added){
+    #update intensities
+    #update peak positions in calls table
+    #update intrex
+}
+
+
 #background noise absolute or relative to reference peak
 noise <- function(a,b,c,d,abs=FALSE){
     vec <- sort(c(a,b,c,d))
@@ -493,6 +517,7 @@ i_wo_p <- function(p,iA,iC,iG,iT){
     else if (mut_peak == iT) return(list("T",mut_peak))
     else                     return(list("-",mut_peak))
 }
+
 # i_w_p <- function(p,iA,iC,iG,iT,pA,pC,pG,pT){
 #     mut_peak <- (sort(c(iA,iC,iG,iT),decreasing = TRUE)[p])
 #          if (mut_peak == 0 ) return(list(" ",mut_peak,pA))

@@ -146,16 +146,24 @@ shinyServer(function(input,output,session) {
                 {
                     added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
                     g_calls <<- g_calls[!(id %in% added[[1]])]
-                }
+                    remove_intensities(added)
+                }      
                 g_minor_het_insertions[,added:=NULL]
             }
-            
-            
+                        
             report_hetero_indels(g_calls)
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
             
-            get_expected_het_indels(g_calls)
+            if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
+                for(i in nrow(g_minor_het_insertions))
+                {
+                    added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
+                    add_intensities(added[[1]]);
 
+                }
+            }
+            
+            get_expected_het_indels(g_calls)
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
             return(TRUE)

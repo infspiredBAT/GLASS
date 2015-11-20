@@ -55,6 +55,37 @@ HTMLWidgets.widget({
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            
+        var gLine_a   = focus.append("g");
+      	var gLine_c   = focus.append("g");
+  		var gLine_g   = focus.append("g");
+  		var gLine_t   = focus.append("g");
+        var gLine_a_r = focus.append("g");
+        var gLine_c_r = focus.append("g");
+  		var gLine_g_r = focus.append("g");
+  		var gLine_t_r = focus.append("g");
+
+          
+        function updateLine(data,base,rev){
+            switch(base) {
+                case "A": if(rev){var g = gLine_a_r;}else{var g = gLine_a;} var col = "#33CC33"; break;
+                case "C": if(rev){var g = gLine_c_r;}else{var g = gLine_c;} var col = "#0000FF"; break;
+                case "G": if(rev){var g = gLine_g_r;}else{var g = gLine_g;} var col = "#000000"; break;
+                case "T": if(rev){var g = gLine_t_r;}else{var g = gLine_t;} var col = "#FF0000"; break;
+            }    
+            if(rev){var c = "line_r";var l = line_rev;}
+            else{var c = "line_f";var l = line_fwd;}
+            
+            var line = g.selectAll("path").data(data); //join
+            line.attr("class","path "+c);                   //update
+            line.enter().append("path")                         //enter
+                .attr("class","path "+c)
+                .attr("d",l)
+                .attr("fill","none").attr("stroke",col)
+                .attr("stroke-width",0.75);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+            line.exit().remove();                               //exit
+        }
+        
         svg.append("defs").append("clipPath")
             .attr("id", "clip")
             .append("rect")
@@ -395,7 +426,6 @@ HTMLWidgets.widget({
             .on('s', brushZoomOut())
             );
 
-
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
@@ -411,6 +441,7 @@ HTMLWidgets.widget({
             join:    join,
             joinView:joinView,
             focus:   focus,
+            updateLine: updateLine,
             redraw:  redraw,
             widthScale:  widthScale,
             width2Scale: width2Scale,
@@ -559,78 +590,33 @@ HTMLWidgets.widget({
 
   			brush.x(width2Scale);
 
-  			var group_a = focus.append("g");
-  			var group_c = focus.append("g");
-  			var group_g = focus.append("g");
-  			var group_t = focus.append("g");
-
-        //forward strand
-  			group_a.selectAll("path").data([intens["A"]]).enter()
-  			    .append("path").attr("class","path line_f")
-  				.attr("d",line_fwd)
-  				.attr("fill","none")
-  				.attr("stroke","#33CC33").attr("stroke-width",0.75);
-  			group_c.selectAll("path").data([intens["C"]]).enter()
-  				.append("path").attr("class","path line_f")
-  				.attr("d",line_fwd)
-  				.attr("fill","none")
-  				.attr("stroke","#0000FF").attr("stroke-width",0.75);
-  			group_g.selectAll("path").data([intens["G"]]).enter()
-  				.append("path").attr("class","path line_f")
-  				.attr("d",line_fwd)
-  				.attr("fill","none")
-  				.attr("stroke","#000000").attr("stroke-width",0.75);
-  			group_t.selectAll("path").data([intens["T"]]).enter()
-  				.append("path").attr("class","path line_f")
-  				.attr("d",line_fwd)
-  				.attr("fill","none")
-  				.attr("stroke","#FF0000").attr("stroke-width",0.75);
-
+  			
+            instance.updateLine([intens["A"]],"A",false);
+            instance.updateLine([intens["C"]],"C",false);
+            instance.updateLine([intens["G"]],"G",false);
+            instance.updateLine([intens["T"]],"T",false);
+                 
         //noise indocator fwd
 
-        var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
-        var group_noise_fwd = focus.append("g");
-        var group_noise_rev = focus.append("g");
-        group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
-            .append("path").attr("class","area area_fwd").attr("d",noise_area_fwd)
-            .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15);
+            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
+            var group_noise_fwd = focus.append("g");
+            var group_noise_rev = focus.append("g");
+            group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
+                .append("path").attr("class","area area_fwd").attr("d",noise_area_fwd)
+                .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15);
 
-        //reverse strand
-        if(intens_rev != ""){
-            //Noise indicator rev
-            var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
-            group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
-            .append("path").attr("class","area area_rev").attr("d",noise_area_rev)
-            .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15);
-            var group_a_r = focus.append("g");
-    	    	var group_c_r = focus.append("g");
-  		    	var group_g_r = focus.append("g");
-  		    	var group_t_r = focus.append("g");
-
-            group_a_r.selectAll("path").data([intens_rev["A"]]).enter()
-        			.append("path").attr("class","path line_r")
-      				.attr("d",line_rev)
-      				.attr("fill","none")
-      				.attr("stroke","#33CC33").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,1,10,1");
-      			group_c_r.selectAll("path").data([intens_rev["C"]]).enter()
-      				.append("path").attr("class","path line_r")
-      				.attr("d",line_rev)
-      				.attr("fill","none")
-      				.attr("stroke","#0000FF").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,1,10,1");
-      			group_g_r.selectAll("path").data([intens_rev["G"]]).enter()
-      				.append("path").attr("class","path line_r")
-      				.attr("d",line_rev)
-      				.attr("fill","none")
-      				.attr("stroke","#000000").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,1,10,1");
-      			group_t_r.selectAll("path").data([intens_rev["T"]]).enter()
-      			    .append("path").attr("class","path line_r")
-      				.attr("d",line_rev)
-      				.attr("fill","none")
-      				.attr("stroke","#FF0000").attr("stroke-width",0.75)
-                    .attr("stroke-dasharray","20,3,10,1,10,1");
+            //reverse strand
+            if(intens_rev != ""){
+                //Noise indicator rev
+                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
+                group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
+                .append("path").attr("class","area area_rev").attr("d",noise_area_rev)
+                .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15);
+                
+                instance.updateLine([intens_rev["A"]],"A",true);
+                instance.updateLine([intens_rev["C"]],"C",true);
+                instance.updateLine([intens_rev["G"]],"G",true);
+                instance.updateLine([intens_rev["T"]],"T",true);   
             }
 
             //on single strand always show "join view"
@@ -639,7 +625,6 @@ HTMLWidgets.widget({
             }else{
                 instance.joinView("TRUE");
             }
-
 
             //trace peak labels
             focus.append("g").selectAll("scope").data(calls).enter()        //scope (position indicator)
@@ -805,6 +790,26 @@ HTMLWidgets.widget({
 
         }else{
             //console.log("render");
+            if(instance.max_x != x["intrexdat"]["max_x"]){   
+                instance.max_x = x["intrexdat"]["max_x"];
+                var intens = x["intens"];
+                console.log(intens);
+
+          		instance.updateLine([intens["A"]],"A",false);
+                instance.updateLine([intens["C"]],"C",false);
+                instance.updateLine([intens["G"]],"G",false);
+                instance.updateLine([intens["T"]],"T",false);
+                
+                if(x["intens_rev"]!==null){
+                    var intens_rev = x["intens_rev"];
+                    instance.updateLine([intens_rev["A"]],"A",true);
+                    instance.updateLine([intens_rev["C"]],"C",true);
+                    instance.updateLine([intens_rev["G"]],"G",true);
+                    instance.updateLine([intens_rev["T"]],"T",true);   
+                }
+                instance.redraw();
+                             
+            }
   			if(x["intrexdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["intrexdat"]["max_y"]);
                 instance.max_y = x["intrexdat"]["max_y"];
@@ -812,9 +817,8 @@ HTMLWidgets.widget({
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
                 var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
-                var rev = 0;  //offset on labels in case we have alternative reference ??
+                var rev = 0; 
                 if(x["intens_rev"] !== null){
-                    var intens_rev = x["intens_rev"];
                     rev = 1;
                 }
                 var show_calls  = x["show_calls"];
