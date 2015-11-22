@@ -77,13 +77,13 @@ HTMLWidgets.widget({
             else{var c = "line_f";var l = line_fwd;}
             
             var line = g.selectAll("path").data(data); //join
-            line.attr("class","path "+c);                   //update
-            line.enter().append("path")                         //enter
+            line.attr("class","path "+c);              //update
+            line.enter().append("path")                //enter
                 .attr("class","path "+c)
                 .attr("d",l)
                 .attr("fill","none").attr("stroke",col)
                 .attr("stroke-width",0.75);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
-            line.exit().remove();                               //exit
+            line.exit().remove();                      //exit
         }
         
         svg.append("defs").append("clipPath")

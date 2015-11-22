@@ -485,6 +485,9 @@ add_intensities <- function(added){
     setkey(g_intens,     id)
     setkey(g_intens_rev, id) #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
     #update peak positions in calls table
+    
+    g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
+    g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
 
     #update intrex
     g_intrexdat$max_x <<- nrow(g_intens)
@@ -494,9 +497,14 @@ add_intensities <- function(added){
 }
 
 remove_intensities <- function(added){
-    #update intensities
+    #update intensities (this operation takes too long)
+    g_intens <<- g_intens[!id %in% as.numeric(str_split(g_minor_het_insertions$ins_added," ")[[1]]),]
+    g_intens_rev <<-g_intens_rev[! id %in% as.numeric(str_split(g_minor_het_insertions$ins_added," ")[[1]]),]
     #update peak positions in calls table
+    g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
+    g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
     #update intrex
+    g_intrexdat$max_x <<- nrow(g_intens)
 }
 
 

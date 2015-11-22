@@ -21,7 +21,7 @@ g_hetero_indel_pid      <<- 0
 g_hetero_ins_tab        <<- NULL
 g_hetero_del_tab        <<- NULL
 g_expected_het_indel    <<- NULL
-
+g_minor_het_insertions  <<- NULL
 shinyServer(function(input,output,session) {
 
 #     get_file <- reactive({
@@ -136,9 +136,9 @@ shinyServer(function(input,output,session) {
             calls<-loading_processed_files()
             if(is.null(g_calls)){
                 g_calls <<- calls
-                setkey(g_calls,id)
             }
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
+            setkey(g_calls,id)
 
             #remove added minor het ins
 
@@ -155,12 +155,13 @@ shinyServer(function(input,output,session) {
                         
             report_hetero_indels(g_calls)
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
+            setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
 
 
                 ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added,split = " ")))
-                g_minor_het_insertions$ins_added <- ins_added
+                g_minor_het_insertions$ins_added <<- ins_added
             }
 
             get_expected_het_indels(g_calls)
