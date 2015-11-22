@@ -274,8 +274,8 @@ get_choices <- function(calls){
         choices[,ids:=NA,by=1:nrow(choices)]
         choices[,user_sample:=ambig_minus(user_sample,reference),by=1:nrow(choices)]
         choices[,user_mut:=ambig_minus(user_mut,reference),by=1:nrow(choices)]
-        choices[,sample_peak_pct := mround(sample_peak_pct,5),by=1:nrow(choices)]
-        choices[,mut_peak_pct := mround(mut_peak_pct,5),by=1:nrow(choices)]
+        choices[,sample_peak_pct := mround(sample_peak_pct,1),by=1:nrow(choices)]
+        choices[,mut_peak_pct := mround(mut_peak_pct,1),by=1:nrow(choices)]
 
         choices[,`:=`(coding = paste0("c.", coding_seq), protein="")]
     # 1st variant
@@ -349,12 +349,12 @@ report_hetero_indels <- function(calls){
     } else secondary_seq <- gsub("[ -]","",paste(calls[["mut_call_fwd"]],collapse = ""))
     primary_seq <- gsub("[ -]","",paste(calls[["user_sample"]],collapse = ""))
     hetero_indel_aln <- pairwiseAlignment(primary_seq, secondary_seq,type = "overlap",substitutionMatrix = sm,gapOpening = -15, gapExtension = -1)
-    
+
     hetero_ins_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\-]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
-    
+
     is.in.primery <- apply(hetero_ins_tab,1,function(x) all(x %in% which(calls[["user_sample"]] == "-")))
-    
+
     if(length(hetero_ins_tab[which(!is.in.primery),2]) > 0){
         move_vec <- numeric(nchar(primary_seq))
         move_vec[hetero_ins_tab[which(!is.in.primery),2] + 1] <- -(hetero_ins_tab[which(!is.in.primery),2]-hetero_ins_tab[which(!is.in.primery),1])-1
@@ -362,13 +362,13 @@ report_hetero_indels <- function(calls){
         hetero_del_tab <- apply(hetero_del_tab,c(1,2),function(x) x + move_vec[x])
         hetero_ins_tab <- apply(hetero_ins_tab,c(1,2),function(x) x + move_vec[x])
     }
-    
-    
+
+
     is.in.reference <- apply(hetero_del_tab,1,function(x) all(x %in% which(calls[["reference"]] == "-")))
-    
+
     ins_counts <- sum(hetero_ins_tab[which(!is.in.primery),2]-hetero_ins_tab[which(!is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(is.in.reference),2]-hetero_del_tab[which(is.in.reference),1]+1,na.rm = T)
     del_counts <- sum(hetero_ins_tab[which(is.in.primery),2]-hetero_ins_tab[which(is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(!is.in.reference),2]-hetero_del_tab[which(!is.in.reference),1]+1,na.rm = T)
-    
+
     # if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = )
     if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = hetero_ins_tab[which(!is.in.primery),1],seq = stri_sub(secondary_seq,hetero_ins_tab[which(!is.in.primery),1],hetero_ins_tab[which(!is.in.primery),2]))
     else g_minor_het_insertions <<- data.table::data.table()
@@ -376,8 +376,7 @@ report_hetero_indels <- function(calls){
     g_hetero_indel_pid <<- round(pid(hetero_indel_aln),1)
     g_hetero_ins_tab   <<- hetero_ins_tab
     g_hetero_del_tab   <<- hetero_del_tab
-    g_hetero_indel_report <<- paste0(g_hetero_indel_pid,"%\n",ins_counts,"/",del_counts)
-    
+    g_hetero_indel_report <<- paste0("alignment % id : ",g_hetero_indel_pid,"%\nins/del counts : ",ins_counts," / ",del_counts)
 }
 
 get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
@@ -428,14 +427,14 @@ incorporate_hetero_indels_func <- function(calls){
             ins_tab[,user_sample := "-"][,reference := "-"]
             return(ins_tab)
         }
-        
+
         if(nrow(g_minor_het_insertions[!is.na(pos)])>0){
             ins_tabs <- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(g_minor_het_insertions[!is.na(pos),]$pos[x],g_minor_het_insertions$seq[x]))
             g_minor_het_insertions$added <<- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
             #g_minor_het_insertions$added = rbindlist(ins_tabs)$id;
             calls <- rbindlist(c(list(calls),ins_tabs))
         }
-    } 
+    }
     return(calls)
 }
 
@@ -472,12 +471,12 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
         replace <- replace[replace > 0]
         new_vec[replace] <- primarySeq[replace]
     }
-    return(new_vec) 
+    return(new_vec)
 }
 
 
 add_intensities <- function(added){
-    
+
     #update intensities
     id <- g_calls[id == as.integer(added[1]),]$trace_peak + 6
     add<-data.table("id"=id + (1:(length(added)*12)/1000),"A"=0,"C"=0,"G"=0,"T"=0)
@@ -486,10 +485,10 @@ add_intensities <- function(added){
     setkey(g_intens,     id)
     setkey(g_intens_rev, id) #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
     #update peak positions in calls table
-    
+
     #update intrex
     g_intrexdat$max_x <<- nrow(g_intens)
-    
+
 }
 
 remove_intensities <- function(added){
@@ -530,17 +529,17 @@ i_wo_p <- function(p,iA,iC,iG,iT){
 
 get_expected_het_indels <- function(calls){
     min_het_pct <- 0.04
-    
+
     rev <- !is.null(calls[["call_rev"]])
-    
+
     if(rev) intens_tab <- calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd,iA_rev,iC_rev,iG_rev,iT_rev)]
     else intens_tab <- calls[,list(iA_fwd,iC_fwd,iG_fwd,iT_fwd)]
-    
+
     fwd_matrix <- as.matrix(intens_tab[,1:4,with = F])
     fwd_matrix2 <- fwd_matrix / rowSums(fwd_matrix)
     fwd_matrix2[which(is.na(fwd_matrix2))] <- 0
     sec_fwd_vec <- apply(fwd_matrix2,1,function(x) max(x[-which.max(x)]))
-    
+
     if(rev){
         rev_matrix <- as.matrix(intens_tab[,5:8,with = F])
         rev_matrix2 <- rev_matrix / rowSums(rev_matrix)
@@ -550,19 +549,18 @@ get_expected_het_indels <- function(calls){
     } else {
         sec_vec <- sec_fwd_vec
     }
-    
-    
+
     hst <- hist(sec_vec,breaks = 100,plot = F)
-    
+
     xz <- as.zoo(hst$density)
     min <- rollapply(xz, 9, function(x) which.min(x)==5)
     max <- rollapply(xz, 9, function(x) which.max(x)==5)
-    
+
     max <- index(max)[which(max)]
     max <- max[max > which(hst$breaks > min_het_pct)[1]]
     max_dens <- rollapply(xz, 9, sum)[max]
     best_max <- index(max_dens)[which.max(max_dens)]
-    
+
     min <- index(min)[which(min)]
     min <- min[min < best_max]
     if(length(min) == 0){
@@ -571,7 +569,7 @@ get_expected_het_indels <- function(calls){
     }
 
     best_min <- rev(min)[which.min(rev(hst$density[min]))]
-    
+
     if(max_dens[which(index(max_dens) == best_max)] > 8){
         g_expected_het_indel <<- list(min = hst$breaks[best_min + 1],max = hst$breaks[best_max + 1],hist = hst)
     } else  g_expected_het_indel <<- list(min = 0,max = 0,hist = hst)

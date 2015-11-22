@@ -24,12 +24,13 @@ shinyUI(
             tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
 
-		HTML("<b><font size=3em>genomePD/ </font><font size=5em>glass</font></b><font size=3em> | Pal Bystry Reigl Krejci Demko Malcikova and Darzentas</font><font size=2.0em> @ <a href=http://bat.infspire.org>bat.infspire.org</a> & the Medical Genomics Group | CEITEC MU | CESNET/MetaCentrum | ERIC </font>"),
+		HTML(paste("<b><font size=4em>genomePD/ </font><font size=6em>glass</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> <i>&nbsp&&nbsp</i> the Medical Genomics Group at CEITEC MU <i>&nbsp&&nbsp</i> <a href=http://www.ericll.org target=_blank>the European Research Initiative on CLL / ERIC</a></font> | CESNET/MetaCentrum")),
 
 		hr(),
 
 		fluidRow(
 			column(1, selectInput("gene_of_interest","",choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
+            # column(1),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
 			column(9, verbatimTextOutput("files"))
 		),
@@ -48,24 +49,20 @@ shinyUI(
                         actionButton("change_btn","change", icon = icon("exchange"))
 					),
 					column(4,
-				        HTML(paste("messages and info will appear here", sep="")),
+				        HTML(paste("general infobox", sep="")),
 					    verbatimTextOutput("infobox")
 					),
 					column(2,
-                        tags$div(title="the % identity of the alignment between the sequences of the primary and mutation calls,\nand distinct insertion / deletion (in that order) events, and their lengths in nt\n\nif this low and there are many variants reported, there might be a heterozygous indel",
-    					    HTML(paste("hetero aln info [?]")),verbatimTextOutput("hetero_indel_pid")
+                        tags$div(title="whether we can detect heterozygous indels in the data,\nthe % identity of the alignment between the sequences of the primary and mutation calls,\nand distinct insertion / deletion (in that order) events, and their lengths in nt\n\nif this low and there are many variants reported, there might be a heterozygous indel",
+    					    HTML(paste("hetero indels infobox [?]")),verbatimTextOutput("hetero_indel_pid")
     					),
 #                         tags$div(title="distinct insertion / deletion (in that order) events, and their lengths in nt",
 #     					    HTML(paste("hetero ins/dels [?]")),verbatimTextOutput("hetero_indel_tab")
 #     					),
-                        tags$div(title="if there are indel events above, use them to try and correct the variant calling",
-                            checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
-                        )
-					),
-
-					column(1
-					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 20)
-                        #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
+					    conditionalPanel(condition = "!grepl('0 / 0',hetero_indel_pid)",
+                            tags$div(title="if there are indel events above, use them to try and correct the variant calling",
+                                checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
+                            ))
 					),
 					column(1,
                         tags$div(title="min % of peak for mutation to be called",
@@ -74,6 +71,10 @@ shinyUI(
                         tags$div(title="min signal to noise ratio for mutation to be called",
     					    sliderInput("s2n_min","mut: min S/N [?]", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
                         )
+					),
+					column(1
+					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 20)
+                        #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
                     column(1),
 					column(1
@@ -106,12 +107,12 @@ shinyUI(
 			tabPanel('calls', value = 'call_table', icon = icon("table"),
 				 shiny::dataTableOutput("call_table")
  			)
-			,tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
-		         shiny::dataTableOutput("intens_table")
-			)
-            ,tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
-                 shiny::dataTableOutput("intens_table_rev")
-            )
+# 			,tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
+# 		         shiny::dataTableOutput("intens_table")
+# 			)
+#             ,tabPanel('intensities rev', value = 'intens_table_rev', icon = icon("table"),
+#                  shiny::dataTableOutput("intens_table_rev")
+#             )
 		)
     )
 )

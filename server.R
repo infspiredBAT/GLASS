@@ -38,7 +38,7 @@ shinyServer(function(input,output,session) {
             name <- input$select_file$name
             full_name <- input$select_file$name
             single_rev <- FALSE
-            
+
             #getting rid of the date in names
             for(i in 1:length(name)){
                 name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
@@ -63,7 +63,7 @@ shinyServer(function(input,output,session) {
                     rev_file <- NULL
                     rev_file_name <- "-"
                 }
-            base <- ""    
+            base <- ""
             }else{ #only one file selected
                 fwd_file <- input$select_file$datapath
                 fwd_file_name <- full_name
@@ -72,7 +72,7 @@ shinyServer(function(input,output,session) {
                 base <- sapply(strsplit(basename(name),"\\."),
                                function(x) paste(x[1:(length(x)-1)], collapse="."))
             }
-            
+
             if(substr(base,nchar(base),nchar(base))=="R"){
                 g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,sep="")
                 single_rev <- TRUE
@@ -139,30 +139,29 @@ shinyServer(function(input,output,session) {
                 setkey(g_calls,id)
             }
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
-            
+
             #remove added minor het ins
-            if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
-                for(i in nrow(g_minor_het_insertions))
-                {
-                    added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
-                    g_calls <<- g_calls[!(id %in% added[[1]])]
-                    remove_intensities(added)
-                }      
-                g_minor_het_insertions[,added:=NULL]
-            }
-                        
+#             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
+#                 for(i in nrow(g_minor_het_insertions))
+#                 {
+#                     added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
+#                     g_calls <<- g_calls[!(id %in% added[[1]])]
+#                     remove_intensities(added)
+#                 }
+#                 g_minor_het_insertions[,added:=NULL]
+#             }
+
             report_hetero_indels(g_calls)
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
-            
+
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
                 for(i in nrow(g_minor_het_insertions))
                 {
                     added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
                     add_intensities(added[[1]]);
-
                 }
             }
-            
+
             get_expected_het_indels(g_calls)
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
@@ -185,8 +184,8 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            if(is.null(g_expected_het_indel)) het_indel_info <- paste0("no detected hetero indel\n")
-            else het_indel_info <- paste0("detected hetero indel with min around ",g_expected_het_indel[[1]] * 100,"%\n")
+            if(is.null(g_expected_het_indel)) het_indel_info <- paste0(" ...nothing detected\n")
+            else het_indel_info <- paste0("detected starting at ~",g_expected_het_indel[[1]] * 100,"% ->\n")
             cat(het_indel_info)
             cat(g_hetero_indel_report)
         }
@@ -370,7 +369,7 @@ shinyServer(function(input,output,session) {
         if(is.null(g_intens_rev))   session$sendCustomMessage(type = "join",message = "TRUE")
         else                        session$sendCustomMessage(type = "join",message = paste0(input$join_traces_checkbox))
     })
-    
+
 #     show_calls <- observe({
 #         if(varcall()){
 #             session$sendCustomMessage(type = "show",message = paste0(input$show_calls_checkbox))
@@ -421,7 +420,7 @@ shinyServer(function(input,output,session) {
           writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
       }
     })
-    
+
     output$het_histogram <- renderPlot({
         if(varcall() ) {
             if(!is.null(g_expected_het_indel)){
@@ -437,13 +436,13 @@ shinyServer(function(input,output,session) {
     }
     ,options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
-    output$intens_table <- shiny::renderDataTable({
-        if(varcall() & !is.null(g_intens)) { g_intens }
-    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-
-    output$intens_table_rev <- shiny::renderDataTable({
-        if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
-    }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+#     output$intens_table <- shiny::renderDataTable({
+#         if(varcall() & !is.null(g_intens)) { g_intens }
+#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+#
+#     output$intens_table_rev <- shiny::renderDataTable({
+#         if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
+#     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
     #used for conditional display of options for double strand data
     output$reverse <- reactive({
