@@ -488,6 +488,8 @@ add_intensities <- function(added){
 
     #update intrex
     g_intrexdat$max_x <<- nrow(g_intens)
+    
+    return(paste0(add$id,collapse= " "))
 
 }
 

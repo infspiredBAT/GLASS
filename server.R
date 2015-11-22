@@ -141,25 +141,26 @@ shinyServer(function(input,output,session) {
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
 
             #remove added minor het ins
-#             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
-#                 for(i in nrow(g_minor_het_insertions))
-#                 {
-#                     added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
-#                     g_calls <<- g_calls[!(id %in% added[[1]])]
-#                     remove_intensities(added)
-#                 }
-#                 g_minor_het_insertions[,added:=NULL]
-#             }
-
-            report_hetero_indels(g_calls)
-            if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
                 for(i in nrow(g_minor_het_insertions))
                 {
                     added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
-                    add_intensities(added[[1]]);
-                }
+                    g_calls <<- g_calls[!(id %in% added[[1]])]
+                    remove_intensities(added)
+                }      
+                g_minor_het_insertions[,added:=NULL]
+                g_minor_het_insertions[,ins_added := NULL]
+            }
+                        
+            report_hetero_indels(g_calls)
+            if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
+
+            if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
+
+
+                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added,split = " ")))
+                g_minor_het_insertions$ins_added <- ins_added
             }
 
             get_expected_het_indels(g_calls)
