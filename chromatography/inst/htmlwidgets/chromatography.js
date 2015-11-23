@@ -187,7 +187,7 @@ HTMLWidgets.widget({
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){callShiny(d["id"],d["trace_peak"]);})
+                .on("click",function(d,i){callShiny(d["id"]);})
                 .attr("y",function(d){
                                 if(label.indexOf("rev") > -1){
                                     return((join=="FALSE")*110 + label_pos[label]);
@@ -364,18 +364,8 @@ HTMLWidgets.widget({
             }
         );
         function callShiny(id,trace_peak){
-            //console.log(message);
+            console.log(id);
             Shiny.onInputChange("pos_click", {id: id});
-/*
-            setBrush(Number(trace_peak)-100,Number(trace_peak)+120);
-            focus.append("g").selectAll("position_indicator")  //position indicator
-  		         .append("line").attr("class","peak_label short line var_noise_indic")
-  		         .attr("x1",function(d){return widthScale(Number(trace_peak));})
-  		         .attr("y1",0)
-  		         .attr("x2",function(d){return widthScale(Number(trace_peak));})
-  		         .attr("y2",180)
-  		         .attr("stroke-width",8).attr("stroke","rgba(0,0,255,0.1)").attr("stroke-dasharray",2);
-*/
         };
        function brushZoomIn(){
             return function(event) {
@@ -678,17 +668,7 @@ HTMLWidgets.widget({
               .attr("y",instance.label_pos["aa"])
               .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
               .attr("stroke","#000000");
-              instance.setPeakLabel(calls,"reference");
-              instance.setPeakLabel(calls,"call");
-              instance.setPeakLabel(calls,"mut_call_fwd");
-              if(rev!==0){
-                  instance.setPeakLabel(calls,"call_rev");
-                  instance.setPeakLabel(calls,"mut_call_rev");
-              }
-              //default
-              focus.selectAll(".call").attr("opacity",instance.call_opacity);
-              instance.setPeakLabel(calls,"user_sample");
-              instance.setPeakLabel(calls,"user_mut");
+              
             focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
                 .append("text").attr("class","peak_label short aa_sample")
                 .text(function(d){
@@ -730,17 +710,17 @@ HTMLWidgets.widget({
                 .on("click",function(d,i){instance.callShiny(d["id"]);})
                 .attr("y",(instance.label_pos["gen_coord"]+rev))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
-/*
-            focus.append("g").selectAll("text.exon_intron").data(calls).enter() //intrex
-                .append("text").attr("class","peak_label")
-                .text(function(d){return d["exon_intron"];})
-                .attr("text-anchor", "middle")
-                .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
-                .attr("y",(instance.label_pos["intrex"]+rev))
-                .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
-            focus.selectAll(".peak_label").attr("visibility","hidden")
-*/
+            instance.setPeakLabel(calls,"reference");
+            instance.setPeakLabel(calls,"call");
+            instance.setPeakLabel(calls,"mut_call_fwd");
+            if(rev!==0){
+                instance.setPeakLabel(calls,"call_rev");
+                instance.setPeakLabel(calls,"mut_call_rev");
+            }
+              //default
+            focus.selectAll(".call").attr("opacity",instance.call_opacity);
+            instance.setPeakLabel(calls,"user_sample");
+            instance.setPeakLabel(calls,"user_mut");
 /*
             //horizontal line on top of the chrom
                 focus
