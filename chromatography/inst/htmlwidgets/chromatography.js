@@ -151,36 +151,37 @@ HTMLWidgets.widget({
                 if(w<2000){focus.selectAll(".short").attr("visibility","visible");}
             }
         }
-
+        var text_ref          = focus.append("g");
+        var text_call         = focus.append("g");
+        var text_call_rev     = focus.append("g");
+        var text_user_sample  = focus.append("g");
+        var text_user_mut     = focus.append("g");
+        var text_mut_call_fwd = focus.append("g");
+        var text_mut_call_rev = focus.append("g");
+        
         function setPeakLabel(calls,label,opacity){
             opacity = typeof opacity !== 'undefined' ? opacity : 0.8;
-            //Bind data
-            var text = focus.append("g").selectAll("text").data(calls)
-            //Ender
-            text = text.enter().append("text");
-            //Update  - not working correctly still have to remove old data
-            text.attr("class",function(d){
-                    if(label.indexOf("user") > -1){
-                        return "peak_label short user ".concat("id").concat(d["id"]);
-                    }else if(label.indexOf("call") > -1){
-                        if(label.indexOf("mut_call_rev") > -1){
-                            return "peak_label short call mut_rev mut";
-                        }else if(label.indexOf("call_rev") > -1){
-                            return "peak_label short call rev";
-                        }else if(label.indexOf("mut_call_fwd")> -1){
-                            return "peak_label short call mut_fwd";
-                        }
-                        return "peak_label short call";
-                    }else if(label.indexOf("mut") > -1){
-                        return "peak_label short mut";
-                    }else{return "peak_label short";}
+            switch(label) {
+                case "reference":    var t = text_ref;          c = "ref"; break;
+                case "call":         var t = text_call;         c = "call"; break;
+                case "call_rev":     var t = text_call_rev;     c = "call rev"; break    
+                case "user_sample":  var t = text_user_sample;  c = "user"; break;
+                case "user_mut":     var t = text_user_mut;     c = "user"; break;
+                case "mut_call_fwd": var t = text_mut_call_fwd; c = "call call_fwd"; break;
+                case "mut_call_rev": var t = text_mut_call_rev; c = "call mut_rev mut"; break ;        
+            }
+            var text = t.selectAll("text").data(calls);         //Join
+            text.attr("class","update");                        //Update 
+            text.enter().append("text").attr("class", "enter"); //Enter
+                
+            text.attr("class",function(d){ 
+                    if(label.indexOf("user") > -1) {return "peak_label short user ".concat("id").concat(d["id"]);} 
+                    return("peak_label short "+c);
                 })
                 .text(function(d){
                     if(label.indexOf("mut") > -1){
                         if(typeof(d[label])=='undefined'){ console.log(label);console.log(d);}
                         return d[label].toLowerCase();
-//                    }else if(label.indexOf("user") > -1 && d[label]==="low qual"){
-//                        return "N";
                     } else {
                         return d[label];}
                  })
@@ -204,6 +205,9 @@ HTMLWidgets.widget({
                     else if (d[label] === "T"){ return "#FF0000"; }
                     else if (d[label] === "-"){ return "black"; }
                     else    {                   return "orange"; }});
+                    
+                    
+            text.exit().remove();
         }
         function showVarInMinimap(choices){
             //genomic
@@ -541,19 +545,7 @@ HTMLWidgets.widget({
   				.attr("x2",widthScale(domain_x))
   				.attr("y2",25)
   				.attr("stroke-width",3).attr("stroke","rgba(180,180,180,1.0)");
-  			//visualise introns/exons
-/*
-            //lines
-  			context.selectAll("lines.intrex").data(intrex).enter()
-  				.append("line")
-  				.attr("x1",function(d){return widthScale(d["start"]);})
-  				.attr("y1",0)
-  				.attr("x2",function(d){return widthScale(d["start"]);})
-  				.attr("y2",50)
-  				.attr("stroke-width",2).attr("stroke","rgba(20,20,20,0.6)").attr("stroke-dasharray",2);
-//  				.on("mouseover", function(){d3.select(this).style("fill", "white");})
-//  				.on("mouseout",  function(){d3.select(this).style("fill", "rgba(200,200,200,0.2)");});
-*/
+
             //intron/exon boxes
   			context.selectAll("rect").data(intrex).enter()
   				.append("rect").attr("class","context")
@@ -589,8 +581,7 @@ HTMLWidgets.widget({
   				.attr("fill","black");
 
   			brush.x(width2Scale);
-
-  			
+		
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
@@ -793,8 +784,6 @@ HTMLWidgets.widget({
             if(instance.max_x != x["intrexdat"]["max_x"]){   
                 instance.max_x = x["intrexdat"]["max_x"];
                 var intens = x["intens"];
-                console.log(intens);
-
           		instance.updateLine([intens["A"]],"A",false);
                 instance.updateLine([intens["C"]],"C",false);
                 instance.updateLine([intens["G"]],"G",false);
@@ -807,8 +796,7 @@ HTMLWidgets.widget({
                     instance.updateLine([intens_rev["G"]],"G",true);
                     instance.updateLine([intens_rev["T"]],"T",true);   
                 }
-                instance.redraw();
-                             
+                instance.redraw();                         
             }
   			if(x["intrexdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["intrexdat"]["max_y"]);
@@ -828,18 +816,15 @@ HTMLWidgets.widget({
                     instance.call_opacity = 0;
                 }
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
-                instance.focus.selectAll(".peak_label short line").remove();
+                //instance.focus.selectAll(".peak_label short line").remove();
                 instance.context.selectAll(".minimap").remove();
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
                 instance.showNoiseInMinimap(noisy_neighbors);
                 instance.noisy_neighbors = x.noisy_neighbors;
-                instance.focus.selectAll(".user").remove();
                 instance.setPeakLabel(calls,"user_sample");
                 instance.setPeakLabel(calls,"user_mut");
-                instance.focus.selectAll(".mut_fwd").remove();
-                instance.focus.selectAll(".mut_rev").remove();
-                //instance.setPeakLabel(calls,"")
+                instance.setPeakLabel(calls,"reference")
                 instance.setPeakLabel(calls,"mut_call_fwd",instance.call_opacity);
                 if(rev){
                     instance.setPeakLabel(calls,"mut_call_rev",instance.call_opacity);
