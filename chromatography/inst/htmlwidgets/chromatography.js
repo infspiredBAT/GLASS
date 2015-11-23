@@ -174,7 +174,8 @@ HTMLWidgets.widget({
             text.attr("class","update");                        //Update 
             text.enter().append("text").attr("class", "enter"); //Enter
                 
-            text.attr("class",function(d){ 
+            text.on("click",function(d){alert("hello");})
+                .attr("class",function(d){ 
                     if(label.indexOf("user") > -1) {return "peak_label short user ".concat("id").concat(d["id"]);} 
                     return("peak_label short "+c);
                 })
@@ -187,7 +188,6 @@ HTMLWidgets.widget({
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){callShiny(d["id"]);})
                 .attr("y",function(d){
                                 if(label.indexOf("rev") > -1){
                                     return((join=="FALSE")*110 + label_pos[label]);
@@ -205,8 +205,8 @@ HTMLWidgets.widget({
                     else if (d[label] === "T"){ return "#FF0000"; }
                     else if (d[label] === "-"){ return "black"; }
                     else    {                   return "orange"; }});
-                    
-                    
+ 
+                                       
             text.exit().remove();
         }
         function showVarInMinimap(choices){
