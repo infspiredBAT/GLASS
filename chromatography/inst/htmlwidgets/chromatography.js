@@ -55,7 +55,9 @@ HTMLWidgets.widget({
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            
+        var scope_g   = focus.append("g");
+        var quals_g   = focus.append("g");
+        var quals_g_r = focus.append("g");
         var gLine_a   = focus.append("g");
       	var gLine_c   = focus.append("g");
   		var gLine_g   = focus.append("g");
@@ -158,6 +160,10 @@ HTMLWidgets.widget({
         var text_user_mut     = focus.append("g");
         var text_mut_call_fwd = focus.append("g");
         var text_mut_call_rev = focus.append("g");
+        var var_ind_focus     = focus.append("g");
+        var varim_gen         = focus.append("g");
+        var varim_user_s      = focus.append("g");
+        var varim_user_m      = focus.append("g");
         
         function setPeakLabel(calls,label,opacity){
             opacity = typeof opacity !== 'undefined' ? opacity : 0.8;
@@ -174,8 +180,7 @@ HTMLWidgets.widget({
             text.attr("class","update");                        //Update 
             text.enter().append("text").attr("class", "enter"); //Enter
                 
-            text.on("click",function(d){alert("hello");})
-                .attr("class",function(d){ 
+            text.attr("class",function(d){ 
                     if(label.indexOf("user") > -1) {return "peak_label short user ".concat("id").concat(d["id"]);} 
                     return("peak_label short "+c);
                 })
@@ -188,6 +193,7 @@ HTMLWidgets.widget({
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                .on("click",function(d,i){callShiny(d["id"]);})
                 .attr("y",function(d){
                                 if(label.indexOf("rev") > -1){
                                     return((join=="FALSE")*110 + label_pos[label]);
@@ -205,66 +211,54 @@ HTMLWidgets.widget({
                     else if (d[label] === "T"){ return "#FF0000"; }
                     else if (d[label] === "-"){ return "black"; }
                     else    {                   return "orange"; }});
- 
-                                       
+                    
+                    
             text.exit().remove();
         }
         function showVarInMinimap(choices){
             //genomic
             //console.log("changing choices");
             context.selectAll("lines.choices").data(choices).enter()
-    			      .append("line")
+                .append("line")
                 .attr("class","minimap context")
-      			    .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-      			    .attr("y1",4)
-      			    .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-      			    .attr("y2",24)
-      			    .attr("stroke-width",3)
-      			    .attr("stroke",function(d) {
-      			        if      (d["reference"] === "A"){ return "#33CC33"; }
-      			        else if (d["reference"] === "C"){ return "#0000FF"; }
-      			        else if (d["reference"] === "G"){ return "#000000"; }
-      			        else if (d["reference"] === "T"){ return "#FF0000"; }
-      			        else if (d["reference"] === "-"){ return "white"; }
-      			        else    {                         return "yellow"; }});
+      			.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+      			.attr("y1",4)
+      			.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+      			.attr("y2",24)
+      			.attr("stroke-width",3)
+      			.attr("stroke",function(d) { return get_color(d["reference"])});
   			    // user
-  			    context.selectAll("lines.choices").data(choices).enter()
-  				      .append("line")
+            context.selectAll("lines.choices").data(choices).enter()
+  		        .append("line")
                 .attr("class","minimap context")
-  				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y1",26)
-  				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y2",38)
-  				      .attr("stroke-width",3)
-  				      .attr("stroke",function(d) {
-  				          if      (d["user_sample"] === "A"){ return "#33CC33"; }
-  				          else if (d["user_sample"] === "C"){ return "#0000FF"; }
-  				          else if (d["user_sample"] === "G"){ return "#000000"; }
-  				          else if (d["user_sample"] === "T"){ return "#FF0000"; }
-  				          else if (d["user_sample"] === "-"){ return "white"; }
-  				          else    {                           return "yellow";  }});
-              context.selectAll("lines.choices").data(choices).enter()
-    			      .append("line")
+  		        .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+  				.attr("y1",26)
+  				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+  				.attr("y2",38)
+  				.attr("stroke-width",3)
+  				.attr("stroke",function(d) { return get_color(d["user_sample"])});
+
+            context.selectAll("lines.choices").data(choices).enter()
+    		    .append("line")
                 .attr("class","minimap context")
-  				      .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y1",38)
-  				      .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
-  				      .attr("y2",46)
-  				      .attr("stroke-width",3)
-  				      .attr("stroke",function(d) {
-  				          if      (d["user_mut"] === "A"){ return "#33CC33"; }
-  				          else if (d["user_mut"] === "C"){ return "#0000FF"; }
-  				          else if (d["user_mut"] === "G"){ return "#000000"; }
-  				          else if (d["user_mut"] === "T"){ return "#FF0000"; }
-  				          else if (d["user_mut"] === "-"){ return "white"; }
-  				          else    {                        return "yellow";  }});
-            focus.append("g").selectAll("variance_indicator").data(choices).enter()  //variance indicator
-  		         .append("line").attr("class","peak_label short line var_noise_indic")
-  		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
-  		         .attr("y1",140)
-  		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  		         .attr("y2",400)
-  		         .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
+  				.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
+  				.attr("y1",38)
+  				.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
+  				.attr("y2",46)
+  				.attr("stroke-width",3)
+  				.attr("stroke",function(d) { return get_color(d["user_mut"])});
+            
+            var v = var_ind_focus.selectAll("line").data(choices);
+            v.attr("class","update");
+            v.enter().append("line").attr("class","enter");
+            v.attr("class","peak_label short line var_noise_indic")
+  		        .attr("x1",function(d){return widthScale(d["trace_peak"]);})
+  		        .attr("y1",140)
+  		        .attr("x2",function(d){return widthScale(d["trace_peak"]);})
+  		        .attr("y2",400)
+  		        .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
+            v.exit().remove();
+            
         }
         function showNoiseInMinimap(noisy_neighbors){
             context.selectAll("lines.noisy_neighbors").data(noisy_neighbors).enter()
@@ -338,7 +332,14 @@ HTMLWidgets.widget({
                 redraw();
             }
         }
-
+        function get_color(col){
+      	    if      (col === "A"){ return "#33CC33"; }
+  		    else if (col === "C"){ return "#0000FF"; }
+  			else if (col === "G"){ return "#000000"; }
+  			else if (col === "T"){ return "#FF0000"; }
+  			else if (col === "-"){ return "white"; }
+  	        return "yellow";  
+        }
         Shiny.addCustomMessageHandler("join",
             function(message){
                 join = message;
@@ -367,7 +368,7 @@ HTMLWidgets.widget({
             console.log(id);
             Shiny.onInputChange("pos_click", {id: id});
         };
-       function brushZoomIn(){
+        function brushZoomIn(){
             return function(event) {
                 event.preventDefault();
                 var ext = brush.extent();
@@ -430,6 +431,9 @@ HTMLWidgets.widget({
             noise_area_rev: noise_area_rev,
             label_pos:  label_pos,
             linec:   linec,
+            scope_g: scope_g,
+            quals_g: quals_g,
+            quals_g_r: quals_g_r,
             context: context,
 	        brush:   brush,
             join:    join,
@@ -577,7 +581,7 @@ HTMLWidgets.widget({
             instance.updateLine([intens["G"]],"G",false);
             instance.updateLine([intens["T"]],"T",false);
                  
-        //noise indocator fwd
+        //noise indicator fwd
 
             var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
             var group_noise_fwd = focus.append("g");
@@ -608,14 +612,14 @@ HTMLWidgets.widget({
             }
 
             //trace peak labels
-            focus.append("g").selectAll("scope").data(calls).enter()        //scope (position indicator)
+            instance.scope_g.selectAll("scope").data(calls).enter()        //scope (position indicator)
                  .append("rect").attr("class",function(d){return "scope ".concat("scope").concat(d["trace_peak"]);})
                  .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
                  .attr("y",-14).attr("rx",2).attr("ry",2)
                  .attr("width",24).attr("height",instance.height-90)
                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
             if(rev==0){
-                focus.append("g").selectAll("qualities").data(calls).enter()  //quality box
+                instance.quals_g.selectAll("qualities").data(calls).enter()  //quality box
       		        .append("rect").attr("class","peak_label qual_fwd q")
       		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
       		        .attr("y",0).attr("rx",1).attr("ry",1)
@@ -631,14 +635,14 @@ HTMLWidgets.widget({
       		        .attr("y",-2)
       		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             }else{
-                focus.append("g").selectAll("qualities.fwd").data(calls).enter()  //quality box
+                instance.quals_g.selectAll("qualities.fwd").data(calls).enter()  //quality box
         	        .append("rect").attr("class","peak_label qual_fwd q")
       		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
       		        .attr("y",0).attr("rx",1).attr("ry",1)
       		        .attr("width",9)
       		        .attr("height",function(d){return d["quality_fwd"];})
       		        .attr("fill", "rgba(200,200,200,0.3)");
-                focus.append("g").selectAll("qualities.rev").data(calls).enter()  //quality box
+                instance.quals_g_r.selectAll("qualities.rev").data(calls).enter()  //quality box
                   .append("rect").attr("class","peak_label qual_rev q")
       		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
       		        .attr("y",0).attr("rx",1).attr("ry",1)
@@ -790,17 +794,14 @@ HTMLWidgets.widget({
                     rev = 1;
                 }
                 var show_calls  = x["show_calls"];
-                if(show_calls){
-                    instance.call_opacity = 0.8;
-                }else{
-                    instance.call_opacity = 0;
-                }
+                if(show_calls){ instance.call_opacity = 0.8; }
+                else{ instance.call_opacity = 0; }  
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
                 //instance.focus.selectAll(".peak_label short line").remove();
                 instance.context.selectAll(".minimap").remove();
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
-                instance.showNoiseInMinimap(noisy_neighbors);
+                //instance.showNoiseInMinimap(noisy_neighbors);
                 instance.noisy_neighbors = x.noisy_neighbors;
                 instance.setPeakLabel(calls,"user_sample");
                 instance.setPeakLabel(calls,"user_mut");
@@ -809,22 +810,6 @@ HTMLWidgets.widget({
                 if(rev){
                     instance.setPeakLabel(calls,"mut_call_rev",instance.call_opacity);
                 }
-
-                instance.focus.selectAll(".var_noise_indic").remove();
-                instance.focus.append("g").selectAll("variance_indicator").data(choices).enter() //variance indicator
-                    .append("line").attr("class","peak_label short line var_noise_indic")
-                    .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .attr("y1",140)
-                    .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
-                    .attr("y2",400)
-                    .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
-                instance.focus.append("g").selectAll("noise_indicator").data(noisy_neighbors).enter()  //noise indicator
-      		         .append("line").attr("class","peak_label short line var_noise_indic")
-      		         .attr("x1",function(d){return instance.widthScale(d["trace_peak"]);})
-      		         .attr("y1",140)
-      		         .attr("x2",function(d){return instance.widthScale(d["trace_peak"]);})
-      		         .attr("y2",400)
-      		         .attr("stroke-width",10).attr("stroke","brown").attr("opacity",0.2).attr("stroke-dasharray","1,3");
 
                 instance.focus.selectAll("g").selectAll(".aa_sample").remove();
                 instance.focus.append("g").selectAll("text.seq.aa").data(calls).enter() //aa_sample
