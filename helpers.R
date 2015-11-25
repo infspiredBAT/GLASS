@@ -427,6 +427,7 @@ incorporate_hetero_indels_func <- function(calls){
             ins_tab <- calls[rep(pos,length(ins_seq)),]
             ins_tab[,id := id - 1 + seq_along(id)/100]
             ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
+            ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod="")]
             return(ins_tab)
         }
 

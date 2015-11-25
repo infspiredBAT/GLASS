@@ -81,6 +81,7 @@ HTMLWidgets.widget({
         var scope_g   = focus.append("g");
         var quals_g   = focus.append("g");
         var quals_g_r = focus.append("g");
+        var quals_txt = focus.append("g");
         var gLine_a   = focus.append("g");
       	var gLine_c   = focus.append("g");
   		var gLine_g   = focus.append("g");
@@ -293,7 +294,7 @@ HTMLWidgets.widget({
         }
         function setCodingLabel(calls){
             var aa_r = aa_ref.selectAll("text").data(calls);
-            aa_r.enter().append("text")
+            aa_r.enter().append("text");
             aa_r.attr("class","peak_label short")
                 .text(function(d){
 //                    if   (d["ord_in_cod"] == 1) {return d["aa_ref"].toUpperCase()+""+d["codon"];}
@@ -333,7 +334,39 @@ HTMLWidgets.widget({
                 .attr("stroke","#000000");
             aa_m.exit().remove();
         }
-        
+        function setQualityLabels(calls,rev){
+            q = rev ? "quality_fwd" : "quality"; 
+            var qt = quals_txt.selectAll("text").data(calls);
+            qt.enter().append("text");
+            qt.attr("class","peak_label")
+      		        .text(function(d){return d["quality"];})
+      		        .attr("text-anchor", "middle")
+      		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                    .on("click",function(d,i){callShiny(d["id"]);})
+      		        .attr("y",-2)
+      		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
+            qt.exit().remove();
+            qg = quals_g.selectAll("rect").data(calls);
+            qg.enter().append("rect");
+            qg.attr("class","peak_label qual_fwd q")
+      		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
+      		        .attr("y",0).attr("rx",1).attr("ry",1)
+      		        .attr("width",9+(!rev)*9)
+      		        .attr("height",function(d){return d[q];})
+      		        .attr("fill", "rgba(200,200,200,0.3)");
+            qg.exit().remove();
+            if(rev!=0){
+                qg_r = quals_g_r.selectAll("rect").data(calls);
+                qg_r.enter().append("rect");
+                qg_r.attr("class","peak_label qual_rev q")
+      		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
+      		        .attr("y",0).attr("rx",1).attr("ry",1)
+      		        .attr("width",9)
+      		        .attr("height",function(d){return d["quality_rev"];})
+      		        .attr("fill", "rgba(200,200,200,0.3)");
+                qg_r.exit().remove();
+            }      
+        }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
                 setBrush(Number(message)-180,Number(message)+200);
@@ -469,8 +502,6 @@ HTMLWidgets.widget({
             full_line: full_line,
             exon_boxes: exon_boxes,
             scope_g: scope_g,
-            quals_g: quals_g,
-            quals_g_r: quals_g_r,
             context: context,
 	        brush:   brush,
             join:    join,
@@ -494,6 +525,7 @@ HTMLWidgets.widget({
             showVarInMinimap: showVarInMinimap,
             showNoiseInMinimap: showNoiseInMinimap,
             setCodingLabel: setCodingLabel,
+            setQualityLabels: setQualityLabels,
             callShiny: callShiny
         }
     },
@@ -650,38 +682,6 @@ HTMLWidgets.widget({
                  .attr("width",24).attr("height",instance.height-90)
                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
             
-            focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
-          	        .append("text").attr("class","peak_label")
-      		        .text(function(d){return d["quality"];})
-      		        .attr("text-anchor", "middle")
-      		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-      		        .attr("y",-2)
-      		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
-            if(rev==0){
-                instance.quals_g.selectAll("qualities").data(calls).enter()  //quality box
-      		        .append("rect").attr("class","peak_label qual_fwd q")
-      		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
-      		        .attr("y",0).attr("rx",1).attr("ry",1)
-      		        .attr("width",18)
-      		        .attr("height",function(d){return d["quality"];})
-      		        .attr("fill", "rgba(200,200,200,0.3)");
-            }else{
-                instance.quals_g.selectAll("qualities.fwd").data(calls).enter()  //quality box
-        	        .append("rect").attr("class","peak_label qual_fwd q")
-      		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
-      		        .attr("y",0).attr("rx",1).attr("ry",1)
-      		        .attr("width",9)
-      		        .attr("height",function(d){return d["quality_fwd"];})
-      		        .attr("fill", "rgba(200,200,200,0.3)");
-                instance.quals_g_r.selectAll("qualities.rev").data(calls).enter()  //quality box
-                  .append("rect").attr("class","peak_label qual_rev q")
-      		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
-      		        .attr("y",0).attr("rx",1).attr("ry",1)
-      		        .attr("width",9)
-      		        .attr("height",function(d){return d["quality_rev"];})
-      		        .attr("fill", "rgba(200,200,200,0.3)");
-            }            
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
                 .append("text").attr("class","peak_label")
                 .text(function(d){
@@ -708,7 +708,8 @@ HTMLWidgets.widget({
                 instance.setPeakLabel(calls,"call_rev");
                 instance.setPeakLabel(calls,"mut_call_rev");
             }
-              //default
+            instance.setQualityLabels(calls,rev);
+            //default
             focus.selectAll(".call").attr("opacity",instance.call_opacity);
             instance.setPeakLabel(calls,"user_sample");
             instance.setPeakLabel(calls,"user_mut");
@@ -765,6 +766,7 @@ HTMLWidgets.widget({
                     instance.updateLine([intens_rev["G"]],"G",true);
                     instance.updateLine([intens_rev["T"]],"T",true);   
                 }
+                instance.setQualityLabels(calls,rev);
                 instance.redraw();                         
             }
   			if(x["intrexdat"]["max_y"]!= instance.max_y){
