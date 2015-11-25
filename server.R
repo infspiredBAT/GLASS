@@ -158,9 +158,7 @@ shinyServer(function(input,output,session) {
             setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
-
-
-                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added,split = " ")))
+                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added,split = " ")[[1]]))
                 g_minor_het_insertions$ins_added <<- ins_added
             }
 

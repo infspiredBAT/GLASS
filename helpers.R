@@ -363,15 +363,17 @@ report_hetero_indels <- function(calls){
         hetero_ins_tab <- apply(hetero_ins_tab,c(1,2),function(x) x + move_vec[x])
     }
 
-
     is.in.reference <- apply(hetero_del_tab,1,function(x) all(x %in% which(calls[["reference"]] == "-")))
 
     ins_counts <- sum(hetero_ins_tab[which(!is.in.primery),2]-hetero_ins_tab[which(!is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(is.in.reference),2]-hetero_del_tab[which(is.in.reference),1]+1,na.rm = T)
     del_counts <- sum(hetero_ins_tab[which(is.in.primery),2]-hetero_ins_tab[which(is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(!is.in.reference),2]-hetero_del_tab[which(!is.in.reference),1]+1,na.rm = T)
 
     # if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = )
-    if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = hetero_ins_tab[which(!is.in.primery),1],seq = stri_sub(secondary_seq,hetero_ins_tab[which(!is.in.primery),1],hetero_ins_tab[which(!is.in.primery),2]))
-    else g_minor_het_insertions <<- data.table::data.table()
+    if(nrow(hetero_ins_tab) > 0) {
+        offset <- -start(pattern(hetero_indel_aln)) + start(subject(hetero_indel_aln))
+        g_minor_het_insertions <<- data.table::data.table(pos = hetero_ins_tab[which(!is.in.primery),1],seq = stri_sub(secondary_seq,hetero_ins_tab[which(!is.in.primery),1] + offset,hetero_ins_tab[which(!is.in.primery),2] + offset))        
+    }
+        else g_minor_het_insertions <<- data.table::data.table()
     g_hetero_indel_aln <<- hetero_indel_aln
     g_hetero_indel_pid <<- round(pid(hetero_indel_aln),1)
     g_hetero_ins_tab   <<- hetero_ins_tab
@@ -423,8 +425,8 @@ incorporate_hetero_indels_func <- function(calls){
         get_ins_data_table <- function(pos,seq){
             ins_seq <- strsplit(seq,"")[[1]]
             ins_tab <- calls[rep(pos,length(ins_seq)),]
-            ins_tab[,id := id + seq_along(id)/100]
-            ins_tab[,user_sample := "-"][,reference := "-"]
+            ins_tab[,id := id - 1 + seq_along(id)/100]
+            ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
             return(ins_tab)
         }
 
@@ -474,9 +476,7 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
     return(new_vec)
 }
 
-
 add_intensities <- function(added){
-
     #update intensities
     id <- g_calls[id == as.integer(added[1]),]$trace_peak + 6
     add<-data.table("id"=id + (1:(length(added)*12)/1000),"A"=0,"C"=0,"G"=0,"T"=0)
@@ -484,16 +484,12 @@ add_intensities <- function(added){
     g_intens_rev <<- rbind(g_intens_rev, add)
     setkey(g_intens,     id)
     setkey(g_intens_rev, id) #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
-    #update peak positions in calls table
-    
+    #update peak positions in calls table    
     g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
     g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
-
     #update intrex
-    g_intrexdat$max_x <<- nrow(g_intens)
-    
+    g_intrexdat$max_x <<- nrow(g_intens)  
     return(paste0(add$id,collapse= " "))
-
 }
 
 remove_intensities <- function(added){
@@ -506,7 +502,6 @@ remove_intensities <- function(added){
     #update intrex
     g_intrexdat$max_x <<- nrow(g_intens)
 }
-
 
 #background noise absolute or relative to reference peak
 noise <- function(a,b,c,d,abs=FALSE){
