@@ -463,7 +463,6 @@ HTMLWidgets.widget({
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
-            svg:     svg,
             noise_area_fwd: noise_area_fwd,
             noise_area_rev: noise_area_rev,
             label_pos:  label_pos,
@@ -550,7 +549,6 @@ HTMLWidgets.widget({
   			var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"])
   			instance.intrex = intrex;
 
-  			var svg     = instance.svg;
             var noise_area_fwd = instance.noise_area_fwd;
             var noise_area_rev = instance.noise_area_rev;
   			var focus   = instance.focus;
@@ -645,13 +643,21 @@ HTMLWidgets.widget({
                 instance.joinView("TRUE");
             }
 
-            //trace peak labels
             instance.scope_g.selectAll("scope").data(calls).enter()        //scope (position indicator)
                  .append("rect").attr("class",function(d){return "scope ".concat("scope").concat(d["trace_peak"]);})
                  .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
                  .attr("y",-14).attr("rx",2).attr("ry",2)
                  .attr("width",24).attr("height",instance.height-90)
                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
+            
+            focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
+          	        .append("text").attr("class","peak_label")
+      		        .text(function(d){return d["quality"];})
+      		        .attr("text-anchor", "middle")
+      		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                    .on("click",function(d,i){instance.callShiny(d["id"]);})
+      		        .attr("y",-2)
+      		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             if(rev==0){
                 instance.quals_g.selectAll("qualities").data(calls).enter()  //quality box
       		        .append("rect").attr("class","peak_label qual_fwd q")
@@ -660,14 +666,6 @@ HTMLWidgets.widget({
       		        .attr("width",18)
       		        .attr("height",function(d){return d["quality"];})
       		        .attr("fill", "rgba(200,200,200,0.3)");
-                focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
-      		        .append("text").attr("class","peak_label")
-      		        .text(function(d){return d["quality"];})
-      		        .attr("text-anchor", "middle")
-      		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-      		        .attr("y",-2)
-      		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             }else{
                 instance.quals_g.selectAll("qualities.fwd").data(calls).enter()  //quality box
         	        .append("rect").attr("class","peak_label qual_fwd q")
@@ -683,14 +681,6 @@ HTMLWidgets.widget({
       		        .attr("width",9)
       		        .attr("height",function(d){return d["quality_rev"];})
       		        .attr("fill", "rgba(200,200,200,0.3)");
-                focus.append("g").selectAll("text.qualities").data(calls).enter() //quality number
-      		        .append("text").attr("class","peak_label")
-      		        .text(function(d){return d["quality"];})
-      		        .attr("text-anchor", "middle")
-      		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){instance.callShiny(d["id"]);})
-      		        .attr("y",-2)
-      		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             }            
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
                 .append("text").attr("class","peak_label")
@@ -745,9 +735,6 @@ HTMLWidgets.widget({
   				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
   				.attr("opacity",0.6);
 
-            //In SVG, z-index is defined by the order the element appears in the document
-            //http://stackoverflow.com/questions/17786618/how-to-use-z-index-in-svg-elements
-            //the vars on the minimap are shown last sto that they stay on to
             instance.showVarInMinimap(choices);
             instance.showNoiseInMinimap(noisy_neighbors);
 	          //zooming in so that the first view is not ugly dense graph
