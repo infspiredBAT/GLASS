@@ -751,15 +751,22 @@ HTMLWidgets.widget({
 
         }else{
             //console.log("render");
+            var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
+            var rev = 0; 
+            if(x["intens_rev"] !== null){
+                rev = 1;
+            }
             if(instance.max_x != x["intrexdat"]["max_x"]){   
                 instance.max_x = x["intrexdat"]["max_x"];
+                console.log(x["intens"]);
+                
                 var intens = x["intens"];
           		instance.updateLine([intens["A"]],"A",false);
                 instance.updateLine([intens["C"]],"C",false);
                 instance.updateLine([intens["G"]],"G",false);
                 instance.updateLine([intens["T"]],"T",false);
                 
-                if(x["intens_rev"]!==null){
+                if(rev){
                     var intens_rev = x["intens_rev"];
                     instance.updateLine([intens_rev["A"]],"A",true);
                     instance.updateLine([intens_rev["C"]],"C",true);
@@ -775,11 +782,7 @@ HTMLWidgets.widget({
   			}else if(x.choices != instance.choices){
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
-                var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
-                var rev = 0; 
-                if(x["intens_rev"] !== null){
-                    rev = 1;
-                }
+                
                 var show_calls  = x["show_calls"];
                 if(show_calls){ instance.call_opacity = 0.8; }
                 else{ instance.call_opacity = 0; }  
