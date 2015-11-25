@@ -446,9 +446,13 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
     else elem <- "-"
     new_vec <- rep(elem,length(vec))
     if(length(ins) > 0) {
-        vec <- vec[-ins]
-        if(fwd) vec <- c(vec,rep(elem,length(ins)))
-        else vec <- c(rep(elem,length(ins)),vec)
+        if(fwd) {
+            vec <- vec[-ins]
+            vec <- c(vec,rep(elem,length(ins)))
+        } else {
+            vec <- vec[-(ins - length(ins))]
+            vec <- c(rep(elem,length(ins)),vec)
+        }
     }
     if(fwd) {
         vec <- vec[1:min(length(vec),length(new_vec) - length(dels))]
