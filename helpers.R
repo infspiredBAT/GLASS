@@ -308,33 +308,35 @@ get_choices <- function(calls){
 
 #remove consecutive single base deletions and replace them with one long deletion in table
 get_view<-function(choices){
-    reps<-rle(choices$user_mut)
-    reps$csum <- cumsum(reps$length)
-    dtr <- data.table(length=reps$length,values=reps$values,csum=reps$csum)
-    if(nrow(dtr[values=="-"&length>=2,])>=1){
-        dtr[values=="-"&length>=2,`:=`(start=csum-length+1,end=csum)]
-        deletions <- dtr[values=="-"&length>=2,
-                         list(id=choices[start,]$id,
-                              ids=gsub(",","",toString(choices[,id[start:end]])), #Might need this for locks and resets
-                              start=start,                                        #to now which rows I'm replacing
-                              end=end,
-                              gen_coord=paste0(choices[start,]$gen_coord,"_",
-                                               choices[end,]$gen_coord),
-                              coding=paste0("c.",choices[start]$coding_seq,"_",
-                                            choices[end,]$coding_seq,"del",
-                                            gsub(", ","",toString(choices[,reference[start:end]]))),
-                              protein=paste0("p.",choices[start,]$aa_ref,choices[start,]$codon,"fs")),
-                         by=1:nrow(dtr[values=="-"&length>=2,])]
-        deleted=0
-        for(i in 1:nrow(deletions)){
-            from <- deletions$start[[i]]-deleted
-            to   <- deletions$end[[i]]-deleted
-            choices<-choices[-c(from:to)]
-            deleted <- (deletions$end[[i]] - deletions$start[[i]] +1)
-        }
-        choices <- rbind(choices,deletions,fill=TRUE)
-        setkey(choices,id)
+    
+    computeConsecutives <- function(ids){
+        ids <- ids * 100
+        res <- rle(ids - c(Inf,ids[-length(ids)]))
+        ccc <- cumsum(res$lengths)
+        ccc[which(res$values != 1 & res$values != 100)] <- 0
+        res <- rep(ccc,res$lengths)
+        res2 <- res - c(res[-1],0)
+        res2[res2 >= 0] <- 0 
+        return(res - res2)
     }
+    
+    squeeze_indels <- function(tab){
+        coord <- gsub("c\\.(\\d*).*","\\1",tab$coding)
+        nucs <- gsub("c\\.\\d*...(.)","\\1",tab$coding)
+        type <- gsub("c\\.\\d*(...).*","\\1",tab$coding)[1]
+        coding <- paste0("c.",min(coord),"_",max(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
+        return(list(id = min(tab$id),gen_coord = paste0(max(tab$gen_coord),"_",min(tab$gen_coord)),coding = coding,protein = tab$protein[1]))
+    }
+    
+    choices[,consecutives := computeConsecutives(id) ][,mut_type := gsub("c\\.\\d*(...).*","\\1",coding)]
+    indel_tab <- choices[intersect(grep("del|ins",mut_type),which(consecutives != 0)), squeeze_indels(.SD),by = c("mut_type","consecutives")]
+
+    if(nrow(indel_tab) > 0){
+        choices <- choices[union(grep("del|ins",mut_type,invert = T),which(consecutives == 0)),]
+        choices <- rbind(choices,indel_tab,fill=TRUE)
+    }
+
+    setkey(choices,id)
     return(choices)
 }
 
