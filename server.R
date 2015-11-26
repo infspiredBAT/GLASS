@@ -142,7 +142,7 @@ shinyServer(function(input,output,session) {
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
                 for(i in nrow(g_minor_het_insertions))
                 {
-                    added <- strsplit(g_minor_het_insertions[i]$added, split = " ")
+                    added <- strsplit(g_minor_het_insertions[i]$added[[1]], split = " ")
                     g_calls <<- g_calls[!(id %in% added[[1]])]
                     remove_intensities(added)
                 }      
@@ -162,7 +162,7 @@ shinyServer(function(input,output,session) {
             setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
-                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added,split = " ")[[1]]))
+                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added[[1]],split = " ")[[1]]))
                 g_minor_het_insertions$ins_added <<- ins_added
             }
 
