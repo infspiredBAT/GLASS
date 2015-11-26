@@ -88,16 +88,52 @@ splice_variants <- function(intrexdat){
     return(intrexdat)
 }
 
+
+include_locked_indels <- function(vec,indels,fwd){
+    vec <- copy(vec)
+    get_del_positions <- function(code,pos,vec){
+        coord1 <- as.numeric(gsub("c\\.(\\d*).*","\\1",code))
+        coord2 <- suppressWarnings(as.numeric(gsub("c\\.\\d*_(\\d*).*","\\1",code)))
+        if(is.na(coord2)) del_len <- 0
+        else del_len <- coord2 - coord1
+        if(vec[pos + 1] == "-") pos <- pos + 1
+        return(0:del_len + pos)
+    }
+    
+    dels <- unlist(lapply(names(indels)[grep("del",names(indels))],function(x) get_del_positions(x,indels[[x]],vec)))
+    het_dels <- dels[which(vec[dels] != "-")]
+#     prim_dels <- setdiff(dels,het_dels)
+#     
+#     vec[prim_dels] <- g_calls$reference[prim_dels]
+    if(length(het_dels) > 0){
+        vec <- vec[-het_dels]
+        if(fwd) {
+            vec <- c(vec,rep("-",length(het_dels)))
+        } else {
+            vec <- c(rep("-",length(het_dels)),vec)
+        }
+    }
+    
+    return(vec)
+}
+
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     # reset all but set_by_user
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut    := user_sample_orig]
     calls[set_by_user == FALSE, mut_call_fwd := call]
+    if(length(grep("del",names(g_stored_het_indels))) > 0){
+        calls[, mut_call_fwd := include_locked_indels(mut_call_fwd,g_stored_het_indels,fwd = T)]
+    }
     # calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls[set_by_user==FALSE,])]
     # mut
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
         calls[set_by_user == FALSE, mut_call_rev := call_rev]
+        if(length(grep("del",names(g_stored_het_indels))) > 0){
+            calls[, mut_call_rev := include_locked_indels(mut_call_rev,g_stored_het_indels,fwd = F)]
+        }
+        
         # calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
         # initialising mut calls
         calls[
@@ -321,11 +357,21 @@ get_view<-function(choices){
     }
     
     squeeze_indels <- function(tab){
-        coord <- gsub("c\\.(\\d*).*","\\1",tab$coding)
-        nucs <- gsub("c\\.\\d*...(.)","\\1",tab$coding)
-        type <- gsub("c\\.\\d*(...).*","\\1",tab$coding)[1]
-        coding <- paste0("c.",min(coord),"_",max(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
-        return(list(id = min(tab$id),gen_coord = paste0(max(tab$gen_coord),"_",min(tab$gen_coord)),coding = coding,protein = tab$protein[1]))
+        if(nrow(tab) > 0){
+            coord <- gsub("c\\.(\\d*).*","\\1",tab$coding)
+            nucs <- gsub("c\\.\\d*...(.)","\\1",tab$coding)
+            type <- gsub("c\\.\\d*(...).*","\\1",tab$coding)[1]
+            
+            if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
+            else gen_coord <- paste0(max(tab$gen_coord),"_",min(tab$gen_coord))
+            
+            if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) - 1,"_",min(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
+            else coding <- paste0("c.",min(coord),"_",max(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
+            
+            return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,protein = tab$protein[1]))
+        } else {
+            return(tab)
+        }
     }
     
     choices[,consecutives := computeConsecutives(id) ][,mut_type := gsub("c\\.\\d*(...).*","\\1",coding)]
@@ -335,7 +381,14 @@ get_view<-function(choices){
         choices <- choices[union(grep("del|ins",mut_type,invert = T),which(consecutives == 0)),]
         choices <- rbind(choices,indel_tab,fill=TRUE)
     }
-
+    
+    for(i in grep("ins",choices$mut_type)){
+        seq <- gsub("c\\.\\d*...(.)","\\1",choices[i,]$coding)
+        if(floor(choices[i,]$id) == choices[i,]$id) prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id - 1,]$reference,collapse = "")
+        else prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
+        if(seq == prev_seq) choices[i,coding := gsub("ins","dup",coding)]
+    }
+    
     setkey(choices,id)
     return(choices)
 }
@@ -354,7 +407,7 @@ report_hetero_indels <- function(calls){
 
     hetero_ins_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\-]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
     hetero_del_tab <- stringi::stri_locate_all_regex(compareStrings(hetero_indel_aln),"[\\+]+")[[1]] + start(pattern(hetero_indel_aln)) - 1
-
+    
     is.in.primery <- apply(hetero_ins_tab,1,function(x) all(x %in% which(calls[["user_sample"]] == "-")))
 
     if(length(hetero_ins_tab[which(!is.in.primery),2]) > 0){
@@ -364,7 +417,7 @@ report_hetero_indels <- function(calls){
         hetero_del_tab <- apply(hetero_del_tab,c(1,2),function(x) x + move_vec[x])
         hetero_ins_tab <- apply(hetero_ins_tab,c(1,2),function(x) x + move_vec[x])
     }
-
+    
     is.in.reference <- apply(hetero_del_tab,1,function(x) all(x %in% which(calls[["reference"]] == "-")))
 
     ins_counts <- sum(hetero_ins_tab[which(!is.in.primery),2]-hetero_ins_tab[which(!is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(is.in.reference),2]-hetero_del_tab[which(is.in.reference),1]+1,na.rm = T)
@@ -384,12 +437,12 @@ report_hetero_indels <- function(calls){
 }
 
 get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
-    if(length(which(primery_seq == "-")) > 0){
-        mut_fwd <- mut_fwd[-which(primery_seq == "-")]
-        mut_rev <- mut_rev[-which(primery_seq == "-")]
-    }
+#     if(length(which(primery_seq == "-")) > 0){
+#         mut_fwd <- mut_fwd[-which(primery_seq == "-")]
+#         mut_rev <- mut_rev[-which(primery_seq == "-")]
+#     }
     names <- structure(c(1,1:4),names = c("N","A","C","G","T"))
-    pa <- pairwiseAlignment(gsub("[ -]","N",paste(mut_fwd,collapse = "")), gsub("[ -]","N",paste(mut_rev,collapse = "")),type = "overlap",substitutionMatrix = sm,gapOpening = -10, gapExtension = -1)
+    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd,collapse = "")), gsub("[ -]","",paste(mut_rev,collapse = "")),type = "overlap",substitutionMatrix = sm,gapOpening = -10, gapExtension = -1)
     fwd <- strsplit(as.character(pattern(pa)),"")[[1]]
     rev <- strsplit(as.character(subject(pa)),"")[[1]]
     fwd_i <- numeric(length(fwd))
@@ -463,16 +516,18 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
         vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(dels)):1]
         new_vec[setdiff(seq_along(new_vec),dels)] <- vec
     }
-    if(type == "char"){
+    if(type == "char" && !is.null(primarySeq)){
         move_vec <- numeric(length(new_vec))
         if(fwd){
             move_vec[ins] <- -1
             move_vec[dels] <- 1
             move_vec <- cumsum(move_vec)
+            move_vec[which(rep(rle(move_vec)$length,rle(move_vec)$length) == 1)] <- move_vec[which(rep(rle(move_vec)$length,rle(move_vec)$length) == 1) + 1]
         } else {
             move_vec[ins] <- 1
             move_vec[dels] <- -1
             move_vec <- rev(cumsum(rev(move_vec)))
+            move_vec[which(rep(rle(move_vec)$length,rle(move_vec)$length) == 1)] <- move_vec[which(rep(rle(move_vec)$length,rle(move_vec)$length) == 1) - 1]
         }
         replace <- setdiff(which(orig_vec == primarySeq) + move_vec[which(orig_vec == primarySeq)],c(ins,dels))
         replace <- replace[replace < length(primarySeq)]

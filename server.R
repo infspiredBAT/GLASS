@@ -22,6 +22,7 @@ g_hetero_ins_tab        <<- NULL
 g_hetero_del_tab        <<- NULL
 g_expected_het_indel    <<- NULL
 g_minor_het_insertions  <<- NULL
+g_stored_het_indels     <<- list()
 shinyServer(function(input,output,session) {
 
 #     get_file <- reactive({
@@ -137,11 +138,7 @@ shinyServer(function(input,output,session) {
             if(is.null(g_calls)){
                 g_calls <<- calls
             }
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
-            setkey(g_calls,id)
-
-            #remove added minor het ins
-
+            
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
                 for(i in nrow(g_minor_het_insertions))
                 {
@@ -152,6 +149,13 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,added:=NULL]
                 g_minor_het_insertions[,ins_added := NULL]
             }
+            
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
+            setkey(g_calls,id)
+
+            #remove added minor het ins
+
+            
                         
             report_hetero_indels(g_calls)
             if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
@@ -250,7 +254,7 @@ shinyServer(function(input,output,session) {
                 add_checkbox_buttons <- add_checkboxes()
                 add_goto_buttons     <- paste0('<input type="button" class="go-goto"  value="goto"  name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
                 add_reset_buttons    <- paste0('<input type="button" class="go-reset" value="remove" name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
-                add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
+                add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_view$id,'" data-id="',g_view$id,'" data-coding="',g_view$coding,'"',">")
 
                 # cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
 
@@ -290,8 +294,10 @@ shinyServer(function(input,output,session) {
                 e.preventDefault();
                 $el = $(this);
                 var id_data = $el.data('id');
+                var coding_data = $el.data('coding');
                 Shiny.onInputChange('goLock', {
-                    id: id_data
+                    id: id_data,
+                    coding: coding_data,
                 });
             });
         }"
@@ -342,7 +348,12 @@ shinyServer(function(input,output,session) {
         if(is.null(input$goLock)) return()
         isolate({
             updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
-            g_calls[id==input$goLock$id]$set_by_user <<- TRUE
+            if(length(grep("ins|del|dup",input$goLock$coding)) > 0){
+                g_stored_het_indels[[input$goLock$coding]] <<- input$goLock$id
+            } else {
+                g_calls[id==input$goLock$id]$set_by_user <<- TRUE
+            }
+            
         })
     })
 
