@@ -498,6 +498,9 @@ add_intensities <- function(added){
     g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
     g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
     #update intrex
+    g_intrexdat$intrex     <- setnames(g_calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
+    g_intrexdat$intrex     <- setnames(merge(g_intrexdat$intrex,g_calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+    g_intrexdat       <<- splice_variants(g_intrexdat)
     g_intrexdat$max_x <<- nrow(g_intens)  
     return(paste0(add$id,collapse= " "))
 }
@@ -510,6 +513,9 @@ remove_intensities <- function(added){
     g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
     g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
     #update intrex
+    g_intrexdat$intrex     <- setnames(g_calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
+    g_intrexdat$intrex     <- setnames(merge(g_intrexdat$intrex,g_calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+    g_intrexdat       <<- splice_variants(g_intrexdat)
     g_intrexdat$max_x <<- nrow(g_intens)
 }
 

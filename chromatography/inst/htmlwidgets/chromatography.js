@@ -78,18 +78,20 @@ HTMLWidgets.widget({
         label_pos["call_rev"]       = 170;
         label_pos["mut_call_rev"]   = 185;
         //variables grouped at one place so its easier to read their order and determine their visibility (who's on top)
-        var scope_g   = focus.append("g");
-        var quals_g   = focus.append("g");
-        var quals_g_r = focus.append("g");
-        var quals_txt = focus.append("g");
-        var gLine_a   = focus.append("g");
-      	var gLine_c   = focus.append("g");
-  		var gLine_g   = focus.append("g");
-  		var gLine_t   = focus.append("g");
-        var gLine_a_r = focus.append("g");
-        var gLine_c_r = focus.append("g");
-  		var gLine_g_r = focus.append("g");
-  		var gLine_t_r = focus.append("g");   
+        var scope_g    = focus.append("g");
+        var quals_g    = focus.append("g");
+        var quals_g_r  = focus.append("g");
+        var quals_txt  = focus.append("g");
+        var gLine_a    = focus.append("g");
+      	var gLine_c    = focus.append("g");
+  		var gLine_g    = focus.append("g");
+  		var gLine_t    = focus.append("g");
+        var gLine_a_r  = focus.append("g");
+        var gLine_c_r  = focus.append("g");
+  		var gLine_g_r  = focus.append("g");
+  		var gLine_t_r  = focus.append("g");
+        var gNoise_fwd = focus.append("g");
+        var gNoise_rev = focus.append("g");
         var text_ref          = focus.append("g");
         var text_call         = focus.append("g");
         var text_call_rev     = focus.append("g");
@@ -100,9 +102,13 @@ HTMLWidgets.widget({
         var var_ind_focus     = focus.append("g");
         var full_line         = context.append("g");
         var exon_boxes        = context.append("g");
+        var intrex_txt        = context.append("g");
+        var intrex_num        = context.append("g");
         var varim_gen         = context.append("g");
         var varim_user_s      = context.append("g");
         var varim_user_m      = context.append("g");
+        var noisyn_con        = context.append("g");  //noisy neighbors
+        var noisyn_foc        = focus.append("g");
         var aa_ref            = focus.append("g");
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
@@ -170,16 +176,31 @@ HTMLWidgets.widget({
                 case "G": if(rev){var g = gLine_g_r;}else{var g = gLine_g;} var col = "#000000"; break;
                 case "T": if(rev){var g = gLine_t_r;}else{var g = gLine_t;} var col = "#FF0000"; break;
             }    
+            //console.log("updating line + ",rev);
             if(rev){var c = "line_r";var l = line_rev;}
             else{var c = "line_f";var l = line_fwd;}
             
             var line = g.selectAll("path").data(data); //join
-            line.enter().append("path")                //enter
-                .attr("class","path "+c)
+            line.enter().append("path");                //enter
+            line.attr("class","path "+c)
                 .attr("d",l)
                 .attr("fill","none").attr("stroke",col)
                 .attr("stroke-width",0.75);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
             line.exit().remove();                      //exit
+        }
+        function setNoiseArea(fwd,rev){
+            var gnf = gNoise_fwd.selectAll("path").data([fwd]);
+            gnf.enter().append("path");
+            gnf.attr("class","area area_fwd").attr("d",noise_area_fwd)
+               .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15);
+            gnf.exit().remove();
+            if(typeof rev !== 'undefined'){
+                var gnr = gNoise_rev.selectAll("path").data([rev]);
+                gnr.enter().append("path");
+                gnr.attr("class","area area_rev").attr("d",noise_area_rev)
+                   .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15);
+                gnr.exit().remove();
+            }      
         }
         function setPeakLabel(calls,label,opacity){
             opacity = typeof opacity !== 'undefined' ? opacity : 0.8;
@@ -275,22 +296,25 @@ HTMLWidgets.widget({
             
         }
         function showNoiseInMinimap(noisy_neighbors){
-            context.selectAll("lines.noisy_neighbors").data(noisy_neighbors).enter()
-    			      .append("line")
-                .attr("class","minimap context")
+            var nnc = noisyn_con.selectAll("line").data(noisy_neighbors);
+            nnc.enter().append("line");
+            nnc.attr("class","minimap context")
       			    .attr("x1",function(d){return width2Scale(d["trace_peak"]);})
       			    .attr("y1",-3)
       			    .attr("x2",function(d){return width2Scale(d["trace_peak"]);})
       			    .attr("y2",3)
       			    .attr("stroke-width",3)
       			    .attr("stroke", "brown");
-            focus.append("g").selectAll("noise_indicator").data(noisy_neighbors).enter()  //noise indicator
-  		         .append("line").attr("class","peak_label short line var_noise_indic")
+            nnc.exit().remove();
+            var nnf = noisyn_foc.selectAll("line").data(noisy_neighbors);
+            nnf.enter().append("line");
+            nnf.attr("class","peak_label short line var_noise_indic")
   		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
   		         .attr("y1",140)
   		         .attr("x2",function(d){return widthScale(d["trace_peak"]);})
   		         .attr("y2",400)
   		         .attr("stroke-width",10).attr("stroke","brown").attr("opacity",0.2).attr("stroke-dasharray","1,3");
+            nnf.exit().remove();
         }
         function setCodingLabel(calls){
             var aa_r = aa_ref.selectAll("text").data(calls);
@@ -346,7 +370,7 @@ HTMLWidgets.widget({
       		        .attr("y",-2)
       		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             qt.exit().remove();
-            qg = quals_g.selectAll("rect").data(calls);
+            var qg = quals_g.selectAll("rect").data(calls);
             qg.enter().append("rect");
             qg.attr("class","peak_label qual_fwd q")
       		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
@@ -356,7 +380,7 @@ HTMLWidgets.widget({
       		        .attr("fill", "rgba(200,200,200,0.3)");
             qg.exit().remove();
             if(rev!=0){
-                qg_r = quals_g_r.selectAll("rect").data(calls);
+                var qg_r = quals_g_r.selectAll("rect").data(calls);
                 qg_r.enter().append("rect");
                 qg_r.attr("class","peak_label qual_rev q")
       		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
@@ -366,6 +390,41 @@ HTMLWidgets.widget({
       		        .attr("fill", "rgba(200,200,200,0.3)");
                 qg_r.exit().remove();
             }      
+        }
+        function setIntrexBoxes(intrex){
+            var eb = exon_boxes.selectAll("rect").data(intrex);
+            eb.enter().append("rect");
+  			eb.attr("class","context")
+  				.attr("x",function(d){return width2Scale(d["start"]);})
+  				.attr("y",0).attr("rx",3).attr("ry",3)
+  				.attr("width",function(d){return width2Scale(d["end"]-d["start"]);})
+  				.attr("height",50)
+  				.attr("fill",function(d) {
+  				           if (d["splicevar"] != ''){   return "rgba(255,205,205,1.0)";
+  				    } else if (/exon/.test(d["attr"])){ return "rgba(200,200,200,1.0)";
+  				    } else {                            return "rgba(230,230,230,1.0)"; }
+  				});
+            eb.exit().remove();
+            var iet = intrex_txt.selectAll("text").data(intrex);
+            iet.enter().append("text");
+            iet.attr("class","context")
+  				.attr("x",function(d){return width2Scale(d["start"]);})
+  				.attr("y",-4)
+  				.attr("opacity",0.8)
+  				.attr("fill","black")
+  				.text(function(d) {
+  				    return d["attr"]+d["splicevar"];
+  				});
+            iet.exit().remove();
+            var ien = intrex_num.selectAll("text").data(intrex);
+            ien.enter().append("text");
+  		    ien.attr("class","context")
+  				.attr("x",function(d){return width2Scale(d["start"]);})
+  				.attr("y",62)
+  				.attr("opacity",0.8)
+  				.text(function(d){return d["id"];})
+  				.attr("fill","black");
+            ien.exit().remove();            
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
@@ -429,7 +488,7 @@ HTMLWidgets.widget({
             }
         );
         function callShiny(id,trace_peak){
-            console.log(id);
+            //console.log(id);
             Shiny.onInputChange("pos_click", {id: id});
         };
         function get_color(col){
@@ -459,8 +518,6 @@ HTMLWidgets.widget({
                 from = (ext[0]-ten);
                 if(from < 0){from=0};
                 to   = (ext[1]+ten);
-                //if(to > width){to = width}; must get the scales right to set boundaries
-
                 setBrush(from,to);}
         };
         function brushMoveLeft(){
@@ -496,17 +553,15 @@ HTMLWidgets.widget({
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
-            noise_area_fwd: noise_area_fwd,
-            noise_area_rev: noise_area_rev,
             label_pos:  label_pos,
             full_line: full_line,
-            exon_boxes: exon_boxes,
             scope_g: scope_g,
             context: context,
 	        brush:   brush,
             join:    join,
             joinView:joinView,
             focus:   focus,
+            setNoiseArea: setNoiseArea,
             updateLine: updateLine,
             redraw:  redraw,
             widthScale:  widthScale,
@@ -526,7 +581,7 @@ HTMLWidgets.widget({
             showNoiseInMinimap: showNoiseInMinimap,
             setCodingLabel: setCodingLabel,
             setQualityLabels: setQualityLabels,
-            callShiny: callShiny
+            setIntrexBoxes: setIntrexBoxes
         }
     },
 
@@ -581,8 +636,6 @@ HTMLWidgets.widget({
   			var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"])
   			instance.intrex = intrex;
 
-            var noise_area_fwd = instance.noise_area_fwd;
-            var noise_area_rev = instance.noise_area_rev;
   			var focus   = instance.focus;
   			var context = instance.context;
   			var brush   = instance.brush;
@@ -606,38 +659,7 @@ HTMLWidgets.widget({
   				.attr("stroke-width",3).attr("stroke","rgba(180,180,180,1.0)");
 
             //intron/exon boxes
-  			instance.exon_boxes.selectAll("rect").data(intrex).enter()
-  				.append("rect").attr("class","context")
-  				.attr("x",function(d){return widthScale(d["start"]);})
-  				.attr("y",0).attr("rx",3).attr("ry",3)
-  				.attr("width",function(d){return widthScale(d["end"]-d["start"]);})
-  				.attr("height",50)
-  				.attr("fill",function(d) {
-  				           if (d["splicevar"] != ''){   return "rgba(255,205,205,1.0)";
-  				    } else if (/exon/.test(d["attr"])){ return "rgba(200,200,200,1.0)";
-  				    } else {                            return "rgba(230,230,230,1.0)"; }
-//  				           if (/exon/.test(d["attr"])){                         return "rgba(200,200,200,1.0)";
-//  				    } else if (/intron9/.test(d["attr"]) & d["length"] == 133){ return "rgba(255,205,205,1.0)";
-//  				    } else {                                                    return "rgba(230,230,230,1.0)"; }
-  				});
-  			context.selectAll("text.intrex.name").data(intrex).enter()
-  				.append("text").attr("class","context")
-  				.attr("x",function(d){return widthScale(d["start"]);})
-  				.attr("y",-4)
-  				.attr("opacity",0.8)
-  				.attr("fill","black")
-  				.text(function(d) {
-  				    return d["attr"]+d["splicevar"];
-//  				    if (/intron9/.test(d["attr"]) & d["length"] == 133){ return d["attr"]+" | "+"beta variant";
-//  				    } else {                                             return d["attr"]; }
-  				});
-  			context.selectAll("text.intrex.start").data(intrex).enter()
-  				.append("text").attr("class","context")
-  				.attr("x",function(d){return widthScale(d["start"]);})
-  				.attr("y",62)
-  				.attr("opacity",0.8)
-  				.text(function(d){return d["id"];})
-  				.attr("fill","black");
+            instance.setIntrexBoxes(intrex);
 
   			brush.x(width2Scale);
 		
@@ -646,28 +668,17 @@ HTMLWidgets.widget({
             instance.updateLine([intens["G"]],"G",false);
             instance.updateLine([intens["T"]],"T",false);
                  
-            //noise indicator fwd
-            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
-            var group_noise_fwd = focus.append("g");
-            var group_noise_rev = focus.append("g");
-            group_noise_fwd.selectAll("path").data([a_noise_fwd]).enter()
-                .append("path").attr("class","area area_fwd").attr("d",noise_area_fwd)
-                .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15);
-
+            //noise indicator
+            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);  
             //reverse strand
             if(intens_rev != ""){
-                //Noise indicator rev
-                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
-                group_noise_rev.selectAll("path").data([a_noise_rev]).enter()
-                .append("path").attr("class","area area_rev").attr("d",noise_area_rev)
-                .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15);
-                
+                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);            
                 instance.updateLine([intens_rev["A"]],"A",true);
                 instance.updateLine([intens_rev["C"]],"C",true);
                 instance.updateLine([intens_rev["G"]],"G",true);
                 instance.updateLine([intens_rev["T"]],"T",true);   
             }
-
+            instance.setNoiseArea(a_noise_fwd,a_noise_rev);
             //on single strand always show "join view"
             if(intens_rev != ""){
                 instance.joinView();
@@ -681,7 +692,6 @@ HTMLWidgets.widget({
                  .attr("y",-14).attr("rx",2).attr("ry",2)
                  .attr("width",24).attr("height",instance.height-90)
                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
-            
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
                 .append("text").attr("class","peak_label")
                 .text(function(d){
@@ -690,7 +700,6 @@ HTMLWidgets.widget({
                     else {                     return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
                 .attr("y",(instance.label_pos["codon"]+rev))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
@@ -698,7 +707,6 @@ HTMLWidgets.widget({
                 .text(function(d){return d["gen_coord"];})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){instance.callShiny(d["id"]);})
                 .attr("y",(instance.label_pos["gen_coord"]+rev))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             instance.setPeakLabel(calls,"reference");
@@ -738,7 +746,7 @@ HTMLWidgets.widget({
 
             instance.showVarInMinimap(choices);
             instance.showNoiseInMinimap(noisy_neighbors);
-	          //zooming in so that the first view is not ugly dense graph
+	        //zooming in so that the first view is not ugly dense graph
 
             if (typeof choices[0] !== 'undefined') {
                 from = choices[0]["trace_peak"]-100;
@@ -756,25 +764,29 @@ HTMLWidgets.widget({
             if(x["intens_rev"] !== null){
                 rev = 1;
             }
+            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);  
+            var intens = x["intens"];
+            instance.updateLine([intens["A"]],"A",false);
+            instance.updateLine([intens["C"]],"C",false);
+            instance.updateLine([intens["G"]],"G",false);
+            instance.updateLine([intens["T"]],"T",false);
+                
+            if(rev){
+                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
+                var intens_rev = x["intens_rev"];
+                instance.updateLine([intens_rev["A"]],"A",true);
+                instance.updateLine([intens_rev["C"]],"C",true);
+                instance.updateLine([intens_rev["G"]],"G",true);
+                instance.updateLine([intens_rev["T"]],"T",true);   
+            }
+            instance.setNoiseArea(a_noise_fwd,a_noise_rev);
+            instance.setQualityLabels(calls,rev);
             if(instance.max_x != x["intrexdat"]["max_x"]){   
-                instance.max_x = x["intrexdat"]["max_x"];
-                console.log(x["intens"]);
-                
-                var intens = x["intens"];
-          		instance.updateLine([intens["A"]],"A",false);
-                instance.updateLine([intens["C"]],"C",false);
-                instance.updateLine([intens["G"]],"G",false);
-                instance.updateLine([intens["T"]],"T",false);
-                
-                if(rev){
-                    var intens_rev = x["intens_rev"];
-                    instance.updateLine([intens_rev["A"]],"A",true);
-                    instance.updateLine([intens_rev["C"]],"C",true);
-                    instance.updateLine([intens_rev["G"]],"G",true);
-                    instance.updateLine([intens_rev["T"]],"T",true);   
-                }
-                instance.setQualityLabels(calls,rev);
-                instance.redraw();                         
+                instance.max_x = x["intrexdat"]["max_x"];  
+                var domain_x    = x["intrexdat"]["max_x"];
+                instance.width2Scale.domain([0,domain_x]);
+                var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]);
+                instance.setIntrexBoxes(intrex);                         
             }
   			if(x["intrexdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["intrexdat"]["max_y"]);
@@ -782,7 +794,6 @@ HTMLWidgets.widget({
   			}else if(x.choices != instance.choices){
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
                 var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
-                
                 var show_calls  = x["show_calls"];
                 if(show_calls){ instance.call_opacity = 0.8; }
                 else{ instance.call_opacity = 0; }  
@@ -791,7 +802,7 @@ HTMLWidgets.widget({
                 //instance.context.selectAll(".minimap").remove();
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
-                //instance.showNoiseInMinimap(noisy_neighbors);
+                instance.showNoiseInMinimap(noisy_neighbors);
                 //instance.noisy_neighbors = x.noisy_neighbors;
                 instance.setPeakLabel(calls,"user_sample");
                 instance.setPeakLabel(calls,"user_mut");
