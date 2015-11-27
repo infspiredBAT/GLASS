@@ -125,6 +125,7 @@ shinyServer(function(input,output,session) {
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
         }
+        g_stored_het_indels <<- list()
         g_calls <<- NULL
         return(calls)
     })
