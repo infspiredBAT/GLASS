@@ -107,6 +107,7 @@ shinyServer(function(input,output,session) {
                 if(!is.null(called)){
                     intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE,single_rev)
                     calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,glassed_cod)
+                    calls        <-  adjust_ref_mut(calls)
                     g_intens     <<- intensified$intens
                     g_intens_rev <<- intensified$intens_rev
                     g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
@@ -446,7 +447,9 @@ shinyServer(function(input,output,session) {
     output$call_table <- shiny::renderDataTable({
         if(varcall() & !is.null(g_calls)) { g_calls }
     }
-    ,options = list(paging=F, columnDefs=list(list(searchable=F, orderable=F, title=""))))
+    ,options = list(paging=F 
+                    ,columnDefs=list(list(searchable=F, orderable=F, title=""))
+                    ))
 
 #     output$intens_table <- shiny::renderDataTable({
 #         if(varcall() & !is.null(g_intens)) { g_intens }

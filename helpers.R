@@ -203,7 +203,6 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         calls[
               mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min
-            & mut_peak_base_fwd != reference
             #& quality_fwd >= qual_thres
             , mut_call_fwd := mut_peak_base_fwd
             ]
@@ -211,7 +210,6 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
         calls[
               mut_peak_pct_rev >= mut_min
             & mut_s2n_abs_rev >= s2n_min
-            & mut_peak_base_rev != reference
             #& quality_rev >= qual_thres
             , mut_call_rev := mut_peak_base_rev
             ]
