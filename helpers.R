@@ -100,21 +100,85 @@ include_locked_indels <- function(vec,indels,fwd){
         return(0:del_len + pos)
     }
     
-    dels <- unlist(lapply(names(indels)[grep("del",names(indels))],function(x) get_del_positions(x,indels[[x]],vec)))
-    het_dels <- dels[which(vec[dels] != "-")]
-#     prim_dels <- setdiff(dels,het_dels)
-#     
-#     vec[prim_dels] <- g_calls$reference[prim_dels]
-    if(length(het_dels) > 0){
-        vec <- vec[-het_dels]
-        if(fwd) {
-            vec <- c(vec,rep("-",length(het_dels)))
-        } else {
-            vec <- c(rep("-",length(het_dels)),vec)
-        }
+    get_ins_positions <- function(code,pos,vec){
+        if(length(grep("nt",code)) > 0) ins_len <- as.numeric(gsub(".*nt(\\d*)","\\1",code))
+        else ins_len <- nchar(gsub(".*[ins|dup](.*)","\\1",code))
+        if(all(g_calls$reference[pos] == "-")) pos <- pos - 1
+        
+        return(1:ins_len + floor(pos))
     }
     
-    return(vec)
+    dels <- lapply(names(indels)[grep("del",names(indels))],function(x) get_del_positions(x,indels[[x]],vec))
+    if(length(dels) > 0){
+        sec_dels <- dels[which(sapply(dels,function(x) all(vec[x] != "-")))]
+        prim_dels <- setdiff(dels,sec_dels)
+    } else{
+        sec_dels <- list()
+        prim_dels <- list()
+    }
+    
+    
+    ins <- lapply(names(indels)[grep("ins|dup",names(indels))],function(x) get_ins_positions(x,indels[[x]],vec))
+    if(length(ins) > 0){
+        sec_ins <- ins[which(sapply(ins,function(x) all(g_calls$reference[x] != "-")))]
+        prim_ins <- setdiff(ins,sec_ins)
+    } else{
+        sec_ins <- list()
+        prim_ins <- list()
+    }
+    
+    move_vec <- numeric(length(vec))
+    if(fwd){
+        if(length(sec_dels) > 0) move_vec[sapply(sec_dels,function(x) max(x) + 1)] <- - sapply(sec_dels,length)
+        if(length(prim_dels) > 0) move_vec[sapply(prim_dels,min)] <- sapply(prim_dels,length)
+        if(length(sec_ins) > 0) move_vec[sapply(sec_ins,min)] <- sapply(sec_ins,length)
+        if(length(prim_ins) > 0) move_vec[sapply(prim_ins,function(x) max(x) + 1)] <- -sapply(prim_ins,length)
+        move_vec <- cumsum(move_vec)
+    } else {
+        if(length(sec_dels) > 0) move_vec[sapply(sec_dels,function(x) min(x) - 1)] <- sapply(sec_dels,length)
+        if(length(prim_dels) > 0) move_vec[sapply(prim_dels,max)] <- -sapply(prim_dels,length)
+        if(length(sec_ins) > 0)move_vec[sapply(sec_ins,max)] <- -sapply(sec_ins,length)
+        if(length(prim_ins) > 0) move_vec[sapply(prim_ins,function(x) min(x) - 1)] <- sapply(prim_ins,length)
+        move_vec <- rev(cumsum(rev(move_vec)))
+    }
+    
+    new_vec <- rep("-",length(vec))
+    vec[unlist(prim_dels)] <- g_calls$reference[unlist(prim_dels)]
+    pos_vec <- seq_along(new_vec) + move_vec
+    pos_vec[pos_vec < 1] <- 1
+    new_vec[pos_vec] <- vec
+    new_vec <- new_vec[1:length(vec)]
+    new_vec[unlist(prim_dels)] <- "-"
+    if(fwd) new_vec[unlist(sec_ins)] <- g_calls$mut_peak_base_fwd[unlist(sec_ins)]
+    else new_vec[unlist(sec_ins)] <- g_calls$mut_peak_base_rev[unlist(sec_ins)]
+    
+#     if(length(het_dels) > 0){
+#         vec <- vec[-het_dels]
+#         if(fwd) {
+#             vec <- c(vec,rep("-",length(het_dels)))
+#         } else {
+#             vec <- c(rep("-",length(het_dels)),vec)
+#         }
+#     }
+#     
+#     prim_dels <- setdiff(dels,het_dels)
+#     if(length(prim_dels) > 0){
+#         vec[prim_dels] <- g_calls$reference[prim_dels]
+#         new_vec <- rep("-",length(vec))
+#         if(fwd) {
+#             vec <- vec[1:min(length(vec),length(new_vec) - length(prim_dels))]
+#             new_vec[setdiff(seq_along(new_vec),prim_dels)] <- vec
+#         } else {
+#             vec <- vec[1 + length(vec) -  min(length(vec),length(new_vec) - length(prim_dels)):1]
+#             new_vec[setdiff(seq_along(new_vec),prim_dels)] <- vec
+#         }
+#         vec <- new_vec
+#     }
+    
+
+    
+    
+    return(new_vec)
 }
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min){
@@ -122,7 +186,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut    := user_sample_orig]
     calls[set_by_user == FALSE, mut_call_fwd := call]
-    if(length(grep("del",names(g_stored_het_indels))) > 0){
+    if(length(grep("del|ins|dup",names(g_stored_het_indels))) > 0){
         calls[, mut_call_fwd := include_locked_indels(mut_call_fwd,g_stored_het_indels,fwd = T)]
     }
     # calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls[set_by_user==FALSE,])]
@@ -130,7 +194,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
         calls[set_by_user == FALSE, mut_call_rev := call_rev]
-        if(length(grep("del",names(g_stored_het_indels))) > 0){
+        if(length(grep("del|ins|dup",names(g_stored_het_indels))) > 0){
             calls[, mut_call_rev := include_locked_indels(mut_call_rev,g_stored_het_indels,fwd = F)]
         }
         
