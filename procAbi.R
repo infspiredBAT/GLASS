@@ -412,13 +412,16 @@ adjust_ref_mut <- function(calls){
         calls[id %in% vf,`:=`(sample_peak_base_fwd =  swp_base,sample_peak_pct_fwd = swp_pct)]
         calls[,`:=`(swp_base = NULL,swp_pct = NULL)]
     }
-    vr <- calls[(mut_peak_base_rev == reference ) & (abs(mut_peak_pct_rev - sample_peak_pct_rev) < 35 ), ]$id
-    if (length(vr)>1){
-        calls[id %in% vr,`:=`(swp_base = mut_peak_base_rev,swp_pct = mut_peak_pct_rev)]
-        calls[id %in% vr,`:=`(mut_peak_base_rev = sample_peak_base_rev,mut_peak_pct_rev = sample_peak_pct_rev)]
-        calls[id %in% vr,`:=`(sample_peak_base_rev =  swp_base,sample_peak_pct_rev = swp_pct)]
-        calls[,`:=`(swp_base = NULL,swp_pct = NULL)]
+    if(!is.null(g_intens_rev)){
+        vr <- calls[(mut_peak_base_rev == reference ) & (abs(mut_peak_pct_rev - sample_peak_pct_rev) < 35 ), ]$id
+        if (length(vr)>1){
+            calls[id %in% vr,`:=`(swp_base = mut_peak_base_rev,swp_pct = mut_peak_pct_rev)]
+            calls[id %in% vr,`:=`(mut_peak_base_rev = sample_peak_base_rev,mut_peak_pct_rev = sample_peak_pct_rev)]
+            calls[id %in% vr,`:=`(sample_peak_base_rev =  swp_base,sample_peak_pct_rev = swp_pct)]
+            calls[,`:=`(swp_base = NULL,swp_pct = NULL)]
+        }
     }
+    return(calls)
 }
 
 #Adam

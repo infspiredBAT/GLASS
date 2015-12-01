@@ -4,7 +4,6 @@ HTMLWidgets.widget({
     type: 'output',
 
     initialize: function(el, w, h) {
-        //console.log("I'm being initialized.")
         var instanceCounter = 0;
         var intrex = "";
         var max_x = 0;
@@ -142,7 +141,7 @@ HTMLWidgets.widget({
             //conditional visibility
             if(w<260){
                 focus.selectAll(".peak_label").attr("visibility","visible");
-                if(w==0){focus.selectAll(".peak_label").attr("visibility","hidden");}
+                if(w===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
                 focus.selectAll(".peak_label").attr("visibility","hidden");
                 if(w<800){
@@ -563,7 +562,6 @@ HTMLWidgets.widget({
             focus:   focus,
             setNoiseArea: setNoiseArea,
             updateLine: updateLine,
-            redraw:  redraw,
             widthScale:  widthScale,
             width2Scale: width2Scale,
             heightScale: heightScale,
@@ -798,8 +796,6 @@ HTMLWidgets.widget({
                 if(show_calls){ instance.call_opacity = 0.8; }
                 else{ instance.call_opacity = 0; }  
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
-                //instance.focus.selectAll(".peak_label short line").remove();
-                //instance.context.selectAll(".minimap").remove();
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
                 instance.showNoiseInMinimap(noisy_neighbors);
