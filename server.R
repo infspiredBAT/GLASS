@@ -30,16 +30,22 @@ shinyServer(function(input,output,session) {
 #         if (!is.null(input$select_file)) return(input$select_file)
 #         else return(NULL)
 #     })
-
+    ex <- NULL
+    btn_counter <- 0
+    
     loading_processed_files <- reactive ({
-
+        if (input$ex_btn[1] - btn_counter){
+            btn_counter <<- input$ex_btn[1]
+            ex <- c("data/abis/eric/3low_freq_fsF.ab1",
+                    "data/abis/eric/3low_freq_fsR.ab1")
+        }
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
-        if(!is.null(input$select_file)) {
+        if(!is.null(input$select_file) || !is.null(ex)) {
             file <- input$select_file$datapath
             name <- input$select_file$name
             full_name <- input$select_file$name
             single_rev <- FALSE
-
+            
             #getting rid of the date in names
             for(i in 1:length(name)){
                 name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
@@ -47,6 +53,7 @@ shinyServer(function(input,output,session) {
             #if multiple files uploaded we use the first to
             #check if we can distinguish forward and reverse
             #otherwise we only take the first file
+            base <- ""
             if(length(name)>=2){
                 if(gsub("F.*","F",name[1])==gsub("R.*","F",name[2])){
                     fwd_file <- input$select_file$datapath[1]
@@ -64,21 +71,28 @@ shinyServer(function(input,output,session) {
                     rev_file <- NULL
                     rev_file_name <- "-"
                 }
-            base <- ""
             }else{ #only one file selected
                 fwd_file <- input$select_file$datapath
                 fwd_file_name <- full_name
                 rev_file <- NULL
                 rev_file_name <- "-"
-                base <- sapply(strsplit(basename(name),"\\."),
-                               function(x) paste(x[1:(length(x)-1)], collapse="."))
+                if(!is.null(name)){
+                    base <- sapply(strsplit(basename(name),"\\."),
+                                   function(x) paste(x[1:(length(x)-1)], collapse="."))
+                }
             }
-
             if(substr(base,nchar(base),nchar(base))=="R"){
                 g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,sep="")
                 single_rev <- TRUE
             }else{
                 g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,sep="")
+            }
+            if(!is.null(ex)){
+                fwd_file <- ex[1]
+                rev_file <- ex[2]
+                g_files <<- "TP53 example data with a frameshift (c.277_278delCT) and a heterozgous polymorphisom (c.215C>G)\nfound with the following settings: minor peak mutation cutoff at 7; minimum quality cutoff at 16\nwhile the 'use the detected hetero indels' box is checked"
+                base = ""
+                ex <- NULL
             }
 
             withProgress(message = paste('processing...',sep=" "), value = 1, {

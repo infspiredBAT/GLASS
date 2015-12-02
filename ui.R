@@ -30,9 +30,10 @@ shinyUI(
 
 		fluidRow(
 			column(1, selectInput("gene_of_interest","",choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
-            # column(1),
+            conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
+                                     column(1,actionButton("ex_btn","example",icon = icon("play")))),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
-			column(9, verbatimTextOutput("files"))
+			column(8, verbatimTextOutput("files"))
 		),
 		tabsetPanel(id = 'tab',
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
