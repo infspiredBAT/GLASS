@@ -23,6 +23,7 @@ g_hetero_del_tab        <<- NULL
 g_expected_het_indel    <<- NULL
 g_minor_het_insertions  <<- NULL
 g_stored_het_indels     <<- list()
+g_indels_present        <<- FALSE
 shinyServer(function(input,output,session) {
 
 #     get_file <- reactive({
@@ -473,11 +474,17 @@ shinyServer(function(input,output,session) {
 #         if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
 #     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
-    #used for conditional display of options for double strand data
+    #used for conditional display 
     output$reverse <- reactive({
         loading_processed_files()
         return(!is.null(g_intens_rev))
     })
+    
+    output$indels_present <- reactive({
+        varcall()
+        return(g_indels_present)
+    })
     #not shure why but I need this here to make it work (regirsters the output variable?)
     outputOptions(output, 'reverse', suspendWhenHidden=FALSE)
+    outputOptions(output, 'indels_present', suspendWhenHidden=FALSE)
 })

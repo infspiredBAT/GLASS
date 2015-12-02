@@ -187,7 +187,10 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min){
     calls[set_by_user == FALSE, user_mut    := user_sample_orig]
     calls[set_by_user == FALSE, mut_call_fwd := call]
     if(length(grep("del|ins|dup",names(g_stored_het_indels))) > 0){
+        g_indels_present <<- TRUE
         calls[, mut_call_fwd := include_locked_indels(mut_call_fwd,g_stored_het_indels,fwd = T)]
+    }else{
+        g_indels_present <<- FALSE
     }
     # calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls[set_by_user==FALSE,])]
     # mut
@@ -484,7 +487,6 @@ report_hetero_indels <- function(calls){
 
     ins_counts <- sum(hetero_ins_tab[which(!is.in.primery),2]-hetero_ins_tab[which(!is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(is.in.reference),2]-hetero_del_tab[which(is.in.reference),1]+1,na.rm = T)
     del_counts <- sum(hetero_ins_tab[which(is.in.primery),2]-hetero_ins_tab[which(is.in.primery),1]+1,na.rm = T) + sum(hetero_del_tab[which(!is.in.reference),2]-hetero_del_tab[which(!is.in.reference),1]+1,na.rm = T)
-
     # if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = )
     if(nrow(hetero_ins_tab) > 0) {
         offset <- -start(pattern(hetero_indel_aln)) + start(subject(hetero_indel_aln))
@@ -496,6 +498,11 @@ report_hetero_indels <- function(calls){
     g_hetero_ins_tab   <<- hetero_ins_tab
     g_hetero_del_tab   <<- hetero_del_tab
     g_hetero_indel_report <<- paste0("alignment % id : ",g_hetero_indel_pid,"%\nins/del counts : ",ins_counts," / ",del_counts)
+    if((ins_counts > 0)||(del_counts > 0)){
+        g_indels_present <<- TRUE
+    }else{
+        g_indels_present <<- FALSE
+    }
 }
 
 get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
