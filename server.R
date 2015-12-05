@@ -1,6 +1,6 @@
 library(shiny)
 library(sangerseqR)
-#library(xlsx)
+library(xlsx)
 source("procAbi.R")
 source("helpers.R")
 
