@@ -411,7 +411,7 @@ get_choices <- function(calls){
 get_view<-function(choices){
     
     computeConsecutives <- function(ids){
-        ids <- ids * 100
+        ids <- round(ids * 100)
         res <- rle(ids - c(Inf,ids[-length(ids)]))
         ccc <- cumsum(res$lengths)
         ccc[which(res$values != 1 & res$values != 100)] <- 0
@@ -431,7 +431,7 @@ get_view<-function(choices){
             else gen_coord <- paste0(max(tab$gen_coord),"_",min(tab$gen_coord))
             
             if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) - 1,"_",min(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
-            else coding <- paste0("c.",min(coord),"_",max(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
+            else coding <- paste0("c.",min(coord),"_",max(coord),type, paste(nucs,collapse = ""))
             
             return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,protein = tab$protein[1]))
         } else {
@@ -441,14 +441,43 @@ get_view<-function(choices){
     
     choices[,consecutives := computeConsecutives(id) ][,mut_type := gsub("c\\.\\d*(...).*","\\1",coding)]
     indel_tab <- choices[intersect(grep("del|ins",mut_type),which(consecutives != 0)), squeeze_indels(.SD),by = c("mut_type","consecutives")]
-
+    #represent consecutive indels on one line
     if(nrow(indel_tab) > 0){
         choices <- choices[union(grep("del|ins",mut_type,invert = T),which(consecutives == 0)),]
         choices <- rbind(choices,indel_tab,fill=TRUE)
     }
-    
+    #identify frame shifts and inframe indels
+    for(i in grep("del|ins",choices$mut_type)){
+        seq <- gsub("c\\.\\d*_*\\d*...(.)","\\1",choices[i,]$coding)
+        #if(length(seq) > 10,paste0(length(seq),"nt")
+        if((str_length(seq) %% 3)!=0){
+            prot <- gsub("(p\\....\\d*).*","\\1",choices[i]$protein)
+            choices[i,]$protein = paste0(prot, "fs")
+        }else{ #in frame 
+            if(choices[i,]$mut_type == "ins"){
+                from <- as.numeric(g_calls[choices[i]$id]$codon)
+                to   <- as.numeric(g_calls[choices[i]$id]$codon) +1
+                choices[i,]$protein = paste0("p.",g_calls[codon==from,][1]$aa_ref,from,"_",
+                                             g_calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
+                                             paste(translate(strsplit(seq,"")[[1]]),collapse = ""))
+            }
+            if(choices[i,]$mut_type=="del"){
+                
+                from <- as.numeric(g_calls[choices[i]$id]$codon) 
+                to   <- as.numeric(g_calls[choices[i]$id]$codon) + nchar(seq)/3 -1
+                
+                #from <- as.numeric(g_calls[choices[i]$id]$codon) - 10
+                #to   <- as.numeric(g_calls[choices[i]$id]$codon) + nchar(seq)/3 + 10
+                #lapply(g_calls[codon %in% c(from:to) & ord_in_cod == 1]$aa_ref,mya)
+                
+                choices[i,]$protein = paste0("p.",g_calls[codon==from,][1]$aa_ref,from,"_",
+                                             g_calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type)
+            }
+        }
+    }
+    #identify duplications (special kind of insertions)
     for(i in grep("ins",choices$mut_type)){
-        seq <- gsub("c\\.\\d*...(.)","\\1",choices[i,]$coding)
+        seq <- gsub("c\\.\\d*_*\\d*...(.)","\\1",choices[i,]$coding)
         if(floor(choices[i,]$id) == choices[i,]$id) prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id - 1,]$reference,collapse = "")
         else prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
         if(seq == prev_seq) choices[i,coding := gsub("ins","dup",coding)]
@@ -457,7 +486,12 @@ get_view<-function(choices){
     setkey(choices,id)
     return(choices)
 }
-
+mya <- function(x){
+    if(is.na(x)){return(".")}
+    else{ if(x == "-"){return("-")}
+        else{return(a(x))}
+    }
+}
 mround <- function(x,base){
     base*round(x/base)
 }

@@ -56,12 +56,12 @@ shinyServer(function(input,output,session) {
             #otherwise we only take the first file
             base <- ""
             if(length(name)>=2){
-                if(gsub("F.*","F",name[1])==gsub("R.*","F",name[2])){
+                if(gsub("*F.ab1","F",name[1])==gsub("*R.ab1","F",name[2])){
                     fwd_file <- input$select_file$datapath[1]
                     fwd_file_name <- full_name[1]
                     rev_file <- input$select_file$datapath[2]
                     rev_file_name <- full_name[2]
-                }else if(gsub("R.*","R",name[1])==gsub("F.*","R",name[2])){
+                }else if(gsub("*R.ab1","R",name[1])==gsub("*F.ab1","R",name[2])){
                     fwd_file <- input$select_file$datapath[2]
                     fwd_file_name <- full_name[2]
                     rev_file <- input$select_file$datapath[1]
@@ -120,6 +120,8 @@ shinyServer(function(input,output,session) {
                     error = function(e){output$files <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
 
                 if(!is.null(called)){
+                    g_intens                <<- NULL
+                    g_intens_rev            <<- NULL 
                     intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE,single_rev)
                     calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,glassed_cod)
                     calls        <-  adjust_ref_mut(calls)

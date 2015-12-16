@@ -294,7 +294,7 @@ HTMLWidgets.widget({
             v.exit().remove();
             
         }
-        function showNoiseInMinimap(noisy_neighbors){
+        function showNoisyNbr(noisy_neighbors){
             var nnc = noisyn_con.selectAll("line").data(noisy_neighbors);
             nnc.enter().append("line");
             nnc.attr("class","minimap context")
@@ -305,7 +305,7 @@ HTMLWidgets.widget({
       			    .attr("stroke-width",3)
       			    .attr("stroke", "brown");
             nnc.exit().remove();
-            var nnf = noisyn_foc.selectAll("line").data(noisy_neighbors);
+        /*  var nnf = noisyn_foc.selectAll("line").data(noisy_neighbors);
             nnf.enter().append("line");
             nnf.attr("class","peak_label short line var_noise_indic")
   		         .attr("x1",function(d){return widthScale(d["trace_peak"]);})
@@ -314,6 +314,7 @@ HTMLWidgets.widget({
   		         .attr("y2",400)
   		         .attr("stroke-width",10).attr("stroke","brown").attr("opacity",0.2).attr("stroke-dasharray","1,3");
             nnf.exit().remove();
+        */
         }
         function setCodingLabel(calls){
             var aa_r = aa_ref.selectAll("text").data(calls);
@@ -576,7 +577,7 @@ HTMLWidgets.widget({
             setBrush: setBrush,
             setPeakLabel: setPeakLabel,
             showVarInMinimap: showVarInMinimap,
-            showNoiseInMinimap: showNoiseInMinimap,
+            showNoisyNbr: showNoisyNbr,
             setCodingLabel: setCodingLabel,
             setQualityLabels: setQualityLabels,
             setIntrexBoxes: setIntrexBoxes
@@ -743,7 +744,7 @@ HTMLWidgets.widget({
   				.attr("opacity",0.6);
 
             instance.showVarInMinimap(choices);
-            instance.showNoiseInMinimap(noisy_neighbors);
+            instance.showNoisyNbr(noisy_neighbors);
 	        //zooming in so that the first view is not ugly dense graph
 
             if (typeof choices[0] !== 'undefined') {
@@ -798,8 +799,7 @@ HTMLWidgets.widget({
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
-                instance.showNoiseInMinimap(noisy_neighbors);
-                //instance.noisy_neighbors = x.noisy_neighbors;
+                instance.showNoisyNbr(noisy_neighbors);
                 instance.setPeakLabel(calls,"user_sample");
                 instance.setPeakLabel(calls,"user_mut");
                 instance.setPeakLabel(calls,"reference")
