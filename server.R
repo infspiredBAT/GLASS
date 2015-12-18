@@ -122,6 +122,9 @@ shinyServer(function(input,output,session) {
                 if(!is.null(called)){
                     g_intens                <<- NULL
                     g_intens_rev            <<- NULL 
+                    g_minor_het_insertions  <<- NULL
+                    g_stored_het_indels     <<- list()
+                    g_indels_present        <<- FALSE
                     intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE,single_rev)
                     calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,glassed_cod)
                     calls        <-  adjust_ref_mut(calls)
@@ -409,11 +412,11 @@ shinyServer(function(input,output,session) {
     set_opacity <- observe({
         if(varcall()){
             opac_fwd <- 1 + (input$opacity/100)
-            opac_rev <- 1 - (input$opacity/100)
+            #opac_rev <- 1 - (input$opacity/100)
             #if(opac_fwd>1)opac_fwd <- 1
             #if(opac_rev>1)opac_rev <- 1
             session$sendCustomMessage(type = "opac_f",message = paste0(opac_fwd))
-            session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
+            #??session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
 

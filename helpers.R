@@ -480,7 +480,10 @@ get_view<-function(choices){
         seq <- gsub("c\\.\\d*_*\\d*...(.)","\\1",choices[i,]$coding)
         if(floor(choices[i,]$id) == choices[i,]$id) prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id - 1,]$reference,collapse = "")
         else prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
-        if(seq == prev_seq) choices[i,coding := gsub("ins","dup",coding)]
+        if(seq == prev_seq) {
+            choices[i,coding := gsub("ins","dup",coding)]
+            #the coordinates are changed to the sequence that is duplicated 
+        }
     }
     
     setkey(choices,id)
@@ -582,8 +585,8 @@ incorporate_hetero_indels_func <- function(calls){
     if(nrow(g_minor_het_insertions[!is.na(pos)]) > 0){
         get_ins_data_table <- function(pos,seq){
             ins_seq <- strsplit(seq,"")[[1]]
-            ins_tab <- calls[rep(pos,length(ins_seq)),]
-            ins_tab[,id := id - 1 + seq_along(id)/100]
+            ins_tab <- calls[rep(pos-1,length(ins_seq)),]
+            ins_tab[,id := id + seq_along(id)/100]
             ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
             ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
             if(!is.null(g_intens_rev)){
