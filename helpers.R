@@ -452,7 +452,13 @@ get_view<-function(choices){
         #if(length(seq) > 10,paste0(length(seq),"nt")
         if((str_length(seq) %% 3)!=0){
             prot <- gsub("(p\\....\\d*).*","\\1",choices[i]$protein)
-            choices[i,]$protein = paste0(prot, "fs")
+            aa <- gsub("p\\.(...)\\d*.*","\\1",choices[i]$protein)
+            cod <- as.numeric(gsub("p\\....(\\d*).*","\\1",choices[i]$protein))
+            while((g_calls[codon == cod][1]$aa_ref == g_calls[codon == cod][1]$aa_mut)&
+                  (g_calls[codon == cod][1]$aa_ref == g_calls[codon == cod][1]$aa_sample)&
+                  (!is.na(g_calls[codon == cod][1]$aa_sample))) {cod = cod +1}
+            choices[i,]$protein = paste0("p.",aa,cod, "fs")
+            
         }else{ #in frame 
             if(choices[i,]$mut_type == "ins"){
                 from <- as.numeric(g_calls[choices[i]$id]$codon)
@@ -482,7 +488,13 @@ get_view<-function(choices){
         else prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
         if(seq == prev_seq) {
             choices[i,coding := gsub("ins","dup",coding)]
-            #the coordinates are changed to the sequence that is duplicated 
+            #the coordinates are changed to the sequence that is duplicated #! find teste for these
+            if(nchar(seq)>1){
+                choices[i,]$coding <- paste0("c.",g_calls[floor(choices[i,]$id)-nchar(seq)+1]$coding_seq,"_",g_calls[floor(choices[i,]$id),]$coding_seq,"dup",seq)
+            }
+        }else{
+            if(nchar(seq)==1)
+                choices[i,]$coding <- paste0("c.",g_calls[floor(choices[i]$id),]$coding_seq,"_",g_calls[ceiling(choices[i]$id),]$coding_seq,"ins",seq)
         }
     }
     
