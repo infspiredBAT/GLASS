@@ -330,21 +330,22 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
     } else {
         intens <- setnames(data.table(intens),c("A","C","G","T"))
     }
-
+    intens[,id:=c(1:nrow(intens))]
+    setkey(intens,id)
     if(rev){
         intens_rev <- normalize_peak_width(intens_rev,data_rev$PLOC.1,11)
         intens_rev <- setnames(data.table(intens_rev),c("T","G","C","A"))
         intens_rev <- intens_rev[nrow(intens_rev):1]
         calls      <- calls[,trace_peak_rev:=rescale_call_positions(data_rev$PLOC.1[1],nrow(calls),11)]
+        intens_rev[,id:=c(1:nrow(intens_rev))]
+        setkey(intens_rev,id)
     }
 
     deletions <- calls[call=="-"][,id]
     if(rev) deletions_rev <- calls[call_rev=="-"][,id]
     else deletions_rev <- list()
-
     if(length(deletions)!=0){
-        intens[,id:=c(1:nrow(intens))]
-        setkey(intens,id)
+        
         del_pos <- 0
         del_pos <- calls[id %in% deletions][,trace_peak]
         rep <- 0
@@ -358,8 +359,6 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
         setkey(intens,id)
     }
     if(length(deletions_rev)!=0){
-        intens_rev[,id:=c(1:nrow(intens_rev))]
-        setkey(intens_rev,id)
         del_pos <- 0
         del_pos <- calls[id %in% deletions_rev][,trace_peak_rev]
         rep <- 0

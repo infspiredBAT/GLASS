@@ -652,9 +652,13 @@ add_intensities <- function(added){
     id <- g_calls[id == as.integer(added[1]),]$trace_peak + 6
     add<-data.table("id"=id + (1:(length(added)*12)/1000),"A"=0,"C"=0,"G"=0,"T"=0)
     g_intens     <<- rbind(g_intens,     add)
-    g_intens_rev <<- rbind(g_intens_rev, add)
     setkey(g_intens,     id)
-    setkey(g_intens_rev, id) #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
+    if("call_rev" %in% colnames(g_calls)){
+        g_intens_rev <<- rbind(g_intens_rev, add)
+        setkey(g_intens_rev, id)
+        
+    }
+    #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
     #update peak positions in calls table    
     g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
     g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
@@ -669,10 +673,12 @@ add_intensities <- function(added){
 remove_intensities <- function(added){
     #update intensities (this operation takes too long)
     g_intens <<- g_intens[!id %in% as.numeric(str_split(g_minor_het_insertions$ins_added," ")[[1]]),]
-    g_intens_rev <<-g_intens_rev[! id %in% as.numeric(str_split(g_minor_het_insertions$ins_added," ")[[1]]),]
     #update peak positions in calls table
     g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
-    g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
+    if("call_rev" %in% colnames(g_calls)){
+        g_intens_rev <<-g_intens_rev[! id %in% as.numeric(str_split(g_minor_het_insertions$ins_added," ")[[1]]),]
+        g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
+    }
     #update intrex
     g_intrexdat$intrex     <- setnames(g_calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
     g_intrexdat$intrex     <- setnames(merge(g_intrexdat$intrex,g_calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")

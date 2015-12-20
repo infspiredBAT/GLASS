@@ -160,7 +160,7 @@ shinyServer(function(input,output,session) {
             if(is.null(g_calls)){
                 g_calls <<- calls
             }
-            
+            #remove added minor het ins         
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
                 for(i in nrow(g_minor_het_insertions))
                 {
@@ -174,13 +174,9 @@ shinyServer(function(input,output,session) {
             
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             setkey(g_calls,id)
-
-            #remove added minor het ins
-
-            
                         
             report_hetero_indels(g_calls)
-            if(input$incorporate_checkbox) g_calls <<- incorporate_hetero_indels_func(g_calls)
+            if(input$incorporate_checkbox & g_indels_present) g_calls <<- incorporate_hetero_indels_func(g_calls)
             setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
@@ -412,11 +408,11 @@ shinyServer(function(input,output,session) {
     set_opacity <- observe({
         if(varcall()){
             opac_fwd <- 1 + (input$opacity/100)
-            #opac_rev <- 1 - (input$opacity/100)
-            #if(opac_fwd>1)opac_fwd <- 1
-            #if(opac_rev>1)opac_rev <- 1
+            opac_rev <- 1 - (input$opacity/100)
+            if(opac_fwd>1)opac_fwd <- 1
+            if(opac_rev>1)opac_rev <- 1
             session$sendCustomMessage(type = "opac_f",message = paste0(opac_fwd))
-            #??session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
+            session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
 

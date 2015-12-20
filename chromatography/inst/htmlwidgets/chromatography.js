@@ -607,7 +607,7 @@ HTMLWidgets.widget({
             var intens_rev = "";
             var rev = 0;  //offset on labels in case we have alternative reference
             if(x["intens_rev"] !== null){
-                var intens_rev = x["intens_rev"];
+                intens_rev = x["intens_rev"];
                 rev = 1;
             }
         if(instance.instanceCounter>=1){ //cleanup after previous sample
@@ -668,10 +668,10 @@ HTMLWidgets.widget({
             instance.updateLine([intens["T"]],"T",false);
                  
             //noise indicator
-            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);  
+            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]); 
             //reverse strand
             if(intens_rev != ""){
-                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);            
+                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
                 instance.updateLine([intens_rev["A"]],"A",true);
                 instance.updateLine([intens_rev["C"]],"C",true);
                 instance.updateLine([intens_rev["G"]],"G",true);
@@ -763,7 +763,7 @@ HTMLWidgets.widget({
             if(x["intens_rev"] !== null){
                 rev = 1;
             }
-            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);  
+            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]); 
             var intens = x["intens"];
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
