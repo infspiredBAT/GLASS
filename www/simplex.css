@@ -1443,9 +1443,9 @@ kbd kbd {
 pre {
   display: block;
   padding: 2px;
-  margin: 3px 0px;
+  margin: 2px 0px;
   font-size: 12px;
-  line-height: 1.42857143;
+  line-height: 1.2;
   word-break: break-all;
   word-wrap: break-word;
   color: #444444;
