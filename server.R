@@ -33,7 +33,7 @@ shinyServer(function(input,output,session) {
 #     })
     ex <- NULL
     btn_counter <- 0
-    
+
     loading_processed_files <- reactive ({
         if (input$ex_btn[1] - btn_counter){
             btn_counter <<- input$ex_btn[1]
@@ -46,7 +46,7 @@ shinyServer(function(input,output,session) {
             name <- input$select_file$name
             full_name <- input$select_file$name
             single_rev <- FALSE
-            
+
             #getting rid of the date in names
             for(i in 1:length(name)){
                 name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
@@ -91,7 +91,7 @@ shinyServer(function(input,output,session) {
             if(!is.null(ex)){
                 fwd_file <- ex[1]
                 rev_file <- ex[2]
-                g_files <<- "TP53 example data with a frameshift (c.277_278delCT) and a heterozgous polymorphisom (c.215C>G)\nfound with the following settings: minor peak mutation cutoff at 7; minimum quality cutoff at 16\nwhile the 'use the detected hetero indels' box is checked"
+                g_files <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
                 base = ""
                 ex <- NULL
             }
@@ -121,7 +121,7 @@ shinyServer(function(input,output,session) {
 
                 if(!is.null(called)){
                     g_intens                <<- NULL
-                    g_intens_rev            <<- NULL 
+                    g_intens_rev            <<- NULL
                     g_minor_het_insertions  <<- NULL
                     g_stored_het_indels     <<- list()
                     g_indels_present        <<- FALSE
@@ -160,21 +160,21 @@ shinyServer(function(input,output,session) {
             if(is.null(g_calls)){
                 g_calls <<- calls
             }
-            #remove added minor het ins         
+            #remove added minor het ins
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
                 for(i in nrow(g_minor_het_insertions))
                 {
                     added <- strsplit(g_minor_het_insertions[i]$added[[1]], split = " ")
                     g_calls <<- g_calls[!(id %in% added[[1]])]
                     remove_intensities(added)
-                }      
+                }
                 g_minor_het_insertions[,added:=NULL]
                 g_minor_het_insertions[,ins_added := NULL]
             }
-            
+
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
             setkey(g_calls,id)
-                        
+
             report_hetero_indels(g_calls)
             if(input$incorporate_checkbox & g_indels_present) g_calls <<- incorporate_hetero_indels_func(g_calls)
             setkey(g_calls,id)
@@ -371,7 +371,7 @@ shinyServer(function(input,output,session) {
             } else {
                 g_calls[id==input$goLock$id]$set_by_user <<- TRUE
             }
-            
+
         })
     })
 
@@ -463,7 +463,7 @@ shinyServer(function(input,output,session) {
     output$call_table <- shiny::renderDataTable({
         if(varcall() & !is.null(g_calls)) { g_calls }
     }
-    ,options = list(paging=F 
+    ,options = list(paging=F
                     ,columnDefs=list(list(searchable=F, orderable=F, title=""))
                     ))
 
@@ -475,12 +475,12 @@ shinyServer(function(input,output,session) {
 #         if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
 #     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
 
-    #used for conditional display 
+    #used for conditional display
     output$reverse <- reactive({
         loading_processed_files()
         return(!is.null(g_intens_rev))
     })
-    
+
     output$indels_present <- reactive({
         varcall()
         return(g_indels_present)

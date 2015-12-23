@@ -30,8 +30,9 @@ shinyUI(
 
 		fluidRow(
 			column(1, selectInput("gene_of_interest","",choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
-            conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
-                                     column(1,actionButton("ex_btn","example",icon = icon("play")))),
+            column(1,
+                conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
+                    actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",width='100%'))),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
 			column(8, verbatimTextOutput("files"))
 		),
@@ -41,13 +42,13 @@ shinyUI(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
                         tags$div(title="the absolute position of a call, nothing to do with genomic or codon numbering\n\nyou can either type a number, or it will show by interacting with glass",
-                            textInput("choose_call_pos","call position [?]")
-                        ),
+                            textInput("choose_call_pos","call position [?]")),
 					    # selectInput("change_peak","user_mod it to",choices=list(empty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
-					    selectInput("change_user_sample","change 1st variant",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
-					    selectInput("change_user_mut","change 2nd variant",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
-					    # textInput("change_variant","change variant to"),
-                        actionButton("change_btn","change", icon = icon("exchange"))
+                        tags$div(title="change the 1st/2nd or major/minor or sample/mutation variants to...",
+    					    selectInput("change_user_sample","change variants [?]",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
+    					    selectInput("change_user_mut","",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
+    					    # textInput("change_variant","change variant to"),
+                            actionButton("change_btn","change", icon = icon("exchange"), width='100%'))
 					),
 					column(4,
 				        HTML(paste("general infobox", sep="")),
