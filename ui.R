@@ -24,11 +24,9 @@ shinyUI(
             tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
 
-		HTML(paste("<b><font size=4em>genomePD/ </font><font size=6em>glass</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp.&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>the Medical Genomics Group @ CEITEC MU</a> &nbsp.&nbsp <a href=http://www.ericll.org target=_blank>the European Research Initiative on CLL / ERIC</a> &nbsp.&nbsp <a href=http://www.igcll.org target=_blank>the IgCLL group</a></font> | CESNET/MetaCentrum")),
-
-		hr(),
-
+		HTML(paste("&nbsp&nbsp<b><font size=4em>genomePD/ </font><font size=6em>glass</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp.&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>the Medical Genomics Group @ CEITEC MU</a> &nbsp.&nbsp <a href=http://www.ericll.org target=_blank>the European Research Initiative on CLL / ERIC</a> &nbsp.&nbsp <a href=http://www.igcll.org target=_blank>the IgCLL group</a></font> | CESNET/MetaCentrum")),
 		fluidRow(
+    		br(),
 			column(1, selectInput("gene_of_interest","",choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
             column(1,
                 conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
@@ -38,7 +36,6 @@ shinyUI(
 		),
 		tabsetPanel(id = 'tab',
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
-				br(),
 				fluidRow(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table

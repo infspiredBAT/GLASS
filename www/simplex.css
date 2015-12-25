@@ -1489,8 +1489,8 @@ pre code {
 .container-fluid {
   margin-right: auto;
   margin-left: auto;
-  padding-left: 15px;
-  padding-right: 15px;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 .row {
   margin-left: 0px;
@@ -3765,6 +3765,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .nav-tabs {
   border-bottom: 1px solid #dddddd;
   font-size: 1.2em;
+  margin-left: 6px;
 }
 .nav-tabs > li {
   float: left;
@@ -3907,6 +3908,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .tab-content > .active {
   display: block;
   visibility: visible;
+  padding: 6px 6px 14px 6px;
 }
 .nav-tabs .dropdown-menu {
   margin-top: -1px;
