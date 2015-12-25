@@ -460,17 +460,17 @@ shinyServer(function(input,output,session) {
         }
     },height = 600)
 
-    output$call_table <- shiny::renderDataTable({
-        if(varcall() & !is.null(g_calls)) { g_calls }
-    }
-    ,options = list(paging=F
-                    ,columnDefs=list(list(searchable=F, orderable=F, title=""))
-                    ))
+#     output$call_table <- shiny::renderDataTable({
+#         if(varcall() & !is.null(g_calls)) { g_calls }
+#     }
+#     ,options = list(paging=F
+#                     ,columnDefs=list(list(searchable=F, orderable=F, title=""))
+#                     ))
 
 #     output$intens_table <- shiny::renderDataTable({
 #         if(varcall() & !is.null(g_intens)) { g_intens }
 #     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))
-#
+
 #     output$intens_table_rev <- shiny::renderDataTable({
 #         if(varcall() & !is.null(g_intens_rev)) { g_intens_rev }
 #     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))

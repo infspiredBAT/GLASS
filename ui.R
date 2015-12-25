@@ -90,8 +90,12 @@ shinyUI(
 					                      sliderInput("opacity","R <trace opacity> F", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
 					)
 				),
-				br(),
-
+				fluidRow(
+					column(12,wellPanel(tags$div(style="font-family:Consolas;font-size:1.1em;",HTML(paste("
+                        <b>chromatogram</b>: click text to highlight call and show info^ | sequences from top = reference, call/primary, mutation/secondary | striped verticals = indicators e.g. variants | grey bars = quality</br>
+                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=red>dashed red box = use for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
+                        <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'remove' = ignore for the session | 'lock' = keep for the session, even if you change parameters | 'export' = save all/ticked to Excel
+  		            "), sep = ""))))),
 				chromatographyOutput("plot"),
 				shiny::dataTableOutput("chosen_variants_table"),
 				conditionalPanel(condition=" output.chosen_variants_table ",
@@ -102,12 +106,12 @@ shinyUI(
 			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
 		         verbatimTextOutput("aln"),
 		         plotOutput('het_histogram',height = 600)
-			),
+			)
 # 			tabPanel('variant annotation', value = 'annotation', icon = icon("user-md")
 # 			),
-			tabPanel('calls', value = 'call_table', icon = icon("table"),
-				 shiny::dataTableOutput("call_table")
- 			)
+# 			tabPanel('calls', value = 'call_table', icon = icon("table"),
+# 				 shiny::dataTableOutput("call_table")
+#  			)
 # 			,tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
 # 		         shiny::dataTableOutput("intens_table")
 # 			)
