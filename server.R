@@ -206,8 +206,8 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            if(is.null(g_expected_het_indel)) het_indel_info <- paste0(" ...nothing detected\n")
-            else het_indel_info <- paste0("detected starting at ~",g_expected_het_indel[[1]] * 100,"% ->\n")
+            if(is.null(g_expected_het_indel)) het_indel_info <- paste0(" ...none expected\n")
+            else het_indel_info <- paste0("expected starting at ~",g_expected_het_indel[[1]] * 100,"% ->\n")
             cat(het_indel_info)
             cat(g_hetero_indel_report)
         }

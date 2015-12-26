@@ -53,12 +53,15 @@ shinyUI(
 					    verbatimTextOutput("infobox")
 					),
 					column(2,
-                        tags$div(title="whether we can detect heterozygous indels in the data,\nthe % identity of the alignment between the sequences of the primary and mutation calls,\nand distinct insertion / deletion (in that order) events, and their lengths in nt\n\nif this low and there are many variants reported, there might be a heterozygous indel",
+                        tags$div(title="whether we expect heterozygous indels in the data,\nthe % identity of the alignment between the primary and secondary sequences (get this as high as you can),\nand insertion / deletion (in that order) counts\n\nus expecting an indel does not mean there is one: try any suggested peak%, keep %id high, and use your best judgement after studying the chromatogram\n\nif indels are detected, a checkbox to use them will appear under this infobox",
     					    HTML(paste("hetero indels infobox [?]")),verbatimTextOutput("hetero_indel_pid")
     					),
 #                         tags$div(title="distinct insertion / deletion (in that order) events, and their lengths in nt",
 #     					    HTML(paste("hetero ins/dels [?]")),verbatimTextOutput("hetero_indel_tab")
 #     					),
+					    conditionalPanel(condition = "!output.indels_present",
+					        HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
+					    ),
 					    conditionalPanel(condition = "output.indels_present",
                             tags$div(title="if there are indel events above, use them to try and correct the variant calling",
                                 checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
