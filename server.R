@@ -10,6 +10,8 @@ g_calls                 <<- NULL             #annotated basecall data
 g_intens                <<- NULL             #intensities file
 g_intens_rev            <<- NULL             #optional reverse intensities file
 g_intrexdat             <<- NULL             #intrex data used in graphs
+g_glassed_ref           <<- NULL
+g_glassed_cod           <<- NULL
 g_choices               <<- NULL
 g_noisy_neighbors       <<- NULL
 g_view                  <<- NULL
@@ -34,6 +36,19 @@ shinyServer(function(input,output,session) {
     ex <- NULL
     btn_counter <- 0
 
+    change_reference <- observe ({
+        input$gene_of_interest
+        isolate({
+            g_glassed_ref <<- paste("data/refs/",input$gene_of_interest,".glassed.intrex.fasta",sep="")
+            g_glassed_cod <<- paste("data/refs/",input$gene_of_interest,".glassed.codons.rdata",sep="")
+            g_files <<- paste0("Reference changed to ", input$gene_of_interest)
+            if(class(loading_processed_files())[1] != "my_UI_exception"){
+                output$files      <-  renderPrint({cat(g_files)})
+            }
+        })
+        #return(list(glassed_ref=glassed_ref,glassed_cod=glassed_cod))
+    })
+    
     loading_processed_files <- reactive ({
         if (input$ex_btn[1] - btn_counter){
             btn_counter <<- input$ex_btn[1]
@@ -41,9 +56,12 @@ shinyServer(function(input,output,session) {
                     "data/abis/eric/3low_freq_fsR.ab1")
         }
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
+        
+        
         if(!is.null(input$select_file) || !is.null(ex)) {
             file <- input$select_file$datapath
             name <- input$select_file$name
+            #input$gene_of_interest
             full_name <- input$select_file$name
             single_rev <- FALSE
 
@@ -92,6 +110,7 @@ shinyServer(function(input,output,session) {
                 fwd_file <- ex[1]
                 rev_file <- ex[2]
                 g_files <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
+                output$files      <-  renderPrint({cat("frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked")})
                 base = ""
                 ex <- NULL
             }
@@ -113,10 +132,8 @@ shinyServer(function(input,output,session) {
                 res <- NULL
                 called <- NULL
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
-                glassed_ref <- paste("data/refs/",input$gene_of_interest,".glassed.intrex.fasta",sep="")
-                glassed_cod <- paste("data/refs/",input$gene_of_interest,".glassed.codons.rdata",sep="")
                 tryCatch(
-                    called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,glassed_ref)),
+                    called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,g_glassed_ref)),
                     error = function(e){output$files <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
 
                 if(!is.null(called)){
@@ -126,7 +143,7 @@ shinyServer(function(input,output,session) {
                     g_stored_het_indels     <<- list()
                     g_indels_present        <<- FALSE
                     intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE,single_rev)
-                    calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,glassed_cod)
+                    calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,g_glassed_cod)
                     calls        <-  adjust_ref_mut(calls)
                     g_intens     <<- intensified$intens
                     g_intens_rev <<- intensified$intens_rev
@@ -136,7 +153,7 @@ shinyServer(function(input,output,session) {
                         intrexdat$intrex     <- list()
                         intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
                         intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-                        intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) #although these numbers should be the same
+                        intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) # these numbers should be the same
                         intrexdat$new_sample <- TRUE
                     g_intrexdat       <<- splice_variants(intrexdat)
                     calls             <-  data.table(calls,key="id")
