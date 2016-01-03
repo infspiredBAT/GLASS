@@ -41,10 +41,10 @@ shinyServer(function(input,output,session) {
         isolate({
             g_glassed_ref <<- paste("data/refs/",input$gene_of_interest,".glassed.intrex.fasta",sep="")
             g_glassed_cod <<- paste("data/refs/",input$gene_of_interest,".glassed.codons.rdata",sep="")
-            g_files <<- paste0("Reference changed to ", input$gene_of_interest)
-            if(class(loading_processed_files())[1] != "my_UI_exception"){
-                output$files      <-  renderPrint({cat(g_files)})
-            }
+            #g_files <<- paste0("Reference changed to ", input$gene_of_interest)
+            #if(class(loading_processed_files())[1] != "my_UI_exception"){
+                #output$files      <-  renderPrint({cat(g_files)})
+            #}
         })
         #return(list(glassed_ref=glassed_ref,glassed_cod=glassed_cod))
     })
