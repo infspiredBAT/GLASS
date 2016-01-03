@@ -11,6 +11,9 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
     deletions <- list()
     if(is.null(data_rev)) {
         qual  <- data$PCON.2
+        if(is.null(qual)){
+            qual <- get_pseudo_qual(data)
+        }
         if(single_rev) {
             res   <- generate_ref(complement(reverse(data$PBAS.1)),glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
@@ -39,8 +42,15 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
         }
 
     } else {
-
-        user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,data$PCON.2,data_rev$PCON.2)
+        fwd_qual <- data$PCON.2
+        rev_qual <- data_rev$PCON.2
+        if(is.null(fwd_qual)){
+            fwd_qual <- get_pseudo_qual(data)
+        }
+        if(is.null(rev_qual)){
+            rev_qual <- get_pseudo_qual(rev_data)
+        }
+        user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,fwd_qual,rev_qual)
         res <- generate_ref(paste(user_align[[1]],collapse = ""),glassed_ref)
         calls <- data.table(id              = seq_along(user_align[[1]])
                             ,user_sample    = user_align[[1]]
@@ -87,6 +97,32 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
 # get_noise <- function(row){
 #     return((mean(row[-which.max(row)]) + g_base_noise) / (row[which.max(row)]  + g_base_noise))
 # }
+
+
+get_pseudo_qual <- function(data){
+    to = length(data$PLOC.2)
+    qual <- c(
+        round((1-noise(max(data$DATA.9[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]),
+                       max(data$DATA.10[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]),
+                       max(data$DATA.11[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]),
+                       max(data$DATA.12[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]))
+                      )*58,digits=0),
+        unlist(lapply(c(2:(length(data$PLOC.2)-1)),function(x){round((1-noise(max(data$DATA.9[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]),
+                                                                              max(data$DATA.10[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]),
+                                                                              max(data$DATA.11[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]),
+                                                                              max(data$DATA.12[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]))
+                                                                             )*58,digits=0)
+                                                              }
+                     )
+              ),
+        round((1-noise(max(data$DATA.9[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]),
+                       max(data$DATA.10[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]),
+                       max(data$DATA.11[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]),
+                       max(data$DATA.12[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]))
+                      )*58,digits=0)
+    )
+    return(qual)
+}
 
 align_intens_calls <- function(calls_fwd,intens_fwd,calls_rev=NULL,intens_rev=NULL){
     calls_intens_fwd <- numeric(length(calls_fwd))

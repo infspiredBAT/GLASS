@@ -101,10 +101,14 @@ shinyServer(function(input,output,session) {
                 }
             }
             if(substr(base,nchar(base),nchar(base))=="R"){
-                g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,sep="")
-                single_rev <- TRUE
+                isolate({
+                    g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,"\non ",input$gene_of_interest,sep="")
+                    single_rev <- TRUE
+                })
             }else{
-                g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,sep="")
+                isolate({
+                    g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,"\non ",input$gene_of_interest,sep="")
+                })
             }
             if(!is.null(ex)){
                 fwd_file <- ex[1]
