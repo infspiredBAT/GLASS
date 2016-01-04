@@ -104,12 +104,12 @@ shinyServer(function(input,output,session) {
             }
             if(substr(base,nchar(base),nchar(base))=="R"){
                 isolate({
-                    g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,"\naligned to: ",input$gene_of_interest,sep="")
+                    g_files <<- paste0("fwd (F): ",rev_file_name," \t<em>aligned to: ",input$gene_of_interest,"</em>","\nrev (R): ",fwd_file_name,sep="")
                     single_rev <- TRUE
                 })
             }else{
                 isolate({
-                    g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,"\naligned to: ",input$gene_of_interest,sep="")
+                    g_files <<- paste0("fwd (F): ",fwd_file_name," \t<em>aligned to: ",input$gene_of_interest,"</em>","\nrev (R): ",rev_file_name,sep="")
                 })
             }
             if(!is.null(ex)){
