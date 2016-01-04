@@ -13,6 +13,9 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
         qual  <- data$PCON.2
         if(is.null(qual)){
             qual <- get_pseudo_qual(data)
+            qual_present <- FALSE
+        }else{
+            qual_present <- TRUE
         }
         if(single_rev) {
             res   <- generate_ref(complement(reverse(data$PBAS.1)),glassed_ref)
@@ -44,11 +47,14 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
     } else {
         fwd_qual <- data$PCON.2
         rev_qual <- data_rev$PCON.2
+        qual_present <- TRUE
         if(is.null(fwd_qual)){
             fwd_qual <- get_pseudo_qual(data)
+            qual_present <- FALSE
         }
         if(is.null(rev_qual)){
             rev_qual <- get_pseudo_qual(rev_data)
+            qual_present <- FALSE
         }
         user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,fwd_qual,rev_qual)
         res <- generate_ref(paste(user_align[[1]],collapse = ""),glassed_ref)
@@ -80,7 +86,7 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
     data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
     data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
 
-    return(list(calls=calls,deletions=deletions))
+    return(list(calls=calls,deletions=deletions,qual_present=qual_present))
 }
 
 # create_consensus_seq <- function(fwd_seq,rev_seq,intens_tab){

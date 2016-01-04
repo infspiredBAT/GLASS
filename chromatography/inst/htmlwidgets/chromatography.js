@@ -715,7 +715,11 @@ HTMLWidgets.widget({
                 instance.setPeakLabel(calls,"call_rev");
                 instance.setPeakLabel(calls,"mut_call_rev");
             }
-            instance.setQualityLabels(calls,rev);
+            console.log(x);
+            console.log(x["qual_present"]);
+            if(x["qual_present"]){
+                instance.setQualityLabels(calls,rev);
+            } 
             //default
             focus.selectAll(".call").attr("opacity",instance.call_opacity);
             instance.setPeakLabel(calls,"user_sample");
@@ -779,7 +783,9 @@ HTMLWidgets.widget({
                 instance.updateLine([intens_rev["T"]],"T",true);   
             }
             instance.setNoiseArea(a_noise_fwd,a_noise_rev);
-            instance.setQualityLabels(calls,rev);
+            if(x["qual_present"]){
+                instance.setQualityLabels(calls,rev);
+            }
             if(instance.max_x != x["intrexdat"]["max_x"]){   
                 instance.max_x = x["intrexdat"]["max_x"];  
                 var domain_x    = x["intrexdat"]["max_x"];

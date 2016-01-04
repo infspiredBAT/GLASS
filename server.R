@@ -26,6 +26,7 @@ g_expected_het_indel    <<- NULL
 g_minor_het_insertions  <<- NULL
 g_stored_het_indels     <<- list()
 g_indels_present        <<- FALSE
+g_qual_present          <<- FALSE
 shinyServer(function(input,output,session) {
 
 #     get_file <- reactive({
@@ -68,6 +69,7 @@ shinyServer(function(input,output,session) {
             #getting rid of the date in names
             for(i in 1:length(name)){
                 name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
+                name[i] <- gsub(".abi","ab1",name[i])
             }
             #if multiple files uploaded we use the first to
             #check if we can distinguish forward and reverse
@@ -102,19 +104,19 @@ shinyServer(function(input,output,session) {
             }
             if(substr(base,nchar(base),nchar(base))=="R"){
                 isolate({
-                    g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,"\non ",input$gene_of_interest,sep="")
+                    g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name,"\naligned to: ",input$gene_of_interest,sep="")
                     single_rev <- TRUE
                 })
             }else{
                 isolate({
-                    g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,"\non ",input$gene_of_interest,sep="")
+                    g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name,"\naligned to: ",input$gene_of_interest,sep="")
                 })
             }
             if(!is.null(ex)){
                 fwd_file <- ex[1]
                 rev_file <- ex[2]
                 g_files <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
-                output$files      <-  renderPrint({cat("frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked")})
+                output$files      <-  renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
                 base = ""
                 ex <- NULL
             }
@@ -125,11 +127,11 @@ shinyServer(function(input,output,session) {
 
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
-                    error = function(e){output$files <- renderPrint(paste0("error while reading forward file, are you loading .abi ? ",e$message ))})
+                    error = function(e){output$files <- renderPrint(paste0("<pre>error while reading forward file, are you loading .abi ? ",e$message,"</pre>" ))})
                 if(!is.null(rev_file)) {
                     tryCatch(
                         g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
-                        error = function(e){output$files <- renderPrint(paste0("error while reading reverse file, are you loading .abi ? ",e$message ))})
+                        error = function(e){output$files <- renderPrint(paste0("<pre>error while reading reverse file, are you loading .abi ? ",e$message,"</pre>" ))})
                 }
                 else g_abif_rev <- NULL
 
@@ -138,19 +140,18 @@ shinyServer(function(input,output,session) {
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
                     called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,g_glassed_ref)),
-                    error = function(e){output$files <- renderPrint(paste0("error while loading calls from abi file : ",e$message ))})
+                    error = function(e){output$files <- renderPrint(paste0("<pre>error while loading calls from abi file : ",e$message,"</pre>" ))})
 
                 if(!is.null(called)){
-                    g_intens                <<- NULL
-                    g_intens_rev            <<- NULL
                     g_minor_het_insertions  <<- NULL
                     g_stored_het_indels     <<- list()
                     g_indels_present        <<- FALSE
+                    g_qual_present          <<- called$qual_present
                     intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE,single_rev)
-                    calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,g_glassed_cod)
-                    calls        <-  adjust_ref_mut(calls)
                     g_intens     <<- intensified$intens
                     g_intens_rev <<- intensified$intens_rev
+                    calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,g_glassed_cod)
+                    calls        <-  adjust_ref_mut(calls)
                     g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                     #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
                         intrexdat            <- list()
@@ -162,6 +163,11 @@ shinyServer(function(input,output,session) {
                     g_intrexdat       <<- splice_variants(intrexdat)
                     calls             <-  data.table(calls,key="id")
                     g_noisy_neighbors <<- get_noisy_neighbors(calls)
+                    if(!called$qual_present){
+                        g_files <- paste0(g_files,HTML("\n<strong style=\"color: red;\">Phred qualities not present in abi file!</strong>"))
+                    
+                    }
+                    g_files <- paste0("<pre>",g_files,"</pre>")
                     output$files      <-  renderPrint({cat(g_files)})
                     g_new_sample      <<- TRUE
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
@@ -219,7 +225,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox)
+            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present)
             g_new_sample <<- FALSE
             return(ret)
         }

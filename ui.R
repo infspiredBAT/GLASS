@@ -32,8 +32,11 @@ shinyUI(
             column(1,
                 conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
                     actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
+			column(2,
+			       tags$div(title="Please make sure both files have the same name followed by an \"F\" or \"R\" before the .abi (.ab1) file extension. Use \"*R.abi\" also when loading a single \"reverse\" abi file.",
+			                wellPanel(tags$div(style="font-family:Consolas;font-size:1.1em;",HTML(paste("For paired (forward + reverse) abi files please use the folowing naming format: <strong>sample1<strong style=\"color: red;\">F</strong>.ab1 sample1<strong style=\"color: red;\">R</strong>.ab1</strong> [?]"), sep = ""))))),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
-			column(8, verbatimTextOutput("files"))
+			column(6, htmlOutput("files"))
 		),
 		tabsetPanel(id = 'tab',
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
