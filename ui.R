@@ -11,6 +11,7 @@ shinyUI(
 
     fluidPage(theme = "simplex.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
+		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("genomePD/glass"),
             # script for input file cleaning
             tags$script('
@@ -23,7 +24,6 @@ shinyUI(
               		'),
             tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
-
 		HTML(paste("&nbsp&nbsp<b><font size=4em>genomePD/ </font><font size=6em>glass</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
 		fluidRow(
     		br(),
@@ -34,7 +34,7 @@ shinyUI(
                     actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
 			column(2,
 			       tags$div(title="Paired (forward+reverse) files: please make sure both files have the same name followed by an \"F\" or \"R\" before the .abi/.ab1 file extension. Also use \"*R.abi\" when loading a single \"reverse\" abi file.",
-			                wellPanel(tags$div(style="font-family:Consolas,monaco;font-size:10px;",HTML(paste("Up to 2 ABI files; if paired (fwd+rev) name like: <strong>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi</strong>[?]"), sep = ""))))),
+			                wellPanel(tags$div(HTML(paste("<div font-size:1em; >Up to 2 ABI files; if paired (fwd+rev) name as: <strong style=\"font-family:'Inconsolata'\">*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi</strong> [?]</div>"), sep = ""))))),
 			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
 			column(6, htmlOutput("files"))
 		),
@@ -98,10 +98,11 @@ shinyUI(
 					)
 				),
 				fluidRow(
-					column(12,wellPanel(tags$div(style="font-family:Consolas,monaco;font-size:10px;",HTML(paste("
+					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
                         <b>chromatogram</b>: click text to highlight call and show info^ | sequences from top = reference, call/primary, mutation/secondary | striped verticals = indicators e.g. variants | grey bars = quality</br>
                         <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=red>dashed red box = use for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
                         <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'remove' = ignore for the session | 'lock' = keep for the session, even if you change parameters | 'export' = save all/ticked to Excel
+                        </div>
   		            "), sep = ""))))),
 				chromatographyOutput("plot"),
 				shiny::dataTableOutput("chosen_variants_table"),
