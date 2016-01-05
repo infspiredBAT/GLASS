@@ -36,7 +36,7 @@ shinyUI(
                 column(5,
     			       tags$div(title="Paired (forward+reverse) files: please make sure both files have the same name followed by an \"F\" or \"R\" before the .abi/.ab1 file extension. Also use \"*R.abi\" when loading a single \"reverse\" abi file.",
 					# column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
-    			                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">[?] up to 2 ABI files,</br>&nbsp&nbsp&nbsp if fwd+rev name as:</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<strong>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi</strong></div>"), sep = "")))),
+    			                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">up to 2 ABI files,</br>if fwd+rev name as:</br>&nbsp&nbsp<strong>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi</strong> [?]</div>"), sep = "")))),
     			column(7, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1')))
 			))),
 			column(7, htmlOutput("files"))
