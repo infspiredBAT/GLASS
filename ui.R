@@ -27,16 +27,19 @@ shinyUI(
 		HTML(paste("&nbsp&nbsp<b><font size=4em>genomePD/ </font><font size=6em>glass</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
 		fluidRow(
     		br(),
-			 column(1, selectInput("gene_of_interest","",choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
+			column(1, selectInput("gene_of_interest","",choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
 			#column(1, selectInput("gene_of_interest","",choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
             column(1,
                 conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
                     actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
-			column(2,
-			       tags$div(title="Paired (forward+reverse) files: please make sure both files have the same name followed by an \"F\" or \"R\" before the .abi/.ab1 file extension. Also use \"*R.abi\" when loading a single \"reverse\" abi file.",
-			                wellPanel(tags$div(HTML(paste("<div font-size:1em; >Up to 2 ABI files; if paired (fwd+rev) name as: <strong style=\"font-family:'Inconsolata'\">*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi</strong> [?]</div>"), sep = ""))))),
-			column(2, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1'))),
-			column(6, htmlOutput("files"))
+            column(3,wellPanel(fluidRow(
+                column(5,
+    			       tags$div(title="Paired (forward+reverse) files: please make sure both files have the same name followed by an \"F\" or \"R\" before the .abi/.ab1 file extension. Also use \"*R.abi\" when loading a single \"reverse\" abi file.",
+					# column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
+    			                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">[?] up to 2 ABI files,</br>&nbsp&nbsp&nbsp if fwd+rev name as:</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<strong>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi</strong></div>"), sep = "")))),
+    			column(7, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1')))
+			))),
+			column(7, htmlOutput("files"))
 		),
 		tabsetPanel(id = 'tab',
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/

@@ -49,7 +49,7 @@ shinyServer(function(input,output,session) {
         })
         #return(list(glassed_ref=glassed_ref,glassed_cod=glassed_cod))
     })
-    
+
     loading_processed_files <- reactive ({
         if (input$ex_btn[1] - btn_counter){
             btn_counter <<- input$ex_btn[1]
@@ -57,8 +57,8 @@ shinyServer(function(input,output,session) {
                     "data/abis/eric/3low_freq_fsR.ab1")
         }
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
-        
-        
+
+
         if(!is.null(input$select_file) || !is.null(ex)) {
             file <- input$select_file$datapath
             name <- input$select_file$name
@@ -115,8 +115,8 @@ shinyServer(function(input,output,session) {
             if(!is.null(ex)){
                 fwd_file <- ex[1]
                 rev_file <- ex[2]
-                g_files <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
-                output$files      <-  renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with the following settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
+                g_files <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
+                output$files      <-  renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
                 base = ""
                 ex <- NULL
             }
@@ -164,8 +164,7 @@ shinyServer(function(input,output,session) {
                     calls             <-  data.table(calls,key="id")
                     g_noisy_neighbors <<- get_noisy_neighbors(calls)
                     if(!called$qual_present){
-                        g_files <- paste0(g_files,HTML("\n<strong style=\"color: red;\">Phred qualities not present in abi file!</strong>"))
-                    
+                        g_files <- paste0(g_files,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
                     }
                     g_files <- paste0("<pre>",g_files,"</pre>")
                     output$files      <-  renderPrint({cat(g_files)})
