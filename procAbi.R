@@ -389,7 +389,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
     if(rev) deletions_rev <- calls[call_rev=="-"][,id]
     else deletions_rev <- list()
     if(length(deletions)!=0){
-        
+
         del_pos <- 0
         del_pos <- calls[id %in% deletions][,trace_peak]
         rep <- 0

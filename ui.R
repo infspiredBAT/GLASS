@@ -34,9 +34,9 @@ shinyUI(
                     actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
             column(3,wellPanel(fluidRow(
                 column(5,
-    			       tags$div(title="Paired (forward+reverse) files: please make sure both files have the same name followed by an \"F\" or \"R\" before the .abi/.ab1 file extension. Also use \"*R.abi\" when loading a single \"reverse\" abi file.",
+    			       tags$div(title="please make sure either or both (in case of paired i.e. forward and reverse) files have an \"F\" or \"R\" before the .abi/.ab1 file extension,\ne.g. my_sampleF.abi and/or my_sampleR.abi\n\nuse \"*R.abi\" even if loading a single reverse file!",
 					# column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
-    			                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">up to 2 ABI files,</br>if fwd+rev name as:</br>&nbsp&nbsp<strong>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi</strong> [?]</div>"), sep = "")))),
+    			                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">up to two ABI files,</br>name fwd and rev as:</br>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi [?]</div>"), sep = "")))),
     			column(7, fileInput("select_file","",multiple=T,accept=c('.abi','.ab1')))
 			))),
 			column(7, htmlOutput("files"))
