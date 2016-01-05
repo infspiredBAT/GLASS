@@ -116,7 +116,7 @@ shinyServer(function(input,output,session) {
                 fwd_file <- ex[1]
                 rev_file <- ex[2]
                 g_files <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
-                output$files      <-  renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
+                output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
                 base = ""
                 ex <- NULL
             }
@@ -232,8 +232,8 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            if(is.null(g_expected_het_indel)) het_indel_info <- paste0(" ...none expected\n")
-            else het_indel_info <- paste0("expected starting at ~",g_expected_het_indel[[1]] * 100,"% ->\n")
+            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("expected starting at ~",g_expected_het_indel[[1]] * 100,"% ->\n")
+            else                                                                       het_indel_info <- paste0(" ... none expected\n")
             cat(het_indel_info)
             cat(g_hetero_indel_report)
         }
