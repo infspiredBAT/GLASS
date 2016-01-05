@@ -69,7 +69,7 @@ shinyServer(function(input,output,session) {
             #getting rid of the date in names
             for(i in 1:length(name)){
                 name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
-                name[i] <- gsub(".abi","ab1",name[i])
+                name[i] <- gsub(".abi",".ab1",name[i])
             }
             #if multiple files uploaded we use the first to
             #check if we can distinguish forward and reverse
