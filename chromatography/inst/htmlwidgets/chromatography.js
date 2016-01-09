@@ -8,8 +8,10 @@ HTMLWidgets.widget({
         var intrex = "";
         var max_x = 0;
         var max_y = 0;
-        var margin  = {top: 10,  right: 10, bottom: 100, left: 40},
-            margin2 = {top: 430, right: 10, bottom: 20,  left: 40},
+        //var margin  = {top: 10,  right: 10, bottom: 100, left: 40},
+        //    margin2 = {top: 430, right: 10, bottom: 20,  left: 40},
+        var margin  = {top: 55, right: 10,bottom: 20, left:10},
+            margin2 = {top: 20, right: 10,bottom: 420,  left:10},
             width   = w - margin.left - margin.right,
             height  = h - margin.top  - margin.bottom,
             half_height = height/1.6;
@@ -63,19 +65,20 @@ HTMLWidgets.widget({
         var join = "FALSE";
             
         var label_pos = {};        //map for pisitioning labels representing called base
-        label_pos["reference"]      =  10;
-        label_pos["aa"]             =  25;
-        label_pos["aa_sample"]      =  40;
-        label_pos["user_sample"]    =  55;
-        label_pos["user_mut"]       =  70;
-        label_pos["aa_mut"]         =  83;
-        label_pos["codon"]          = 105;
-        label_pos["gen_coord"]      = 115;
+        label_pos["reference"]      =  10 + margin.top - 10;
+        label_pos["aa"]             =  25 + margin.top - 10;
+        label_pos["aa_sample"]      =  40 + margin.top - 10;
+        label_pos["user_sample"]    =  55 + margin.top - 10;
+        label_pos["user_mut"]       =  70 + margin.top - 10;
+        label_pos["aa_mut"]         =  83 + margin.top - 10;
+        label_pos["codon"]          = 105 + margin.top - 10;
+        label_pos["gen_coord"]      = 115 + margin.top - 10;
 //        label_pos["intrex"]         = 120;
-        label_pos["call"]           = 130;
-        label_pos["mut_call_fwd"]   = 145;
-        label_pos["call_rev"]       = 170;
-        label_pos["mut_call_rev"]   = 185;
+        label_pos["call"]           = 130 + margin.top - 10;
+        label_pos["mut_call_fwd"]   = 145 + margin.top - 10;
+        label_pos["call_rev"]       = 170 + margin.top - 10;
+        label_pos["mut_call_rev"]   = 185 + margin.top - 10;
+        label_pos["qual"]           =   0 + margin.top - 10;
         //variables grouped at one place so its easier to read their order and determine their visibility (who's on top)
         var scope_g    = focus.append("g");
         var quals_g    = focus.append("g");
@@ -230,9 +233,9 @@ HTMLWidgets.widget({
                 .on("click",function(d,i){callShiny(d["id"]);})
                 .attr("y",function(d){
                                 if(label.indexOf("rev") > -1){
-                                    return((join=="FALSE")*110 + label_pos[label]);
+                                    return((join=="FALSE")*110 + label_pos[label] );
                                 }else{
-                                    return(label_pos[label]);
+                                    return(label_pos[label] );
                                 }})
                 .attr("fill", "black")
                 .attr("opacity", opacity)
@@ -367,14 +370,14 @@ HTMLWidgets.widget({
       		        .attr("text-anchor", "middle")
       		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
                     .on("click",function(d,i){callShiny(d["id"]);})
-      		        .attr("y",-2)
+      		        .attr("y",label_pos["qual"] -2)
       		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             qt.exit().remove();
             var qg = quals_g.selectAll("rect").data(calls);
             qg.enter().append("rect");
             qg.attr("class","peak_label qual_fwd q")
       		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
-      		        .attr("y",0).attr("rx",1).attr("ry",1)
+      		        .attr("y",label_pos["qual"]).attr("rx",1).attr("ry",1)
       		        .attr("width",9+(!rev)*9)
       		        .attr("height",function(d){return d[q];})
       		        .attr("fill", "rgba(200,200,200,0.3)");
@@ -384,7 +387,7 @@ HTMLWidgets.widget({
                 qg_r.enter().append("rect");
                 qg_r.attr("class","peak_label qual_rev q")
       		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
-      		        .attr("y",0).attr("rx",1).attr("ry",1)
+      		        .attr("y",label_pos["qual"]).attr("rx",1).attr("ry",1)
       		        .attr("width",9)
       		        .attr("height",function(d){return d["quality_rev"];})
       		        .attr("fill", "rgba(200,200,200,0.3)");
