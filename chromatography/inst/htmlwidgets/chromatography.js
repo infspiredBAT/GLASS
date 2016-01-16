@@ -8,8 +8,8 @@ HTMLWidgets.widget({
         var intrex = "";
         var max_x = 0;
         var max_y = 0;
-        //var margin  = {top: 10,  right: 10, bottom: 100, left: 40},
-        //    margin2 = {top: 430, right: 10, bottom: 20,  left: 40},
+        //var margin  = {top: 10,  right: 10, bottom: 100, left: 40},   //minimap on bottom
+        //    margin2 = {top: 430, right: 10, bottom: 20,  left: 40},   //minimap on top
         var margin  = {top: 55, right: 10,bottom: 20, left:10},
             margin2 = {top: 20, right: 10,bottom: 420,  left:10},
             width   = w - margin.left - margin.right,
@@ -50,6 +50,7 @@ HTMLWidgets.widget({
         var svg = d3.select(el).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
+        var brush = d3.svg.brush().on("brushend", brushed);
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -61,7 +62,6 @@ HTMLWidgets.widget({
         var context = svg.append("g")
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-        var brush = d3.svg.brush().on("brushend", brushed);
         var join = "FALSE";
             
         var label_pos = {};        //map for pisitioning labels representing called base
@@ -118,7 +118,10 @@ HTMLWidgets.widget({
         function brushed() { redraw(); }
         //setting brush programmatically
         function setBrush(start,end){
-            context.call(brush.extent([start,end]));
+            //context.call(brush.extent([start,end]));
+            brush.extent([start,end]);
+            brush(d3.select(".brush").transition());
+            brush.event(d3.select(".brush").transition().delay(1000))
             redraw();
         }
         function reHeight(domain_y){
@@ -502,7 +505,7 @@ HTMLWidgets.widget({
   			else if (col === "-"){ return "white"; }
   	        return "yellow";  
         }
-        function brushZoomIn(){
+/*        function brushZoomIn(){
             return function(event) {
                 event.preventDefault();
                 var ext = brush.extent();
@@ -552,7 +555,7 @@ HTMLWidgets.widget({
             .on('d', brushMoveRight())
             .on('s', brushZoomOut())
             );
-
+*/
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
@@ -635,7 +638,7 @@ HTMLWidgets.widget({
   			instance.max_y  = domain_y;
   			var domain_x    = x["intrexdat"]["max_x"];
   			instance.max_x  = domain_x;
-  			var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"])
+  			var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]);
   			instance.intrex = intrex;
 
   			var focus   = instance.focus;
@@ -718,8 +721,8 @@ HTMLWidgets.widget({
                 instance.setPeakLabel(calls,"call_rev");
                 instance.setPeakLabel(calls,"mut_call_rev");
             }
-            console.log(x);
-            console.log(x["qual_present"]);
+            //console.log(x);
+            //console.log(x["qual_present"]);
             if(x["qual_present"]){
                 instance.setQualityLabels(calls,rev);
             } 
@@ -738,10 +741,12 @@ HTMLWidgets.widget({
       				.attr("y2",intens_guide_line)
       				.attr("stroke-width",1).attr("stroke","rgba(0,0,0,0.6)").attr("stroke-dasharray",2);
 */
+
   			context.append("g")
 //				.attr("class", "x brush")
-      			.call(brush).attr("class","context")
-  				.selectAll("rect")
+                .attr("class","brush context")
+                .call(brush)
+      			.selectAll("rect")
   				.attr("y", -16)
   				.attr("height", 80) //height2 + 10)
   				.attr("rx",3)
