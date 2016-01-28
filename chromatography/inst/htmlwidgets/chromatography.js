@@ -109,7 +109,7 @@ HTMLWidgets.widget({
         var varim_gen         = context.append("g");
         var varim_user_s      = context.append("g");
         var varim_user_m      = context.append("g");
-        var noisyn_con        = context.append("g");  //noisy neighbors
+        var noisyn_con        = context.append("g");  //noisy neighbours
         var noisyn_foc        = focus.append("g");
         var aa_ref            = focus.append("g");
         var aa_sample         = focus.append("g");
@@ -121,7 +121,7 @@ HTMLWidgets.widget({
             //context.call(brush.extent([start,end]));
             brush.extent([start,end]);
             brush(d3.select(".brush").transition());
-            brush.event(d3.select(".brush").transition().delay(1000))
+            brush.event(d3.select(".brush").transition().delay(1000));
             redraw();
         }
         function reHeight(domain_y){
@@ -434,6 +434,7 @@ HTMLWidgets.widget({
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
+                console.log("goto message");
                 setBrush(Number(message)-180,Number(message)+200);
                 focus.selectAll(".scope").attr("opacity",0);
                 focus.selectAll(".".concat("scope").concat(message))
