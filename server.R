@@ -203,7 +203,7 @@ shinyServer(function(input,output,session) {
 
             report                  <- report_hetero_indels(g_calls)
             g_indels_present       <<- report$indels_present
-            g_minor_het_insertions <<- report$minor_het_insertionss
+            g_minor_het_insertions <<- report$minor_het_insertions
             g_hetero_indel_aln     <<- report$hetero_indel_aln
             g_hetero_ins_tab       <<- report$hetero_ins_tab
             g_hetero_del_tab       <<- report$hetero_del_tab
@@ -213,12 +213,12 @@ shinyServer(function(input,output,session) {
             if(input$incorporate_checkbox & g_indels_present){ 
                 ret      <- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions)
                 g_calls <<- ret$calls
-                g_minor_het_insertions <<- ret$g_minor_het_insertions
+                g_minor_het_insertions <<- ret$minor_het_insertions
                 }
             setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
-                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added[[1]],split = " ")[[1]]))
+                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added[[1]],split = " ")[[1]]),g_calls,g_intens,g_intens_rev)
                 g_minor_het_insertions$ins_added <<- ins_added
             }
 

@@ -615,7 +615,7 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,m
             calls <- rbindlist(c(list(calls),ins_tabs))
         }
     }
-    return(calls=calls,minor_het_insertions=minor_het_insertions)
+    return(list(calls=calls,minor_het_insertions=minor_het_insertions))
 }
 
 incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
@@ -660,23 +660,22 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
     return(new_vec)
 }
 
-add_intensities <- function(added){
+add_intensities <- function(added,calls,intens,intens_rev){
     #update intensities
-    id <- g_calls[id == as.integer(added[1]),]$trace_peak + 6
+    id <- calls[id == as.integer(added[1]),]$trace_peak + 6
     add<-data.table("id"=id + (1:(length(added)*12)/1000),"A"=0,"C"=0,"G"=0,"T"=0)
-    g_intens     <<- rbind(g_intens,     add)
-    setkey(g_intens,     id)
-    if("call_rev" %in% colnames(g_calls)){
-        g_intens_rev <<- rbind(g_intens_rev, add)
-        setkey(g_intens_rev, id)
-
+    intens     <- rbind(intens,     add)
+    setkey(intens,     id)
+    if("call_rev" %in% colnames(calls)){
+        intens_rev <<- rbind(intens_rev, add)
+        setkey(intens_rev, id)
     }
     #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
     #update peak positions in calls table
-    g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
-    g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
+    calls$trace_peak<<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
+    calls$trace_peak_rev<<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
     #update intrex
-    g_intrexdat$intrex     <- setnames(g_calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
+    g_intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
     g_intrexdat$intrex     <- setnames(merge(g_intrexdat$intrex,g_calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
     g_intrexdat       <<- splice_variants(g_intrexdat)
     g_intrexdat$max_x <<- nrow(g_intens)
