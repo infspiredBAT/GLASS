@@ -447,7 +447,7 @@ get_window_intens <- function(intens){
 
 #if the mutation is around 50 % the reference peak may be sometimes higher than the reference peak
 #then this function swaps the bases and percentages of the sample and mutation peak
-adjust_ref_mut <- function(calls){
+adjust_ref_mut <- function(calls,intens_rev){
     vf <- calls[(mut_peak_base_fwd == reference ) & (abs(mut_peak_pct_fwd - sample_peak_pct_fwd) < 35 ), ]$id
     if (length(vf)>1){
         calls[id %in% vf,`:=`(swp_base = mut_peak_base_fwd,swp_pct = mut_peak_pct_fwd)]
@@ -455,7 +455,7 @@ adjust_ref_mut <- function(calls){
         calls[id %in% vf,`:=`(sample_peak_base_fwd =  swp_base,sample_peak_pct_fwd = swp_pct)]
         calls[,`:=`(swp_base = NULL,swp_pct = NULL)]
     }
-    if(!is.null(g_intens_rev)){
+    if(!is.null(intens_rev)){
         vr <- calls[(mut_peak_base_rev == reference ) & (abs(mut_peak_pct_rev - sample_peak_pct_rev) < 35 ), ]$id
         if (length(vr)>1){
             calls[id %in% vr,`:=`(swp_base = mut_peak_base_rev,swp_pct = mut_peak_pct_rev)]

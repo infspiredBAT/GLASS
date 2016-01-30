@@ -89,7 +89,7 @@ splice_variants <- function(intrexdat){
 }
 
 
-include_locked_indels <- function(vec,indels,fwd){
+include_locked_indels <- function(calls,vec,indels,fwd){
     vec <- copy(vec)
     get_del_positions <- function(code,pos,vec){
         coord1 <- as.numeric(gsub("c\\.(\\d*).*","\\1",code))
@@ -103,7 +103,7 @@ include_locked_indels <- function(vec,indels,fwd){
     get_ins_positions <- function(code,pos,vec){
         if(length(grep("nt",code)) > 0) ins_len <- as.numeric(gsub(".*nt(\\d*)","\\1",code))
         else ins_len <- nchar(gsub(".*[ins|dup](.*)","\\1",code))
-        if(all(g_calls$reference[pos] == "-")) pos <- pos - 1
+        if(all(calls$reference[pos] == "-")) pos <- pos - 1
 
         return(1:ins_len + floor(pos))
     }
@@ -120,7 +120,7 @@ include_locked_indels <- function(vec,indels,fwd){
 
     ins <- lapply(names(indels)[grep("ins|dup",names(indels))],function(x) get_ins_positions(x,indels[[x]],vec))
     if(length(ins) > 0){
-        sec_ins <- ins[which(sapply(ins,function(x) all(g_calls$reference[x] != "-")))]
+        sec_ins <- ins[which(sapply(ins,function(x) all(calls$reference[x] != "-")))]
         prim_ins <- setdiff(ins,sec_ins)
     } else{
         sec_ins <- list()
@@ -143,14 +143,14 @@ include_locked_indels <- function(vec,indels,fwd){
     }
 
     new_vec <- rep("-",length(vec))
-    vec[unlist(prim_dels)] <- g_calls$reference[unlist(prim_dels)]
+    vec[unlist(prim_dels)] <- calls$reference[unlist(prim_dels)]
     pos_vec <- seq_along(new_vec) + move_vec
     pos_vec[pos_vec < 1] <- 1
     new_vec[pos_vec] <- vec
     new_vec <- new_vec[1:length(vec)]
     new_vec[unlist(prim_dels)] <- "-"
-    if(fwd) new_vec[unlist(sec_ins)] <- g_calls$mut_peak_base_fwd[unlist(sec_ins)]
-    else new_vec[unlist(sec_ins)] <- g_calls$mut_peak_base_rev[unlist(sec_ins)]
+    if(fwd) new_vec[unlist(sec_ins)] <- calls$mut_peak_base_fwd[unlist(sec_ins)]
+    else new_vec[unlist(sec_ins)] <- calls$mut_peak_base_rev[unlist(sec_ins)]
 
 #     if(length(het_dels) > 0){
 #         vec <- vec[-het_dels]
@@ -181,24 +181,24 @@ include_locked_indels <- function(vec,indels,fwd){
     return(new_vec)
 }
 
-call_variants <- function(calls, qual_thres, mut_min, s2n_min){
+call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels){
     # reset all but set_by_user
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut    := user_sample_orig]
     calls[set_by_user == FALSE, mut_call_fwd := call]
-    if(length(grep("del|ins|dup",names(g_stored_het_indels))) > 0){
-        g_indels_present <<- TRUE
-        calls[, mut_call_fwd := include_locked_indels(mut_call_fwd,g_stored_het_indels,fwd = T)]
-    }else{
-        g_indels_present <<- FALSE
-    }
+    if(length(grep("del|ins|dup",names(stored_het_indels))) > 0){
+        #g_indels_present <<- TRUE
+        calls[, mut_call_fwd := include_locked_indels(calls,mut_call_fwd,stored_het_indels,fwd = T)]
+    }else#{
+    #    g_indels_present <<- FALSE
+    #}
     # calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(call,reference),by=1:nrow(calls[set_by_user==FALSE,])]
     # mut
     if("call_rev" %in% colnames(calls)) {
         # reset all but set_by_user
         calls[set_by_user == FALSE, mut_call_rev := call_rev]
-        if(length(grep("del|ins|dup",names(g_stored_het_indels))) > 0){
-            calls[, mut_call_rev := include_locked_indels(mut_call_rev,g_stored_het_indels,fwd = F)]
+        if(length(grep("del|ins|dup",names(stored_het_indels))) > 0){
+            calls[, mut_call_rev := include_locked_indels(mut_call_rev,stored_het_indels,fwd = F)]
         }
 
         # calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
@@ -408,7 +408,7 @@ get_choices <- function(calls){
 }
 
 #remove consecutive single base deletions and replace them with one long deletion in table
-get_view<-function(choices){
+get_view<-function(calls,choices){
 
     computeConsecutives <- function(ids){
         ids <- round(ids * 100)
@@ -454,47 +454,47 @@ get_view<-function(choices){
             prot <- gsub("(p\\....\\d*).*","\\1",choices[i]$protein)
             aa <- gsub("p\\.(...)\\d*.*","\\1",choices[i]$protein)
             cod <- as.numeric(gsub("p\\....(\\d*).*","\\1",choices[i]$protein))
-            while((g_calls[codon == cod][1]$aa_ref == g_calls[codon == cod][1]$aa_mut)&
-                  (g_calls[codon == cod][1]$aa_ref == g_calls[codon == cod][1]$aa_sample)&
-                  (!is.na(g_calls[codon == cod][1]$aa_sample))) {cod = cod +1}
+            while((calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_mut)&
+                  (calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_sample)&
+                  (!is.na(calls[codon == cod][1]$aa_sample))) {cod = cod +1}
             choices[i,]$protein = paste0("p.",aa,cod, "fs")
 
         }else{ #in frame
             if(choices[i,]$mut_type == "ins"){
-                from <- as.numeric(g_calls[choices[i]$id]$codon)
-                to   <- as.numeric(g_calls[choices[i]$id]$codon) +1
-                choices[i,]$protein = paste0("p.",g_calls[codon==from,][1]$aa_ref,from,"_",
-                                             g_calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
+                from <- as.numeric(calls[choices[i]$id]$codon)
+                to   <- as.numeric(calls[choices[i]$id]$codon) +1
+                choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
+                                             calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
                                              paste(translate(strsplit(seq,"")[[1]]),collapse = ""))
             }
             if(choices[i,]$mut_type=="del"){
 
-                from <- as.numeric(g_calls[choices[i]$id]$codon)
-                to   <- as.numeric(g_calls[choices[i]$id]$codon) + nchar(seq)/3 -1
+                from <- as.numeric(calls[choices[i]$id]$codon)
+                to   <- as.numeric(calls[choices[i]$id]$codon) + nchar(seq)/3 -1
 
                 #from <- as.numeric(g_calls[choices[i]$id]$codon) - 10
                 #to   <- as.numeric(g_calls[choices[i]$id]$codon) + nchar(seq)/3 + 10
                 #lapply(g_calls[codon %in% c(from:to) & ord_in_cod == 1]$aa_ref,mya)
 
-                choices[i,]$protein = paste0("p.",g_calls[codon==from,][1]$aa_ref,from,"_",
-                                             g_calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type)
+                choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
+                                             calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type)
             }
         }
     }
     #identify duplications (special kind of insertions)
     for(i in grep("ins",choices$mut_type)){
         seq <- gsub("c\\.\\d*_*\\d*...(.)","\\1",choices[i,]$coding)
-        if(floor(choices[i,]$id) == choices[i,]$id) prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id - 1,]$reference,collapse = "")
-        else prev_seq <- paste0(g_calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
+        if(floor(choices[i,]$id) == choices[i,]$id) prev_seq <- paste0(calls[-(nchar(seq) - 1):0 + choices[i,]$id - 1,]$reference,collapse = "")
+        else prev_seq <- paste0(calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
         if(seq == prev_seq) {
             choices[i,coding := gsub("ins","dup",coding)]
             #the coordinates are changed to the sequence that is duplicated #! find teste for these
             if(nchar(seq)>1){
-                choices[i,]$coding <- paste0("c.",g_calls[floor(choices[i,]$id)-nchar(seq)+1]$coding_seq,"_",g_calls[floor(choices[i,]$id),]$coding_seq,"dup",seq)
+                choices[i,]$coding <- paste0("c.",calls[floor(choices[i,]$id)-nchar(seq)+1]$coding_seq,"_",calls[floor(choices[i,]$id),]$coding_seq,"dup",seq)
             }
         }else{
             if(nchar(seq)==1)
-                choices[i,]$coding <- paste0("c.",g_calls[floor(choices[i]$id),]$coding_seq,"_",g_calls[ceiling(choices[i]$id),]$coding_seq,"ins",seq)
+                choices[i,]$coding <- paste0("c.",calls[floor(choices[i]$id),]$coding_seq,"_",calls[ceiling(choices[i]$id),]$coding_seq,"ins",seq)
         }
     }
 
@@ -539,19 +539,20 @@ report_hetero_indels <- function(calls){
     # if(nrow(hetero_ins_tab) > 0) g_minor_het_insertions <<- data.table::data.table(pos = )
     if(nrow(hetero_ins_tab) > 0) {
         offset <- -start(pattern(hetero_indel_aln)) + start(subject(hetero_indel_aln))
-        g_minor_het_insertions <<- data.table::data.table(pos = hetero_ins_tab[which(!is.in.primery),1],seq = stri_sub(secondary_seq,hetero_ins_tab[which(!is.in.primery),1] + offset,hetero_ins_tab[which(!is.in.primery),2] + offset))
+        minor_het_insertions <<- data.table::data.table(pos = hetero_ins_tab[which(!is.in.primery),1],seq = stri_sub(secondary_seq,hetero_ins_tab[which(!is.in.primery),1] + offset,hetero_ins_tab[which(!is.in.primery),2] + offset))
     }
-        else g_minor_het_insertions <<- data.table::data.table()
-    g_hetero_indel_aln <<- hetero_indel_aln
-    g_hetero_indel_pid <<- round(pid(hetero_indel_aln),1)
-    g_hetero_ins_tab   <<- hetero_ins_tab
-    g_hetero_del_tab   <<- hetero_del_tab
-    g_hetero_indel_report <<- paste0("alignment % id : ",g_hetero_indel_pid,"%\nins/del counts : ",ins_counts," / ",del_counts)
+        else minor_het_insertions <<- data.table::data.table()
+    hetero_indel_aln <<- hetero_indel_aln
+    hetero_indel_pid <<- round(pid(hetero_indel_aln),1)
+    hetero_ins_tab   <<- hetero_ins_tab
+    hetero_del_tab   <<- hetero_del_tab
+    hetero_indel_report <<- paste0("alignment % id : ",hetero_indel_pid,"%\nins/del counts : ",ins_counts," / ",del_counts)
     if((ins_counts > 0)||(del_counts > 0)){
-        g_indels_present <<- TRUE
+        indels_present <- TRUE
     }else{
-        g_indels_present <<- FALSE
+        indels_present <- FALSE
     }
+    return(list(indels_present=indels_present,minor_het_insertions=minor_het_insertions,hetero_indel_aln=hetero_indel_aln,hetero_ins_tab=hetero_ins_tab,hetero_del_tab=hetero_del_tab,hetero_indel_pid=hetero_indel_pid,hetero_indel_report=hetero_indel_report))
 }
 
 get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
@@ -577,10 +578,10 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
 }
 
 #reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels indels
-incorporate_hetero_indels_func <- function(calls){
-    if(!is.na(g_hetero_del_tab[1])) dels <- as.vector(unlist(apply(g_hetero_del_tab,1,function(x) x[1]:x[2])))
+incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,minor_het_insertions){
+    if(!is.na(hetero_del_tab[1])) dels <- as.vector(unlist(apply(hetero_del_tab,1,function(x) x[1]:x[2])))
     else dels <- numeric()
-    if(!is.na(g_hetero_ins_tab[1])) ins <- as.vector(unlist(apply(g_hetero_ins_tab,1,function(x) x[1]:x[2])))
+    if(!is.na(hetero_ins_tab[1])) ins <- as.vector(unlist(apply(hetero_ins_tab,1,function(x) x[1]:x[2])))
     else ins <- numeric()
     if(max(length(dels),length(ins)) != 0){
         calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T,calls[["sample_peak_base_fwd"]])]
@@ -594,27 +595,27 @@ incorporate_hetero_indels_func <- function(calls){
             calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
         }
     }
-    if(nrow(g_minor_het_insertions[!is.na(pos)]) > 0){
+    if(nrow(minor_het_insertions[!is.na(pos)]) > 0){
         get_ins_data_table <- function(pos,seq){
             ins_seq <- strsplit(seq,"")[[1]]
             ins_tab <- calls[rep(pos-1,length(ins_seq)),]
             ins_tab[,id := id + seq_along(id)/100]
             ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
             ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
-            if(!is.null(g_intens_rev)){
+            if("call_rev" %in% row.names(calls)){
                 ins_tab[,`:=`(iA_rev=0,iC_rev=0,iG_rev=0,iT_rev=0)]
             }
             return(ins_tab)
         }
 
-        if(nrow(g_minor_het_insertions[!is.na(pos)])>0){
-            ins_tabs <- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(g_minor_het_insertions[!is.na(pos),]$pos[x],g_minor_het_insertions$seq[x]))
-            g_minor_het_insertions$added <<- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
+        if(nrow(minor_het_insertions[!is.na(pos)])>0){
+            ins_tabs <- lapply(1:nrow(minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(minor_het_insertions[!is.na(pos),]$pos[x],minor_het_insertions$seq[x]))
+            minor_het_insertions$added <<- lapply(1:nrow(minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
             #g_minor_het_insertions$added = rbindlist(ins_tabs)$id;
             calls <- rbindlist(c(list(calls),ins_tabs))
         }
     }
-    return(calls)
+    return(calls=calls,minor_het_insertions=minor_het_insertions)
 }
 
 incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
@@ -764,13 +765,18 @@ get_expected_het_indels <- function(calls){
     min <- index(min)[which(min)]
     min <- min[min < best_max]
     if(length(min) == 0){
-        g_expected_het_indel <<- list(min = 0,max = 0,hist = hst)
-        return()
+        g_expected_het_indel <- list(min = 0,max = 0,hist = hst)
+        return(g_expected_het_indel)
     }
 
     best_min <- rev(min)[which.min(rev(hst$density[min]))]
 
     if(max_dens[which(index(max_dens) == best_max)] > 8){
-        g_expected_het_indel <<- list(min = hst$breaks[best_min + 1],max = hst$breaks[best_max + 1],hist = hst)
-    } else  g_expected_het_indel <<- list(min = 0,max = 0,hist = hst)
+        g_expected_het_indel <- list(min = hst$breaks[best_min + 1],max = hst$breaks[best_max + 1],hist = hst)
+        return(g_expected_het_indel)
+    } else  {
+        g_expected_het_indel <- list(min = 0,max = 0,hist = hst)
+        return(g_expected_het_indel)
+    }
+    
 }

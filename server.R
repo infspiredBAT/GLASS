@@ -4,31 +4,31 @@ library(xlsx)
 source("procAbi.R")
 source("helpers.R")
 
-#options(shiny.reactlog=TRUE)
-g_calls                 <<- NULL             #annotated basecall data
-#makeReactiveBinding("g_calls")
-g_intens                <<- NULL             #intensities file
-g_intens_rev            <<- NULL             #optional reverse intensities file
-g_intrexdat             <<- NULL             #intrex data used in graphs
-g_glassed_ref           <<- NULL
-g_glassed_cod           <<- NULL
-g_choices               <<- NULL
-g_noisy_neighbors       <<- NULL
-g_view                  <<- NULL
-g_selected              <<- NULL
-g_selected_goto_index   <<- 0
-g_max_y                 <<- NULL
-g_hetero_calls          <<- 0
-g_hetero_indel_pid      <<- 0
-g_hetero_ins_tab        <<- NULL
-g_hetero_del_tab        <<- NULL
-g_expected_het_indel    <<- NULL
-g_minor_het_insertions  <<- NULL
-g_stored_het_indels     <<- list()
-g_indels_present        <<- FALSE
-g_qual_present          <<- FALSE
-shinyServer(function(input,output,session) {
 
+shinyServer(function(input,output,session) {
+    #options(shiny.reactlog=TRUE)
+    g_calls                 <- NULL             #annotated basecall data
+    #makeReactiveBinding("g_calls")
+    g_intens                <- NULL             #intensities file
+    g_intens_rev            <- NULL             #optional reverse intensities file
+    g_intrexdat             <- NULL             #intrex data used in graphs
+    g_glassed_ref           <- NULL
+    g_glassed_cod           <- NULL
+    g_choices               <- NULL
+    g_noisy_neighbors       <- NULL
+    g_view                  <- NULL
+    g_selected              <- NULL
+    g_selected_goto_index   <- 0
+    g_max_y                 <- NULL
+    g_hetero_calls          <- 0
+    g_hetero_indel_pid      <- 0
+    g_hetero_ins_tab        <- NULL
+    g_hetero_del_tab        <- NULL
+    g_expected_het_indel    <- NULL
+    g_minor_het_insertions  <- NULL
+    g_stored_het_indels     <- list()
+    g_indels_present        <- FALSE
+    g_qual_present          <- FALSE
 #     get_file <- reactive({
 #        # if (!is.null(input$select_file)) return(input$select_file$datapath)
 #         if (!is.null(input$select_file)) return(input$select_file)
@@ -151,7 +151,7 @@ shinyServer(function(input,output,session) {
                     g_intens     <<- intensified$intens
                     g_intens_rev <<- intensified$intens_rev
                     calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,g_glassed_cod)
-                    calls        <-  adjust_ref_mut(calls)
+                    #calls        <-  adjust_ref_mut(calls,g_intens_rev)
                     g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                     #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
                         intrexdat            <- list()
@@ -198,11 +198,23 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,ins_added := NULL]
             }
 
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min)
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels)
             setkey(g_calls,id)
 
-            report_hetero_indels(g_calls)
-            if(input$incorporate_checkbox & g_indels_present) g_calls <<- incorporate_hetero_indels_func(g_calls)
+            report                  <- report_hetero_indels(g_calls)
+            g_indels_present       <<- report$indels_present
+            g_minor_het_insertions <<- report$minor_het_insertionss
+            g_hetero_indel_aln     <<- report$hetero_indel_aln
+            g_hetero_ins_tab       <<- report$hetero_ins_tab
+            g_hetero_del_tab       <<- report$hetero_del_tab
+            g_hetero_indel_pid     <<- report$hetero_indel_pid
+            g_hetero_indel_report  <<- report$hetero_indel_report
+            
+            if(input$incorporate_checkbox & g_indels_present){ 
+                ret      <- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions)
+                g_calls <<- ret$calls
+                g_minor_het_insertions <<- ret$g_minor_het_insertions
+                }
             setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
@@ -210,7 +222,7 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions$ins_added <<- ins_added
             }
 
-            get_expected_het_indels(g_calls)
+            g_expected_het_indel <<- get_expected_het_indels(g_calls)
             g_calls   <<- retranslate(g_calls)
             g_choices <<- get_choices(g_calls)
             return(TRUE)
@@ -292,7 +304,7 @@ shinyServer(function(input,output,session) {
             input$reset_btn
             if(varcall() & !is.null(g_choices)) {
 
-                g_view<<-get_view(g_choices)
+                g_view<<-get_view(g_calls,g_choices)
                 #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
                 #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
                 add_checkbox_buttons <- add_checkboxes()
