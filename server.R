@@ -192,7 +192,11 @@ shinyServer(function(input,output,session) {
                 {
                     added <- strsplit(g_minor_het_insertions[i]$added[[1]], split = " ")
                     g_calls <<- g_calls[!(id %in% added[[1]])]
-                    remove_intensities(added)
+                    ret <- remove_intensities(added,g_calls,g_intens,g_intens_rev,g_intrexdat,g_minor_het_insertions)
+                    g_calls      <<- ret$calls
+                    g_intens     <<- ret$intens
+                    g_intens_rev <<- ret$intens_rev
+                    g_intrexdat  <<- ret$intrexdat
                 }
                 g_minor_het_insertions[,added:=NULL]
                 g_minor_het_insertions[,ins_added := NULL]
@@ -211,15 +215,19 @@ shinyServer(function(input,output,session) {
             g_hetero_indel_report  <<- report$hetero_indel_report
             
             if(input$incorporate_checkbox & g_indels_present){ 
-                ret      <- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions)
-                g_calls <<- ret$calls
-                g_minor_het_insertions <<- ret$minor_het_insertions
-                }
+                g_calls <<- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions)
+            }
             setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
-                ins_added <- lapply(1:nrow(g_minor_het_insertions),function(x) add_intensities(strsplit(g_minor_het_insertions[x]$added[[1]],split = " ")[[1]]),g_calls,g_intens,g_intens_rev)
-                g_minor_het_insertions$ins_added <<- ins_added
+                for(i in 1:nrow(g_minor_het_insertions)){
+                    ret <- add_intensities(strsplit(g_minor_het_insertions[i]$added[[1]],split= " ")[[1]],g_calls,g_intens,g_intens_rev,g_intrexdat)
+                }
+                g_calls                          <<- ret$calls
+                g_minor_het_insertions$ins_added <<- ret$ins_added
+                g_intens                         <<- ret$intens
+                g_intens_rev                     <<- ret$intens_rev
+                g_intrexdat                      <<- ret$intrexdat  
             }
 
             g_expected_het_indel <<- get_expected_het_indels(g_calls)

@@ -578,7 +578,7 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
 }
 
 #reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels indels
-incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,minor_het_insertions){
+incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g_minor_het_insertions){
     if(!is.na(hetero_del_tab[1])) dels <- as.vector(unlist(apply(hetero_del_tab,1,function(x) x[1]:x[2])))
     else dels <- numeric()
     if(!is.na(hetero_ins_tab[1])) ins <- as.vector(unlist(apply(hetero_ins_tab,1,function(x) x[1]:x[2])))
@@ -595,7 +595,7 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,m
             calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
         }
     }
-    if(nrow(minor_het_insertions[!is.na(pos)]) > 0){
+    if(nrow(g_minor_het_insertions[!is.na(pos)]) > 0){
         get_ins_data_table <- function(pos,seq){
             ins_seq <- strsplit(seq,"")[[1]]
             ins_tab <- calls[rep(pos-1,length(ins_seq)),]
@@ -608,14 +608,15 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,m
             return(ins_tab)
         }
 
-        if(nrow(minor_het_insertions[!is.na(pos)])>0){
-            ins_tabs <- lapply(1:nrow(minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(minor_het_insertions[!is.na(pos),]$pos[x],minor_het_insertions$seq[x]))
-            minor_het_insertions$added <<- lapply(1:nrow(minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
+        if(nrow(g_minor_het_insertions[!is.na(pos)])>0){
+            ins_tabs <- lapply(1:nrow(minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(minor_het_insertions[!is.na(pos),]$pos[x],g_minor_het_insertions$seq[x]))
+            added <- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
+            g_minor_het_insertions[,added:=added]
             #g_minor_het_insertions$added = rbindlist(ins_tabs)$id;
             calls <- rbindlist(c(list(calls),ins_tabs))
         }
     }
-    return(list(calls=calls,minor_het_insertions=minor_het_insertions))
+    return(calls)
 }
 
 incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
@@ -660,42 +661,43 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
     return(new_vec)
 }
 
-add_intensities <- function(added,calls,intens,intens_rev){
+add_intensities <- function(added,calls,intens,intens_rev,intrexdat){
     #update intensities
     id <- calls[id == as.integer(added[1]),]$trace_peak + 6
     add<-data.table("id"=id + (1:(length(added)*12)/1000),"A"=0,"C"=0,"G"=0,"T"=0)
     intens     <- rbind(intens,     add)
     setkey(intens,     id)
     if("call_rev" %in% colnames(calls)){
-        intens_rev <<- rbind(intens_rev, add)
+        intens_rev <- rbind(intens_rev, add)
         setkey(intens_rev, id)
     }
     #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
     #update peak positions in calls table
-    calls$trace_peak<<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
-    calls$trace_peak_rev<<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
+    calls$trace_peak<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
+    calls$trace_peak_rev<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
     #update intrex
-    g_intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
-    g_intrexdat$intrex     <- setnames(merge(g_intrexdat$intrex,g_calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-    g_intrexdat       <<- splice_variants(g_intrexdat)
-    g_intrexdat$max_x <<- nrow(g_intens)
-    return(paste0(add$id,collapse= " "))
+    intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
+    intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+    intrexdat       <- splice_variants(intrexdat)
+    intrexdat$max_x <- nrow(intens)
+    return(list(ins_added=paste0(add$id,collapse= " "),calls=calls,intens=intens,intens_rev=intens_rev,intrexdat=intrexdat))
 }
 
-remove_intensities <- function(added){
+remove_intensities <- function(added,calls,intens,intens_rev,intrexdat,minor_het_insertions){
     #update intensities (this operation takes too long)
-    g_intens <<- g_intens[!id %in% as.numeric(str_split(g_minor_het_insertions$ins_added," ")[[1]]),]
+    intens <- intens[!id %in% as.numeric(str_split(minor_het_insertions$ins_added," ")[[1]]),]
     #update peak positions in calls table
-    g_calls$trace_peak<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
-    if("call_rev" %in% colnames(g_calls)){
-        g_intens_rev <<-g_intens_rev[! id %in% as.numeric(str_split(g_minor_het_insertions$ins_added," ")[[1]]),]
-        g_calls$trace_peak_rev<<-seq(from = g_calls[1]$trace_peak, by = 12, length.out = nrow(g_calls))
+    calls$trace_peak <- seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
+    if("call_rev" %in% colnames(calls)){
+        intens_rev <- intens_rev[! id %in% as.numeric(str_split(minor_het_insertions$ins_added," ")[[1]]),]
+        calls$trace_peak_rev <- seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
     }
     #update intrex
-    g_intrexdat$intrex     <- setnames(g_calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
-    g_intrexdat$intrex     <- setnames(merge(g_intrexdat$intrex,g_calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-    g_intrexdat       <<- splice_variants(g_intrexdat)
-    g_intrexdat$max_x <<- nrow(g_intens)
+    intrexdat$intrex    <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
+    intrexdat$intrex    <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+    intrexdat           <- splice_variants(intrexdat)
+    intrexdat$max_x     <- nrow(intens)
+    return(list(calls=calls,intens=intens,intens_rev=intens_rev,intrexdat=intrexdat))
 }
 
 #background noise absolute or relative to reference peak
