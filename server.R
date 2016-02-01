@@ -151,7 +151,7 @@ shinyServer(function(input,output,session) {
                     g_intens     <<- intensified$intens
                     g_intens_rev <<- intensified$intens_rev
                     calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,g_glassed_cod)
-                    #calls        <-  adjust_ref_mut(calls,g_intens_rev)
+                    calls        <-  adjust_ref_mut(calls,g_intens_rev)
                     g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                     #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
                         intrexdat            <- list()
@@ -506,12 +506,12 @@ shinyServer(function(input,output,session) {
         }
     },height = 600)
 
-#     output$call_table <- shiny::renderDataTable({
-#         if(varcall() & !is.null(g_calls)) { g_calls }
-#     }
-#     ,options = list(paging=F
-#                     ,columnDefs=list(list(searchable=F, orderable=F, title=""))
-#                     ))
+     output$call_table <- shiny::renderDataTable({
+         if(varcall() & !is.null(g_calls)) { g_calls }
+     }
+     ,options = list(paging=F
+                     ,columnDefs=list(list(searchable=F, orderable=F, title=""))
+                     ))
 
 #     output$intens_table <- shiny::renderDataTable({
 #         if(varcall() & !is.null(g_intens)) { g_intens }

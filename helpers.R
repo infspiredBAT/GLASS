@@ -465,7 +465,7 @@ get_view<-function(calls,choices){
                 to   <- as.numeric(calls[choices[i]$id]$codon) +1
                 choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
                                              calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
-                                             paste(translate(strsplit(seq,"")[[1]]),collapse = ""))
+                                             paste(aaa(translate(strsplit(seq,"")[[1]])),collapse = ""))
             }
             if(choices[i,]$mut_type=="del"){
 
@@ -488,7 +488,7 @@ get_view<-function(calls,choices){
         else prev_seq <- paste0(calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
         if(seq == prev_seq) {
             choices[i,coding := gsub("ins","dup",coding)]
-            #the coordinates are changed to the sequence that is duplicated #! find teste for these
+            #the coordinates are changed to the sequence that is duplicated #! find test for these
             if(nchar(seq)>1){
                 choices[i,]$coding <- paste0("c.",calls[floor(choices[i,]$id)-nchar(seq)+1]$coding_seq,"_",calls[floor(choices[i,]$id),]$coding_seq,"dup",seq)
             }
