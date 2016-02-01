@@ -483,36 +483,36 @@ shinyServer(function(input,output,session) {
     # Other tabs
     #
 
-    output$aln <- renderPrint({
-      if(varcall() ) {
-          cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
-          if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
-          else print(g_hetero_ins_tab)
-          cat("\nidentified deletions:\n")
-          if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
-          else print(g_hetero_del_tab)
-          cat("\n")
-          writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
-      }
-    })
-
-    output$het_histogram <- renderPlot({
-        if(varcall() ) {
-            if(!is.null(g_expected_het_indel)){
-                plot(g_expected_het_indel$hist)
-                if(g_expected_het_indel$min != 0) abline(v = g_expected_het_indel$min,col = "red")
-                #if(g_expected_het_indel$max != 0) abline(v = g_expected_het_indel$max,col = "orange")
-            }
-        }
-    },height = 600)
-
-     output$call_table <- shiny::renderDataTable({
-         if(varcall() & !is.null(g_calls)) { g_calls }
-     }
-     ,options = list(paging=F
-                     ,columnDefs=list(list(searchable=F, orderable=F, title=""))
-                     ))
-
+#    output$aln <- renderPrint({
+#      if(varcall() ) {
+#          cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
+#          if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
+#          else print(g_hetero_ins_tab)
+#          cat("\nidentified deletions:\n")
+#          if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
+#          else print(g_hetero_del_tab)
+#          cat("\n")
+#          writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
+#      }
+#    })
+#
+#    output$het_histogram <- renderPlot({
+#        if(varcall() ) {
+#            if(!is.null(g_expected_het_indel)){
+#                plot(g_expected_het_indel$hist)
+#                if(g_expected_het_indel$min != 0) abline(v = g_expected_het_indel$min,col = "red")
+#                #if(g_expected_het_indel$max != 0) abline(v = g_expected_het_indel$max,col = "orange")
+#            }
+#        }
+#    },height = 600)
+#
+#     output$call_table <- shiny::renderDataTable({
+#         if(varcall() & !is.null(g_calls)) { g_calls }
+#     }
+#     ,options = list(paging=F
+#                     ,columnDefs=list(list(searchable=F, orderable=F, title=""))
+#                     ))
+#
 #     output$intens_table <- shiny::renderDataTable({
 #         if(varcall() & !is.null(g_intens)) { g_intens }
 #     }, options = list(paging=T, columnDefs=list(list(searchable=F, orderable=F, title=""))))

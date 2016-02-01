@@ -114,17 +114,17 @@ shinyUI(
 				),
 				br()
 			)
-            ,
- 			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
- 		         verbatimTextOutput("aln"),
- 		         plotOutput('het_histogram',height = 600)
- 			)
+#            ,
+#			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
+#		         verbatimTextOutput("aln"),
+#		         plotOutput('het_histogram',height = 600)
+#			)
 # 			tabPanel('variant annotation', value = 'annotation', icon = icon("user-md")
 # 			),
-            ,
- 			tabPanel('calls', value = 'call_table', icon = icon("table"),
- 				 shiny::dataTableOutput("call_table")
-  			)
+#            ,
+# 			tabPanel('calls', value = 'call_table', icon = icon("table"),
+# 				 shiny::dataTableOutput("call_table")
+#  			)
 # 			,tabPanel('intensities fwd', value = 'intens_table', icon = icon("table"),
 # 		         shiny::dataTableOutput("intens_table")
 # 			)
