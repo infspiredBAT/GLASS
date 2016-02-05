@@ -97,19 +97,32 @@ shinyServer(function(input,output,session) {
                 fwd_file_name <- full_name
                 rev_file <- NULL
                 rev_file_name <- "-"
-                if(!is.null(name)){
-                    base <- sapply(strsplit(basename(name),"\\."),
-                                   function(x) paste(x[1:(length(x)-1)], collapse="."))
-                }
-            }
-            if(substr(base,nchar(base),nchar(base))=="R"){
-                isolate({
-                    g_files <<- paste0("fwd (F): ",rev_file_name," \t<em>aligned to: ",input$gene_of_interest,"</em>","\nrev (R): ",fwd_file_name,sep="")
+                ref <- read.fasta(paste0("data/refs/",input$gene_of_interest,".glassed.intrex.fasta"))
+                ref <- toupper(paste0(unlist(ref),collapse = ""))
+                sm <<- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
+                seq<-DNAString(sangerseqR::read.abif(fwd_file)@data$PBAS.2)
+                pa <- pairwiseAlignment(pattern = ref, subject = seq,type = "overlap",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+                score_fwd <- pa@score
+                pa <- pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "overlap",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+                score_rev <- pa@score
+                if(score_rev>score_fwd){
                     single_rev <- TRUE
+                }
+                #if(!is.null(name)){
+                #    base <- sapply(strsplit(basename(name),"\\."),
+                #                   function(x) paste(x[1:(length(x)-1)], collapse="."))
+                #}
+            }
+            
+            #if(substr(base,nchar(base),nchar(base))=="R"){
+            if(single_rev){
+                isolate({
+                    g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name," \n<em>aligned to: ",input$gene_of_interest,"</em>",sep="")
+                    #single_rev <- TRUE
                 })
             }else{
                 isolate({
-                    g_files <<- paste0("fwd (F): ",fwd_file_name," \t<em>aligned to: ",input$gene_of_interest,"</em>","\nrev (R): ",rev_file_name,sep="")
+                    g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",input$gene_of_interest,"</em>",sep="")
                 })
             }
             if(!is.null(ex)){
