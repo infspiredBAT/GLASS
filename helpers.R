@@ -323,7 +323,7 @@ retranslate <- function(calls){
         setkey(coding,coding_seq)
     }
     coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
-    trans <- translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
+    trans <- seqinr::translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     #Shift annotation of codons by '-'s
     ord_sample<-rep(c(1,2,3),length(trans))
     suppressWarnings(trans_sample <- aaa(trans))
@@ -344,7 +344,7 @@ retranslate <- function(calls){
     }
     coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
 #! # ord<-rep(c(1,2,3),length(trans))
-    trans <- translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
+    trans <- seqinr::translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     ord_mut<-rep(c(1,2,3),length(trans))
     suppressWarnings(trans_mut <- aaa(trans))
 
