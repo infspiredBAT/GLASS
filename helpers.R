@@ -465,7 +465,7 @@ get_view<-function(calls,choices){
                 to   <- as.numeric(calls[choices[i]$id]$codon) +1
                 choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
                                              calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
-                                             paste(aaa(translate(strsplit(seq,"")[[1]])),collapse = ""))
+                                             paste(aaa(seqinr::translate(strsplit(seq,"")[[1]])),collapse = ""))
             }
             if(choices[i,]$mut_type=="del"){
 
