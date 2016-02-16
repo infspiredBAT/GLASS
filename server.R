@@ -92,7 +92,7 @@ shinyServer(function(input,output,session) {
                     rev_file <- NULL
                     rev_file_name <- "-"
                 }
-            }else{ #only one file selected
+            }else if(is.null(ex)){ #only one file selected
                 fwd_file <- input$select_file$datapath
                 fwd_file_name <- full_name
                 rev_file <- NULL
@@ -120,7 +120,7 @@ shinyServer(function(input,output,session) {
                     g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name," \n<em>aligned to: ",input$gene_of_interest,"</em>",sep="")
                     #single_rev <- TRUE
                 })
-            }else{
+            }else if(is.null(ex)){
                 isolate({
                     g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",input$gene_of_interest,"</em>",sep="")
                 })
