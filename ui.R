@@ -5,7 +5,7 @@ library(htmlwidgets)
 library(chromatography)
 library(stringr)
 library(stringi)
-#require(DT)
+library(DT)
 
 shinyUI(
 
