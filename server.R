@@ -3,7 +3,7 @@ library(sangerseqR)
 library(xlsx)
 source("procAbi.R")
 source("helpers.R")
-source("samples.R")
+#source("samples.R")
 
 
 shinyServer(function(input,output,session) {
