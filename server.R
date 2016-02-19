@@ -42,8 +42,13 @@ shinyServer(function(input,output,session) {
     
     g_files <- data.table(FWD=c("data/abis/eric/3low_freq_fsF.ab1"),
                           REV=c("data/abis/eric/3low_freq_fsR.ab1"),
-                          REF=add_goto_buttons     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL  )
+                          REF=add_button     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="auto"  ),
+                          DELETE=add_button  <- shinyInput(actionButton, c(2), 'button_',ico=list("close"),label=NULL,disabled=TRUE)
     )
+    g_files<- rbind(g_files,list(FWD= "-",REV=("some sample rev only"),REF=add_button     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="auto"),
+                                 DELETE=add_button  <- shinyInput(actionButton,c(2),'button_',ico=list("close"),label=NULL)
+                                 ) 
+                    )
     output$samples_table <- DT::renderDataTable(
         g_files ,escape=FALSE
     )
