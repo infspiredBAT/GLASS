@@ -3,6 +3,7 @@ library(sangerseqR)
 library(xlsx)
 source("procAbi.R")
 source("helpers.R")
+source("samples.R")
 
 
 shinyServer(function(input,output,session) {
@@ -29,6 +30,7 @@ shinyServer(function(input,output,session) {
     g_stored_het_indels     <- list()
     g_indels_present        <- FALSE
     g_qual_present          <- FALSE
+    g_files                 <- NULL
 #     get_file <- reactive({
 #        # if (!is.null(input$select_file)) return(input$select_file$datapath)
 #         if (!is.null(input$select_file)) return(input$select_file)
@@ -36,7 +38,16 @@ shinyServer(function(input,output,session) {
 #     })
     ex <- NULL
     btn_counter <- 0
-
+    
+    
+    g_files <- data.table(FWD=c("data/abis/eric/3low_freq_fsF.ab1"),
+                          REV=c("data/abis/eric/3low_freq_fsR.ab1"),
+                          REF=add_goto_buttons     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL  )
+    )
+    output$samples_table <- DT::renderDataTable(
+        g_files ,escape=FALSE
+    )
+    
     change_reference <- observe ({
         input$gene_of_interest
         isolate({
@@ -309,16 +320,16 @@ shinyServer(function(input,output,session) {
     #
     # DataTable stuff
     #
-    add_checkboxes <- function(){
-        checkboxes <- paste0('<input type="checkbox" name="row', g_view$id, '" value="', g_view$id, '"',"")
-        for(i in 1:nrow(g_view)) {
-            if(g_view[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
-            else checkboxes[i] <- paste0(checkboxes[i],">","")
-        }
-        return(checkboxes)
-    }
+#    add_checkboxes <- function(){
+#        checkboxes <- paste0('<input type="checkbox" name="row', g_view$id, '" value="', g_view$id, '"',"")
+#        for(i in 1:nrow(g_view)) {
+#            if(g_view[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
+#            else checkboxes[i] <- paste0(checkboxes[i],">","")
+#        }
+#        return(checkboxes)
+#    }
 
-    output$chosen_variants_table <- shiny::renderDataTable({
+    output$chosen_variants_table <- DT::renderDataTable({
         if(varcall())
         if(!is.null(g_choices) && nrow(g_choices) > 0){
             input$change_btn
@@ -326,82 +337,46 @@ shinyServer(function(input,output,session) {
             if(varcall() & !is.null(g_choices)) {
 
                 g_view<<-get_view(g_calls,g_choices)
-                #add_checkbox_buttons <- paste0('<input type="checkbox" name="row', g_choices$id, '" value="', g_choices$id, '">',"")
-                #add_edit_buttons <- paste0('<a class="go-edit" href="" data-id="', g_choices$id, '"><i class="fa fa-crosshairs"></i></a>')
-                add_checkbox_buttons <- add_checkboxes()
-                add_goto_buttons     <- paste0('<input type="button" class="go-goto"  value="goto"  name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
-                add_reset_buttons    <- paste0('<input type="button" class="go-reset" value="remove" name="btn',g_view$id,'" data-id="',g_view$id,'"',">")
-                add_lock_buttons     <- paste0('<input type="button" class="go-lock"  value="lock"  name="btn',g_view$id,'" data-id="',g_view$id,'" data-coding="',g_view$coding,'"',">")
 
-                # cbind(Pick=add_checkbox_buttons, Edit=add_edit_buttons, Zoom=add_zoom_buttons, g_choices[,list("call position"=id,"coding variant"=coding,"protein variant"=protein,reference,"sample variant"=user_sample,"%"=sample_peak_pct,"mutant variant"=user_mut,"%"=mut_peak_pct)])
+                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id)' )
+                add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "remove", onclick = 'Shiny.onInputChange(\"goReset\",  this.id)' )
+                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'Shiny.onInputChange(\"goLock\",  this.id)',ico = unlist(lapply(g_view$set_by_user, function(x){if(x ==TRUE){"lock"}else{ "unlock"}})) )
 
-                cbind(Pick=add_checkbox_buttons, Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
-
+                cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
+                
             }
         }
     }
-    , options = list(dom = "t",orderClasses=c(-1,-2,-3,-4), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2,3), orderable=F, title="")))
-    , escape=c(-1,-2,-3,-4)
-    , callback =
-        "function(table) {
-            table.on('change.dt', 'tr td input:checkbox', function() {
-                setTimeout(function () {
-                    Shiny.onInputChange('rows', $(this).add('tr td input:checkbox:checked').parent().siblings(':nth-child(4)').map(function() {
-                        return $(this).text();
-                    }).get())
-                }, 10);
-            });
-            table.on('click', '.go-goto', function(e) {
-                e.preventDefault();
-                $el = $(this);
-                var id_data = $el.data('id');
-                Shiny.onInputChange('goGoto', {
-                    id: id_data
-                });
-            });
-            table.on('click', '.go-reset', function(e) {
-                e.preventDefault();
-                $el = $(this);
-                var id_data = $el.data('id');
-                Shiny.onInputChange('goReset', {
-                    id: id_data
-                });
-            });
-            table.on('click', '.go-lock', function(e) {
-                e.preventDefault();
-                $el = $(this);
-                var id_data = $el.data('id');
-                var coding_data = $el.data('coding');
-                Shiny.onInputChange('goLock', {
-                    id: id_data,
-                    coding: coding_data,
-                });
-            });
-        }"
+#    , options = list(dom = "t",orderClasses=c(-1,-2,-3,-4), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2,3), orderable=F, title="")))
+    , escape=FALSE
+    , style= 'bootstrap'
+    , options=list("paging"=FALSE,"searching"=FALSE,"ordering"=FALSE,"autoWidth"=FALSE)
     )
 
-    variant_select <- observe({
-        if(varcall()) {
-            g_selected <<- str_trim(input$rows)
-            g_selected_goto_index <<- 0
-        }
-    })
+#    variant_select <- observe({
+#        if(varcall()) {
+#            g_selected <<- str_trim(input$rows)
+#            g_selected_goto_index <<- 0
+#        }
+#    })
 
     #
     # data table buttons
     #
     goGoto_handler <- observe({
         if(is.null(input$goGoto)) return()
-        session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==input$goGoto$id]$trace_peak))
-        updateTextInput(session,"choose_call_pos",value=paste0(input$goGoto$id))
+        goto_id <- as.numeric(strsplit(input$goGoto, "_")[[1]][2])
+        session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==goto_id]$trace_peak))
+        updateTextInput(session,"choose_call_pos",value=paste0(goto_id))
     })
 
     goReset_handler <- reactive({
         #if(varcall()) {
             if(!is.null(input$goReset)){
                 isolate({
-                    if(!is.na(g_view[id==input$goReset$id]$ids)){
-                        ids <- strsplit(g_view[id==input$goReset$id]$ids," ")[[1]]
+                    reset_id <- as.numeric(strsplit(input$goReset, "_")[[1]][2])
+                    if(!is.na(g_view[id==reset_id]$ids)){
+                        ids <- strsplit(g_view[id==reset_id]$ids," ")[[1]]
                         for( cid in ids){
                             updateTextInput(session,"choose_call_pos",value=paste0(cid))
                             g_calls[id==cid]$user_sample <<- g_calls[id==cid]$reference
@@ -409,11 +384,11 @@ shinyServer(function(input,output,session) {
                             g_calls[id==cid]$set_by_user <<- TRUE
                         }
                     }else{
-                        updateTextInput(session,"choose_call_pos",value=paste0(input$goReset$id))
+                        updateTextInput(session,"choose_call_pos",value=paste0(reset_id))
                         #reset button changed to remove variant
-                        g_calls[id==input$goReset$id]$user_sample <<- g_calls[id==input$goReset$id]$reference
-                        g_calls[id==input$goReset$id]$user_mut    <<- g_calls[id==input$goReset$id]$reference
-                        g_calls[id==input$goReset$id]$set_by_user <<- TRUE
+                        g_calls[id==reset_id]$user_sample <<- g_calls[id==reset_id]$reference
+                        g_calls[id==reset_id]$user_mut    <<- g_calls[id==reset_id]$reference
+                        g_calls[id==reset_id]$set_by_user <<- TRUE
                     }
                 })
             }
@@ -424,12 +399,15 @@ shinyServer(function(input,output,session) {
     goLock_handler <- observe({
         if(is.null(input$goLock)) return()
         isolate({
-            updateTextInput(session,"choose_call_pos",value=paste0(input$goLock$id))
-            if(length(grep("ins|del|dup",input$goLock$coding)) > 0){
-                g_stored_het_indels[[input$goLock$coding]] <<- input$goLock$id
+            lock_id <- as.numeric(strsplit(input$goLock, "_")[[1]][2])
+            coding  <- g_view[id==lock_id]$coding
+            updateTextInput(session,"choose_call_pos",value=paste0(lock_id))
+            if(length(grep("ins|del|dup",coding)) > 0){
+                g_stored_het_indels[[coding]] <<- lock_id
             } else {
-                g_calls[id==input$goLock$id]$set_by_user <<- TRUE
+                g_calls[id==lock_id]$set_by_user <<- TRUE
             }
+            #output$goLock <- renderUI({actionButton(input$goLock, icon = icon("lock"))})
 
         })
     })
@@ -484,11 +462,15 @@ shinyServer(function(input,output,session) {
             paste('data-', Sys.Date(), '.xlsx', sep='')
         },
         content = function(con) {
-            out<-data.table()
+            out<-data.table("genomic coordinate"=character(),"coding variant"=character(),"protein variant"=character())
+            g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
             for(i in 1:nrow(g_view)) {
-                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[id==i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
+                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
             }
-            write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
+            if(length(g_selected)==0)
+                write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
+            else write.xlsx(out,con)
+            
         }
     )
 

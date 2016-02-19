@@ -695,7 +695,7 @@ HTMLWidgets.widget({
             instance.scope_g.selectAll("scope").data(calls).enter()        //scope (position indicator)
                  .append("rect").attr("class",function(d){return "scope ".concat("scope").concat(d["trace_peak"]);})
                  .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
-                 .attr("y",-14).attr("rx",2).attr("ry",2)
+                 .attr("y",20).attr("rx",2).attr("ry",2)
                  .attr("width",24).attr("height",instance.height-90)
                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff

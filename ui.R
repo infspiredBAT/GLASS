@@ -11,6 +11,7 @@ shinyUI(
 
     fluidPage(theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
+		    includeCSS("www/samples.css"),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("genomePD/glass"),
             # script for input file cleaning
@@ -25,6 +26,14 @@ shinyUI(
             tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
 		HTML(paste("&nbsp&nbsp<b><font size=4em>genomePD/ </font><font size=6em>glass</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
+		absolutePanel(id = "samples", class = "panel panel-default", fixed = TRUE,
+		              draggable = TRUE, top = 200, left = 200, right = "auto", bottom = "auto",
+		              width = 1100, height = "auto",
+		              
+		              h2("Sample Browser"),
+		              DT::dataTableOutput('samples_table')
+		              
+		              ),
 		fluidRow(
     		br(),
 			column(1, selectInput("gene_of_interest",NULL,choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
@@ -108,7 +117,7 @@ shinyUI(
                         </div>
   		            "), sep = ""))))),
 				chromatographyOutput("plot"),
-				shiny::dataTableOutput("chosen_variants_table"),
+				DT::dataTableOutput("chosen_variants_table"),
 				conditionalPanel(condition=" output.chosen_variants_table ",
 				    downloadButton("export_btn","export")
 				),

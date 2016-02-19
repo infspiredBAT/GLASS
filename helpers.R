@@ -781,3 +781,14 @@ get_expected_het_indels <- function(calls){
     }
     
 }
+
+shinyInput <- function(FUN, ids, id, ico = NULL,...) {
+    inputs <- character(length(ids))
+    for (i in 1:length(ids)) {
+        if(!is.null(ico))
+            inputs[i] <- as.character(FUN(paste0(id, ids[i]), icon = icon(ico[i]),...))
+        else
+            inputs[i] <- as.character(FUN(paste0(id, ids[i]), ...))
+    }
+    inputs
+}
