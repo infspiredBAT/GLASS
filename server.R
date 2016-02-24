@@ -30,7 +30,11 @@ shinyServer(function(input,output,session) {
     g_stored_het_indels     <- list()
     g_indels_present        <- FALSE
     g_qual_present          <- FALSE
-    g_files                 <- NULL
+    g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftF.ab1"),
+                                          FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
+                                          REV_name=c("lowFreq_frameShiftR.ab1"),
+                                          REV_file=c("data/abis/eric/3low_freq_fsR.ab1")
+    )
 #     get_file <- reactive({
 #        # if (!is.null(input$select_file)) return(input$select_file$datapath)
 #         if (!is.null(input$select_file)) return(input$select_file)
@@ -39,19 +43,27 @@ shinyServer(function(input,output,session) {
     ex <- NULL
     btn_counter <- 0
     
+    #SAMPLE BROWSER STUFF in progress...
     
-    g_files <- data.table(FWD=c("data/abis/eric/3low_freq_fsF.ab1"),
-                          REV=c("data/abis/eric/3low_freq_fsR.ab1"),
-                          REF=add_button     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="auto"  ),
-                          DELETE=add_button  <- shinyInput(actionButton, c(2), 'button_',ico=list("close"),label=NULL,disabled=TRUE)
-    )
-    g_files<- rbind(g_files,list(FWD= "-",REV=("some sample rev only"),REF=add_button     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="auto"),
-                                 DELETE=add_button  <- shinyInput(actionButton,c(2),'button_',ico=list("close"),label=NULL)
+    g_files<- rbind(g_files,list(FWD_name="-",FWD_file= "-",REV_name="sample rev",REV_file="some sample rev only"
+                                 #REF=add_button     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="auto"),
+                                 #DELETE=add_button  <- shinyInput(actionButton,c(2),'button_',ico=list("close"),label=NULL)
                                  ) 
                     )
-    output$samples_table <- DT::renderDataTable(
-        g_files ,escape=FALSE
+    
+    
+    output$samples_table <- DT::renderDataTable({
+            input$browser_files
+            add_reset_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'button_', label = NULL, onclick = 'Shiny.onInputChange(\"goResetSamples\",  this.id)',ico=rep("close",nrow(g_files)) )
+            cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],delete=add_reset_buttons)
+        },
+        escape=FALSE,
+        options=list("paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE)
     )
+    
+    
+    
+    
     
     change_reference <- observe ({
         input$gene_of_interest
@@ -340,13 +352,10 @@ shinyServer(function(input,output,session) {
             input$change_btn
             input$reset_btn
             if(varcall() & !is.null(g_choices)) {
-
                 g_view<<-get_view(g_calls,g_choices)
-
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id)' )
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "remove", onclick = 'Shiny.onInputChange(\"goReset\",  this.id)' )
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'Shiny.onInputChange(\"goLock\",  this.id)',ico = unlist(lapply(g_view$set_by_user, function(x){if(x ==TRUE){"lock"}else{ "unlock"}})) )
-
                 cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
                 
             }
