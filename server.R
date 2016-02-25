@@ -61,13 +61,15 @@ shinyServer(function(input,output,session) {
                 loaded <- ""
                 ret <- samples_load(input$browser_files,output)
                 g_files <<- rbind(g_files,ret$loaded)
-                
             }
-            add_reset_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'button_', label = NULL, onclick = 'Shiny.onInputChange(\"goResetSamples\",  this.id)',ico=rep("close",nrow(g_files)) )
-            cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],delete=add_reset_buttons)
+            add_load_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'load_sample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id)',ico=rep("play",nrow(g_files)) )
+            add_reset_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'del_sample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) )
+            add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'select_input_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="100px")
+            out<-cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],add_reference_dropdown,delete=add_reset_buttons,load=add_load_buttons)
+            #DT::datatable(out,selection = "none")
         },
         escape=FALSE,
-        options=list("paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE)
+        options=list("paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE),selection="none"
     )
     
     
@@ -546,7 +548,12 @@ shinyServer(function(input,output,session) {
         varcall()
         return(g_indels_present)
     })
+    #output$show_sample_brows <- reactive({
+    #    input$mng_samples_btn
+    #    return(FALSE)
+    #})
     #not shure why but I need this here to make it work (regirsters the output variable?)
     outputOptions(output, 'reverse', suspendWhenHidden=FALSE)
     outputOptions(output, 'indels_present', suspendWhenHidden=FALSE)
+    #outputOptions(output, 'show_sample_brows',suspendWhenHidden=FALSE)
 })
