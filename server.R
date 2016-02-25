@@ -3,7 +3,7 @@ library(sangerseqR)
 library(xlsx)
 source("procAbi.R")
 source("helpers.R")
-#source("samples.R")
+source("samples.R")
 
 
 shinyServer(function(input,output,session) {
@@ -30,10 +30,13 @@ shinyServer(function(input,output,session) {
     g_stored_het_indels     <- list()
     g_indels_present        <- FALSE
     g_qual_present          <- FALSE
+    g_not_loaded            <- ""
+    g_refs_avail            <<- c("TP53","NOTCH1","ATM")
     g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftF.ab1"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
                                           REV_name=c("lowFreq_frameShiftR.ab1"),
-                                          REV_file=c("data/abis/eric/3low_freq_fsR.ab1")
+                                          REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
+                                          REF=c("TP53")
     )
 #     get_file <- reactive({
 #        # if (!is.null(input$select_file)) return(input$select_file$datapath)
@@ -45,7 +48,7 @@ shinyServer(function(input,output,session) {
     
     #SAMPLE BROWSER STUFF in progress...
     
-    g_files<- rbind(g_files,list(FWD_name="-",FWD_file= "-",REV_name="sample rev",REV_file="some sample rev only"
+    g_files<- rbind(g_files,list(FWD_name="-",FWD_file= "-",REV_name="sample rev",REV_file="some sample rev only",REF=c("ATM")
                                  #REF=add_button     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="auto"),
                                  #DELETE=add_button  <- shinyInput(actionButton,c(2),'button_',ico=list("close"),label=NULL)
                                  ) 
@@ -53,16 +56,19 @@ shinyServer(function(input,output,session) {
     
     
     output$samples_table <- DT::renderDataTable({
-            input$browser_files
+            if(!is.null(input$browser_files)){
+                g_not_loaded <- ""
+                loaded <- ""
+                ret <- samples_load(input$browser_files,output)
+                g_files <<- rbind(g_files,ret$loaded)
+                
+            }
             add_reset_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'button_', label = NULL, onclick = 'Shiny.onInputChange(\"goResetSamples\",  this.id)',ico=rep("close",nrow(g_files)) )
             cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],delete=add_reset_buttons)
         },
         escape=FALSE,
         options=list("paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE)
     )
-    
-    
-    
     
     
     change_reference <- observe ({
@@ -126,12 +132,12 @@ shinyServer(function(input,output,session) {
                 rev_file <- NULL
                 rev_file_name <- "-"
                 ref <- read.fasta(paste0("data/refs/",input$gene_of_interest,".glassed.intrex.fasta"))
-                ref <- toupper(paste0(unlist(ref),collapse = ""))
+                re
                 sm <<- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
                 seq<-DNAString(sangerseqR::read.abif(fwd_file)@data$PBAS.2)
                 pa <- pairwiseAlignment(pattern = ref, subject = seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                 score_fwd <- pa@score
-                pa <- pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+                pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                 score_rev <- pa@score
                 if(score_rev>score_fwd){
                     single_rev <- TRUE
