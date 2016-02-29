@@ -58,7 +58,7 @@ shinyServer(function(input,output,session) {
                 g_files <<- rbind(g_files,ret$loaded)
             }
             disabled <- rep(FALSE,nrow(g_files))
-            #dsbl[1] <- "true"
+            disabled[1] <- TRUE
             add_load_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id)',ico=rep("play",nrow(g_files)) )
             add_delete_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)),dsbl=disabled )
             add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="100px")
