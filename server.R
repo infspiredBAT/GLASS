@@ -27,7 +27,9 @@ shinyServer(function(input,output,session) {
     g_hetero_del_tab        <- NULL
     g_expected_het_indel    <- NULL
     g_minor_het_insertions  <- NULL
+    load_id                 <- NULL
     g_stored_het_indels     <- list()
+    files_info              <- ""
     g_indels_present        <- FALSE
     g_qual_present          <- FALSE
     g_not_loaded            <- ""
@@ -48,13 +50,6 @@ shinyServer(function(input,output,session) {
     
     #SAMPLE BROWSER STUFF in progress...
     
-    g_files<- rbind(g_files,list(FWD_name="-",FWD_file= "-",REV_name="sample rev",REV_file="some sample rev only",REF=c("ATM")
-                                 #REF=add_button     <- shinyInput(selectInput, c(1), 'button_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="auto"),
-                                 #DELETE=add_button  <- shinyInput(actionButton,c(2),'button_',ico=list("close"),label=NULL)
-                                 ) 
-                    )
-    
-    
     output$samples_table <- DT::renderDataTable({
             if(!is.null(input$browser_files)){
                 g_not_loaded <- ""
@@ -62,10 +57,12 @@ shinyServer(function(input,output,session) {
                 ret <- samples_load(input$browser_files,output)
                 g_files <<- rbind(g_files,ret$loaded)
             }
-            add_load_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'load_sample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id)',ico=rep("play",nrow(g_files)) )
-            add_reset_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'del_sample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) )
-            add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'select_input_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="100px")
-            out<-cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],add_reference_dropdown,delete=add_reset_buttons,load=add_load_buttons)
+            disabled <- rep(FALSE,nrow(g_files))
+            #dsbl[1] <- "true"
+            add_load_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id)',ico=rep("play",nrow(g_files)) )
+            add_delete_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)),dsbl=disabled )
+            add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="100px")
+            out<-cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
             #DT::datatable(out,selection = "none")
         },
         escape=FALSE,
@@ -73,18 +70,18 @@ shinyServer(function(input,output,session) {
     )
     
     
-    change_reference <- observe ({
-        input$gene_of_interest
-        isolate({
-            g_glassed_ref <<- paste("data/refs/",input$gene_of_interest,".glassed.intrex.fasta",sep="")
-            g_glassed_cod <<- paste("data/refs/",input$gene_of_interest,".glassed.codons.rdata",sep="")
-            #g_files <<- paste0("Reference changed to ", input$gene_of_interest)
-            #if(class(loading_processed_files())[1] != "my_UI_exception"){
-                #output$files      <-  renderPrint({cat(g_files)})
-            #}
-        })
-        #return(list(glassed_ref=glassed_ref,glassed_cod=glassed_cod))
-    })
+#    change_reference <- observe ({
+#        input$gene_of_interest
+#        isolate({
+#            g_glassed_ref <<- paste("data/refs/",input$gene_of_interest,".glassed.intrex.fasta",sep="")
+#            g_glassed_cod <<- paste("data/refs/",input$gene_of_interest,".glassed.codons.rdata",sep="")
+#            #g_files <<- paste0("Reference changed to ", input$gene_of_interest)
+#            #if(class(loading_processed_files())[1] != "my_UI_exception"){
+#                #output$files      <-  renderPrint({cat(g_files)})
+#            #}
+#        })
+#        #return(list(glassed_ref=glassed_ref,glassed_cod=glassed_cod))
+#    })
 
     loading_processed_files <- reactive ({
         if (input$ex_btn[1] - btn_counter){
@@ -94,77 +91,102 @@ shinyServer(function(input,output,session) {
         }
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
 
-
-        if(!is.null(input$select_file) || !is.null(ex)) {
-            file <- input$select_file$datapath
-            name <- input$select_file$name
-            #input$gene_of_interest
-            full_name <- input$select_file$name
-            single_rev <- FALSE
-
-            #getting rid of the date in names
-            for(i in 1:length(name)){
-                name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
-                name[i] <- gsub(".abi",".ab1",name[i])
+        if(!is.null(input$goLoadSamples)){
+            isolate({
+                load_id <- as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2])
+            })
+        }
+        #if(!is.null(input$select_file) || !is.null(ex)) {
+        if(!is.null(load_id) || !is.null(ex)) {
+            fwd_file      <- g_files[load_id]$FWD_file
+            fwd_file_name <- g_files[load_id]$FWD_name
+            rev_file      <- g_files[load_id]$REV_file
+            rev_file_name <- g_files[load_id]$REV_name
+            ref           <- g_files[load_id]$REF
+            
+            if(!is.null(ex)){
+                fwd_file <- fwd_file_name <- ex[1]
+                rev_file <- rev_file_name <- ex[2]
+                ref = "TP53"
             }
-            #if multiple files uploaded we use the first to
-            #check if we can distinguish forward and reverse
-            #otherwise we only take the first file
-            base <- ""
-            if(length(name)>=2){
-                if(gsub("*F.ab1","F",name[1])==gsub("*R.ab1","F",name[2])){
-                    fwd_file <- input$select_file$datapath[1]
-                    fwd_file_name <- full_name[1]
-                    rev_file <- input$select_file$datapath[2]
-                    rev_file_name <- full_name[2]
-                }else if(gsub("*R.ab1","R",name[1])==gsub("*F.ab1","R",name[2])){
-                    fwd_file <- input$select_file$datapath[2]
-                    fwd_file_name <- full_name[2]
-                    rev_file <- input$select_file$datapath[1]
-                    rev_file_name <- full_name[1]
-                }else{
-                    fwd_file <- input$select_file$datapath[1]
-                    fwd_file_name <- full_name[1]
-                    rev_file <- NULL
-                    rev_file_name <- "-"
-                }
-            }else if(is.null(ex)){ #only one file selected
-                fwd_file <- input$select_file$datapath
-                fwd_file_name <- full_name
+            g_glassed_ref <<- paste("data/refs/",ref,".glassed.intrex.fasta",sep="")
+            g_glassed_cod <<- paste("data/refs/",ref,".glassed.codons.rdata",sep="")
+            
+            if (fwd_file_name == "-"){
+                single_rev <- TRUE
+                fwd_file <- NULL
+            }
+            else
+                single_rev <- FALSE
+            if (rev_file_name == "-")
                 rev_file <- NULL
-                rev_file_name <- "-"
-                ref <- read.fasta(paste0("data/refs/",input$gene_of_interest,".glassed.intrex.fasta"))
-                re
-                sm <<- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
-                seq<-DNAString(sangerseqR::read.abif(fwd_file)@data$PBAS.2)
-                pa <- pairwiseAlignment(pattern = ref, subject = seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
-                score_fwd <- pa@score
-                pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
-                score_rev <- pa@score
-                if(score_rev>score_fwd){
-                    single_rev <- TRUE
-                }
-                #if(!is.null(name)){
-                #    base <- sapply(strsplit(basename(name),"\\."),
-                #                   function(x) paste(x[1:(length(x)-1)], collapse="."))
-                #}
-            }
+          #  file <- input$select_file$datapath
+          #  name <- input$select_file$name
+          #  #input$gene_of_interest
+          #  full_name <- input$select_file$name
+          #  single_rev <- FALSE
+#
+          #  #getting rid of the date in names
+          #  for(i in 1:length(name)){
+          #      name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
+          #      name[i] <- gsub(".abi",".ab1",name[i])
+          #  }
+          #  #if multiple files uploaded we use the first to
+          #  #check if we can distinguish forward and reverse
+          #  #otherwise we only take the first file
+          #  base <- ""
+          #  if(length(name)>=2){
+          #      if(gsub("*F.ab1","F",name[1])==gsub("*R.ab1","F",name[2])){
+          #          fwd_file <- input$select_file$datapath[1]
+          #          fwd_file_name <- full_name[1]
+          #          rev_file <- input$select_file$datapath[2]
+          #          rev_file_name <- full_name[2]
+          #      }else if(gsub("*R.ab1","R",name[1])==gsub("*F.ab1","R",name[2])){
+          #          fwd_file <- input$select_file$datapath[2]
+          #          fwd_file_name <- full_name[2]
+          #          rev_file <- input$select_file$datapath[1]
+          #          rev_file_name <- full_name[1]
+          #      }else{
+          #          fwd_file <- input$select_file$datapath[1]
+          #          fwd_file_name <- full_name[1]
+          #          rev_file <- NULL
+          #          rev_file_name <- "-"
+          #      }
+          #  }else if(is.null(ex)){ #only one file selected
+          #      fwd_file <- input$select_file$datapath
+          #      fwd_file_name <- full_name
+          #      rev_file <- NULL
+          #      rev_file_name <- "-"
+          #      ref <- read.fasta(paste0("data/refs/",input$gene_of_interest,".glassed.intrex.fasta"))
+          #      re
+          #      sm <<- matrix(c(1 ,-1 ,-1 ,-1 ,-1 ,0.5 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,0.1 ,0 ,-1 ,1 ,-1 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.5 ,-1 ,0.1 ,-1 ,0.1 ,0.1 ,0 ,-1 ,-1 ,1 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.5 ,-1 ,0.1 ,0.1 ,-1 ,0.1 ,0 ,-1 ,-1 ,-1 ,1 ,0.5 ,-1 ,-1 ,0.5 ,-1 ,0.5 ,0.1 ,0.1 ,0.1 ,-1 ,0 ,-1 ,-1 ,0.5 ,0.5 ,0.1 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.5 ,0.5 ,-1 ,-1 ,-1 ,0.1 ,0 ,0 ,0 ,0 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.1 ,0.5 ,-1 ,0.5 ,-1 ,0 ,0 ,0.1 ,-1 ,0 ,0 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-1 ,0.5 ,-1 ,0.5 ,0 ,0 ,-1 ,0.1 ,0 ,0 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.5 ,0.5 ,-1 ,0 ,0 ,0 ,0 ,0.1 ,-1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,0.5 ,-1 ,-1 ,0.5 ,0 ,0 ,0 ,0 ,-1 ,0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,-1 ,0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,-0.1 ,0.1 ,0 ,0.1 ,0 ,0 ,0.1 ,0.1 ,0.1 ,-1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0.1 ,0 ,0 ,0.1 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,-1 ,-0.1 ,0.1 ,0.1 ,-0.1 ,0.1 ,-0.1 ,0 ,0 ,0 ,0.1 ,0.1 ,0 ,0 ,0 ,0 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1),15,15,dimnames = list(c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),c("A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N")))
+          #      seq<-DNAString(sangerseqR::read.abif(fwd_file)@data$PBAS.2)
+          #      pa <- pairwiseAlignment(pattern = ref, subject = seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+          #      score_fwd <- pa@score
+          #      pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
+          #      score_rev <- pa@score
+          #      if(score_rev>score_fwd){
+          #          single_rev <- TRUE
+          #      }
+          #      #if(!is.null(name)){
+          #      #    base <- sapply(strsplit(basename(name),"\\."),
+          #      #                   function(x) paste(x[1:(length(x)-1)], collapse="."))
+          #      #}
+          #  }
             
             #if(substr(base,nchar(base),nchar(base))=="R"){
             if(single_rev){
                 isolate({
-                    g_files <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name," \n<em>aligned to: ",input$gene_of_interest,"</em>",sep="")
+                    files_info <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
                     #single_rev <- TRUE
                 })
             }else if(is.null(ex)){
                 isolate({
-                    g_files <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",input$gene_of_interest,"</em>",sep="")
+                    files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
                 })
             }
             if(!is.null(ex)){
-                fwd_file <- ex[1]
-                rev_file <- ex[2]
-                g_files <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
+                files_info <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
                 output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
                 base = ""
                 ex <- NULL
@@ -215,8 +237,8 @@ shinyServer(function(input,output,session) {
                     if(!called$qual_present){
                         g_files <- paste0(g_files,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
                     }
-                    g_files <- paste0("<pre>",g_files,"</pre>")
-                    output$files      <-  renderPrint({cat(g_files)})
+                    files_info <- paste0("<pre>",files_info,"</pre>")
+                    output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
@@ -363,7 +385,7 @@ shinyServer(function(input,output,session) {
                 g_view<<-get_view(g_calls,g_choices)
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id)' )
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "remove", onclick = 'Shiny.onInputChange(\"goReset\",  this.id)' )
-                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'Shiny.onInputChange(\"goLock\",  this.id)',ico = unlist(lapply(g_view$set_by_user, function(x){if(x ==TRUE){"lock"}else{ "unlock"}})) )
+                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'Shiny.onInputChange(\"goLock\",  this.id)',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})) )
                 cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
                 
             }

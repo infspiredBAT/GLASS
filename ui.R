@@ -58,7 +58,7 @@ shinyUI(
     		#	column(7, fileInput("select_file",NULL,multiple=T,accept=c('.abi','.ab1')))
 			#))),
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
-			column(7, htmlOutput("files"))
+			column(11, htmlOutput("files"))
 		),
 		tabsetPanel(id = 'tab',
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
