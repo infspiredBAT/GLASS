@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyjs)
 library(data.table)
 library(rjson)
 library(htmlwidgets)
@@ -7,10 +8,17 @@ library(stringr)
 library(stringi)
 library(DT)
 
+
+jsDeleteRow <- "shinyjs.delRow = function(id)
+{$('.samplesdt tr').eq(id).hide() }"
+
 shinyUI(
     
     
-    fluidPage(theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
+    fluidPage(
+        useShinyjs(),
+        extendShinyjs(text = jsDeleteRow),
+        theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
 		    includeCSS("www/samples.css"),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
@@ -49,7 +57,7 @@ shinyUI(
             #column(1,
             #    conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
             #        actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
-			column(1,actionButton("ex_btn","load example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;")),
+			column(1,actionButton("ex_btn","load example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;margin-bottom:4px;")),
             #column(3,wellPanel(fluidRow(
             #    column(5,
     		#	       tags$div(title="please make sure either or both (in case of paired i.e. forward and reverse) files have an \"F\" or \"R\" before the .abi/.ab1 file extension,\ne.g. my_sampleF.abi and/or my_sampleR.abi\n\nuse \"*R.abi\" even if loading a single reverse file!",
@@ -134,9 +142,11 @@ shinyUI(
 				br()
 			),
             tabPanel('Manage Samples',value = 'smpl_brws',icon = icon("list"),
-                    h2("Sample Browser"),
-                    DT::dataTableOutput('samples_table'),
-                    fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'))
+                fluidRow(
+                    column(4,h2("Sample Browser")),
+                    column(2,fileInput("browser_files","Select files to upload",multiple=T,accept=c('.abi','.ab1')))
+                ),
+                DT::dataTableOutput('samples_table')
                 
             )
 #            ,

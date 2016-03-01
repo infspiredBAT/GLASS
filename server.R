@@ -6,6 +6,8 @@ source("helpers.R")
 source("samples.R")
 
 
+
+
 shinyServer(function(input,output,session) {
     #options(shiny.reactlog=TRUE)
     g_calls                 <- NULL             #annotated basecall data
@@ -39,7 +41,8 @@ shinyServer(function(input,output,session) {
                                           REV_name=c("lowFreq_frameShiftR.ab1"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
                                           REF=c("TP53")
-    )
+                                )
+    
 #     get_file <- reactive({
 #        # if (!is.null(input$select_file)) return(input$select_file$datapath)
 #         if (!is.null(input$select_file)) return(input$select_file)
@@ -60,15 +63,31 @@ shinyServer(function(input,output,session) {
             disabled <- rep(FALSE,nrow(g_files))
             disabled[1] <- TRUE
             add_load_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id)',ico=rep("play",nrow(g_files)) )
-            add_delete_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)),dsbl=disabled )
-            add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="100px")
+            add_delete_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) )
+            add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="100px") #selected = ref
             out<-cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
             #DT::datatable(out,selection = "none")
         },
         escape=FALSE,
-        options=list("paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE),selection="none"
+        options=list("paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE,"bInfo"=FALSE),selection="none",class="samplesdt"
     )
     
+    #Handlers for the Sample Browser
+    
+    goDelete_sample_handler <- observe({
+        
+        if(!is.null(input$goDeleteSamples)){
+            isolate({
+                delete_id <- as.numeric(strsplit(input$goDeleteSamples, "_")[[1]][2])
+                g_files <<- g_files[-delete_id]
+                js$delRow(delete_id)
+                
+            })
+        }
+        #if(!is.null(input$goDeleteSamples)) {
+        #    g_files <- g_files
+        #}
+    })
     
 #    change_reference <- observe ({
 #        input$gene_of_interest
@@ -96,6 +115,7 @@ shinyServer(function(input,output,session) {
                 load_id <- as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2])
             })
         }
+        single_rev <- FALSE
         #if(!is.null(input$select_file) || !is.null(ex)) {
         if(!is.null(load_id) || !is.null(ex)) {
             fwd_file      <- g_files[load_id]$FWD_file
@@ -114,7 +134,8 @@ shinyServer(function(input,output,session) {
             
             if (fwd_file_name == "-"){
                 single_rev <- TRUE
-                fwd_file <- NULL
+                fwd_file <- rev_file
+                rev_file <- NULL
             }
             else
                 single_rev <- FALSE
@@ -177,7 +198,7 @@ shinyServer(function(input,output,session) {
             #if(substr(base,nchar(base),nchar(base))=="R"){
             if(single_rev){
                 isolate({
-                    files_info <<- paste0("fwd (F): ",rev_file_name,"\nrev (R): ",fwd_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
+                    files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
                     #single_rev <- TRUE
                 })
             }else if(is.null(ex)){
@@ -380,7 +401,8 @@ shinyServer(function(input,output,session) {
         if(varcall())
         if(!is.null(g_choices) && nrow(g_choices) > 0){
             input$change_btn
-            input$reset_btn
+            #input$reset_btn
+            #input$lo
             if(varcall() & !is.null(g_choices)) {
                 g_view<<-get_view(g_calls,g_choices)
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id)' )
@@ -454,6 +476,7 @@ shinyServer(function(input,output,session) {
             #output$goLock <- renderUI({actionButton(input$goLock, icon = icon("lock"))})
 
         })
+        return(T)
     })
 
     #
