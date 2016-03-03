@@ -811,8 +811,8 @@ shinyInput <- function(FUN, ids, id, choices=NULL,selected=NULL, ico = NULL,dsbl
 shinyInputRev <- function(FUN, ids, id, g_files, ...){
     inputs <- character(length(ids))
     for(i in 1:length(ids)){
-        if(g_files[i]$REV_name == "-"){
-            choices <- c("-",g_files[g_files[g_files[-2,REF==g_files[2]$REF]][,FWD_name == "-"]]$REV_name)
+        if(g_files[i]$REV_name == "-"){     #create a list of rev files that can become pair to current fwd
+            choices <- c("-",g_files[g_files[g_files[-i,REF==g_files[2]$REF]][,FWD_name == "-"]]$REV_name)
             inputs[i] <- as.character(FUN(paste0(id, ids[i]), label = NULL,choices, "-", ...))
         }else{
             if(!g_files[i]$FWD_name == "-"){

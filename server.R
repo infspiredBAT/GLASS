@@ -59,13 +59,14 @@ shinyServer(function(input,output,session) {
         goRef_handler()
         goDelete_sample_handler()
         goSwap_sample_handler()
+        goChangeRev_handler()
             
         disabled <- rep(FALSE,nrow(g_files))
         disabled[1] <- TRUE
         
         add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)) )
-        add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) ,dsbl = disabled)
-        add_swap_buttons <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_',label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
+        add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) ,dsbl = disabled)
+        add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
         #add_reference_dropdown <- shinyInput(selectizeInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),onchange = 'Shiny.onInputChange(\"goChangeSamples\",  this.id + (Math.random()/10))',label=NULL,width="100px") #selected = ref
         add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectGene_',choices=c("TP53","NOTCH1","ATM"), selected = g_files[,REF],width="130px")
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
@@ -86,7 +87,7 @@ shinyServer(function(input,output,session) {
                                                                                 var sel = $(this).find(":selected").text();
                                                                                 Shiny.onInputChange("goChangeRev",{id: this.id,
                                                                                                                    name: sel});
-                                                                                alert("changing rev "+this.id+" to "+ sel);
+                                                                                /*alert("changing rev "+this.id+" to "+ sel);*/
                                                                         });
                                                                   }'))
                                    )
@@ -104,14 +105,28 @@ shinyServer(function(input,output,session) {
         }
         
     })
-    goChangeRev_handler <- observe({
+    goChangeRev_handler <- reactive({
         if(!is.null(input$goChangeRev)){
             pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
-            name <- as.character(input$goChangeRef$name)
+            name <- as.character(input$goChangeRev$name)
             if(name=="-"){  #split
+                rev_name <- g_files[pos_at]$REV_name
+                rev_file <- g_files[pos_at]$REV_file
+                ref      <- g_files[pos_at]$REF
                 
+                g_files[pos_at]$REV_name <- "-"
+                g_files[pos_at]$REV_file <- "-" 
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1)))
             }else{          #combine
+                setkey(g_files,id)
+                rev_name <- name
+                rm_id <- g_files[g_files[,REV_name == name]]$id
+                rev_file <- g_files[g_files[,REV_name == name]]$REV_file
+                pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
+                g_files[pos_at]$REV_name <- rev_name
+                g_files[pos_at]$REV_file <- rev_file 
                 
+                g_files<<-g_files[!g_files[id==rm_id]]
             }
         }
     })
