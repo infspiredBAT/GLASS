@@ -7,7 +7,7 @@ library(chromatography)
 library(stringr)
 library(stringi)
 library(DT)
-source("JS.R")
+#source("JS.R")
 
 
 
@@ -16,9 +16,9 @@ shinyUI(
     
     
     fluidPage(
-        useShinyjs(),
-        extendShinyjs(text = jsDeleteRow),
-        extendShinyjs(text = jsSwapRow),
+#        useShinyjs(),
+#        extendShinyjs(text = jsDeleteRow),
+#        extendShinyjs(text = jsSwapRow),
         theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
 		    includeCSS("www/samples.css"),
