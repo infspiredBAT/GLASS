@@ -38,9 +38,10 @@ shinyServer(function(input,output,session) {
     g_refs_avail            <<- c("TP53","NOTCH1","ATM")
     g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftF.ab1"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
-                                          REV_name=c("lowFreq_frameShiftR.ab1"),
+                                          REV_name=c("LowFreq_frameShiftR.ab1"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
-                                          REF=c("TP53")
+                                          REF=c("TP53"),
+                                          id=1
                                 )
     
 #     get_file <- reactive({
@@ -53,40 +54,97 @@ shinyServer(function(input,output,session) {
     
     #SAMPLE BROWSER STUFF in progress...
     
+    loadSamples <- reactive({
+        if(!is.null(input$browser_files)){
+            g_not_loaded <- ""
+            loaded <- ""
+            ret <- samples_load(input$browser_files,output)
+            g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
+            g_files[,id:= 1:nrow(g_files)]
+        }
+        
+    })
+    
     output$samples_table <- DT::renderDataTable({
-            if(!is.null(input$browser_files)){
-                g_not_loaded <- ""
-                loaded <- ""
-                ret <- samples_load(input$browser_files,output)
-                g_files <<- rbind(g_files,ret$loaded)
-            }
-            disabled <- rep(FALSE,nrow(g_files))
-            disabled[1] <- TRUE
-            add_load_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id)',ico=rep("play",nrow(g_files)) )
-            add_delete_buttons    <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) )
-            add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),label=NULL,width="100px") #selected = ref
-            out<-cbind(g_files[,list("forward"=FWD_name,"reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
-            #DT::datatable(out,selection = "none")
-        },
-        escape=FALSE,
-        options=list("paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE,"bInfo"=FALSE),selection="none",class="samplesdt"
-    )
+        loadSamples()
+        goRef_handler()
+        goDelete_sample_handler()
+        goSwap_sample_handler()
+            
+        disabled <- rep(FALSE,nrow(g_files))
+        disabled[1] <- TRUE
+        
+        add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)) )
+        add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) ,dsbl = disabled)
+        add_swap_buttons <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_',label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
+        #add_reference_dropdown <- shinyInput(selectizeInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),onchange = 'Shiny.onInputChange(\"goChangeSamples\",  this.id + (Math.random()/10))',label=NULL,width="100px") #selected = ref
+        add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectGene_',choices=c("TP53","NOTCH1","ATM"), selected = g_files[,REF],width="130px")
+        #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
+        add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'choseRev_',g_files,width="200px")
+        #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
+        out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
+        table_out <- DT::datatable(out,escape=FALSE,
+                                   selection = "none",
+                                   class="samplesdt",
+                                   options=list("ordering"=FALSE,"paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE,"bInfo"=FALSE,
+                                                initComplete = JS('function(setting, json) {
+                                                                        $(\'[id*="selectGene"]\').change(function() {
+                                                                                var sel = $(this).find(":selected").text();
+                                                                                Shiny.onInputChange("goChangeRef",{id: this.id,
+                                                                                                                   gene: sel});
+                                                                        });
+                                                                        $(\'[id*="choseRev"]\').change(function() {
+                                                                                var sel = $(this).find(":selected").text();
+                                                                                Shiny.onInputChange("goChangeRev",{id: this.id,
+                                                                                                                   gene: sel});
+                                                                                /*alert("changing rev "+this.id+" to "+ sel);*/
+                                                                        });
+                                                                  }'))
+                                   )
+    })
     
     #Handlers for the Sample Browser
+    goRef_handler <- reactive({
+        if(!is.null(input$goChangeRef)){
+            ref_id <- as.numeric(strsplit(input$goChangeRef$id,"_")[[1]][2])
+            g_files[ref_id]$REF <-  as.character(input$goChangeRef$gene)
+            g_files <<- g_files
+            
+        }
+    })
     
-    goDelete_sample_handler <- observe({
-        
+    goDelete_sample_handler <- reactive({
         if(!is.null(input$goDeleteSamples)){
             isolate({
                 delete_id <- as.numeric(strsplit(input$goDeleteSamples, "_")[[1]][2])
-                g_files <<- g_files[-delete_id]
-                js$delRow(delete_id)
+                #g_files <<- g_files[-delete_id]
+                g_files <<- g_files[!g_files[,id==delete_id]]
+                #js$delRow(delete_id)
                 
             })
         }
-        #if(!is.null(input$goDeleteSamples)) {
-        #    g_files <- g_files
-        #}
+    })
+    
+    goSwap_sample_handler <- reactive({
+        input$goSwapSamples
+        if(!is.null(input$goSwapSamples)){
+            isolate({
+                swap_id <- floor(as.numeric(strsplit(input$goSwapSamples, "_")[[1]][2]))/10
+                swp_name <- g_files[id==swap_id]$FWD_name
+                swp_file <- g_files[id==swap_id]$FWD_file
+                g_files[id==swap_id]$FWD_name <- g_files[id==swap_id]$REV_name
+                g_files[id==swap_id]$FWD_file <- g_files[id==swap_id]$REV_file
+                g_files[id==swap_id]$REV_file <- swp_file
+                g_files[id==swap_id]$REV_name <- swp_name
+                g_files <<- g_files
+                #js$swapRow(swap_id)
+                
+                updateSelectizeInput(
+                    session, 'selectizeInput_1',server = FALSE,
+                    options = list ("maxInput" = 5)
+                )
+            })
+        }
     })
     
 #    change_reference <- observe ({
@@ -112,7 +170,7 @@ shinyServer(function(input,output,session) {
 
         if(!is.null(input$goLoadSamples)){
             isolate({
-                load_id <- as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2])
+                load_id <- floor(as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2]))/10
             })
         }
         single_rev <- FALSE
@@ -256,7 +314,7 @@ shinyServer(function(input,output,session) {
                     calls             <-  data.table(calls,key="id")
                     g_noisy_neighbors <<- get_noisy_neighbors(calls)
                     if(!called$qual_present){
-                        g_files <- paste0(g_files,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
+                        files_info <- paste0(files_info,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
                     }
                     files_info <- paste0("<pre>",files_info,"</pre>")
                     output$files      <-  renderPrint({cat(files_info)})

@@ -782,22 +782,45 @@ get_expected_het_indels <- function(calls){
     
 }
 
-shinyInput <- function(FUN, ids, id, ico = NULL,dsbl = NULL,...) {
+shinyInput <- function(FUN, ids, id, choices=NULL,selected=NULL, ico = NULL,dsbl = NULL,...) {
     inputs <- character(length(ids))
-    for (i in 1:length(ids)) {
-        dis <- NULL
-        if(!is.null(ico)){
-            if(!is.null(dsbl)){
-               if(dsbl[i]==TRUE)
-                    dis <- dsbl[i]
-               else
-                   dis <- NULL
-            }
-                
-            inputs[i] <- as.character(FUN(paste0(id, ids[i]), icon = icon(ico[i]), disabled =dis,...))
+    #Select input
+    if(length(grep("select",id))>0){
+        for (i in 1:length(ids)) {
+           inputs[i] <- as.character(FUN(paste0(id, ids[i]), label = NULL,choices, selected[i], ...))
         }
-        else
-            inputs[i] <- as.character(FUN(paste0(id, ids[i]), ...))
+    #All other buttons    
+    }else{
+        for (i in 1:length(ids)) {
+            dis <- NULL
+            if(!is.null(ico)){
+                if(!is.null(dsbl)){
+                   if(dsbl[i]==TRUE)
+                        dis <- dsbl[i]
+                   else
+                       dis <- NULL
+                }
+                inputs[i] <- as.character(FUN(paste0(id, ids[i]), icon = icon(ico[i]), disabled =dis,...))
+            }
+            else
+                inputs[i] <- as.character(FUN(paste0(id, ids[i]), ...))
+        }
+    }
+    inputs
+}
+shinyInputRev <- function(FUN, ids, id, g_files, ...){
+    inputs <- character(length(ids))
+    for(i in 1:length(ids)){
+        if(g_files[i]$REV_name == "-"){
+            choices <- c("-",g_files[g_files[g_files[-2,REF==g_files[2]$REF]][,FWD_name == "-"]]$REV_name)
+            inputs[i] <- as.character(FUN(paste0(id, ids[i]), label = NULL,choices, "-", ...))
+        }else{
+            if(!g_files[i]$FWD_name == "-"){
+                choices <- c(g_files[i]$REV_name,"-")
+                inputs[i] <- as.character(FUN(paste0(id, ids[i]), label = NULL,choices, ...))
+            }else
+                inputs[i] <- g_files[i]$REV_name
+        }
     }
     inputs
 }
