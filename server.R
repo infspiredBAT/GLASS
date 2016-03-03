@@ -54,17 +54,6 @@ shinyServer(function(input,output,session) {
     
     #SAMPLE BROWSER STUFF in progress...
     
-    loadSamples <- reactive({
-        if(!is.null(input$browser_files)){
-            g_not_loaded <- ""
-            loaded <- ""
-            ret <- samples_load(input$browser_files,output)
-            g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
-            g_files[,id:= 1:nrow(g_files)]
-        }
-        
-    })
-    
     output$samples_table <- DT::renderDataTable({
         loadSamples()
         goRef_handler()
@@ -80,7 +69,7 @@ shinyServer(function(input,output,session) {
         #add_reference_dropdown <- shinyInput(selectizeInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),onchange = 'Shiny.onInputChange(\"goChangeSamples\",  this.id + (Math.random()/10))',label=NULL,width="100px") #selected = ref
         add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectGene_',choices=c("TP53","NOTCH1","ATM"), selected = g_files[,REF],width="130px")
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
-        add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'choseRev_',g_files,width="200px")
+        add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="200px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
         out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
         table_out <- DT::datatable(out,escape=FALSE,
@@ -93,17 +82,39 @@ shinyServer(function(input,output,session) {
                                                                                 Shiny.onInputChange("goChangeRef",{id: this.id,
                                                                                                                    gene: sel});
                                                                         });
-                                                                        $(\'[id*="choseRev"]\').change(function() {
+                                                                        $(\'[id*="chooseRev"]\').change(function() {
                                                                                 var sel = $(this).find(":selected").text();
                                                                                 Shiny.onInputChange("goChangeRev",{id: this.id,
-                                                                                                                   gene: sel});
-                                                                                /*alert("changing rev "+this.id+" to "+ sel);*/
+                                                                                                                   name: sel});
+                                                                                alert("changing rev "+this.id+" to "+ sel);
                                                                         });
                                                                   }'))
                                    )
     })
     
     #Handlers for the Sample Browser
+    
+    loadSamples <- reactive({
+        if(!is.null(input$browser_files)){
+            g_not_loaded <- ""
+            loaded <- ""
+            ret <- samples_load(input$browser_files,output)
+            g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
+            g_files[,id:= 1:nrow(g_files)]
+        }
+        
+    })
+    goChangeRev_handler <- observe({
+        if(!is.null(input$goChangeRev)){
+            pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
+            name <- as.character(input$goChangeRef$name)
+            if(name=="-"){  #split
+                
+            }else{          #combine
+                
+            }
+        }
+    })
     goRef_handler <- reactive({
         if(!is.null(input$goChangeRef)){
             ref_id <- as.numeric(strsplit(input$goChangeRef$id,"_")[[1]][2])
