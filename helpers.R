@@ -424,8 +424,8 @@ get_view<-function(calls,choices){
     squeeze_indels <- function(tab){
         if(nrow(tab) > 0){
             coord <- gsub("c\\.(\\d*).*","\\1",tab$coding)
-            nucs <- gsub("c\\.\\d*...(.)","\\1",tab$coding)
-            type <- gsub("c\\.\\d*(...).*","\\1",tab$coding)[1]
+            nucs  <- gsub("c\\.\\d*...(.)","\\1",tab$coding)
+            type  <- gsub("c\\.\\d*(...).*","\\1",tab$coding)[1]
 
             if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
             else gen_coord <- paste0(max(tab$gen_coord),"_",min(tab$gen_coord))
@@ -433,7 +433,7 @@ get_view<-function(calls,choices){
             if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) - 1,"_",min(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
             else coding <- paste0("c.",min(coord),"_",max(coord),type, paste(nucs,collapse = ""))
 
-            return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,protein = tab$protein[1]))
+            return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1]))
         } else {
             return(tab)
         }

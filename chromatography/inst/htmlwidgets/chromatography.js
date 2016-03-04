@@ -434,7 +434,7 @@ HTMLWidgets.widget({
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
-                console.log("goto message");
+                /*console.log("goto message");*/
                 setBrush(Number(message)-180,Number(message)+200);
                 focus.selectAll(".scope").attr("opacity",0);
                 focus.selectAll(".".concat("scope").concat(message))

@@ -52,7 +52,7 @@ shinyServer(function(input,output,session) {
     ex <- NULL
     btn_counter <- 0
     
-    #SAMPLE BROWSER STUFF in progress...
+    #SAMPLE BROWSER STUFF 
     
     output$samples_table <- DT::renderDataTable({
         loadSamples()
@@ -135,7 +135,6 @@ shinyServer(function(input,output,session) {
             ref_id <- as.numeric(strsplit(input$goChangeRef$id,"_")[[1]][2])
             g_files[ref_id]$REF <-  as.character(input$goChangeRef$gene)
             g_files <<- g_files
-            
         }
     })
     
@@ -146,7 +145,6 @@ shinyServer(function(input,output,session) {
                 #g_files <<- g_files[-delete_id]
                 g_files <<- g_files[!g_files[,id==delete_id]]
                 #js$delRow(delete_id)
-                
             })
         }
     })
@@ -489,10 +487,10 @@ shinyServer(function(input,output,session) {
             #input$lo
             if(varcall() & !is.null(g_choices)) {
                 g_view<<-get_view(g_calls,g_choices)
-                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id)' )
+                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "remove", onclick = 'Shiny.onInputChange(\"goReset\",  this.id)' )
-                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'Shiny.onInputChange(\"goLock\",  this.id)',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})) )
-                cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
+                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'event.preventDefault();Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})) )
+                cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
                 
             }
         }
@@ -515,7 +513,7 @@ shinyServer(function(input,output,session) {
     #
     goGoto_handler <- observe({
         if(is.null(input$goGoto)) return()
-        goto_id <- as.numeric(strsplit(input$goGoto, "_")[[1]][2])
+        goto_id <- floor(as.numeric(strsplit(input$goGoto, "_")[[1]][2]))/10
         session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==goto_id]$trace_peak))
         updateTextInput(session,"choose_call_pos",value=paste0(goto_id))
     })
@@ -549,14 +547,27 @@ shinyServer(function(input,output,session) {
     goLock_handler <- observe({
         if(is.null(input$goLock)) return()
         isolate({
-            lock_id <- as.numeric(strsplit(input$goLock, "_")[[1]][2])
+            lock_id <- floor(as.numeric(strsplit(input$goLock, "_")[[1]][2]))/10
             coding  <- g_view[id==lock_id]$coding
             updateTextInput(session,"choose_call_pos",value=paste0(lock_id))
             if(length(grep("ins|del|dup",coding)) > 0){
-                g_stored_het_indels[[coding]] <<- lock_id
+                len <- length(unique(na.omit(as.numeric(unlist(strsplit(unlist(coding), "[^0-9]+"))))))
+                if(is.null(g_stored_het_indels[[coding]])){
+                    g_stored_het_indels[[coding]] <<- lock_id
+                    for(i in 0:(len-1)){
+                        g_calls[id==(lock_id + i)]$set_by_user <<- !g_calls[id==(lock_id +i)]$set_by_user
+                    }
+                }else{
+                    g_stored_het_indels[[coding]] <<- NULL
+                    for(i in 0:(len-1)){
+                        g_calls[id==(lock_id+i)]$set_by_user <<- !g_calls[id==(lock_id +i)]$set_by_user
+                    }
+                }
+                
             } else {
-                g_calls[id==lock_id]$set_by_user <<- TRUE
+                g_calls[id==lock_id]$set_by_user <<- !g_calls[id==lock_id]$set_by_user
             }
+            
             #output$goLock <- renderUI({actionButton(input$goLock, icon = icon("lock"))})
 
         })

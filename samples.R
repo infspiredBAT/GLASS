@@ -49,6 +49,3 @@ samples_load <- function(s_files,output){
     })
 }
 
-#select sample
-
-#function for fwd/reverse detection
