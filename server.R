@@ -36,9 +36,9 @@ shinyServer(function(input,output,session) {
     g_qual_present          <- FALSE
     g_not_loaded            <- ""
     g_refs_avail            <<- c("TP53","NOTCH1","ATM")
-    g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftF.ab1"),
+    g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftFwd (Example)"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
-                                          REV_name=c("LowFreq_frameShiftR.ab1"),
+                                          REV_name=c("LowFreq_frameShiftRev (Example)"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
                                           REF=c("TP53"),
                                           id=1
@@ -185,11 +185,11 @@ shinyServer(function(input,output,session) {
 #    })
 
     loading_processed_files <- reactive ({
-        if (input$ex_btn[1] - btn_counter){
-            btn_counter <<- input$ex_btn[1]
-            ex <- c("data/abis/eric/3low_freq_fsF.ab1",
-                    "data/abis/eric/3low_freq_fsR.ab1")
-        }
+        #if (input$ex_btn[1] - btn_counter){
+        #    btn_counter <<- input$ex_btn[1]
+        #    ex <- c("data/abis/eric/3low_freq_fsF.ab1",
+        #            "data/abis/eric/3low_freq_fsR.ab1")
+        #}
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
 
         if(!is.null(input$goLoadSamples)){
@@ -288,7 +288,7 @@ shinyServer(function(input,output,session) {
                     files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
                 })
             }
-            if(!is.null(ex)){
+            if(load_id == 1){
                 files_info <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
                 output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
                 base = ""
