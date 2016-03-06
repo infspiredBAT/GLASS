@@ -22,7 +22,7 @@ shinyUI(
         theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
 		    includeCSS("www/samples.css"),
-		    #tags$style(HTML('.fa-close{color:red}')),
+		    tags$style(HTML('.dlt_btn{background-color:red;background-image:linear-gradient(rgb(255,0,));}')),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("genomePD/glass"),
 		    #tags$head(tags$script(src="selectize.min.js")),
