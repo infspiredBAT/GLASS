@@ -36,7 +36,7 @@ shinyServer(function(input,output,session) {
     g_qual_present          <- FALSE
     g_not_loaded            <- ""
     g_refs_avail            <<- c("TP53","NOTCH1","ATM")
-    g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftFwd (Example)"),
+    g_files                 <<- data.table(FWD_name=c("LowFreq_frameShiftFwd (Example)"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
                                           REV_name=c("LowFreq_frameShiftRev (Example)"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
@@ -489,16 +489,21 @@ shinyServer(function(input,output,session) {
                 g_view<<-get_view(g_calls,g_choices)
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "remove", onclick = 'Shiny.onInputChange(\"goReset\",  this.id)' )
-                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'event.preventDefault();Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})) )
-                cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
-                
+                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'console.log($("#DataTables_Table_1"));Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})) )
+                out<-cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
+                tableout<-DT::datatable(out
+                                        , escape=FALSE
+                                        , style= 'bootstrap'
+                                        , options=list("paging"=FALSE,"searching"=FALSE,"ordering"=FALSE,"autoWidth"=FALSE,
+                                                        rowCallback = JS("function( row, data, index ) {
+                                                                                    $('#DataTables_Table_1 td').on('click',function(){console.log(123)});
+                                                                          }"))
+                                        )
             }
         }
     }
-#    , options = list(dom = "t",orderClasses=c(-1,-2,-3,-4), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2,3), orderable=F, title="")))
-    , escape=FALSE
-    , style= 'bootstrap'
-    , options=list("paging"=FALSE,"searching"=FALSE,"ordering"=FALSE,"autoWidth"=FALSE)
+    #, options = list(dom = "t",orderClasses=c(-1,-2,-3,-4), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2,3), orderable=F, title="")))
+    
     )
 
 #    variant_select <- observe({

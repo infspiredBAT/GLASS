@@ -22,7 +22,8 @@ shinyUI(
         theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
 		    includeCSS("www/samples.css"),
-		    tags$style(HTML('.dlt_btn{background-color:red;background-image:linear-gradient(rgb(255,0,));}')),
+		    tags$style(HTML('.dlt_btn{background-color:red;background-image:linear-gradient(red,crimson);};
+		                    .dlt_btn:selected{background-image:linear-gradient(red,crimson)};')),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("genomePD/glass"),
 		    #tags$head(tags$script(src="selectize.min.js")),
@@ -75,7 +76,9 @@ shinyUI(
             tabPanel('Samples',value = 'smpl_brws',icon = icon("list"),
                 fluidRow(
                     column(4,wellPanel(fluidRow(
-                        column(6,paste("Upload ABI files")),
+                        column(6,tags$div(title="Plase make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored. Currently supported references are TP53, NOTH1 and ATM.",
+                                          HTML(paste("Upload ABI files [?]")))
+                        ),
                         column(6,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1')))
                     )))
 		        ),
