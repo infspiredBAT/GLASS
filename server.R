@@ -63,7 +63,7 @@ shinyServer(function(input,output,session) {
             
         disabled <- rep(FALSE,nrow(g_files))
         disabled[1] <- TRUE
-        
+        g_files[,id:= 1:nrow(g_files)]
         add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)) )
         add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) ,dsbl = disabled,class="dlt_btn")
         add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
@@ -125,8 +125,12 @@ shinyServer(function(input,output,session) {
                 pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
                 g_files[pos_at]$REV_name <- rev_name
                 g_files[pos_at]$REV_file <- rev_file 
-                
                 g_files<<-g_files[!g_files[id==rm_id]]
+                if(pos_at == rm_id){
+                    bla <- 123
+                }
+                
+                
             }
         }
     })
