@@ -494,10 +494,36 @@ shinyServer(function(input,output,session) {
                 tableout<-DT::datatable(out
                                         , escape=FALSE
                                         , style= 'bootstrap'
-                                        , options=list("paging"=FALSE,"searching"=FALSE,"ordering"=FALSE,"autoWidth"=FALSE,
-                                                        rowCallback = JS("function( row, data, index ) {
-                                                                                    $('#DataTables_Table_1 td').on('click',function(){console.log(123)});
-                                                                          }"))
+                                        , options=list("paging"=FALSE,"searching"=FALSE,"ordering"=FALSE,"autoWidth"=FALSE
+                                                       ##rowCallback = JS("function( row, data, index ) {
+                                                       ,initComplete = JS("function(setting, json){
+                                                                                console.log($(this.api().table()).length);
+                                                                         }")
+                                                       # 
+                                                       #                         console.log('row click');
+                                                       #                         $('#DataTables_Table_1').on('select.dt'),function(e,dt,type,indexes){
+                                                       #                             console.log('select event');
+                                                       #                         }
+                                                       #                         $('#DataTables_Table_1 td').click(function(){
+                                                       #                             console.log(1);
+                                                       #                             var cell = $(this);
+                                                       #                             var row = cell.parent();
+                                                       #                             var col = cell.parents(\"table\").find(\"td:nth-child(\" + (cell.index() + 1) + \")\");
+                                                       #                             console.log('cell: '+cell,'row: '+row,'col :' + col);
+                                                       #                             cell.css({backgroundColor: \"Red\"});
+                                                       #                         $('#DataTables_Table_1 td')
+                                                       #                             
+                                                       #                         });
+                                                       #                   }")
+                                                       )
+                                        
+                                        
+                                        #,callback = JS("
+                                        #               table.on('click','td',function(){
+                                        #                    if($(this).find('button').length != 0){
+                                        #                        console.log($(this).parent());
+                                        #                    }
+                                        #               });")
                                         )
             }
         }
