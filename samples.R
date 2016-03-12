@@ -1,5 +1,3 @@
-library(DT)
-
 samples_load <- function(s_files,output){
     not_loaded <- ""
     loaded <- data.table()

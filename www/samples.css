@@ -27,3 +27,6 @@
 .leaflet-container {
   background-color: white !important;
 }
+.samplesdt td{
+    padding:8px;
+}

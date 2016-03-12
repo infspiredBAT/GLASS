@@ -13,6 +13,10 @@
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 
+.samplesdt td{
+    padding:8px;
+}
+
 #gene_of_interest {
     font-size: 18px;
 }
@@ -2393,6 +2397,8 @@ th {
 .table-condensed > tbody > tr > td,
 .table-condensed > tfoot > tr > td {
   padding: 5px;
+  border-right:0;
+  border-bottom:1px solid #dddddd;
 }
 .table-bordered {
   border: 1px solid #dddddd;

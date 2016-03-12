@@ -72,11 +72,13 @@ shinyServer(function(input,output,session) {
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="200px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
-        out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
+        out<-cbind(delete=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown,load=add_load_buttons)
         table_out <- DT::datatable(out,escape=FALSE,
                                    selection = "none",
-                                   class="samplesdt",
-                                   options=list("ordering"=FALSE,"paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE,"bInfo"=FALSE,
+                                   style = "bootstrap",
+                                   #id = "samplesdt",
+                                   class="compact",
+                                   options=list("ordering"=FALSE,"paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE,"bInfo"=FALSE,"id"="samplesdt",
                                                 initComplete = JS('function(setting, json) {
                                                                         $(\'[id*="selectGene"]\').change(function() {
                                                                                 var sel = $(this).find(":selected").text();
@@ -105,6 +107,7 @@ shinyServer(function(input,output,session) {
         }
         
     })
+    
     goChangeRev_handler <- reactive({
         if(!is.null(input$goChangeRev)){
             pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
@@ -293,7 +296,7 @@ shinyServer(function(input,output,session) {
                 })
             }
             if(load_id == 1){
-                files_info <<- "frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
+                files_info <<- "Example file loaded.\nframeshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
                 output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
                 base = ""
                 ex <- NULL
@@ -347,6 +350,7 @@ shinyServer(function(input,output,session) {
                     files_info <- paste0("<pre>",files_info,"</pre>")
                     output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
+                    updateTabsetPanel(session,'tabs',selected = "main")
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
         }
@@ -492,42 +496,15 @@ shinyServer(function(input,output,session) {
             if(varcall() & !is.null(g_choices)) {
                 g_view<<-get_view(g_calls,g_choices)
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
-                add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "remove", onclick = 'Shiny.onInputChange(\"goReset\",  this.id)' )
+                add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "", ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)' )
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'console.log($("#DataTables_Table_1"));Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})) )
-                out<-cbind(Goto=add_goto_buttons, Reset=add_reset_buttons, Lock=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
+                out<-cbind(Goto=add_goto_buttons, Remove=add_reset_buttons, Confirm=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
                 tableout<-DT::datatable(out
                                         , escape=FALSE
+                                        #, class = "compact"
+                                        , selection = "none"
                                         , style= 'bootstrap'
-                                        , options=list("paging"=FALSE,"searching"=FALSE,"ordering"=FALSE,"autoWidth"=FALSE
-                                                       ##rowCallback = JS("function( row, data, index ) {
-                                                       ,initComplete = JS("function(setting, json){
-                                                                                console.log($(this.api().table()).length);
-                                                                         }")
-                                                       # 
-                                                       #                         console.log('row click');
-                                                       #                         $('#DataTables_Table_1').on('select.dt'),function(e,dt,type,indexes){
-                                                       #                             console.log('select event');
-                                                       #                         }
-                                                       #                         $('#DataTables_Table_1 td').click(function(){
-                                                       #                             console.log(1);
-                                                       #                             var cell = $(this);
-                                                       #                             var row = cell.parent();
-                                                       #                             var col = cell.parents(\"table\").find(\"td:nth-child(\" + (cell.index() + 1) + \")\");
-                                                       #                             console.log('cell: '+cell,'row: '+row,'col :' + col);
-                                                       #                             cell.css({backgroundColor: \"Red\"});
-                                                       #                         $('#DataTables_Table_1 td')
-                                                       #                             
-                                                       #                         });
-                                                       #                   }")
-                                                       )
-                                        
-                                        
-                                        #,callback = JS("
-                                        #               table.on('click','td',function(){
-                                        #                    if($(this).find('button').length != 0){
-                                        #                        console.log($(this).parent());
-                                        #                    }
-                                        #               });")
+                                        , options=list("paging"=FALSE,"searching"=FALSE,"ordering"=FALSE,"autoWidth"=FALSE)
                                         )
             }
         }

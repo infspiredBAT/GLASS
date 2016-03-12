@@ -72,8 +72,8 @@ shinyUI(
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
 			column(11, htmlOutput("files"))
 		),
-		tabsetPanel(id = 'tab',
-            tabPanel('Samples',value = 'smpl_brws',icon = icon("list"),
+		tabsetPanel(id = 'tabs',
+            tabPanel('samples',value = 'smpl_brws',icon = icon("list"),
                 fluidRow(
                     column(4,wellPanel(fluidRow(
                         column(6,tags$div(title="Plase make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored. Currently supported references are TP53, NOTH1 and ATM.",
