@@ -151,9 +151,7 @@ shinyUI(
   		            "), sep = ""))))),
 				chromatographyOutput("plot"),
 				DT::dataTableOutput("chosen_variants_table"),
-				conditionalPanel(condition=" output.chosen_variants_table ",
-				    downloadButton("export_btn","export")
-				),
+				#conditionalPanel(condition=" output.chosen_variants_table ",downloadButton("export_btn","export")),
 				br()
 			)
 #            ,

@@ -41,6 +41,8 @@ shinyServer(function(input,output,session) {
                                           REV_name=c("LowFreq_frameShiftRev (Example)"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
                                           REF=c("TP53"),
+                                          mut_min=20,qual_thres_to_call=20,s2n_min=2,show_call_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incoroprate_checkbox=F,loaded=F,
+                                          status="New",
                                           id=1
                                 )
     
@@ -60,6 +62,8 @@ shinyServer(function(input,output,session) {
         goDelete_sample_handler()
         goSwap_sample_handler()
         goChangeRev_handler()
+        loading_processed_files()
+        input$goLock
             
         disabled <- rep(FALSE,nrow(g_files))
         disabled[1] <- TRUE
@@ -72,7 +76,7 @@ shinyServer(function(input,output,session) {
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="200px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
-        out<-cbind(delete=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown,load=add_load_buttons)
+        out<-cbind(delete=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown,load=add_load_buttons,g_files[,list("Status"=status)])
         table_out <- DT::datatable(out,escape=FALSE,
                                    selection = "none",
                                    style = "bootstrap",
@@ -93,6 +97,7 @@ shinyServer(function(input,output,session) {
                                                                         });
                                                                   }'))
                                    )
+        
     })
     
     #Handlers for the Sample Browser
@@ -119,7 +124,7 @@ shinyServer(function(input,output,session) {
                 
                 g_files[pos_at]$REV_name <- "-"
                 g_files[pos_at]$REV_file <- "-" 
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1)))
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_call_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incoroprate_checkbox=F))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name
@@ -129,10 +134,6 @@ shinyServer(function(input,output,session) {
                 g_files[pos_at]$REV_name <- rev_name
                 g_files[pos_at]$REV_file <- rev_file 
                 g_files<<-g_files[!g_files[id==rm_id]]
-                if(pos_at == rm_id){
-                    bla <- 123
-                }
-                
                 
             }
         }
@@ -178,6 +179,30 @@ shinyServer(function(input,output,session) {
         }
     })
     
+    controls_listener <- observe({
+        input$mut_min
+        input$qual_thres_to_call
+        input$max_y_p
+        input$s2n_min
+        input$show_calls_checkbox
+        input$join_traces_checkbox
+        input$max_y_p
+        input$opacity
+        input$incorporate_checkbox
+        
+        if(nrow(g_files[loaded==TRUE,]) ==1){
+            g_files <<- g_files[loaded==TRUE,`:=`(mut_min=input$mut_min,
+                                      qual_thres_to_call=input$qual_thres_to_call,
+                                      s2n_min=input$s2n_min,
+                                      show_call_checkbox=input$show_calls_checkbox,
+                                      join_traces_checkbox=input$join_traces_checkbox,
+                                      max_y_p=input$max_y_p,
+                                      opacity=input$opacity,
+                                      incoroprate_checkbox=input$incorporate_checkbox)]
+        }
+        
+        
+    })
 #    change_reference <- observe ({
 #        input$gene_of_interest
 #        isolate({
@@ -202,6 +227,18 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$goLoadSamples)){
             isolate({
                 load_id <- floor(as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2]))/10
+                g_files[,loaded:=F]
+                g_files[load_id,loaded:=T]
+                g_files[load_id,status:="viewed"]
+                updateSliderInput(session,'mut_min',value=g_files[loaded==T,]$mut_min)
+                updateSliderInput(session,'qual_thres_to_call',value=g_files[loaded==T,]$qual_thres_to_call)
+                updateSliderInput(session,'s2n_min',value=g_files[loaded==T,]$s2n_min)
+                updateCheckboxInput(session,'show_call_checkbox',value=g_files[loaded==T,]$show_call_checkbox)
+                updateCheckboxInput(session,'join_traces_checkbox',value=g_files[loaded==T,]$join_traces_checkbox)
+                updateSliderInput(session,'max_y_p',value=g_files[loaded==T,]$max_y_p)
+                updateSliderInput(session,'opacity',value=g_files[loaded==T,]$opacity)
+                #updateCheckboxInput(session,'incoroprate_checkbox',value=g_files[loaded==T,]$incoroprate_checkbox)
+                updateCheckboxInput(session,'incoroprate_checkbox',value=F)
             })
         }
         single_rev <- FALSE
@@ -560,26 +597,33 @@ shinyServer(function(input,output,session) {
         if(is.null(input$goLock)) return()
         isolate({
             lock_id <- floor(as.numeric(strsplit(input$goLock, "_")[[1]][2]))/10
+            g_view[id==lock_id]$set_by_user <<- !g_view[id==lock_id]$set_by_user
             coding  <- g_view[id==lock_id]$coding
             updateTextInput(session,"choose_call_pos",value=paste0(lock_id))
-            if(length(grep("ins|del|dup",coding)) > 0){
-                len <- length(unique(na.omit(as.numeric(unlist(strsplit(unlist(coding), "[^0-9]+"))))))
-                if(is.null(g_stored_het_indels[[coding]])){
-                    g_stored_het_indels[[coding]] <<- lock_id
-                    for(i in 0:(len-1)){
-                        g_calls[id==(lock_id + i)]$set_by_user <<- !g_calls[id==(lock_id +i)]$set_by_user
-                    }
-                }else{
-                    g_stored_het_indels[[coding]] <<- NULL
-                    for(i in 0:(len-1)){
-                        g_calls[id==(lock_id+i)]$set_by_user <<- !g_calls[id==(lock_id +i)]$set_by_user
-                    }
-                }
-                
-            } else {
+                    if(length(grep("ins|del|dup",coding)) > 0){ #locking indels
+                        len <- length(unique(na.omit(as.numeric(unlist(strsplit(unlist(coding), "[^0-9]+"))))))
+                        if(is.null(g_stored_het_indels[[coding]])){
+                            g_stored_het_indels[[coding]] <<- lock_id
+                            for(i in 0:(len-1)){
+                                g_calls[id==(lock_id + i)]$set_by_user <<- !g_calls[id==(lock_id +i)]$set_by_user
+                            }
+                        }else{
+                            g_stored_het_indels[[coding]] <<- NULL
+                            for(i in 0:(len-1)){
+                                g_calls[id==(lock_id+i)]$set_by_user <<- !g_calls[id==(lock_id +i)]$set_by_user
+                            }
+                        }
+                        
+                    } else {     #locking SNPs
                 g_calls[id==lock_id]$set_by_user <<- !g_calls[id==lock_id]$set_by_user
+                abc<-123
             }
             
+            if(nrow(g_view[set_by_user==TRUE])>0){
+                g_files<<-g_files[loaded==TRUE,status:=paste0("confirmed: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"))]
+            }else{
+                g_fies<<-g_files[loaded==TRUE,status:="viewed"]
+            }
             #output$goLock <- renderUI({actionButton(input$goLock, icon = icon("lock"))})
 
         })
@@ -631,22 +675,22 @@ shinyServer(function(input,output,session) {
     #
     # EXPORT
     #
-    output$export_btn <- downloadHandler(
-        filename = function() {
-            paste('data-', Sys.Date(), '.xlsx', sep='')
-        },
-        content = function(con) {
-            out<-data.table("genomic coordinate"=character(),"coding variant"=character(),"protein variant"=character())
-            g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
-            for(i in 1:nrow(g_view)) {
-                if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
-            }
-            if(length(g_selected)==0)
-                write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
-            else write.xlsx(out,con)
-            
-        }
-    )
+    #output$export_btn <- downloadHandler(
+    #    filename = function() {
+    #        paste('data-', Sys.Date(), '.xlsx', sep='')
+    #    },
+    #    content = function(con) {
+    #        out<-data.table("genomic coordinate"=character(),"coding variant"=character(),"protein variant"=character())
+    #        g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
+    #        for(i in 1:nrow(g_view)) {
+    #            if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
+    #        }
+    #        if(length(g_selected)==0)
+    #            write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
+    #        else write.xlsx(out,con)
+    #        
+    #    }
+    #)
 
     #
     # Other tabs
