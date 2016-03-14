@@ -40,9 +40,9 @@ samples_load <- function(s_files,output){
                     incProgress(1/nrow(s_files))
                     #test fwd/rev/ which reference
                     if(!rev)
-                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=20,s2n_min=2,show_call_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incoroprate_checkbox=F,loaded=F,status="New"))
+                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=20,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="New",calls=""))
                     else
-                        loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=20,s2n_min=2,show_call_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incoroprate_checkbox=F,loaded=F,status="New"))
+                        loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=20,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="New",calls=""))
                 }
                 else not_loaded <- c(not_loaded,s_files[i,]$name)
             }

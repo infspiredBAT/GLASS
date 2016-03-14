@@ -41,7 +41,8 @@ shinyServer(function(input,output,session) {
                                           REV_name=c("LowFreq_frameShiftRev (Example)"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
                                           REF=c("TP53"),
-                                          mut_min=20,qual_thres_to_call=20,s2n_min=2,show_call_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incoroprate_checkbox=F,loaded=F,
+                                          mut_min=20,qual_thres_to_call=20,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
+                                          calls = "",
                                           status="New",
                                           id=1
                                 )
@@ -124,7 +125,7 @@ shinyServer(function(input,output,session) {
                 
                 g_files[pos_at]$REV_name <- "-"
                 g_files[pos_at]$REV_file <- "-" 
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_call_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incoroprate_checkbox=F))
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name
@@ -194,11 +195,11 @@ shinyServer(function(input,output,session) {
             g_files <<- g_files[loaded==TRUE,`:=`(mut_min=input$mut_min,
                                       qual_thres_to_call=input$qual_thres_to_call,
                                       s2n_min=input$s2n_min,
-                                      show_call_checkbox=input$show_calls_checkbox,
+                                      show_calls_checkbox=input$show_calls_checkbox,
                                       join_traces_checkbox=input$join_traces_checkbox,
                                       max_y_p=input$max_y_p,
                                       opacity=input$opacity,
-                                      incoroprate_checkbox=input$incorporate_checkbox)]
+                                      incorporate_checkbox=input$incorporate_checkbox)]
         }
         
         
@@ -227,18 +228,26 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$goLoadSamples)){
             isolate({
                 load_id <- floor(as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2]))/10
+                if(nrow(g_files[loaded==TRUE,])==1){
+                    tmpfile <- tempfile("calls")
+                    save(g_calls,file=tmpfile)
+                    g_files[loaded==TRUE,calls:=tmpfile]
+                }
                 g_files[,loaded:=F]
                 g_files[load_id,loaded:=T]
-                g_files[load_id,status:="viewed"]
+                if(g_files[loaded==T,]$calls == ""){
+                    g_files[load_id,status:="viewed"]
+                }
                 updateSliderInput(session,'mut_min',value=g_files[loaded==T,]$mut_min)
                 updateSliderInput(session,'qual_thres_to_call',value=g_files[loaded==T,]$qual_thres_to_call)
                 updateSliderInput(session,'s2n_min',value=g_files[loaded==T,]$s2n_min)
-                updateCheckboxInput(session,'show_call_checkbox',value=g_files[loaded==T,]$show_call_checkbox)
+                updateCheckboxInput(session,'show_calls_checkbox',value=g_files[loaded==T,]$show_calls_checkbox)
                 updateCheckboxInput(session,'join_traces_checkbox',value=g_files[loaded==T,]$join_traces_checkbox)
                 updateSliderInput(session,'max_y_p',value=g_files[loaded==T,]$max_y_p)
                 updateSliderInput(session,'opacity',value=g_files[loaded==T,]$opacity)
-                #updateCheckboxInput(session,'incoroprate_checkbox',value=g_files[loaded==T,]$incoroprate_checkbox)
-                updateCheckboxInput(session,'incoroprate_checkbox',value=F)
+                updateCheckboxInput(session,'incorporate_checkbox',value=g_files[loaded==T,]$incorporate_checkbox)
+                #updateCheckboxInput(session,'incorporate_checkbox',value=FALSE)
+                g_files<<-g_files
             })
         }
         single_rev <- FALSE
@@ -357,6 +366,7 @@ shinyServer(function(input,output,session) {
                 called <- NULL
                 #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
+                    
                     called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,g_glassed_ref)),
                     error = function(e){output$files <- renderPrint(paste0("<pre>error while loading calls from abi file : ",e$message,"</pre>" ))})
 
@@ -388,6 +398,14 @@ shinyServer(function(input,output,session) {
                     output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
                     updateTabsetPanel(session,'tabs',selected = "main")
+                    
+                    if(nrow(g_files[loaded==T,]) == 1){                  #g_calls saved from previous session we test if they are compatible to reload
+                        if(g_files[loaded==T,]$calls != ""){
+                            load(g_files[loaded==T]$calls)
+                            if(nrow(g_calls)==nrow(calls))
+                                calls <- g_calls
+                        }
+                    }
                 } else return(structure("error_reading_Rbin",class = "my_UI_exception"))
             })
         }
