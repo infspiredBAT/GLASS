@@ -36,7 +36,7 @@ shinyServer(function(input,output,session) {
     g_qual_present          <- FALSE
     g_not_loaded            <- ""
     g_refs_avail            <<- c("TP53","NOTCH1","ATM")
-    g_files                 <<- data.table(FWD_name=c("LowFreq_frameShiftFwd (Example)"),
+    g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftFwd (Example)"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
                                           REV_name=c("LowFreq_frameShiftRev (Example)"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
@@ -107,7 +107,7 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$browser_files)){
             g_not_loaded <- ""
             loaded <- ""
-            ret <- samples_load(input$browser_files,output)
+            ret <- samples_load(input$browser_files,output,g_files)
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
             g_files[,id:= 1:nrow(g_files)]
         }

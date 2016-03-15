@@ -108,14 +108,14 @@ shinyUI(
 #                         tags$div(title="distinct insertion / deletion (in that order) events, and their lengths in nt",
 #     					    HTML(paste("hetero ins/dels [?]")),verbatimTextOutput("hetero_indel_tab")
 #     					),
-					    #conditionalPanel(condition = "!output.indels_present",
-					    #    HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
-					    #),
-					    #conditionalPanel(condition = "output.indels_present",
+					    conditionalPanel(condition = "!output.indels_present",
+					        HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
+					    ),
+					    conditionalPanel(condition = "output.indels_present",
                             tags$div(title="if there are indel events above, use them to try and correct the variant calling",
                                 checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
                             )
-					    #)
+					    )
 					),
 					column(1,
                         tags$div(title="min % of peak for mutation to be called",
