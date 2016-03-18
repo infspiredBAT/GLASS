@@ -121,33 +121,7 @@ HTMLWidgets.widget({
         blu = brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
         console.log("setting brush fw" + blu);
         }
-        function updateBrushHandler() {
-            var brushg = focus.selectAll(".brush_fw");
-            console.log("in update "+ brushg);
-            
-            
-            var oldMousedown = brushg.on('mousedown.brush');
-            
-            // and replace it with our custom handler
-            brushg.on('mousedown.brush', function () {
-                console.log("md");
-                brushg.on('mouseup.brush', function () {
-                    clearHandlers();
-                });
-            
-                brushg.on('mousemove.brush', function () {
-                    clearHandlers();
-                    //oldMousedown.call(this);
-                    //brushg.on('mousemove.brush').call(this);
-                });
-            
-                function clearHandlers() {
-                    brushg.on('mousemove.brush', null);
-                    brushg.on('mouseup.brush', null);
-                }
-            })
-
-        }
+        
         //setting brush programmatically
         function setBrush(start,end){
             //context.call(brush.extent([start,end]));
@@ -608,7 +582,6 @@ HTMLWidgets.widget({
             scope_g: scope_g,
             context: context,
 	        brush:   brush,
-            updateBrushHandler: updateBrushHandler,
 	        brush_fw: brush_fw,
 	        join:    join,
             joinView:joinView,
@@ -728,9 +701,11 @@ HTMLWidgets.widget({
   				.attr("fill","rgba(255,255,255,0.3)")
   				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
   				.attr("opacity",0.6);
-  				
+  			brush_fw.extent([0,500]);
+            brush_fw(d3.select(".brush_fw").transition());
+            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
   			var brushg = focus.append("g")
-                .attr("class", "brush_fw focus")
+                .attr("class", "brush_fw")
                 .call(brush_fw);
     
             console.log("brushg:" + brushg);
@@ -745,19 +720,20 @@ HTMLWidgets.widget({
                     return i ? -10 : -3;
                 })
                 .attr("rx", 2);
-            brush_fw.extent([0,500]);
+            
             brushg.selectAll("rect")
                 .attr("y",150)
                 .attr("height",120);
             brushg.selectAll(".extent")
                 .attr("opacity",0.1);
 
-            var oldMousedown = brushg.on('mousedown.brush');     
+            var oldMousedown = brushg.on('mousedown.brush');
             
-            instance.updateBrushHandler();
+            
+            
             brushg.on('mousedown.brush', function() {
                 console.log("md");
-                /*brushg.on('mouseup.brush', function() {
+               /* brushg.on('mouseup.brush', function() {
                     clearHandlers();
                 });
                 //console.log(d3.event.target.className.baseVal);
@@ -780,8 +756,8 @@ HTMLWidgets.widget({
                     brushg.on('mousemove.brush', null);
                     brushg.on('mouseup.brush', null);
                 }*/
-            });
-                
+            })
+            
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
