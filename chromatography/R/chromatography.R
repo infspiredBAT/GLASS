@@ -6,7 +6,7 @@
 #'
 #' @export
 
-chromatography <- function(intens, intens_rev = NULL, intrexdat, calls, choices, new_sample, noisy_neighbors, show_calls = FALSE,qual_present, width = NULL, height = NULL) {
+chromatography <- function(intens, intens_rev = NULL, intrexdat, calls, choices, new_sample, noisy_neighbors, show_calls = FALSE,qual_present,brush_fw,brush_rv, width = NULL, height = NULL) {
 
   #data = fromJSON(file=Data)
     x <- list(
@@ -16,9 +16,11 @@ chromatography <- function(intens, intens_rev = NULL, intrexdat, calls, choices,
         calls      = calls,
         choices    = choices,
         new_sample = new_sample,
-        noisy_neighbors    = noisy_neighbors,
-        show_calls = show_calls,
-        qual_present = qual_present
+        noisy_neighbors = noisy_neighbors,
+        show_calls      = show_calls,
+        qual_present    = qual_present,
+        brush_fw        = brush_fw,
+        brush_rv        = brush_rv
     )
   # create widget
     htmlwidgets::createWidget(

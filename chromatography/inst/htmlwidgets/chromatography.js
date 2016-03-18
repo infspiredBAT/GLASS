@@ -51,6 +51,7 @@ HTMLWidgets.widget({
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
         var brush = d3.svg.brush().on("brushend", brushed);
+        var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -116,9 +117,41 @@ HTMLWidgets.widget({
         var aa_mut            = focus.append("g");
 
         function brushed() { redraw(); }
+        function brushed_fw() {
+        blu = brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
+        console.log("setting brush fw" + blu);
+        }
+        function updateBrushHandler() {
+            var brushg = focus.selectAll(".brush_fw");
+            console.log("in update "+ brushg);
+            
+            
+            var oldMousedown = brushg.on('mousedown.brush');
+            
+            // and replace it with our custom handler
+            brushg.on('mousedown.brush', function () {
+                console.log("md");
+                brushg.on('mouseup.brush', function () {
+                    clearHandlers();
+                });
+            
+                brushg.on('mousemove.brush', function () {
+                    clearHandlers();
+                    //oldMousedown.call(this);
+                    //brushg.on('mousemove.brush').call(this);
+                });
+            
+                function clearHandlers() {
+                    brushg.on('mousemove.brush', null);
+                    brushg.on('mouseup.brush', null);
+                }
+            })
+
+        }
         //setting brush programmatically
         function setBrush(start,end){
             //context.call(brush.extent([start,end]));
+            //console.log(start+en);
             brush.extent([start,end]);
             brush(d3.select(".brush").transition());
             brush.event(d3.select(".brush").transition().delay(1000));
@@ -131,7 +164,17 @@ HTMLWidgets.widget({
             redraw();
         }
         function redraw()  {
+            old = brush_fw.extent();
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
+            //console.log("old"+old);
+            //console.log("extent"+brush_fw.extent());
+            brush_fw.extent(old);
+            brush_fw(d3.select(".brush_fw").transition());
+            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
+            
+            //brush_fw_st(d3.select(".brush_fw").transition());
+            //brush_fw_st.event(d3.select(".brush_fw").transition().delay(1000));
+            //focus.selectAll("g").selectAll()
             var w = brush.extent()[1]-brush.extent()[0] ;
             focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
@@ -565,7 +608,9 @@ HTMLWidgets.widget({
             scope_g: scope_g,
             context: context,
 	        brush:   brush,
-            join:    join,
+            updateBrushHandler: updateBrushHandler,
+	        brush_fw: brush_fw,
+	        join:    join,
             joinView:joinView,
             focus:   focus,
             setNoiseArea: setNoiseArea,
@@ -645,6 +690,7 @@ HTMLWidgets.widget({
   			var focus   = instance.focus;
   			var context = instance.context;
   			var brush   = instance.brush;
+  			var brush_fw = instance.brush_fw;
   			var widthScale  = instance.widthScale;
   			var heightScale = instance.heightScale;
             var width2Scale = instance.width2Scale;
@@ -668,7 +714,74 @@ HTMLWidgets.widget({
             instance.setIntrexBoxes(intrex);
 
   			brush.x(width2Scale);
-		
+		    brush_fw.x(widthScale);
+            
+            context.append("g")
+//				.attr("class", "x brush")
+                .attr("class","brush context")
+                .call(brush)
+      			.selectAll("rect")
+  				.attr("y", -16)
+  				.attr("height", 80) //height2 + 10)
+  				.attr("rx",3)
+  				.attr("ry",3)
+  				.attr("fill","rgba(255,255,255,0.3)")
+  				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
+  				.attr("opacity",0.6);
+  				
+  			var brushg = focus.append("g")
+                .attr("class", "brush_fw focus")
+                .call(brush_fw);
+    
+            console.log("brushg:" + brushg);
+            brush_fw_width = x["brush_fw"];
+            console.log("brush_fw: " + brush_fw_width);
+                
+            brushg.selectAll(".resize").append("rect")
+                .attr("class","hook").attr("height",120).attr("y",150)
+                .attr("fill", "red")
+                .attr("width", function(d,i){return i ? 0 : 10;})
+                .attr("x", function(d, i) {
+                    return i ? -10 : -3;
+                })
+                .attr("rx", 2);
+            brush_fw.extent([0,500]);
+            brushg.selectAll("rect")
+                .attr("y",150)
+                .attr("height",120);
+            brushg.selectAll(".extent")
+                .attr("opacity",0.1);
+
+            var oldMousedown = brushg.on('mousedown.brush');     
+            
+            instance.updateBrushHandler();
+            brushg.on('mousedown.brush', function() {
+                console.log("md");
+                /*brushg.on('mouseup.brush', function() {
+                    clearHandlers();
+                });
+                //console.log(d3.event.target.className.baseVal);
+                if(d3.event.target.className.baseVal == "hook"){
+                    console.log("blup");
+                    brushg.on('mousemove.brush', function() {
+                        clearHandlers();
+                        oldMousedown.call(this);
+                        brushg.on('mousemove.brush').call(this);
+                    });
+                }else{
+                    brushg.on('mousemove.brush', function() {
+                        clearHandlers();
+                        //oldMousedown.call(this);
+                        //brushg.on('mousemove.brush').call(this);
+                    });
+                }
+                function clearHandlers() {
+                    consoloe.log("clr");
+                    brushg.on('mousemove.brush', null);
+                    brushg.on('mouseup.brush', null);
+                }*/
+            });
+                
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
@@ -742,19 +855,6 @@ HTMLWidgets.widget({
       				.attr("y2",intens_guide_line)
       				.attr("stroke-width",1).attr("stroke","rgba(0,0,0,0.6)").attr("stroke-dasharray",2);
 */
-
-  			context.append("g")
-//				.attr("class", "x brush")
-                .attr("class","brush context")
-                .call(brush)
-      			.selectAll("rect")
-  				.attr("y", -16)
-  				.attr("height", 80) //height2 + 10)
-  				.attr("rx",3)
-  				.attr("ry",3)
-  				.attr("fill","rgba(255,255,255,0.3)")
-  				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
-  				.attr("opacity",0.6);
 
             instance.showVarInMinimap(choices);
             instance.showNoisyNbr(noisy_neighbors);

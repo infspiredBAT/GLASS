@@ -34,6 +34,8 @@ shinyServer(function(input,output,session) {
     files_info              <- ""
     g_indels_present        <- FALSE
     g_qual_present          <- FALSE
+    g_brush_fw              <- NULL
+    g_brush_rv              <- NULL
     g_not_loaded            <- ""
     g_refs_avail            <<- c("TP53","NOTCH1","ATM")
     g_files                 <- data.table(FWD_name=c("LowFreq_frameShiftFwd (Example)"),
@@ -397,6 +399,7 @@ shinyServer(function(input,output,session) {
                     files_info <- paste0("<pre>",files_info,"</pre>")
                     output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
+                    g_brush_fw        <<- calls[call!="-",][25]$trace_peak
                     updateTabsetPanel(session,'tabs',selected = "main")
                     
                     if(nrow(g_files[loaded==T,]) == 1){                  #g_calls saved from previous session we test if they are compatible to reload
@@ -481,7 +484,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present)
+            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present,g_brush_fw,g_brush_rv)
             g_new_sample <<- FALSE
             return(ret)
         }
