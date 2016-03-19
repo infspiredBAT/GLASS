@@ -52,6 +52,7 @@ HTMLWidgets.widget({
             .attr("height", height + margin.top + margin.bottom);
         var brush = d3.svg.brush().on("brushend", brushed);
         var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
+        var brushg;
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -64,7 +65,7 @@ HTMLWidgets.widget({
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
         var join = "FALSE";
-            
+
         var label_pos = {};        //map for pisitioning labels representing called base
         label_pos["reference"]      =  10 + margin.top - 10;
         label_pos["aa"]             =  25 + margin.top - 10;
@@ -116,12 +117,75 @@ HTMLWidgets.widget({
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
 
+        function finishBrushInit(){
+            brush_fw.x(widthScale);
+            if(brushg==undefined){
+                 brushg = focus.append("g")
+                    .attr("class","brush_fw")
+                    .call(brush_fw);
+
+
+            };
+            brushg.selectAll(".resize").append("rect")
+                 .attr("class","hook").attr("height",120).attr("y",150)
+                 .attr("fill", "red")
+                 .attr("width", function(d,i){return i ? 0 : 10;})
+                 .attr("x", function(d, i) {
+                     return i ? -10 : -3;
+                 })
+                 .attr("rx", 2);
+
+            brushg.selectAll("rect")
+                .attr("y",150)
+                .attr("height",120);
+            brushg.selectAll(".extent")
+                .attr("opacity",0.1);
+            console.log("ext: ",brush_fw.extent());
+
+            console.log("ext2: ",brush_fw.extent());
+
+
+            var oldMousedown = brushg.on('mousedown.brush');
+            brushg.on('mousedown.brush', function() {
+                console.log("md");
+                console.log(brush_fw.extent());
+                brushg.on('mouseup.brush', function() {
+                    clearHandlers();
+                });
+                //console.log(d3.event.target.className.baseVal);
+                if(d3.event.target.className.baseVal == "hook"){
+                    console.log("blup");
+                    brushg.on('mousemove.brush', function() {
+                        clearHandlers();
+                        oldMousedown.call(this);
+                        //brushg.on('mousemove.brush').call(this);
+                    });
+                }else{
+                    brushg.on('mousemove.brush', function() {
+                        clearHandlers();
+                        //oldMousedown.call(this);
+                        //brushg.on('mousemove.brush').call(this);
+                    });
+                }
+                function clearHandlers() {
+                    console.log("clr");
+                    brushg.on('mousemove.brush', null);
+                    brushg.on('mouseup.brush', null);
+                }
+            })
+
+            brush_fw.extent([0,500]);
+            brush_fw(d3.select(".brush_fw").transition());
+            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
+
+        }
+
         function brushed() { redraw(); }
         function brushed_fw() {
         blu = brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
         console.log("setting brush fw" + blu);
         }
-        
+
         //setting brush programmatically
         function setBrush(start,end){
             //context.call(brush.extent([start,end]));
@@ -138,14 +202,14 @@ HTMLWidgets.widget({
             redraw();
         }
         function redraw()  {
-            old = brush_fw.extent();
+            var old = brush_fw.extent();
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             //console.log("old"+old);
             //console.log("extent"+brush_fw.extent());
-            brush_fw.extent(old);
-            brush_fw(d3.select(".brush_fw").transition());
-            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
-            
+            //brush_fw.extent(old);
+            //brush_fw(d3.select(".brush_fw").transition());
+            //brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
+
             //brush_fw_st(d3.select(".brush_fw").transition());
             //brush_fw_st.event(d3.select(".brush_fw").transition().delay(1000));
             //focus.selectAll("g").selectAll()
@@ -183,7 +247,7 @@ HTMLWidgets.widget({
             if(j==="FALSE"){
                 heightScale_fwd = heightScale_fwd_split;
                 heightScale_rev = heightScale_rev_split;
-                redraw();               
+                redraw();
             }else if(j==="TRUE"){
                 split_peak_offset = 100;
                 heightScale_fwd = heightScale;
@@ -197,11 +261,11 @@ HTMLWidgets.widget({
                 case "C": if(rev){var g = gLine_c_r;}else{var g = gLine_c;} var col = "#0000FF"; break;
                 case "G": if(rev){var g = gLine_g_r;}else{var g = gLine_g;} var col = "#000000"; break;
                 case "T": if(rev){var g = gLine_t_r;}else{var g = gLine_t;} var col = "#FF0000"; break;
-            }    
+            }
             //console.log("updating line + ",rev);
             if(rev){var c = "line_r";var l = line_rev;}
             else{var c = "line_f";var l = line_fwd;}
-            
+
             var line = g.selectAll("path").data(data); //join
             line.enter().append("path");                //enter
             line.attr("class","path "+c)
@@ -222,23 +286,23 @@ HTMLWidgets.widget({
                 gnr.attr("class","area area_rev").attr("d",noise_area_rev)
                    .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15);
                 gnr.exit().remove();
-            }      
+            }
         }
         function setPeakLabel(calls,label,opacity){
             opacity = typeof opacity !== 'undefined' ? opacity : 0.8;
             switch(label) {
                 case "reference":    var t = text_ref;          c = "ref"; break;
                 case "call":         var t = text_call;         c = "call"; break;
-                case "call_rev":     var t = text_call_rev;     c = "call rev"; break    
+                case "call_rev":     var t = text_call_rev;     c = "call rev"; break
                 case "user_sample":  var t = text_user_sample;  c = "user"; break;
                 case "user_mut":     var t = text_user_mut;     c = "user"; break;
                 case "mut_call_fwd": var t = text_mut_call_fwd; c = "call call_fwd"; break;
-                case "mut_call_rev": var t = text_mut_call_rev; c = "call mut_rev mut"; break ;        
+                case "mut_call_rev": var t = text_mut_call_rev; c = "call mut_rev mut"; break ;
             }
             var text = t.selectAll("text").data(calls);         //Join
-            text.enter().append("text");                        //Enter    
-            text.attr("class",function(d){ 
-                    if(label.indexOf("user") > -1) {return "peak_label short user ".concat("id").concat(d["id"]);} 
+            text.enter().append("text");                        //Enter
+            text.attr("class",function(d){
+                    if(label.indexOf("user") > -1) {return "peak_label short user ".concat("id").concat(d["id"]);}
                     return("peak_label short "+c);
                 })
                 .text(function(d){
@@ -268,7 +332,7 @@ HTMLWidgets.widget({
                     else if (d[label] === "T"){ return "#FF0000"; }
                     else if (d[label] === "-"){ return "black"; }
                     else    {                   return "orange"; }});
-                    
+
             text.exit().remove();
         }
         function showVarInMinimap(choices){
@@ -315,7 +379,7 @@ HTMLWidgets.widget({
   		        .attr("y2",400)
   		        .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
             v.exit().remove();
-            
+
         }
         function showNoisyNbr(noisy_neighbors){
             var nnc = noisyn_con.selectAll("line").data(noisy_neighbors);
@@ -382,7 +446,7 @@ HTMLWidgets.widget({
             aa_m.exit().remove();
         }
         function setQualityLabels(calls,rev){
-            q = rev ? "quality_fwd" : "quality"; 
+            q = rev ? "quality_fwd" : "quality";
             var qt = quals_txt.selectAll("text").data(calls);
             qt.enter().append("text");
             qt.attr("class","peak_label")
@@ -412,7 +476,7 @@ HTMLWidgets.widget({
       		        .attr("height",function(d){return d["quality_rev"];})
       		        .attr("fill", "rgba(200,200,200,0.3)");
                 qg_r.exit().remove();
-            }      
+            }
         }
         function setIntrexBoxes(intrex){
             var eb = exon_boxes.selectAll("rect").data(intrex);
@@ -447,7 +511,7 @@ HTMLWidgets.widget({
   				.attr("opacity",0.8)
   				.text(function(d){return d["id"];})
   				.attr("fill","black");
-            ien.exit().remove();            
+            ien.exit().remove();
         }
         Shiny.addCustomMessageHandler("goto",
             function(message) {
@@ -521,7 +585,7 @@ HTMLWidgets.widget({
   			else if (col === "G"){ return "#000000"; }
   			else if (col === "T"){ return "#FF0000"; }
   			else if (col === "-"){ return "white"; }
-  	        return "yellow";  
+  	        return "yellow";
         }
 /*        function brushZoomIn(){
             return function(event) {
@@ -583,6 +647,8 @@ HTMLWidgets.widget({
             context: context,
 	        brush:   brush,
 	        brush_fw: brush_fw,
+            brushed_fw: brushed_fw,
+            finishBrushInit: finishBrushInit,
 	        join:    join,
             joinView:joinView,
             focus:   focus,
@@ -687,91 +753,36 @@ HTMLWidgets.widget({
             instance.setIntrexBoxes(intrex);
 
   			brush.x(width2Scale);
-		    brush_fw.x(widthScale);
-            
+            instance.finishBrushInit();
+
             context.append("g")
 //				.attr("class", "x brush")
                 .attr("class","brush context")
                 .call(brush)
       			.selectAll("rect")
   				.attr("y", -16)
-  				.attr("height", 80) //height2 + 10)
-  				.attr("rx",3)
+                .attr("height", 80) //height2 + 10)
+                .attr("rx",3)
   				.attr("ry",3)
   				.attr("fill","rgba(255,255,255,0.3)")
   				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
   				.attr("opacity",0.6);
-  			brush_fw.extent([0,500]);
-            brush_fw(d3.select(".brush_fw").transition());
-            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
-  			var brushg = focus.append("g")
-                .attr("class", "brush_fw")
-                .call(brush_fw);
-    
-            console.log("brushg:" + brushg);
-            brush_fw_width = x["brush_fw"];
-            console.log("brush_fw: " + brush_fw_width);
-                
-            brushg.selectAll(".resize").append("rect")
-                .attr("class","hook").attr("height",120).attr("y",150)
-                .attr("fill", "red")
-                .attr("width", function(d,i){return i ? 0 : 10;})
-                .attr("x", function(d, i) {
-                    return i ? -10 : -3;
-                })
-                .attr("rx", 2);
-            
-            brushg.selectAll("rect")
-                .attr("y",150)
-                .attr("height",120);
-            brushg.selectAll(".extent")
-                .attr("opacity",0.1);
 
-            var oldMousedown = brushg.on('mousedown.brush');
-            
-            
-            
-            brushg.on('mousedown.brush', function() {
-                console.log("md");
-               /* brushg.on('mouseup.brush', function() {
-                    clearHandlers();
-                });
-                //console.log(d3.event.target.className.baseVal);
-                if(d3.event.target.className.baseVal == "hook"){
-                    console.log("blup");
-                    brushg.on('mousemove.brush', function() {
-                        clearHandlers();
-                        oldMousedown.call(this);
-                        brushg.on('mousemove.brush').call(this);
-                    });
-                }else{
-                    brushg.on('mousemove.brush', function() {
-                        clearHandlers();
-                        //oldMousedown.call(this);
-                        //brushg.on('mousemove.brush').call(this);
-                    });
-                }
-                function clearHandlers() {
-                    consoloe.log("clr");
-                    brushg.on('mousemove.brush', null);
-                    brushg.on('mouseup.brush', null);
-                }*/
-            })
-            
+
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
             instance.updateLine([intens["T"]],"T",false);
-                 
+
             //noise indicator
-            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]); 
+            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
             //reverse strand
             if(intens_rev != ""){
                 var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
                 instance.updateLine([intens_rev["A"]],"A",true);
                 instance.updateLine([intens_rev["C"]],"C",true);
                 instance.updateLine([intens_rev["G"]],"G",true);
-                instance.updateLine([intens_rev["T"]],"T",true);   
+                instance.updateLine([intens_rev["T"]],"T",true);
             }
             instance.setNoiseArea(a_noise_fwd,a_noise_rev);
             //on single strand always show "join view"
@@ -815,7 +826,7 @@ HTMLWidgets.widget({
             //console.log(x["qual_present"]);
             if(x["qual_present"]){
                 instance.setQualityLabels(calls,rev);
-            } 
+            }
             //default
             focus.selectAll(".call").attr("opacity",instance.call_opacity);
             instance.setPeakLabel(calls,"user_sample");
@@ -845,38 +856,40 @@ HTMLWidgets.widget({
                 instance.setBrush(200,1000);
             }
 
+
+
         }else{
             //console.log("render");
             var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
-            var rev = 0; 
+            var rev = 0;
             if(x["intens_rev"] !== null){
                 rev = 1;
             }
-            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]); 
+            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
             var intens = x["intens"];
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
             instance.updateLine([intens["T"]],"T",false);
-                
+
             if(rev){
                 var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
                 var intens_rev = x["intens_rev"];
                 instance.updateLine([intens_rev["A"]],"A",true);
                 instance.updateLine([intens_rev["C"]],"C",true);
                 instance.updateLine([intens_rev["G"]],"G",true);
-                instance.updateLine([intens_rev["T"]],"T",true);   
+                instance.updateLine([intens_rev["T"]],"T",true);
             }
             instance.setNoiseArea(a_noise_fwd,a_noise_rev);
             if(x["qual_present"]){
                 instance.setQualityLabels(calls,rev);
             }
-            if(instance.max_x != x["intrexdat"]["max_x"]){   
-                instance.max_x = x["intrexdat"]["max_x"];  
+            if(instance.max_x != x["intrexdat"]["max_x"]){
+                instance.max_x = x["intrexdat"]["max_x"];
                 var domain_x    = x["intrexdat"]["max_x"];
                 instance.width2Scale.domain([0,domain_x]);
                 var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]);
-                instance.setIntrexBoxes(intrex);                         
+                instance.setIntrexBoxes(intrex);
             }
   			if(x["intrexdat"]["max_y"]!= instance.max_y){
   				instance.reHeight(x["intrexdat"]["max_y"]);
@@ -886,7 +899,7 @@ HTMLWidgets.widget({
                 var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
                 var show_calls  = x["show_calls"];
                 if(show_calls){ instance.call_opacity = 0.8; }
-                else{ instance.call_opacity = 0; }  
+                else{ instance.call_opacity = 0; }
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
