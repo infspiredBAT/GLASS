@@ -120,8 +120,6 @@ HTMLWidgets.widget({
         function resetHandlers(brushg){
             var oldMousedown = brushg.on('mousedown.brush');
             brushg.on('mousedown.brush', function() {
-                console.log("md");
-                console.log(brush_fw.extent());
                 brushg.on('mouseup.brush', function() {
                     clearHandlers();
                 });
@@ -173,7 +171,7 @@ HTMLWidgets.widget({
         }
 
         function brushed() { redraw(); }
-        function brushed_fw() {
+        function brushed_fw() {     //callback to shiny here
             brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
             //console.log("setting brush fw" + blu);
         }
