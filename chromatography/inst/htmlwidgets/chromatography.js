@@ -179,7 +179,8 @@ HTMLWidgets.widget({
         }
 
         function brushed() { redraw(); }
-        function brushed_fw() { //callback to shiny here
+
+        function brushed_fw() {     //callback to shiny here
             brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
             //console.log("setting brush fw" + blu);
             var old = brush_fw.extent();
