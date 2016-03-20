@@ -117,34 +117,7 @@ HTMLWidgets.widget({
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
 
-        function finishBrushInit(){
-            brush_fw.x(widthScale);
-            if(brushg==undefined){
-                 brushg = focus.append("g")
-                    .attr("class","brush_fw")
-                    .call(brush_fw);
-
-
-            };
-            brushg.selectAll(".resize").append("rect")
-                 .attr("class","hook").attr("height",120).attr("y",150)
-                 .attr("fill", "red")
-                 .attr("width", function(d,i){return i ? 0 : 10;})
-                 .attr("x", function(d, i) {
-                     return i ? -10 : -3;
-                 })
-                 .attr("rx", 2);
-
-            brushg.selectAll("rect")
-                .attr("y",150)
-                .attr("height",120);
-            brushg.selectAll(".extent")
-                .attr("opacity",0.1);
-            console.log("ext: ",brush_fw.extent());
-
-            console.log("ext2: ",brush_fw.extent());
-
-
+        function resetHandlers(brushg){
             var oldMousedown = brushg.on('mousedown.brush');
             brushg.on('mousedown.brush', function() {
                 console.log("md");
@@ -154,7 +127,6 @@ HTMLWidgets.widget({
                 });
                 //console.log(d3.event.target.className.baseVal);
                 if(d3.event.target.className.baseVal == "hook"){
-                    console.log("blup");
                     brushg.on('mousemove.brush', function() {
                         clearHandlers();
                         oldMousedown.call(this);
@@ -168,22 +140,42 @@ HTMLWidgets.widget({
                     });
                 }
                 function clearHandlers() {
-                    console.log("clr");
                     brushg.on('mousemove.brush', null);
                     brushg.on('mouseup.brush', null);
                 }
             })
+        }
+        function finishBrushInit(to){
+            brush_fw.x(widthScale);
+            if(brushg==undefined){
+                 brushg = focus.append("g")
+                    .attr("class","brush_fw")
+                    .call(brush_fw);
+            };
+            brushg.selectAll(".resize").append("rect")
+                 .attr("class","hook")
+                 .attr("fill", "red")
+                 .attr("width", function(d,i){return i ? 0 : 2;})
+                 .attr("x", function(d, i) {
+                     return i ? -10 : -3;
+                 })
+                 .attr("rx", 2);
 
-            brush_fw.extent([0,500]);
-            brush_fw(d3.select(".brush_fw").transition());
-            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
-
+            brushg.selectAll("rect")
+                .attr("y",150)
+                .attr("height",120);
+            brushg.selectAll(".extent")
+                .attr("opacity",0.09);
+            brush_fw.extent([0,to]);
+            brush_fw(brushg);
+            brush_fw.event(d3.select(".brush_fw"));
+            resetHandlers(brushg);
         }
 
         function brushed() { redraw(); }
         function brushed_fw() {
-        blu = brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
-        console.log("setting brush fw" + blu);
+            brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
+            //console.log("setting brush fw" + blu);
         }
 
         //setting brush programmatically
@@ -206,9 +198,10 @@ HTMLWidgets.widget({
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             //console.log("old"+old);
             //console.log("extent"+brush_fw.extent());
-            //brush_fw.extent(old);
-            //brush_fw(d3.select(".brush_fw").transition());
-            //brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
+            brush_fw.extent(old);
+            brush_fw(brushg);
+            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
+            resetHandlers(brushg);
 
             //brush_fw_st(d3.select(".brush_fw").transition());
             //brush_fw_st.event(d3.select(".brush_fw").transition().delay(1000));
@@ -580,8 +573,8 @@ HTMLWidgets.widget({
             Shiny.onInputChange("pos_click", {id: id});
         };
         function get_color(col){
-              if      (col === "A"){ return "#33CC33"; }
-  		    else if (col === "C"){ return "#0000FF"; }
+            if      (col === "A"){ return "#33CC33"; }
+            else if (col === "C"){ return "#0000FF"; }
   			else if (col === "G"){ return "#000000"; }
   			else if (col === "T"){ return "#FF0000"; }
   			else if (col === "-"){ return "white"; }
@@ -646,8 +639,6 @@ HTMLWidgets.widget({
             scope_g: scope_g,
             context: context,
 	        brush:   brush,
-	        brush_fw: brush_fw,
-            brushed_fw: brushed_fw,
             finishBrushInit: finishBrushInit,
 	        join:    join,
             joinView:joinView,
@@ -751,9 +742,8 @@ HTMLWidgets.widget({
 
             //intron/exon boxes
             instance.setIntrexBoxes(intrex);
-
   			brush.x(width2Scale);
-            instance.finishBrushInit();
+            instance.finishBrushInit(x["brush_fw"]);
 
             context.append("g")
 //				.attr("class", "x brush")
