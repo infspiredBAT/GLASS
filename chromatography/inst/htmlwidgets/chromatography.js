@@ -52,7 +52,9 @@ HTMLWidgets.widget({
             .attr("height", height + margin.top + margin.bottom);
         var brush = d3.svg.brush().on("brushend", brushed);
         var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
-        var brushg;
+        var brush_rv = d3.svg.brush().on("brushend",brushed_rv);
+        var brush_fw_g;
+        var brush_rv_g;
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -120,8 +122,6 @@ HTMLWidgets.widget({
         function resetHandlers(brushg){
             var oldMousedown = brushg.on('mousedown.brush');
             brushg.on('mousedown.brush', function() {
-                console.log("md");
-                console.log(brush_fw.extent());
                 brushg.on('mouseup.brush', function() {
                     clearHandlers();
                 });
@@ -145,7 +145,13 @@ HTMLWidgets.widget({
                 }
             })
         }
-        function finishBrushInit(to){
+        function finishBrushInit(to,fw=true){
+            var brushg;
+            if(fw){
+                brushg = brush_fw_g;
+            }else{
+                brushg = brush_rv_g;
+            }
             brush_fw.x(widthScale);
             if(brushg==undefined){
                  brushg = focus.append("g")
@@ -173,9 +179,17 @@ HTMLWidgets.widget({
         }
 
         function brushed() { redraw(); }
-        function brushed_fw() {
+        function brushed_fw() { //callback to shiny here
             brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
             //console.log("setting brush fw" + blu);
+            var old = brush_fw.extent();
+            brush_fw.extent(old);
+            brush_fw(brush_fw_g);
+            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
+
+        }
+        function brushed_rv(){ //callback to shiny here
+            brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
         }
 
         //setting brush programmatically
@@ -194,18 +208,7 @@ HTMLWidgets.widget({
             redraw();
         }
         function redraw()  {
-            var old = brush_fw.extent();
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
-            //console.log("old"+old);
-            //console.log("extent"+brush_fw.extent());
-            brush_fw.extent(old);
-            brush_fw(brushg);
-            brush_fw.event(d3.select(".brush_fw").transition().delay(1000));
-            resetHandlers(brushg);
-
-            //brush_fw_st(d3.select(".brush_fw").transition());
-            //brush_fw_st.event(d3.select(".brush_fw").transition().delay(1000));
-            //focus.selectAll("g").selectAll()
             var w = brush.extent()[1]-brush.extent()[0] ;
             focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
