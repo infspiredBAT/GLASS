@@ -21,6 +21,18 @@
     font-size: 18px;
 }
 
+.shiny-progress .progress-text {
+  white-space: nowrap;
+  top: 50px;
+  left: 800px;
+  height: 40px;
+  background-color: #FFF;
+  border: 1px solid #777;
+  border-radius: 4px;
+  font-size: 20px;
+  opacity: 0.92;
+}
+
 .shiny-input-checkboxgroup label ~ .shiny-options-group, .shiny-input-radiogroup label ~ .shiny-options-group {
   margin-top: -5px;
   margin-bottom: 5px;
@@ -201,11 +213,18 @@ samp {
 button,
 input,
 optgroup,
-select,
+/*select,*/
 textarea {
   color: inherit;
   font: inherit;
   margin: 0;
+}
+select {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: inherit;
+  color: #777777;
+  background-color: #fcfcfc;
 }
 button {
   overflow: visible;
@@ -1181,7 +1200,7 @@ body {
 }
 input,
 button,
-select,
+/*select,*/
 textarea {
 /*  font-family: monospace;*/
   font-size: 1.0em;
@@ -2368,7 +2387,7 @@ th {
   padding: 0px;
   padding-left: 2px;
   line-height: 1.42857143;
-  vertical-align: top;
+  vertical-align: middle;
   border-right: 1px solid #dddddd;
   border-top: 0px;
 }
@@ -2396,9 +2415,9 @@ th {
 .table-condensed > thead > tr > td,
 .table-condensed > tbody > tr > td,
 .table-condensed > tfoot > tr > td {
-  padding: 5px;
-  border-right:0;
-  border-bottom:1px solid #dddddd;
+  padding: 4px;
+  border:0;
+/*  border-bottom:1px solid #dddddd; */
 }
 .table-bordered {
   border: 1px solid #dddddd;
@@ -4144,7 +4163,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .nav-tabs > li.active > a:hover,
 .nav-tabs > li.active > a:focus {
   color: #777777;
-  background-color: #fcfcfc;
+  background-color: #ffffff; /*#fcfcfc*/
   border: 1px solid #dddddd;
   border-bottom-color: transparent;
   cursor: default;

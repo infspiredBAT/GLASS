@@ -13,8 +13,8 @@ library(DT)
 
 
 shinyUI(
-    
-    
+
+
     fluidPage(
 #        useShinyjs(),
 #        extendShinyjs(text = jsDeleteRow),
@@ -39,23 +39,22 @@ shinyUI(
               		'),
             tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
-		
+
 		       #conditionalPanel(condition = "output.show_sample_brows==TRUE",
 		       #          absolutePanel(id = "samples", class = "panel panel-default", fixed = TRUE,
 		        #      draggable = TRUE, top = 200, left = 130, right = "auto", bottom = "auto",
 		        #      width = 1100, height = "auto",
-		        #      
+		        #
 		        #      h2("Sample Browser"),
-		        #      
+		        #
 		        #      DT::dataTableOutput('samples_table'),
 		        #      fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'))
 		        #         )
-                 
-		              
+
+
 		        #),
 		HTML(paste("&nbsp&nbsp<b><font size=4em>genomePD/ </font><font size=6em>glass</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
 		fluidRow(
-    		br(),
 			#column(1, selectInput("gene_of_interest",NULL,choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
 			#column(1, selectInput("gene_of_interest",NULL,choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
             #column(1,
@@ -70,19 +69,17 @@ shinyUI(
     		#	column(7, fileInput("select_file",NULL,multiple=T,accept=c('.abi','.ab1')))
 			#))),
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
-			column(11, htmlOutput("files"))
+			column(2,  HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
+			column(10, htmlOutput("files"))
 		),
 		tabsetPanel(id = 'tabs',
-            tabPanel('samples',value = 'smpl_brws',icon = icon("list"),
+            tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),
                 fluidRow(
-                    column(4,wellPanel(fluidRow(
-                        column(6,tags$div(title="Plase make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored. Currently supported references are TP53, NOTH1 and ATM.",
-                                          HTML(paste("Upload ABI files [?]")))
-                        ),
-                        column(6,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1')))
-                    )))
+                    column(2,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
+                                  HTML(paste("<b>upload ABI files</b> [?]</br>supported: TP53, ATM, NOTCH1")))),
+                    column(4,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%'))
 		        ),
-		        DT::dataTableOutput('samples_table')    
+		        DT::dataTableOutput('samples_table')
             ),
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
 				fluidRow(
@@ -126,7 +123,7 @@ shinyUI(
                         )
 					),
 					column(1
-					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 20)
+					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 0)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
                     column(1),
@@ -146,7 +143,7 @@ shinyUI(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
                         <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=red>dashed red box = use for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
                         <b>chromatogram</b>: click text to highlight call and show info^ | sequences from top = reference, call/primary, mutation/secondary | striped verticals = indicators e.g. variants | grey bars = quality</br>
-                        <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'remove' = ignore for the session | 'lock' = keep for the session, even if you change parameters | 'export' = save all/ticked to Excel
+                        <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'remove' = ignore for the session | 'lock' = keep for the session, even if you change parameters
                         </div>
   		            "), sep = ""))))),
 				chromatographyOutput("plot"),
