@@ -126,8 +126,9 @@ shinyServer(function(input,output,session) {
                 ref      <- g_files[pos_at]$REF
 
                 g_files[pos_at]$REV_name <- "-"
-                g_files[pos_at]$REV_file <- "-"
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F))
+                g_files[pos_at]$REV_file <- "-" 
+                g_files[pos_at]$calls <- ""
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "New"))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name
