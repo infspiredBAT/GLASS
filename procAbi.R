@@ -18,20 +18,20 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
             qual_present <- TRUE
         }
         if(single_rev) {
-            res   <- generate_ref(complement(reverse(data$PBAS.1)),glassed_ref)
+            res   <- generate_ref(complement(reverse(gsub('\\*','',data$PBAS.1))),glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
-                                ,user_sample = str_split(complement(data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
-                                ,call        = str_split(complement(data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
-                                ,reference   = str_split(complement(data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
+                                ,user_sample = str_split(complement(gsub('\\*','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
+                                ,call        = str_split(complement(gsub('\\*','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
+                                ,reference   = str_split(complement(gsub('\\*','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual[length(qual):1]
                                 )
         }else{
-            res   <- generate_ref(data$PBAS.1,glassed_ref)
+            res   <- generate_ref(gsub('\\*','',data$PBAS.1),glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
-                                ,user_sample = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
-                                ,call        = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
-                                ,reference   = str_split(data$PBAS.1,pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,user_sample = str_split(gsub('\\*','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,call        = str_split(gsub('\\*','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,reference   = str_split(gsub('\\*','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual)
         }
@@ -56,7 +56,7 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
             rev_qual <- get_pseudo_qual(rev_data)
             qual_present <- FALSE
         }
-        user_align <- get_fwd_rev_align(data$PBAS.1,data_rev$PBAS.1,fwd_qual,rev_qual)
+        user_align <- get_fwd_rev_align(gsub('\\*','',data$PBAS.1),gsub('\\*','',data_rev$PBAS.1),fwd_qual,rev_qual)
         res <- generate_ref(paste(user_align[[1]],collapse = ""),glassed_ref)
         calls <- data.table(id              = seq_along(user_align[[1]])
                             ,user_sample    = user_align[[1]]

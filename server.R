@@ -401,6 +401,9 @@ shinyServer(function(input,output,session) {
                     output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
                     g_brush_fw        <<- calls[call!="-",][25]$trace_peak
+                    if(!is.null(g_abif_rev)){
+                        g_brush_rv        <<- calls[nrow(calls[call_rev!="-",])-25]$trace_peak
+                    }
                     updateTabsetPanel(session,'tabs',selected = "main")
 
                     if(nrow(g_files[loaded==T,]) == 1){                  #g_calls saved from previous session we test if they are compatible to reload

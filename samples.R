@@ -14,7 +14,7 @@ samples_load <- function(s_files,output,g_files){
                     abi <- sangerseqR::read.abif(s_files[i,]$datapath)@data
                 )
                 if(!is.null(abi)) {
-                    seq <- DNAString(abi$PBAS.2)
+                    seq <- DNAString(gsub("\\*","N",abi$PBAS.1))
                     mas <- 30                   #Minimum alignment score (Guess)
                     score_bst <- 0
                     ref_name <- "unk"
