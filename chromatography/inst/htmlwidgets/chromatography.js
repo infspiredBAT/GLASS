@@ -216,7 +216,7 @@ HTMLWidgets.widget({
         function brushed_fw() {
             brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
             brush_fw_extent = brush_fw.extent();
-
+            Shiny.onInputChange("brush_fw", {coord: brush_fw_extent[1]});
         }
         function brushed_rv() {
             brush_rv.empty() ? width2Scale.domain() : brush_rv.extent();

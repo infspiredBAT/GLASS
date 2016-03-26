@@ -183,6 +183,7 @@ shinyServer(function(input,output,session) {
         }
     })
 
+    #save settings in sample browser
     controls_listener <- observe({
         input$mut_min
         input$qual_thres_to_call
@@ -662,6 +663,13 @@ shinyServer(function(input,output,session) {
         if(is.null(input$pos_click)) return()
         isolate({
             updateTextInput(session,"choose_call_pos",value=paste0(input$pos_click$id))
+        })
+    })
+    
+    goBrush_fw <- observe({
+        if(is.null(input$brush_fw)) return()
+        isolate({
+            bla <- input$brush_fw$coord
         })
     })
 
