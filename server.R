@@ -71,6 +71,7 @@ shinyServer(function(input,output,session) {
         disabled <- rep(FALSE,nrow(g_files))
         disabled[1] <- TRUE
         g_files[,id:= 1:nrow(g_files)]
+        g_files <<- g_files
         add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)),class="btn btn-info" )
         add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) ,dsbl = disabled,class="btn dlt_btn")
         add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
@@ -112,6 +113,8 @@ shinyServer(function(input,output,session) {
             ret <- samples_load(input$browser_files,output,g_files)
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
             g_files[,id:= 1:nrow(g_files)]
+            g_files <<- g_files
+            
         }
 
     })
