@@ -121,33 +121,71 @@ HTMLWidgets.widget({
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
 
-        function resetHandlers(brushg){
-            var oldMousedown = brushg.on('mousedown.brush');
-            brushg.on('mousedown.brush', function() {
-                brushg.on('mouseup.brush', function() {
+        function resetHandlers_fw(brush_fw_g){
+            var oldMousedown = brush_fw_g.on('mousedown.brush');
+            brush_fw_g.on('mousedown.brush', function() {
+                //console.log("md"+brush_fw.extent());
+                brush_fw_g.on('mouseup.brush', function() {
                     clearHandlers();
                 });
                 //console.log(d3.event.target.className.baseVal);
                 if(d3.event.target.className.baseVal == "hook"){
-                    brushg.on('mousemove.brush', function() {
+                    brush_fw_g.on('mousemove.brush', function() {
                         clearHandlers();
                         oldMousedown.call(this);
+                        if(brush_fw.extent()[0]>10){
+                            console.log("jump detected");
+                            brush_fw.extent(brush_fw_extent);
+                            brush_fw(brush_fw_g);
+                            brush_fw.event(d3.select(".brush_fw").transition().delay(1));
+                        }
+                        //console.log(this);
+                        //console.log("brush from hook" + brush_fw.extent());
                         //brushg.on('mousemove.brush').call(this);
                     });
                 }else{
-                    brushg.on('mousemove.brush', function() {
+                    brush_fw_g.on('mousemove.brush', function() {
                         clearHandlers();
                         //oldMousedown.call(this);
                         //brushg.on('mousemove.brush').call(this);
                     });
                 }
                 function clearHandlers() {
-                    brushg.on('mousemove.brush', null);
-                    brushg.on('mouseup.brush', null);
+                    brush_fw_g.on('mousemove.brush', null);
+                    brush_fw_g.on('mouseup.brush', null);
+                }
+            })
+        }
+        function resetHandlers_rv(brush_rv_g){
+            var oldMousedown = brush_rv_g.on('mousedown.brush');
+            brush_rv_g.on('mousedown.brush', function() {
+                console.log("md"+brush_rv.extent());
+                brush_rv_g.on('mouseup.brush', function() {
+                    clearHandlers();
+                });
+                //console.log(d3.event.target.className.baseVal);
+                if(d3.event.target.className.baseVal == "hook"){
+                    brush_rv_g.on('mousemove.brush', function() {
+                        clearHandlers();
+                        oldMousedown.call(this);
+                        //console.log("brush from hook" + brush_rv.extent());
+                        //brushg.on('mousemove.brush').call(this);
+                    });
+                }else{
+                    brush_rv_g.on('mousemove.brush', function() {
+                        clearHandlers();
+                        //oldMousedown.call(this);
+                        //brushg.on('mousemove.brush').call(this);
+                    });
+                }
+                function clearHandlers() {
+                    brush_rv_g.on('mousemove.brush', null);
+                    brush_rv_g.on('mouseup.brush', null);
                 }
             })
         }
         function finish_fwBrushInit(to,rev){
+            console.log("brush fw finish");
             brush_fw.x(widthScale);
             if(brush_fw_g==undefined){
                  brush_fw_g = focus.append("g")
@@ -176,7 +214,7 @@ HTMLWidgets.widget({
             brush_fw_extent = brush_fw.extent();
             //brush_fw(brush_fw_g);
             //brush_fw.event(d3.select(".brush_fw"));
-            //resetHandlers(brush_fw_g);
+            //resetHandlers_fw(brush_fw_g);
         }
         function finish_rvBrushInit(from,to){
             if(to == 0){
@@ -207,21 +245,24 @@ HTMLWidgets.widget({
                 brush_rv_extent = brush_rv.extent();
                 //brush_rv(brush_rv_g);
                 //brush_rv.event(d3.select(".brush_rv"));
-                resetHandlers(brush_rv_g);
-                console.log("setting brush rv" + brush_rv_extent);
+                resetHandlers_rv(brush_rv_g);
+                //console.log("setting brush rv" + brush_rv_extent);
             }
         }
 
         function brushed() { redraw(); }
         function brushed_fw() {
-            brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
+            console.log("1brushing fw to: " + brush_fw_extent);
+            //brush_fw.empty() ? width2Scale.domain() : brush_fw.extent();
             brush_fw_extent = brush_fw.extent();
             Shiny.onInputChange("brush_fw", {coord: brush_fw_extent[1]});
+            console.log("2brushing fw to: " + brush_fw_extent);
+
         }
         function brushed_rv() {
             brush_rv.empty() ? width2Scale.domain() : brush_rv.extent();
             brush_rv_extent = brush_rv.extent();
-            console.log("setting brush rv" + brush_rv_extent);
+            //console.log("setting brush rv" + brush_rv_extent);
         }
 
         //setting brush programmatically
@@ -240,23 +281,21 @@ HTMLWidgets.widget({
             redraw();
         }
         function redraw()  {
-
+            console.log("redraw");
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             //console.log("old"+old);
             //console.log("extent"+brush_fw.extent());
-            brush_fw.extent(brush_fw_extent);
-            brush_fw(brush_fw_g);
-            brush_fw.event(d3.select(".brush_fw").transition().delay(1));
-            resetHandlers(brush_fw_g);
-            if(brush_rv_g!=undefined){ //this is not good
-                brush_rv.extent(brush_rv_extent);
-                brush_rv(brush_rv_g);
-                brush_rv.event(d3.select(".brush_rv").transition().delay(1));
-                resetHandlers(brush_rv_g);
-            }
-            //brush_fw_st(d3.select(".brush_fw").transition());
-            //brush_fw_st.event(d3.select(".brush_fw").transition().delay(1000));
-            //focus.selectAll("g").selectAll()
+            //console.log("setting brush_fw_extent in redraw: "+ brush_fw_extent);
+            //brush_fw.extent(brush_fw_extent);
+            //brush_fw(brush_fw_g);
+            //brush_fw.event(d3.select(".brush_fw").transition().delay(1));
+            //resetHandlers_fw(brush_fw_g);
+            //if(brush_rv_g!=undefined){ //this is not good
+            //    brush_rv.extent(brush_rv_extent);
+            //    brush_rv(brush_rv_g);
+            //    brush_rv.event(d3.select(".brush_rv").transition().delay(1));
+            //    resetHandlers_rv(brush_rv_g);
+            //}
             var w = brush.extent()[1]-brush.extent()[0] ;
             focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
@@ -794,12 +833,12 @@ HTMLWidgets.widget({
             //intron/exon boxes
             instance.setIntrexBoxes(intrex);
   			brush.x(width2Scale);
-            instance.finish_fwBrushInit(x["brush_fw"],rev);
-            if(rev!=0){
-                instance.finish_rvBrushInit(x["brush_rv"],domain_x);
-            }else{
-                instance.finish_rvBrushInit(0,0);
-            }
+            //instance.finish_fwBrushInit(x["brush_fw"],rev);
+            //if(rev!=0){
+            //    instance.finish_rvBrushInit(x["brush_rv"],domain_x);
+            //}else{
+            //    instance.finish_rvBrushInit(0,0);
+            //}
             console.log("brush_rv: " + x["brush_rv"] );
 
             context.append("g")

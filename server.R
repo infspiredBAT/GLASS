@@ -426,6 +426,7 @@ shinyServer(function(input,output,session) {
         if(class(loading_processed_files())[1] != "my_UI_exception") {
             update_chosen_variants()
             goReset_handler()
+            goBrush_fw()
 
             calls<-loading_processed_files()
             if(is.null(g_calls)){
@@ -447,7 +448,7 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,ins_added := NULL]
             }
 
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels)
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels,g_brush_fw,g_brush_rv)
             setkey(g_calls,id)
 
             report                  <- report_hetero_indels(g_calls)
@@ -666,10 +667,10 @@ shinyServer(function(input,output,session) {
         })
     })
     
-    goBrush_fw <- observe({
+    goBrush_fw <- reactive({
         if(is.null(input$brush_fw)) return()
         isolate({
-            bla <- input$brush_fw$coord
+            g_brush_fw <- input$brush_fw$coord
         })
     })
 
