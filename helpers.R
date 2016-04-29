@@ -318,14 +318,14 @@ retranslate <- function(calls){
     push = 0
     #get missing bases for the first frame if incomplete
     while(coding[1,ord_in_cod]!=1){
-        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])
-        setkey(coding,coding_seq)
+        coding<-rbind(cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)],coding)
+        #setkey(coding,coding_seq)
         push = push +1
     }
     #get missing bases for the last frame if incomplete
     while(coding[nrow(coding),ord_in_cod] != 3){
         coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])
-        setkey(coding,coding_seq)
+        #setkey(coding,coding_seq)
     }
     coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
     trans <- seqinr::translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
@@ -339,13 +339,13 @@ retranslate <- function(calls){
     setnames(coding,"V1","coding_seq")
     push = 0
     while(coding[1,ord_in_cod]!=1){
-        coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
-        setkey(coding,coding_seq)
+        coding<-rbind(cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)],coding)
+        #setkey(coding,coding_seq)
         push = push +1
     }
     while(coding[nrow(coding),ord_in_cod] != 3){
         coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
-        setkey(coding,coding_seq)
+        #setkey(coding,coding_seq)
     }
     coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
 #! # ord<-rep(c(1,2,3),length(trans))
@@ -607,8 +607,8 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g
             ins_tab[,id := id + seq_along(id)/100]
             ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
             
-            #ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
-            ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0)]
+            ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
+            #ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0)]
             
             if("call_rev" %in% row.names(calls)){
                 ins_tab[,`:=`(iA_rev=0,iC_rev=0,iG_rev=0,iT_rev=0)]
