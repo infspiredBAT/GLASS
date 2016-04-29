@@ -626,7 +626,16 @@ shinyServer(function(input,output,session) {
     goLock_handler <- observe({
         if(is.null(input$goLock)) return()
         isolate({
-            lock_id <- floor(as.numeric(strsplit(input$goLock, "_")[[1]][2]))/10
+            lock_id <- strsplit(input$goLock, "_")[[1]][2]
+            
+            if(length(strsplit(lock_id,".",fixed=TRUE)[[1]]) >2){
+                lock_id <- strsplit(lock_id,".",fixed=TRUE)[[1]]
+                lock_id <- as.numeric(paste0(lock_id[1],".", lock_id[2]))
+            }else{
+                lock_id <- floor(as.numeric(lock_id))/10
+            }
+            
+            
             g_view[id==lock_id]$set_by_user <<- !g_view[id==lock_id]$set_by_user
             coding  <- g_view[id==lock_id]$coding
             updateTextInput(session,"choose_call_pos",value=paste0(lock_id))
