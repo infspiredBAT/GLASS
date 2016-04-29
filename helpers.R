@@ -313,7 +313,7 @@ ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes
 retranslate <- function(calls){
 
     # USER SAMPLE
-    coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_sample,reference)]
+    coding <- calls[ord_in_cod>0 & !is.na(codon),list(as.numeric(coding_seq),codon,ord_in_cod,user_sample,reference)]
     setnames(coding,"V1","coding_seq")
     push = 0
     #get missing bases for the first frame if incomplete
@@ -606,7 +606,10 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g
             ins_tab <- calls[rep(pos-1,length(ins_seq)),]
             ins_tab[,id := id + seq_along(id)/100]
             ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
-            ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
+            
+            #ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
+            ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0)]
+            
             if("call_rev" %in% row.names(calls)){
                 ins_tab[,`:=`(iA_rev=0,iC_rev=0,iG_rev=0,iT_rev=0)]
             }
