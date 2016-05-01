@@ -80,7 +80,7 @@ shinyServer(function(input,output,session) {
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
-        out<-cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)]," "=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown," "=add_load_buttons,g_files[,list("status"=status)])
+        out<-cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)]," "=add_swap_buttons,"reverse"=add_reverse_dropdown,"reference"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status)])
         table_out <- DT::datatable(out,escape=FALSE,
                                    selection = "none",
                                    style = "bootstrap",
@@ -131,7 +131,7 @@ shinyServer(function(input,output,session) {
                 g_files[pos_at]$REV_name <- "-"
                 g_files[pos_at]$REV_file <- "-" 
                 g_files[pos_at]$calls <- ""
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "New"))
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new"))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name
@@ -659,12 +659,16 @@ shinyServer(function(input,output,session) {
             }
 
             if(nrow(g_view[set_by_user==TRUE])>0){
-                g_files<<-g_files[loaded==TRUE,status:=paste0("confirmed: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"))]
+                big_space <- "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"
+                prots <- paste(g_view[set_by_user == TRUE]$protein,collapse="")
+                if(prots != ""){
+                    prots <- paste0("<br>",big_space,"(",paste(g_view[set_by_user == TRUE]$protein,collapse=";"),")")
+                }
+                g_files<<-g_files[loaded==TRUE,status:=paste0("<b>confirmed</b>: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"),prots)]
             }else{
-                g_fies<<-g_files[loaded==TRUE,status:="viewed"]
+                g_files<<-g_files[loaded==TRUE,status:="viewed"]
             }
             #output$goLock <- renderUI({actionButton(input$goLock, icon = icon("lock"))})
-
         })
         return(T)
     })
@@ -718,25 +722,44 @@ shinyServer(function(input,output,session) {
     })
 
 
-    #
-    # EXPORT
-    #
-    #output$export_btn <- downloadHandler(
-    #    filename = function() {
-    #        paste('data-', Sys.Date(), '.xlsx', sep='')
-    #    },
-    #    content = function(con) {
-    #        out<-data.table("genomic coordinate"=character(),"coding variant"=character(),"protein variant"=character())
-    #        g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
-    #        for(i in 1:nrow(g_view)) {
-    #            if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
-    #        }
-    #        if(length(g_selected)==0)
-    #            write.xlsx(g_view[,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)], con)
-    #        else write.xlsx(out,con)
-    #
-    #    }
-    #)
+    
+    #EXPORT
+    
+    output$export_btn <- downloadHandler(
+        filename = function() {
+            paste('data-', Sys.Date(), '.xlsx', sep='')
+        },
+        content = function(con) {
+            out<-data.table("Sample"=character(),"coding variant"=character(),"protein variant"=character())
+            if(nrow(g_files)==1){
+                out<-rbind(out,list("empty","",""))
+            }else{
+                for(i in 2:nrow(g_files)){
+                    if(g_files[i]$status=="new"){
+                        var = "NA"
+                    }else if(g_files[i]$status == "viewed"){
+                        var = "wt"
+                    }
+                    names<-gsub("<b>confirmed</b>:","",g_files[i]$status)
+                    names<-gsub("&nbsp","",names)
+                    
+                    names<-strsplit(names,"<br>")[[1]]
+                    coding <- names[1]
+                    if(!is.na(names[2])) protein <- names[2]
+                    else protein<-""
+                    out <- rbind(out,list(paste0(g_files[i]$FWD_name,":",g_files[i]$REV_name),coding,protein ))
+                }
+                #out<-rbind(out,list("1","2","2"))
+            }
+            
+            #g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
+           
+            #for(i in 1:nrow(g_view)) {
+            #    if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
+            #}
+            write.xlsx(out,con)
+        }
+    )
 
     #
     # Other tabs

@@ -46,6 +46,7 @@ intro {
   font-weight: bold;
   font-style: italic;
 }
+
 .shiny-output-error-validation {
   color: red;
 }
@@ -7034,4 +7035,24 @@ label {
 }
 .pager .disabled > a {
   border-color: #dddddd;
+}
+.dlt_btn,
+.dlt_btn:disabled,
+.dlt_btn:hover,
+.dlt_btn:active:focus{
+    background:red;
+}
+.exp_btn,
+.exp_btn:hover,
+.exp_btn:active:focus,
+.exp_btn.active:focus,
+.exp_btn:active,
+.exp_btn:target,
+.exp_btn:visited{
+    background:white !important;
+    color:black !important;
+    box-shadow: none;
+}
+.btn{
+     border-radius:3px;
 }

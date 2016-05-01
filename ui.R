@@ -22,8 +22,6 @@ shinyUI(
         theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
 		    includeCSS("www/samples.css"),
-		    tags$style(HTML('.dlt_btn{background-color:red;background-image:linear-gradient(red,crimson);};
-		                    .dlt_btn:selected{background-image:linear-gradient(red,crimson)};')),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("genomePD/GLASS"),
 		    #tags$head(tags$script(src="selectize.min.js")),
@@ -77,7 +75,8 @@ shinyUI(
                 fluidRow(
                     column(2,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
                                   HTML(paste("<b>upload ABI files</b> [?]</br>supported: TP53, ATM, NOTCH1")))),
-                    column(4,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%'))
+                    column(4,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
+                    column(1,downloadButton('export_btn','export',class = "exp_btn"))
 		        ),
 		        DT::dataTableOutput('samples_table')
             ),
