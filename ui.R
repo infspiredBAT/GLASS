@@ -76,7 +76,7 @@ shinyUI(
                     column(2,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
                                   HTML(paste("<b>upload ABI files</b> [?]</br>supported: TP53, ATM, NOTCH1")))),
                     column(4,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
-                    column(1,downloadButton('export_btn','export',class = "exp_btn"))
+                    column(1,tags$div(title="The list of confirmed variants can be exported and saved in the form of an excel table.",downloadButton('export_btn','export [?]',class = "exp_btn")))
 		        ),
 		        DT::dataTableOutput('samples_table')
             ),
