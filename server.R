@@ -38,9 +38,9 @@ shinyServer(function(input,output,session) {
     g_brush_rv              <- NULL
     g_not_loaded            <- ""
     g_refs_avail            <<- c("TP53","NOTCH1","ATM")
-    g_files                 <- data.table(FWD_name=c("TP53;low freq;frameshift;fwd"),
+    g_files                 <- data.table(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
-                                          REV_name=c("TP53;low freq;frameshift;rev"),
+                                          REV_name=c("TP53 ; rev ; low freq w frameshift"),
                                           REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
                                           REF=c("TP53"),
                                           mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
@@ -80,7 +80,7 @@ shinyServer(function(input,output,session) {
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
-        out<-cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)]," "=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverese files appear here.' >reverse [?]</div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status)])
+        out<-cbind("delete"=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?]</div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown,"load"=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status)])
         table_out <- DT::datatable(out,escape=FALSE,
                                    selection = "none",
                                    style = "bootstrap",
@@ -114,7 +114,7 @@ shinyServer(function(input,output,session) {
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
             g_files[,id:= 1:nrow(g_files)]
             g_files <<- g_files
-            
+
         }
 
     })
@@ -129,7 +129,7 @@ shinyServer(function(input,output,session) {
                 ref      <- g_files[pos_at]$REF
 
                 g_files[pos_at]$REV_name <- "-"
-                g_files[pos_at]$REV_file <- "-" 
+                g_files[pos_at]$REV_file <- "-"
                 g_files[pos_at]$calls <- ""
                 g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new"))
             }else{          #combine
@@ -349,7 +349,7 @@ shinyServer(function(input,output,session) {
                 })
             }
             if(load_id == 1){
-                files_info <<- "Example file loaded.\nframeshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
+                files_info  <<-  "demo file loaded\nframeshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
                 output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
                 base = ""
                 ex <- NULL
@@ -565,7 +565,7 @@ shinyServer(function(input,output,session) {
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "", ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)',class="btn dlt_btn" )
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'console.log($("#DataTables_Table_1"));Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
-                out<-cbind(" "=add_goto_buttons, " "=add_reset_buttons, "<div title='Confirmed variants appear in the samples browser. These variants can be then exported using the export button.'>confirm [?]</div>"=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
+                out<-cbind(" "=add_goto_buttons, " "=add_reset_buttons, "<div title='Confirmed variants are kept for the session even if you change parameters,\nand appear in the 'samples' panel from where they can be exported with the green 'export' button.'>confirm [?]</div>"=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
                 tableout<-DT::datatable(out
                                         , escape=FALSE
                                         #, class = "compact"
@@ -627,15 +627,15 @@ shinyServer(function(input,output,session) {
         if(is.null(input$goLock)) return()
         isolate({
             lock_id <- strsplit(input$goLock, "_")[[1]][2]
-            
+
             if(length(strsplit(lock_id,".",fixed=TRUE)[[1]]) >2){
                 lock_id <- strsplit(lock_id,".",fixed=TRUE)[[1]]
                 lock_id <- as.numeric(paste0(lock_id[1],".", lock_id[2]))
             }else{
                 lock_id <- floor(as.numeric(lock_id))/10
             }
-            
-            
+
+
             g_view[id==lock_id]$set_by_user <<- !g_view[id==lock_id]$set_by_user
             coding  <- g_view[id==lock_id]$coding
             updateTextInput(session,"choose_call_pos",value=paste0(lock_id))
@@ -682,7 +682,7 @@ shinyServer(function(input,output,session) {
             updateTextInput(session,"choose_call_pos",value=paste0(input$pos_click$id))
         })
     })
-    
+
     goBrush_fw <- reactive({
         if(is.null(input$brush_fw)) return()
         isolate({
@@ -722,9 +722,9 @@ shinyServer(function(input,output,session) {
     })
 
 
-    
+
     #EXPORT
-    
+
     output$export_btn <- downloadHandler(
         filename = function() {
             paste('data-', Sys.Date(), '.xlsx', sep='')
@@ -742,7 +742,7 @@ shinyServer(function(input,output,session) {
                     }
                     names<-gsub("<b>confirmed</b>:","",g_files[i]$status)
                     names<-gsub("&nbsp","",names)
-                    
+
                     names<-strsplit(names,"<br>")[[1]]
                     coding <- names[1]
                     if(!is.na(names[2])) protein <- names[2]
@@ -751,9 +751,9 @@ shinyServer(function(input,output,session) {
                 }
                 #out<-rbind(out,list("1","2","2"))
             }
-            
+
             #g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
-           
+
             #for(i in 1:nrow(g_view)) {
             #    if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
             #}

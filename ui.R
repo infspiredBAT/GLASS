@@ -72,11 +72,16 @@ shinyUI(
 		),
 		tabsetPanel(id = 'tabs',
             tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),
+				fluidRow(
+					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
+                        <b>(very) quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) press blue 'load' button</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under status and are exportable with green 'export' button
+                        </div>
+  		            "), sep = ""))))),
                 fluidRow(
                     column(2,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
                                   HTML(paste("<b>upload ABI files</b> [?]</br>supported: TP53, ATM, NOTCH1")))),
                     column(4,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
-                    column(1,tags$div(title="The list of confirmed variants can be exported and saved in the form of an excel table.",downloadButton('export_btn','export [?]',class = "exp_btn")))
+                    column(1,tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",downloadButton('export_btn','export [?]',class = "exp_btn")))
 		        ),
 		        DT::dataTableOutput('samples_table')
             ),
@@ -139,10 +144,10 @@ shinyUI(
 					)
 				),
 				fluidRow(
-					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
-                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=red>dashed red box = use for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
+					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
+                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=red>dashed red box = resize and/or move for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
                         <b>chromatogram</b>: click text to highlight call and show info^ | sequences from top = reference, call/primary, mutation/secondary | striped verticals = indicators e.g. variants | grey bars = quality</br>
-                        <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'remove' = ignore for the session | 'lock' = keep for the session, even if you change parameters
+                        <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'x' = ignore for the session | 'confirm' = keep for the session (even if you change parameters) and make them exportable from 'samples' panel
                         </div>
   		            "), sep = ""))))),
 				chromatographyOutput("plot"),
