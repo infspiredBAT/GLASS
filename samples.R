@@ -41,12 +41,33 @@ samples_load <- function(s_files,output,g_files){
                     #test fwd/rev/ which reference
                     if(!rev)
                         loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls=""))
-                    else
-                        loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls=""))
+                    else{
+                        #pair fwd and rev samples with matching names
+                        #if exactly one fwd file matches the stripped name of given rev file and this fwd file has no pair then:
+                        
+                        
+                        rev_name <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",s_files[i,]$name) #remove date
+                        rev_name <- gsub(".abi",".ab1",rev_name) #normalize extension
+                        rev_name <- gsub(".ab1","",rev_name)     #remove extension
+                        rev_name <- substr(rev_name,1,nchar(rev_name)-1) #remove last letter "R"/"F" naming style
+                        matches <- grep(rev_name,loaded$FWD_name)
+                        if(length(matches)==1){
+                            if(loaded[matches]$REV_name == "-"&& loaded[matches]$REF==ref_name)
+                                loaded[matches,`:=`(REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath)]
+                            else{
+                                loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls=""))
+                            }
+                        }else{
+                            loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls=""))
+                        }
+                    }
+                        
                 }
                 else not_loaded <- c(not_loaded,s_files[i,]$name)
             }
         }
+        
+        
         return(list(not_loaded=not_loaded,loaded=loaded))
     })
 }

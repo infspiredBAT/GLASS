@@ -686,7 +686,9 @@ shinyServer(function(input,output,session) {
     goBrush_fw <- reactive({
         if(is.null(input$brush_fw)) return()
         isolate({
-            g_brush_fw <- input$brush_fw$coord
+            abc <- 21
+            #g_brush_fw <- input$brush_fw$coord
+            print(input$brush_fw$coord)
         })
     })
 
