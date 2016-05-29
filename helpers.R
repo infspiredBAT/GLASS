@@ -181,7 +181,7 @@ include_locked_indels <- function(calls,vec,indels,fwd){
     return(new_vec)
 }
 
-call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,brush_fwd,brush_rev){
+call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,brush_fwd,brush_rev,incorp){
     # reset all but set_by_user
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut    := user_sample_orig]
@@ -225,11 +225,15 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
 #             ]
         
         # brush filter
-        calls <- calls[trace_peak< brush_fwd ,call := if(!is.null(call_rev)){call_rev}else{"N"} ]
-        calls <- calls[trace_peak< brush_fwd, mut_call_fwd := if(!is.null(mut_call_rev)){mut_call_rev}else{"N"} ]
-        
-        calls <- calls[trace_peak> brush_rev ,call := if(!is.null(call)){call}else{"N"} ]
-        calls <- calls[trace_peak> brush_rev, mut_call_rev := if(!is.null(mut_call_fwd)){mut_call_fwd}else{"N"} ]
+        # should be ignored if input het indels is set
+        if(!incorp){
+       
+            calls <- calls[trace_peak< brush_fwd ,call := if(!is.null(call_rev)){call_rev}else{"N"} ]
+            calls <- calls[trace_peak< brush_fwd, mut_call_fwd := if(!is.null(mut_call_rev)){mut_call_rev}else{"N"} ]
+            
+            calls <- calls[trace_peak> brush_rev ,call := if(!is.null(call)){call}else{"N"} ]
+            calls <- calls[trace_peak> brush_rev, mut_call_rev := if(!is.null(mut_call_fwd)){mut_call_fwd}else{"N"} ]
+        }
         
         # setting user muts based on reference and quality
         calls[
@@ -268,7 +272,12 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
             & mut_peak_base_fwd != reference
             , mut_call_fwd := mut_peak_base_fwd
             ]
+        
         calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(mut_call_fwd,reference),by=1:nrow(calls[set_by_user==FALSE,])]
+        #brush filter
+        calls <- calls[trace_peak< brush_fwd ,call := "N" ]
+        calls <- calls[trace_peak< brush_fwd, mut_call_fwd := "N" ]
+        calls <- calls[trace_peak< brush_fwd,c("user_sample","user_mut") := "N"]
         calls[
               set_by_user == FALSE
             & mut_call_fwd != call

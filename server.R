@@ -34,8 +34,8 @@ shinyServer(function(input,output,session) {
     files_info              <- ""
     g_indels_present        <- FALSE
     g_qual_present          <- FALSE
-    g_brush_fwd              <- NULL
-    g_brush_rev              <- NULL
+    g_brush_fwd             <- 0
+    g_brush_rev             <- 0
     g_not_loaded            <- ""
     g_reactval              <- reactiveValues()
     g_reactval$updateVar    <- 0
@@ -467,7 +467,7 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,ins_added := NULL]
             }
 
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev)
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox)
             setkey(g_calls,id)
 
             report                  <- report_hetero_indels(g_calls)
