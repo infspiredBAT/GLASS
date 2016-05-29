@@ -189,11 +189,13 @@ HTMLWidgets.widget({
 
         function brushed() { redraw(); }
         function brushed_fw() {
+
             if (!d3.event.sourceEvent) return; // only transition after input
             //resetHandlers_fw();
             var extent0 = brush_fw.extent();
             var extent1 = [0,extent0[1]];
-
+            Shiny.onInputChange("brush_fw", {coord: extent1[1]});
+            brush_fw_extent = extent1;
             d3.select(this).transition()
                 .call(brush_fw.extent(extent1))
                 .call(brush_fw.event);
@@ -203,9 +205,9 @@ HTMLWidgets.widget({
             if (!d3.event.sourceEvent) return; // only transition after input
             //resetHandlers_fw();
             var extent0 = brush_rv.extent();
-            console.log(width2Scale.domain()[1]);
             var extent1 = [extent0[0],width2Scale.domain()[1]];
-
+            Shiny.onInputChange("brush_rv", {coord: extent1[0]});
+            brush_rv_extent = extent1;
             d3.select(this).transition()
                 .call(brush_rv.extent(extent1))
                 .call(brush_rv.event);

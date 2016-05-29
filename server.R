@@ -34,9 +34,11 @@ shinyServer(function(input,output,session) {
     files_info              <- ""
     g_indels_present        <- FALSE
     g_qual_present          <- FALSE
-    g_brush_fw              <- NULL
-    g_brush_rv              <- NULL
+    g_brush_fwd              <- NULL
+    g_brush_rev              <- NULL
     g_not_loaded            <- ""
+    g_reactval              <- reactiveValues()
+    g_reactval$updateVar    <- 0
     g_refs_avail            <<- c("TP53","NOTCH1","ATM")
     g_files                 <- data.table(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
@@ -46,7 +48,9 @@ shinyServer(function(input,output,session) {
                                           mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
                                           calls = "",
                                           status="new",
-                                          id=1
+                                          id=1,
+                                          brush_fwd = 0,
+                                          brush_rev = 0
                                 )
 
 #     get_file <- reactive({
@@ -197,6 +201,7 @@ shinyServer(function(input,output,session) {
         input$max_y_p
         input$opacity
         input$incorporate_checkbox
+        g_reactval$updateVar
 
         if(nrow(g_files[loaded==TRUE,]) ==1){
             g_files <<- g_files[loaded==TRUE,`:=`(mut_min=input$mut_min,
@@ -206,7 +211,9 @@ shinyServer(function(input,output,session) {
                                       join_traces_checkbox=input$join_traces_checkbox,
                                       max_y_p=input$max_y_p,
                                       opacity=input$opacity,
-                                      incorporate_checkbox=input$incorporate_checkbox)]
+                                      incorporate_checkbox=input$incorporate_checkbox,
+                                      brush_fwd=g_brush_fwd,
+                                      brush_rev=g_brush_rev)]
         }
 
 
@@ -404,9 +411,17 @@ shinyServer(function(input,output,session) {
                     files_info <- paste0("<pre>",files_info,"</pre>")
                     output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
-                    g_brush_fw        <<- calls[call!="-",][25]$trace_peak
+                    if(g_files[loaded==TRUE,]$brush_fwd ==0){
+                        g_brush_fwd        <<- calls[call!="-",][25]$trace_peak
+                    }else{
+                        g_brush_fwd <<- g_files[loaded==TRUE,]$brush_fwd
+                    }
                     if(!is.null(g_abif_rev)){
-                        g_brush_rv        <<- calls[nrow(calls[call_rev!="-",])-25]$trace_peak
+                        if(g_files[loaded==TRUE,]$brush_rev ==0){
+                            g_brush_rev        <<- calls[nrow(calls[call_rev!="-",])-25]$trace_peak
+                        }else{
+                            g_brush_rev <- g_files[loaded==TRUE,]$brush_rev
+                        }
                     }
                     updateTabsetPanel(session,'tabs',selected = "main")
 
@@ -429,7 +444,8 @@ shinyServer(function(input,output,session) {
         if(class(loading_processed_files())[1] != "my_UI_exception") {
             update_chosen_variants()
             goReset_handler()
-            goBrush_fw()
+            g_reactval$updateVar 
+            #goBrush_fw()
 
             calls<-loading_processed_files()
             if(is.null(g_calls)){
@@ -451,7 +467,7 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,ins_added := NULL]
             }
 
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels,g_brush_fw,g_brush_rv)
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev)
             setkey(g_calls,id)
 
             report                  <- report_hetero_indels(g_calls)
@@ -493,7 +509,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present,g_brush_fw,g_brush_rv)
+            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present,g_brush_fwd,g_brush_rev)
             g_new_sample <<- FALSE
             return(ret)
         }
@@ -683,14 +699,29 @@ shinyServer(function(input,output,session) {
         })
     })
 
-    goBrush_fw <- reactive({
+    goBrush_fw <- observe({
         if(is.null(input$brush_fw)) return()
-        isolate({
-            abc <- 21
-            #g_brush_fw <- input$brush_fw$coord
-            print(input$brush_fw$coord)
-        })
+        last <- g_brush_fwd
+        g_brush_fwd <<- input$brush_fw$coord
+        #print(input$brush_fw$coord)
+        #print(g_brush_fwd)
+        if(last <= g_brush_fwd){
+            if(nrow(g_choices[trace_peak > last][trace_peak < g_brush_fwd])==0)
+                return()
+        }
+        g_reactval$updateVar <- runif(1,0,1)
     })
+    goBrush_rv <- observe({
+        if(is.null(input$brush_rv)) return()
+        last <- g_brush_rev
+        g_brush_rev <<- input$brush_rv$coord
+        if(last>=g_brush_rev){
+            if(nrow(g_choices[trace_peak_rev < last][trace_peak_rev>g_brush_rev])==0)
+               return()
+        }
+        g_reactval$updateVar <- runif(1,0,1)
+    })
+
 
     #
     # Send message to JS
@@ -722,7 +753,6 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
-
 
 
     #EXPORT
