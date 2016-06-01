@@ -26,6 +26,14 @@ HTMLWidgets.widget({
             //heightScale_rev = heightScale;
             heightScale_fwd = heightScale_fwd_split;
             heightScale_rev = heightScale_rev_split;
+
+        function rescaleWidth(width_in){
+                var width_new   = width_in - margin.left - margin.right;
+                width2Scale.range([0,width_new]);
+                widthScale.range([0,width_new]);
+
+            }
+
         var line_fwd = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return heightScale_fwd(d)});
@@ -123,7 +131,7 @@ HTMLWidgets.widget({
 
 
         function finish_fwBrushInit(to,rev){
-            console.log("brush fw finish");
+            //console.log("brush fw finish");
             brush_fw.x(widthScale);
             if(brush_fw_g==undefined){
                  brush_fw_g = focus.append("g")
@@ -146,8 +154,8 @@ HTMLWidgets.widget({
             brush_fw_g.selectAll(".extent")
                 .attr("fill","red")
                 .attr("opacity",0.09);
-            console.log(widthScale);
-            console.log("brush fw extent in init",to);
+            //console.log(widthScale);
+            //console.log("brush fw extent in init",to);
             brush_fw.extent([0,to]);
             brush_fw_extent = brush_fw.extent();
             //brush_fw(brush_fw_g);
@@ -366,7 +374,7 @@ HTMLWidgets.widget({
         }
         function showVarInMinimap(choices){
             //genomic
-            //console.log("changing choices");
+            //console.log("showVarInMinimap");
             var g = varim_gen.selectAll("line").data(choices);
             g.enter().append("line").attr("class","enter");
             g.attr("class","minimap context")
@@ -508,6 +516,7 @@ HTMLWidgets.widget({
             }
         }
         function setIntrexBoxes(intrex){
+            //console.log("setIntrexBoxes");
             var eb = exon_boxes.selectAll("rect").data(intrex);
             eb.enter().append("rect");
   			eb.attr("class","context")
@@ -670,6 +679,7 @@ HTMLWidgets.widget({
         //passing arguments
         //this enables to access vars and functions from the render function as instance.*
         return {
+            rescaleWidth: rescaleWidth,
             label_pos:  label_pos,
             full_line: full_line,
             scope_g: scope_g,
@@ -704,16 +714,18 @@ HTMLWidgets.widget({
     },
 
     resize: function(el, width, height, instance) {
+
+
+        d3.select(el).selectAll("svg")
+          .attr("width", width);
+        instance.rescaleWidth(width);
+
         if (instance.lastValue) {
             this.renderValue(el, instance.lastValue, instance);
         }
-/*
-     d3.select(el).selectAll("svg")
-          .attr("width", width)
-          .attr("height", height);
 
-     instance.size([width, height]).resume();
-*/
+     //instance.size([width, height]).resume();
+
     },
     //function called everytime input parameters change
     renderValue: function(el, x, instance) {
@@ -785,7 +797,6 @@ HTMLWidgets.widget({
             }else{
                 instance.finish_rvBrushInit(0,0);
             }
-            console.log("brush_rv: " + x["brush_rv"] );
 
             context.append("g")
 //				.attr("class", "x brush")
