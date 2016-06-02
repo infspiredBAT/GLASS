@@ -685,6 +685,7 @@ HTMLWidgets.widget({
             scope_g: scope_g,
             context: context,
 	        brush:   brush,
+            redraw:  redraw,
             finish_fwBrushInit: finish_fwBrushInit,
             finish_rvBrushInit: finish_rvBrushInit,
 	        join:    join,
@@ -721,6 +722,7 @@ HTMLWidgets.widget({
         instance.rescaleWidth(width);
 
         if (instance.lastValue) {
+            instance.lastValue.resize = true;
             this.renderValue(el, instance.lastValue, instance);
         }
 
@@ -734,6 +736,7 @@ HTMLWidgets.widget({
         //the render function behaves differently when called repeatedly
         //the first run is actually still a part of the initialization step
         if(x.new_sample){
+            x.new_sample = false;
   		    var intens = x["intens"];
             var intens_rev = "";
             var rev = 0;  //offset on labels in case we have alternative reference
@@ -902,7 +905,7 @@ HTMLWidgets.widget({
 
 
         }else{
-            //console.log("render");
+            console.log("render");
 
             var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
             var rev = 0;
@@ -957,7 +960,14 @@ HTMLWidgets.widget({
                 }
                 instance.setCodingLabel(calls);
 
-  			} else { console.log(x) }
+  			}else if(x.resize == true){
+                instance.lastValue.resize = false;
+                instance.redraw();
+                instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]));
+                instance.showVarInMinimap(HTMLWidgets.dataframeToD3(x["choices"]));
+
+            }
+             else { console.log(x) }
         }
     }
 });
