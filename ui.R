@@ -27,6 +27,11 @@ shinyUI(
 		    #tags$head(tags$script(src="selectize.min.js")),
 		    #tags$script(incljs),
             # script for input file cleaning
+		    tags$script('
+		                window.onbeforeunload = function() {
+		                return "You will need to start over if you navigate away!";
+		                };
+		                '),
             tags$script('
               		Shiny.addCustomMessageHandler("resetFileInputHandler", function(x) {
               		var el = $("#" + x);
@@ -139,7 +144,7 @@ shinyUI(
                     ),
 					column(1
                         ,sliderInput("max_y_p","peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
-					    ,conditionalPanel(condition = "output.reverse",
+					    ,conditionalPanel(condition = "output.reverse && input.join_traces_checkbox" ,
 					                      sliderInput("opacity","R <trace opacity> F", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
 					)
 				),

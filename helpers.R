@@ -225,15 +225,17 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
 #             ]
         
         # brush filter
-        # should be ignored if input het indels is set
-        if(!incorp){
+        # should be ignored if input het indels is set ??
+        #if(!incorp){
        
-            calls <- calls[trace_peak< brush_fwd ,call := if(!is.null(call_rev)){call_rev}else{"N"} ]
-            calls <- calls[trace_peak< brush_fwd, mut_call_fwd := if(!is.null(mut_call_rev)){mut_call_rev}else{"N"} ]
-            
-            calls <- calls[trace_peak> brush_rev ,call := if(!is.null(call)){call}else{"N"} ]
-            calls <- calls[trace_peak> brush_rev, mut_call_rev := if(!is.null(mut_call_fwd)){mut_call_fwd}else{"N"} ]
-        }
+        #calls <- calls[trace_peak< brush_fwd ,call := if(!is.null(call_rev)){call_rev}else{"N"} ]
+        #calls <- calls[trace_peak< brush_fwd, mut_call_fwd := if(!is.null(mut_call_rev)){mut_call_rev}else{"N"} ]
+        calls <- calls[trace_peak< brush_fwd ,call := reference ]
+        calls <- calls[trace_peak< brush_fwd, mut_call_fwd := reference ]    
+        
+        calls <- calls[trace_peak> brush_rev ,call := reference ]
+        calls <- calls[trace_peak> brush_rev, mut_call_rev := reference]
+        #}
         
         # setting user muts based on reference and quality
         calls[
