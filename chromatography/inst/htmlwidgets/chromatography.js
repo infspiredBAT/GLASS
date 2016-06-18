@@ -894,12 +894,12 @@ HTMLWidgets.widget({
 	        //zooming in so that the first view is not ugly dense graph
 
             if (typeof choices[0] !== 'undefined') {
-                from = choices[0]["trace_peak"]-100;
-                to   = choices[0]["trace_peak"]+120;
-                if(from < 0) {from = 0;to = 220}
+                from = choices[0]["trace_peak"]-200;
+                to   = choices[0]["trace_peak"]+220;
+                if(from < 0) {from = 0;to = 420}
                 instance.setBrush(from,to);
             }else{
-                instance.setBrush(200,1000);
+                instance.setBrush(200,1200);
             }
 
 
