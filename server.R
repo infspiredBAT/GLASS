@@ -39,7 +39,7 @@ shinyServer(function(input,output,session) {
     g_not_loaded            <- ""
     g_reactval              <- reactiveValues()
     g_reactval$updateVar    <- 0
-    g_refs_avail            <<- c("TP53","NOTCH1","ATM")
+    g_refs_avail            <<- c("TP53","NOTCH1","ATM","CALR")
     g_files                 <- data.table(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
                                           REV_name=c("TP53 ; rev ; low freq w frameshift"),
@@ -80,7 +80,7 @@ shinyServer(function(input,output,session) {
         add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) ,dsbl = disabled,class="btn dlt_btn")
         add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
         #add_reference_dropdown <- shinyInput(selectizeInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),onchange = 'Shiny.onInputChange(\"goChangeSamples\",  this.id + (Math.random()/10))',label=NULL,width="100px") #selected = ref
-        add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectGene_',choices=c("TP53","NOTCH1","ATM"), selected = g_files[,REF],width="80px")
+        add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectGene_',choices=g_refs_avail, selected = g_files[,REF],width="80px")
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
@@ -135,7 +135,7 @@ shinyServer(function(input,output,session) {
                 g_files[pos_at]$REV_name <- "-"
                 g_files[pos_at]$REV_file <- "-"
                 g_files[pos_at]$calls <- ""
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new"))
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new",brush_fwd = 0, brush_rev = 0))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name

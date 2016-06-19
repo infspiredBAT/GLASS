@@ -1,0 +1,319 @@
+LOCUS       NC_000019               5891 bp    DNA     linear   CON 06-JUN-2016
+DEFINITION  Homo sapiens chromosome 19, GRCh38.p7 Primary Assembly.
+ACCESSION   NC_000019 REGION: 12938600..12944490 GPC_000001311
+VERSION     NC_000019.10  GI:568815579
+DBLINK      BioProject: PRJNA168
+            Assembly: GCF_000001405.33
+KEYWORDS    RefSeq.
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini;
+            Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 5891)
+  CONSRTM   International Human Genome Sequencing Consortium
+  TITLE     Finishing the euchromatic sequence of the human genome
+  JOURNAL   Nature 431 (7011), 931-945 (2004)
+   PUBMED   15496913
+REFERENCE   2  (bases 1 to 5891)
+  AUTHORS   Grimwood,J., Gordon,L.A., Olsen,A., Terry,A., Schmutz,J.,
+            Lamerdin,J., Hellsten,U., Goodstein,D., Couronne,O.,
+            Tran-Gyamfi,M., Aerts,A., Altherr,M., Ashworth,L., Bajorek,E.,
+            Black,S., Branscomb,E., Caenepeel,S., Carrano,A., Caoile,C.,
+            Chan,Y.M., Christensen,M., Cleland,C.A., Copeland,A., Dalin,E.,
+            Dehal,P., Denys,M., Detter,J.C., Escobar,J., Flowers,D.,
+            Fotopulos,D., Garcia,C., Georgescu,A.M., Glavina,T., Gomez,M.,
+            Gonzales,E., Groza,M., Hammon,N., Hawkins,T., Haydu,L., Ho,I.,
+            Huang,W., Israni,S., Jett,J., Kadner,K., Kimball,H., Kobayashi,A.,
+            Larionov,V., Leem,S.H., Lopez,F., Lou,Y., Lowry,S., Malfatti,S.,
+            Martinez,D., McCready,P., Medina,C., Morgan,J., Nelson,K.,
+            Nolan,M., Ovcharenko,I., Pitluck,S., Pollard,M., Popkie,A.P.,
+            Predki,P., Quan,G., Ramirez,L., Rash,S., Retterer,J., Rodriguez,A.,
+            Rogers,S., Salamov,A., Salazar,A., She,X., Smith,D., Slezak,T.,
+            Solovyev,V., Thayer,N., Tice,H., Tsai,M., Ustaszewska,A., Vo,N.,
+            Wagner,M., Wheeler,J., Wu,K., Xie,G., Yang,J., Dubchak,I.,
+            Furey,T.S., DeJong,P., Dickson,M., Gordon,D., Eichler,E.E.,
+            Pennacchio,L.A., Richardson,P., Stubbs,L., Rokhsar,D.S.,
+            Myers,R.M., Rubin,E.M. and Lucas,S.M.
+  TITLE     The DNA sequence and biology of human chromosome 19
+  JOURNAL   Nature 428 (6982), 529-535 (2004)
+   PUBMED   15057824
+REFERENCE   3  (bases 1 to 5891)
+  AUTHORS   Lander,E.S., Linton,L.M., Birren,B., Nusbaum,C., Zody,M.C.,
+            Baldwin,J., Devon,K., Dewar,K., Doyle,M., FitzHugh,W., Funke,R.,
+            Gage,D., Harris,K., Heaford,A., Howland,J., Kann,L., Lehoczky,J.,
+            LeVine,R., McEwan,P., McKernan,K., Meldrim,J., Mesirov,J.P.,
+            Miranda,C., Morris,W., Naylor,J., Raymond,C., Rosetti,M.,
+            Santos,R., Sheridan,A., Sougnez,C., Stange-Thomann,N.,
+            Stojanovic,N., Subramanian,A., Wyman,D., Rogers,J., Sulston,J.,
+            Ainscough,R., Beck,S., Bentley,D., Burton,J., Clee,C., Carter,N.,
+            Coulson,A., Deadman,R., Deloukas,P., Dunham,A., Dunham,I.,
+            Durbin,R., French,L., Grafham,D., Gregory,S., Hubbard,T.,
+            Humphray,S., Hunt,A., Jones,M., Lloyd,C., McMurray,A., Matthews,L.,
+            Mercer,S., Milne,S., Mullikin,J.C., Mungall,A., Plumb,R., Ross,M.,
+            Shownkeen,R., Sims,S., Waterston,R.H., Wilson,R.K., Hillier,L.W.,
+            McPherson,J.D., Marra,M.A., Mardis,E.R., Fulton,L.A.,
+            Chinwalla,A.T., Pepin,K.H., Gish,W.R., Chissoe,S.L., Wendl,M.C.,
+            Delehaunty,K.D., Miner,T.L., Delehaunty,A., Kramer,J.B., Cook,L.L.,
+            Fulton,R.S., Johnson,D.L., Minx,P.J., Clifton,S.W., Hawkins,T.,
+            Branscomb,E., Predki,P., Richardson,P., Wenning,S., Slezak,T.,
+            Doggett,N., Cheng,J.F., Olsen,A., Lucas,S., Elkin,C.,
+            Uberbacher,E., Frazier,M., Gibbs,R.A., Muzny,D.M., Scherer,S.E.,
+            Bouck,J.B., Sodergren,E.J., Worley,K.C., Rives,C.M., Gorrell,J.H.,
+            Metzker,M.L., Naylor,S.L., Kucherlapati,R.S., Nelson,D.L.,
+            Weinstock,G.M., Sakaki,Y., Fujiyama,A., Hattori,M., Yada,T.,
+            Toyoda,A., Itoh,T., Kawagoe,C., Watanabe,H., Totoki,Y., Taylor,T.,
+            Weissenbach,J., Heilig,R., Saurin,W., Artiguenave,F., Brottier,P.,
+            Bruls,T., Pelletier,E., Robert,C., Wincker,P., Smith,D.R.,
+            Doucette-Stamm,L., Rubenfield,M., Weinstock,K., Lee,H.M.,
+            Dubois,J., Rosenthal,A., Platzer,M., Nyakatura,G., Taudien,S.,
+            Rump,A., Yang,H., Yu,J., Wang,J., Huang,G., Gu,J., Hood,L.,
+            Rowen,L., Madan,A., Qin,S., Davis,R.W., Federspiel,N.A.,
+            Abola,A.P., Proctor,M.J., Myers,R.M., Schmutz,J., Dickson,M.,
+            Grimwood,J., Cox,D.R., Olson,M.V., Kaul,R., Raymond,C., Shimizu,N.,
+            Kawasaki,K., Minoshima,S., Evans,G.A., Athanasiou,M., Schultz,R.,
+            Roe,B.A., Chen,F., Pan,H., Ramser,J., Lehrach,H., Reinhardt,R.,
+            McCombie,W.R., de la Bastide,M., Dedhia,N., Blocker,H.,
+            Hornischer,K., Nordsiek,G., Agarwala,R., Aravind,L., Bailey,J.A.,
+            Bateman,A., Batzoglou,S., Birney,E., Bork,P., Brown,D.G.,
+            Burge,C.B., Cerutti,L., Chen,H.C., Church,D., Clamp,M.,
+            Copley,R.R., Doerks,T., Eddy,S.R., Eichler,E.E., Furey,T.S.,
+            Galagan,J., Gilbert,J.G., Harmon,C., Hayashizaki,Y., Haussler,D.,
+            Hermjakob,H., Hokamp,K., Jang,W., Johnson,L.S., Jones,T.A.,
+            Kasif,S., Kaspryzk,A., Kennedy,S., Kent,W.J., Kitts,P.,
+            Koonin,E.V., Korf,I., Kulp,D., Lancet,D., Lowe,T.M., McLysaght,A.,
+            Mikkelsen,T., Moran,J.V., Mulder,N., Pollara,V.J., Ponting,C.P.,
+            Schuler,G., Schultz,J., Slater,G., Smit,A.F., Stupka,E.,
+            Szustakowski,J., Thierry-Mieg,D., Thierry-Mieg,J., Wagner,L.,
+            Wallis,J., Wheeler,R., Williams,A., Wolf,Y.I., Wolfe,K.H.,
+            Yang,S.P., Yeh,R.F., Collins,F., Guyer,M.S., Peterson,J.,
+            Felsenfeld,A., Wetterstrand,K.A., Patrinos,A., Morgan,M.J., de
+            Jong,P., Catanese,J.J., Osoegawa,K., Shizuya,H., Choi,S. and
+            Chen,Y.J.
+  CONSRTM   International Human Genome Sequencing Consortium
+  TITLE     Initial sequencing and analysis of the human genome
+  JOURNAL   Nature 409 (6822), 860-921 (2001)
+   PUBMED   11237011
+  REMARK    Erratum:[Nature 2001 Aug 2;412(6846):565]
+REFERENCE   4  (sites)
+  AUTHORS   Lowe,T.M. and Eddy,S.R.
+  TITLE     tRNAscan-SE: a program for improved detection of transfer RNA genes
+            in genomic sequence
+  JOURNAL   Nucleic Acids Res. 25 (5), 955-964 (1997)
+   PUBMED   9023104
+  REMARK    This is the methods paper for tRNAscan-SE.
+COMMENT     REFSEQ INFORMATION: The reference sequence is identical to
+            CM000681.2.
+            On Feb 3, 2014 this sequence version replaced gi:224589810.
+            Assembly Name: GRCh38.p7 Primary Assembly
+            The DNA sequence is composed of genomic sequence, primarily
+            finished clones that were sequenced as part of the Human Genome
+            Project. PCR products and WGS shotgun sequence have been added
+            where necessary to fill gaps or correct errors. All such additions
+            are manually curated by GRC staff. For more information see:
+            http://genomereference.org.
+            
+            ##Genome-Annotation-Data-START##
+            Annotation Provider         :: NCBI
+            Annotation Status           :: Full annotation
+            Annotation Version          :: Homo sapiens Annotation Release 108
+            Annotation Pipeline         :: NCBI eukaryotic genome annotation
+                                           pipeline
+            Annotation Software Version :: 7.0
+            Annotation Method           :: Best-placed RefSeq; Gnomon
+            Features Annotated          :: Gene; mRNA; CDS; ncRNA
+            ##Genome-Annotation-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..5891
+                     /organism="Homo sapiens"
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="19"
+     gene            1..5891
+                     /gene="CALR"
+                     /gene_synonym="cC1qR; CRT; HEL-S-99n; RO; SSA"
+                     /note="calreticulin; Derived by automated computational
+                     analysis using gene prediction method: BestRefSeq."
+                     /db_xref="GeneID:811"
+                     /db_xref="HGNC:HGNC:1455"
+                     /db_xref="HPRD:00169"
+                     /db_xref="MIM:109091"
+     mRNA            join(1..171,535..636,829..1032,1454..1548,1644..1853,
+                     1942..2055,2145..2288,4938..5030,5114..5891)
+                     /gene="CALR"
+                     /gene_synonym="cC1qR; CRT; HEL-S-99n; RO; SSA"
+                     /product="calreticulin"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_004343.3"
+                     /db_xref="GI:209862753"
+                     /db_xref="GeneID:811"
+                     /db_xref="HGNC:HGNC:1455"
+                     /db_xref="HPRD:00169"
+                     /db_xref="MIM:109091"
+     CDS             join(81..171,535..636,829..1032,1454..1548,1644..1853,
+                     1942..2055,2145..2288,4938..5030,5114..5314)
+                     /gene="CALR"
+                     /gene_synonym="cC1qR; CRT; HEL-S-99n; RO; SSA"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="calreticulin precursor"
+                     /protein_id="NP_004334.1"
+                     /db_xref="GI:4757900"
+                     /db_xref="CCDS:CCDS12288.1"
+                     /db_xref="GeneID:811"
+                     /db_xref="HGNC:HGNC:1455"
+                     /db_xref="HPRD:00169"
+                     /db_xref="MIM:109091"
+                     /translation="MLLSVPLLLGLLGLAVAEPAVYFKEQFLDGDGWTSRWIESKHKS
+                     DFGKFVLSSGKFYGDEEKDKGLQTSQDARFYALSASFEPFSNKGQTLVVQFTVKHEQN
+                     IDCGGGYVKLFPNSLDQTDMHGDSEYNIMFGPDICGPGTKKVHVIFNYKGKNVLINKD
+                     IRCKDDEFTHLYTLIVRPDNTYEVKIDNSQVESGSLEDDWDFLPPKKIKDPDASKPED
+                     WDERAKIDDPTDSKPEDWDKPEHIPDPDAKKPEDWDEEMDGEWEPPVIQNPEYKGEWK
+                     PRQIDNPDYKGTWIHPEIDNPEYSPDPSIYAYDNFGVLGLDLWQVKSGTIFDNFLITN
+                     DEAYAEEFGNETWGVTKAAEKQMKDKQDEEQRLKEEEEDKKRKEEEEAEDKEDDEDKD
+                     EDEEDEEDKEEDEEEDVPGQAKDEL"
+     gene            1885..1941
+                     /gene="MIR6515"
+                     /gene_synonym="hsa-mir-6515; mir-6515"
+                     /note="microRNA 6515; Derived by automated computational
+                     analysis using gene prediction method: BestRefSeq."
+                     /db_xref="GeneID:102466659"
+                     /db_xref="HGNC:HGNC:50227"
+                     /db_xref="miRBase:MI0022227"
+     precursor_RNA   1885..1941
+                     /gene="MIR6515"
+                     /gene_synonym="hsa-mir-6515; mir-6515"
+                     /product="microRNA 6515"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NR_106770.1"
+                     /db_xref="GI:563318893"
+                     /db_xref="GeneID:102466659"
+                     /db_xref="HGNC:HGNC:50227"
+                     /db_xref="miRBase:MI0022227"
+     ncRNA           1887..1907
+                     /ncRNA_class="miRNA"
+                     /gene="MIR6515"
+                     /gene_synonym="hsa-mir-6515; mir-6515"
+                     /product="hsa-miR-6515-5p"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /db_xref="miRBase:MIMAT0025486"
+                     /db_xref="GeneID:102466659"
+                     /db_xref="HGNC:HGNC:50227"
+                     /db_xref="miRBase:MI0022227"
+     ncRNA           1922..1941
+                     /ncRNA_class="miRNA"
+                     /gene="MIR6515"
+                     /gene_synonym="hsa-mir-6515; mir-6515"
+                     /product="hsa-miR-6515-3p"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /db_xref="miRBase:MIMAT0025487"
+                     /db_xref="GeneID:102466659"
+                     /db_xref="HGNC:HGNC:50227"
+                     /db_xref="miRBase:MI0022227"
+ORIGIN      
+        1 gcggcgtccg tccgtactgc agagccgctg ccggagggtc gttttaaagg gcccgcgcgt
+       61 tgccgccccc tcggcccgcc atgctgctat ccgtgccgct gctgctcggc ctcctcggcc
+      121 tggccgtcgc cgagcctgcc gtctacttca aggagcagtt tctggacgga ggtaacgcct
+      181 ggtcccgcct cgaggccgcc ccgacgacgc ggccggcccc cgatcctgga tctgcgttgt
+      241 cgcccgtaat taccgtttag aggtccaaca cggtggcctc ccgggactag agccgcgggc
+      301 gatttctctt ctgcgtccct ggggagcgcg gagggcgtag cggcctcccg cggcgggagt
+      361 tagggttagc ccgaggatct ctgaaggcac ccgacgtgtc aaactagagg ttggaatggg
+      421 gagtgtcggg gatctccttt cctgtcccca gcagcttgtg gctctcggca gatgtttggt
+      481 gtgggggggg attagcacag ccgctctgac ctacccctct aatcccccac ttagacgggt
+      541 ggacttcccg ctggatcgaa tccaaacaca agtcagattt tggcaaattc gttctcagtt
+      601 ccggcaagtt ctacggtgac gaggagaaag ataaaggtaa gagcctagga gtgggtgctc
+      661 agatccggga ggacttcctg gcagaagtcc ttgtctgtac acacacagcc gggacagtcc
+      721 ccttggagga ggacaggtgg aggaagtggg ggagtcttct ctattctcta agtcgagggt
+      781 cctcgcgagt caaggcccaa cggtgacctc actaccgtcc cgtctcaggt ttgcagacaa
+      841 gccaggatgc acgcttttat gctctgtcgg ccagtttcga gcctttcagc aacaaaggcc
+      901 agacgctggt ggtgcagttc acggtgaaac atgagcagaa catcgactgt gggggcggct
+      961 atgtgaagct gtttcctaat agtttggacc agacagacat gcacggagac tcagaataca
+     1021 acatcatgtt tggtgagggc ctgcttcctg gtgctgatct ctgtcccatt agttagaggg
+     1081 agacccagac cccattgact ttcttaataa tgattttttt tggaagggga gctaaaagaa
+     1141 taagtcccag caacaattta ttgcattatg atcgcagatc taggctgtta atttaatttg
+     1201 cgtgtttgta tatagttatt tcccaatctt actaatgagg attttgagtt ctagagcact
+     1261 gatttttttt ttttctcctt taaacttaag gctccaccca cagcccattc aggacagaat
+     1321 cagggtctga gtttctcttc tcagccttga cagacccgag ttgaagaacc aggtcttcct
+     1381 tttataaaga ggggtgagag cctcgagatg atgggtagtc tctgactctt aactggatct
+     1441 gcttcacacc taggtcccga catctgtggc cctggcacca agaaggttca tgtcatcttc
+     1501 aactacaagg gcaagaacgt gctgatcaac aaggacatcc gttgcaaggt gtgcctgggg
+     1561 gtggtggcaa atggctgtca tggggagatt cagaggtcag cctcattggg gggtggcccc
+     1621 cgctcacctt cttccttctt caggatgatg agtttacaca cctgtacaca ctgattgtgc
+     1681 ggccagacaa cacctatgag gtgaagattg acaacagcca ggtggagtcc ggctccttgg
+     1741 aagacgattg ggacttcctg ccacccaaga agataaagga tcctgatgct tcaaaaccgg
+     1801 aagactggga tgagcgggcc aagatcgatg atcccacaga ctccaagcct gaggttggtg
+     1861 tttgggcagg ggctctgctc tccacattgg agggtgtgga agacatctgg gccaactctg
+     1921 atctcttcat ctacccccca ggactgggac aagcccgagc atatccctga ccctgatgct
+     1981 aagaagcccg aggactggga tgaagagatg gacggagagt gggaaccccc agtgattcag
+     2041 aaccctgagt acaaggtgag tttggggctc tgagcagggc tggggctcac agtggggagt
+     2101 gcaccaacct tactcaccct tcggtttcct tctcccttct gcagggtgag tggaagcccc
+     2161 ggcagatcga caacccagat tacaagggca cttggatcca cccagaaatt gacaaccccg
+     2221 agtattctcc cgatcccagt atctatgcct atgataactt tggcgtgctg ggcctggacc
+     2281 tctggcaggt gagacttgga ggaaaaagga ggatccctgg ggtacctcaa gtgcataaga
+     2341 tcacccaaga ggaaagggac agggtaggca ccccaggtga gtctgactca aaaatggtac
+     2401 ttcttgtaaa cagtacttcc tggtctgtcc ctgtgaagtc ctcacagcaa cccctttaag
+     2461 gttatacttg ctgtgcacca agtacttccc caagtacttt tatgcaaatc aacttcttta
+     2521 cccccaaaga cctagaaggt ggtcaggtaa cccagttagt tagctggggc tgggcacagt
+     2581 ggctcaccct tacaatcacg gtactttggg aggctgagac agaggattgc ttgaggccag
+     2641 gagttacaca actcaaccta gcttggcaac acagcgagga gaccctatct ctacaaaaaa
+     2701 aatttttttt tttgagacag agtttcactc ttgttgctga ggctggagtg caatggcacg
+     2761 atctcagctc actgcgccct ccgtctcctg gtttcaagcg attctcctgc ctcagcctcc
+     2821 ggagtagctg ggattacagg catgtgctac tatggatgcc aggctaattt tttttttttt
+     2881 tttttttttt gagaccgtgc cttgctctgt cgcccaggct ggagtgcagt ggtgtgatct
+     2941 ctgctcactg caagctccgc acgacccccc aggttcactc cattcttctg cctcagggtc
+     3001 ccgagtaact gggactacag gcacccccca ccatgcctgg ctaatttttt tgtatttttt
+     3061 tttttagtac agacatggtt tcaccgtgtt agccaggatg gtctccatct cctgacctca
+     3121 tgaaccaccc accttggcct cccaaagtgc tgggattaca ggcgtgagcc acctcaccca
+     3181 gcctttttgt agagacaggg cttcatgttg cccaggttgg tctcgaactc ctggcctcag
+     3241 gtcatctgcc cgcctcggcc tcccaaagtg ctgggattac aagggttagc caccatgcct
+     3301 agcctctaca aaaactttaa aaattggcga gatgtcatgc atacctgtag tcccaactac
+     3361 caaggaagaa ggatgatcac ttgagcctgg ggcatcgagg ctgcagtgag ccatgattat
+     3421 gtcactgcac tccagcctcg gtgacagagt gagaccctct caaaaaaagt tgggacttgg
+     3481 ccggacacag tggctcacac ctgtaatccc agcactttgg gaggccaagg cgggtggatc
+     3541 acaaggtcag gagatggaga ccatcctggc taacatggtg aatgaaaccc catctctagt
+     3601 aaaaatacaa aaaatttgcc aggtgtggtg gtgggcgcct gtagtcccag ctactcggga
+     3661 ggctgaggca aaaggatgac gtgaacccgg gaggcggagc ttgcagtgag ctgagatcat
+     3721 gccattgcac tccagcctgg gtgatagcga gactctgtcc caaaaaaaaa aaaaaatgct
+     3781 gggactgaat ttttgtctgt tttggtcact gaaatacctt ctgtgcccaa gacagttctg
+     3841 gcatgtagta ggtacctgaa aaatacctga ataagagagt gagaaacaag aaacaggtgc
+     3901 agagaactga agtcagtggc ccaaggtcat gggggtagga aaccacaaag ctggggtttg
+     3961 aacctgggca gtacagcacc tgagtctctc catctttttt tttttttttt tttaagacag
+     4021 agtcttgctc tgtcacccag gttggagtgc agtggcttga tctcggctca ctgcagcctc
+     4081 tgccttccag gttcaagtga ttctcatgcc tcatcctctc gagcagctgg aattacaggc
+     4141 atgcgccacg acgctgggct tttttttttt tgagatggaa tttcactctt gttgcccagg
+     4201 ctggagtgca atgatgcaat ctcggcggct caccacaacc tctgcatccc agattcaagc
+     4261 gattctcctg cctcggcctc ctgagtagct gggattacag ggatgcgcca tcacagaccc
+     4321 cgggctaatt ttttttagta gagacagagt ttcactatgt tgcccaggtt ggtctcgaac
+     4381 tcctggcctc aagtgatccg ttcgccatga cctcccaaag tgctgggatt acaggcatga
+     4441 gcccgtcccg tccctggctg tctctccatc tttccatctt tttttttttt tttttttttt
+     4501 ttggagatgg agtctcactc tgtcacccag gctggagtgc agtggcacga tcttggctca
+     4561 ctgcaagctc cgcctcctgg gttcacatca ttctcctgtc tcagcctccc aaatagctgg
+     4621 gactacaggc acttgccacc acgcctggct gattttttgt atttttagta gagacggggt
+     4681 ttcaccgtgt tagccagggt ggtctcgatc tcctgacctc gtgatccgcc caccttggcc
+     4741 tctgggcgag gattacaggc gtgatccacc tcacctggcc tctccatctt tttaactgca
+     4801 gtgtcagcgg tgttccttgt cttctctgca gatgcaggca gcagaatata gtggttatag
+     4861 gaacacaggt ggaaaccctg tccaaagcaa gggctatcgg gtatcacctc tgaccatcct
+     4921 tcccattcat cctccaggtc aagtctggca ccatctttga caacttcctc atcaccaacg
+     4981 atgaggcata cgctgaggag tttggcaacg agacgtgggg cgtaacaaag gtgaggcctg
+     5041 gtcctggtcc tgatgtcggg ggcgggcagg gctggcaggg ggcaaggccc tgaggtgtgt
+     5101 gctctgcctg caggcagcag agaaacaaat gaaggacaaa caggacgagg agcagaggct
+     5161 taaggaggag gaagaagaca agaaacgcaa agaggaggag gaggcagagg acaaggagga
+     5221 tgatgaggac aaagatgagg atgaggagga tgaggaggac aaggaggaag atgaggagga
+     5281 agatgtcccc ggccaggcca aggacgagct gtagagaggc ctgcctccag ggctggactg
+     5341 aggcctgagc gctcctgccg cagagctggc cgcgccaaat aatgtctctg tgagactcga
+     5401 gaactttcat ttttttccag gctggttcgg atttggggtg gattttggtt ttgttcccct
+     5461 cctccactct cccccacccc ctccccgccc tttttttttt ttttttttaa actggtattt
+     5521 tatctttgat tctccttcag ccctcacccc tggttctcat ctttcttgat caacatcttt
+     5581 tcttgcctct gtccccttct ctcatctctt agctcccctc caacctgggg ggcagtggtg
+     5641 tggagaagcc acaggcctga gatttcatct gctctccttc ctggagccca gaggagggca
+     5701 gcagaagggg gtggtgtctc caacccccca gcactgagga agaacggggc tcttctcatt
+     5761 tcacccctcc ctttctcccc tgcccccagg actgggccac ttctgggtgg ggcagtgggt
+     5821 cccagattgg ctcacactga gaatgtaaga actacaaaca aaatttctat taaattaaat
+     5881 tttgtgtctc c
+//
+

@@ -1,4 +1,4 @@
-#!/usr/local/python/bin/python
+#!/usr/bin/python
 
 # gb2tab - comprehensive GenBank format parser/extractor
 #
