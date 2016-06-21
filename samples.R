@@ -1,4 +1,4 @@
-samples_load <- function(s_files,output,g_files){
+samples_load <- function(s_files,output,g_files,alignTo){
     not_loaded <- ""
     loaded <- data.table()
     withProgress(message="processing...",value=0,{
@@ -15,24 +15,31 @@ samples_load <- function(s_files,output,g_files){
                 )
                 if(!is.null(abi)) {
                     seq <- DNAString(gsub("\\*","N",abi$PBAS.1))
-                    mas <- 30                   #Minimum alignment score (Guess)
+                    mas <- 140                   #Minimum alignment score (Guess)
                     score_bst <- 0
-                    ref_name <- "unk"
+                    ref_name <- "-"
                     rev <- FALSE
                     output$samples_load_info <- renderPrint({paste0("processing file",i,sep="")})
-                    for(j in 1:length(g_refs_avail)){
-                        ref <- read.fasta(paste0("data/refs/",g_refs_avail[j],".glassed.intrex.fasta"))
+                    
+                    for(j in 1:length(alignTo)){
+                        ref <- read.fasta(paste0("data/refs/",alignTo[j],".glassed.intrex.fasta"))
                         ref <- toupper(paste0(unlist(ref),collapse = ""))
                         pa <- pairwiseAlignment(pattern = ref, subject = seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                         score_fwd <- pa@score
+                        print(paste0("ref: ", alignTo[j]))
+                        print(paste0("fwd: ",pa@score))
                         pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                         score_rev <- pa@score
-                        if(score_fwd > score_bst| score_rev > score_bst){
+                        print(paste0("rev: ",pa@score))
+                        
+                        if(score_fwd > score_bst | score_rev > score_bst){
+                            if(score_fwd > score_rev){score_bst <- score_fwd}
+                            else{score_bst <- score_rev}
                             if(score_fwd > mas & score_fwd > score_rev){
-                                ref_name <- g_refs_avail[j]
+                                ref_name <- alignTo[j]
                                 rev <- FALSE
                             }else if(score_rev > mas & score_rev > score_bst){
-                                ref_name <- g_refs_avail[j]
+                                ref_name <- alignTo[j]
                                 rev <- TRUE
                             }
                         }

@@ -39,7 +39,7 @@ shinyServer(function(input,output,session) {
     g_not_loaded            <- ""
     g_reactval              <- reactiveValues()
     g_reactval$updateVar    <- 0
-    g_refs_avail            <<- c("TP53","NOTCH1","ATM","CALR")
+    g_refs_avail            <<- c("-","TP53","NOTCH1","ATM","CALR")
     g_files                 <- data.table(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
                                           REV_name=c("TP53 ; rev ; low freq w frameshift"),
@@ -114,7 +114,7 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$browser_files)){
             g_not_loaded <- ""
             loaded <- ""
-            ret <- samples_load(input$browser_files,output,g_files)
+            ret <- samples_load(input$browser_files,output,g_files,input$alignTo)
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
             g_files[,id:= 1:nrow(g_files)]
             g_files <<- g_files

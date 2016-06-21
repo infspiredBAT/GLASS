@@ -83,10 +83,20 @@ shinyUI(
                         </div>
   		            "), sep = ""))))),
                 fluidRow(
-                    column(2,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
-                                  HTML(paste("<b>upload ABI files</b> [?]</br>supported: TP53, ATM, NOTCH1")))),
-                    column(4,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
-                    column(1,tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",downloadButton('export_btn','export [?]',class = "exp_btn")))
+                    column(6,
+                    fluidRow(
+                    column(12,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
+                                      HTML(paste("<b>upload ABI files</b> [?]"))))
+                    ),
+                    fluidRow(
+                        column(12,tags$div(title="Uploaded abi files are aligned against the references of the selected genes. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
+                        checkboxGroupInput("alignTo", "Autodetect reference [?]", c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","CALR"),inline=TRUE)))
+                    ),
+                    fluidRow(
+                        column(6,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%'))
+                    )
+                    ),
+                    column(2,tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",downloadButton('export_btn','export [?]',class = "exp_btn")))
 		        ),
 		        DT::dataTableOutput('samples_table')
             ),
