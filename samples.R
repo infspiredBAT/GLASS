@@ -15,7 +15,7 @@ samples_load <- function(s_files,output,g_files,alignTo){
                 )
                 if(!is.null(abi)) {
                     seq <- DNAString(gsub("\\*","N",abi$PBAS.1))
-                    mas <- 130                   #Minimum alignment score (Guess)
+                    mas <- 60                   #Minimum alignment score (Guess)
                     score_bst <- 0
                     ref_name <- "-"
                     rev <- FALSE

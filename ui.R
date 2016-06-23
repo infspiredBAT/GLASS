@@ -89,7 +89,7 @@ shinyUI(
                                       HTML(paste("<b>upload ABI files</b> [?]"))))
                     ),
                     fluidRow(
-                        column(12,tags$div(title="Uploaded abi files are aligned against the references of the selected genes. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
+                        column(12,tags$div(title="Uploaded abi files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
                         checkboxGroupInput("alignTo", "Autodetect reference [?]", c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","CALR"),inline=TRUE)))
                     ),
                     fluidRow(

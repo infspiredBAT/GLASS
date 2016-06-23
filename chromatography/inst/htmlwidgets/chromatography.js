@@ -58,7 +58,7 @@ HTMLWidgets.widget({
         var svg = d3.select(el).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
-        var brush = d3.svg.brush().on("brushend", brushed);
+        var brush    = d3.svg.brush().on("brushend",brushed   );
         var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
         var brush_rv = d3.svg.brush().on("brushend",brushed_rv);
         var brush_fw_g;
@@ -131,11 +131,12 @@ HTMLWidgets.widget({
 
 
         function finish_fwBrushInit(to,rev){
-            //console.log("brush fw finish");
+            console.log("brush fw finish:" + to + " " + rev);
+
             brush_fw.x(widthScale);
             if(brush_fw_g==undefined){
                  brush_fw_g = focus.append("g")
-                    .attr("class","brush_fw")
+                    .attr("class","brush_fw excl")
                     .call(brush_fw);
             };
             brush_fw_g.selectAll(".resize").append("rect")
@@ -152,7 +153,7 @@ HTMLWidgets.widget({
                 .attr("height",function (d){if(rev!=0){return 120;}else{return 280;}});
 
             brush_fw_g.selectAll(".extent")
-                .attr("fill","red")
+                .attr("fill","black")
                 .attr("opacity",0.09);
             //console.log(widthScale);
             //console.log("brush fw extent in init",to);
@@ -163,13 +164,15 @@ HTMLWidgets.widget({
             //resetHandlers_fw(brush_fw_g);
         }
         function finish_rvBrushInit(from,to){
+            console.log("brush fw finish:" + from + " " + to);
             if(to == 0){
-                brush_rv_g = undefined;
+                brush_rv_g.selectAll("rect")
+                    .attr("height",0);
             }else{
                 brush_rv.x(widthScale);
                 if(brush_rv_g==undefined){
                      brush_rv_g = focus.append("g")
-                        .attr("class","brush_rv")
+                        .attr("class","brush_rv excl")
                         .call(brush_fw);
                 };
                 brush_rv_g.selectAll(".resize").append("rect")
@@ -185,7 +188,7 @@ HTMLWidgets.widget({
                     .attr("y",310)
                     .attr("height",120);
                 brush_rv_g.selectAll(".extent")
-                    .attr("fill","red")
+                    .attr("fill","black")
                     .attr("opacity",0.09);
                 brush_rv.extent([from,to]);
                 brush_rv_extent = brush_rv.extent();
@@ -237,7 +240,7 @@ HTMLWidgets.widget({
             redraw();
         }
         function redraw()  {
-            console.log("redraw");
+            //console.log("redraw");
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             //console.log("old"+old);
             //console.log("extent"+brush_fw.extent());
@@ -736,6 +739,7 @@ HTMLWidgets.widget({
         //the render function behaves differently when called repeatedly
         //the first run is actually still a part of the initialization step
         if(x.new_sample){
+            console.log("new sample");
             x.new_sample = false;
   		    var intens = x["intens"];
             var intens_rev = "";
@@ -744,14 +748,15 @@ HTMLWidgets.widget({
                 intens_rev = x["intens_rev"];
                 rev = 1;
             }
-        if(instance.instanceCounter>=1){ //cleanup after previous sample
-            instance.focus.selectAll(".area").remove();
-            instance.focus.selectAll(".line_f").remove();
-            instance.focus.selectAll(".line_r").remove();
-            instance.focus.selectAll(".peak_label").remove();
-            instance.context.selectAll(".context").remove();
-        }
-        instance.instanceCounter = instance.instanceCounter+1;
+            if(instance.instanceCounter>=1){ //cleanup after previous sample
+                instance.focus.selectAll(".area").remove();
+                instance.focus.selectAll(".line_f").remove();
+                instance.focus.selectAll(".line_r").remove();
+                instance.focus.selectAll(".peak_label").remove();
+                instance.context.selectAll(".context").remove();
+                //instance.focus.selectAll(".excl").remove();
+            }
+            instance.instanceCounter = instance.instanceCounter+1;
   			var intens_guide_line = x["intens_guide_line"];
   			var calls       = HTMLWidgets.dataframeToD3(x["calls"]);
   			var choices     = HTMLWidgets.dataframeToD3(x["choices"]);
