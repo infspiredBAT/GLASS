@@ -181,7 +181,7 @@ include_locked_indels <- function(calls,vec,indels,fwd){
     return(new_vec)
 }
 
-call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,brush_fwd,brush_rev,incorp){
+call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,brush_fwd,brush_rev,incorp,single_rev){
     # reset all but set_by_user
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut    := user_sample_orig]
@@ -277,9 +277,15 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
         
         calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(mut_call_fwd,reference),by=1:nrow(calls[set_by_user==FALSE,])]
         #brush filter
-        calls <- calls[trace_peak< brush_fwd ,call := "N" ]
-        calls <- calls[trace_peak< brush_fwd, mut_call_fwd := "N" ]
-        calls <- calls[trace_peak< brush_fwd,c("user_sample","user_mut") := "N"]
+        if(!single_rev){
+            calls <- calls[trace_peak< brush_fwd ,call := "N" ]
+            calls <- calls[trace_peak< brush_fwd, mut_call_fwd := "N" ]
+            calls <- calls[trace_peak< brush_fwd,c("user_sample","user_mut") := "N"]
+        }else{
+            calls <- calls[trace_peak> brush_fwd ,call := "N" ]
+            calls <- calls[trace_peak> brush_fwd, mut_call_fwd := "N" ]
+            calls <- calls[trace_peak> brush_fwd,c("user_sample","user_mut") := "N"]
+        }
         calls[
               set_by_user == FALSE
             & mut_call_fwd != call

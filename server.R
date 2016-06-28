@@ -14,6 +14,7 @@ shinyServer(function(input,output,session) {
     #makeReactiveBinding("g_calls")
     g_intens                <- NULL             #intensities file
     g_intens_rev            <- NULL             #optional reverse intensities file
+    g_single_rev            <- NULL
     g_intrexdat             <- NULL             #intrex data used in graphs
     g_glassed_ref           <- NULL
     g_glassed_cod           <- NULL
@@ -103,9 +104,9 @@ shinyServer(function(input,output,session) {
                                                                                                                    name: sel});
                                                                                 /*alert("changing rev "+this.id+" to "+ sel);*/
                                                                         });
-                                                                  }'))
+                                                                  }')
+                                                )
                                    )
-
     })
 
     #Handlers for the Sample Browser
@@ -118,9 +119,7 @@ shinyServer(function(input,output,session) {
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
             g_files[,id:= 1:nrow(g_files)]
             g_files <<- g_files
-
         }
-
     })
 
     goChangeRev_handler <- reactive({
@@ -139,7 +138,7 @@ shinyServer(function(input,output,session) {
                 g_files[pos_at]$status <- "new"
                 g_files[pos_at]$brush_rev <- 0
                 g_files[pos_at]$calls = ""
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=20,s2n_min=20,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new",brush_fwd = 0, brush_rev = 0))
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new",brush_fwd = 0, brush_rev = 0))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name
@@ -294,12 +293,14 @@ shinyServer(function(input,output,session) {
                 single_rev <- FALSE
             if (rev_file_name == "-")
                 rev_file <- NULL
+            
+            g_single_rev <<- single_rev
           #  file <- input$select_file$datapath
           #  name <- input$select_file$name
           #  #input$gene_of_interest
           #  full_name <- input$select_file$name
           #  single_rev <- FALSE
-#
+          #
           #  #getting rid of the date in names
           #  for(i in 1:length(name)){
           #      name[i] <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",name[i])
@@ -424,8 +425,12 @@ shinyServer(function(input,output,session) {
                         if(g_files[loaded==TRUE,]$brush_rev ==0){
                             g_brush_rev        <<- calls[nrow(calls[call_rev!="-",])-25]$trace_peak
                         }else{
-                            g_brush_rev <- g_files[loaded==TRUE,]$brush_rev
+                            g_brush_rev <<- g_files[loaded==TRUE,]$brush_rev
                         }
+                    }
+                    if(g_single_rev){
+                        g_brush_fwd <<- calls[nrow(calls[call!="-",])-25]$trace_peak
+                        
                     }
                     updateTabsetPanel(session,'tabs',selected = "main")
 
@@ -471,7 +476,7 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,ins_added := NULL]
             }
 
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox)
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,input$mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
             setkey(g_calls,id)
 
             report                  <- report_hetero_indels(g_calls)
@@ -513,7 +518,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present,g_brush_fwd,g_brush_rev)
+            ret<-chromatography(g_intens,g_intens_rev,g_single_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present,g_brush_fwd,g_brush_rev)
             g_new_sample <<- FALSE
             return(ret)
         }
@@ -719,9 +724,14 @@ shinyServer(function(input,output,session) {
         if(is.null(input$brush_rv)) return()
         last <- g_brush_rev
         g_brush_rev <<- input$brush_rv$coord
-        if(last>=g_brush_rev){
-            if(nrow(g_choices[trace_peak_rev < last][trace_peak_rev>g_brush_rev])==0)
-               return()
+        if(g_single_rev){     #we use brush_fwd (as we only have forward calls) but visualised and logic as brush rev
+            g_brush_rev <- last
+            g_brush_fwd <<- input$brush_rv$coord
+        }else{
+            if(last>=g_brush_rev){
+                if(nrow(g_choices[trace_peak_rev < last][trace_peak_rev>g_brush_rev])==0)
+                   return()
+            }
         }
         g_reactval$updateVar <- runif(1,0,1)
     })

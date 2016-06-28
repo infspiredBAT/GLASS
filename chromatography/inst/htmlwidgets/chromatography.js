@@ -130,7 +130,7 @@ HTMLWidgets.widget({
         var aa_mut            = focus.append("g");
 
 
-        function finish_fwBrushInit(to,rev){
+        function finish_fwBrushInit(to,rev,height){
             console.log("brush fw finish:" + to + " " + rev);
 
             brush_fw.x(widthScale);
@@ -150,7 +150,8 @@ HTMLWidgets.widget({
 
             brush_fw_g.selectAll("rect")
                 .attr("y",150)
-                .attr("height",function (d){if(rev!=0){return 120;}else{return 280;}});
+                //.attr("height",function (d){if(rev!=0){return 120;}else{return 280;}});
+                .attr("height",height);
 
             brush_fw_g.selectAll(".extent")
                 .attr("fill","black")
@@ -163,11 +164,17 @@ HTMLWidgets.widget({
             //brush_fw.event(d3.select(".brush_fw"));
             //resetHandlers_fw(brush_fw_g);
         }
-        function finish_rvBrushInit(from,to){
+        function finish_rvBrushInit(from,to,rev = null){
             console.log("brush fw finish:" + from + " " + to);
+            mod = 0;
+            if(!rev){
+                mod = 160;
+            }
             if(to == 0){
-                brush_rv_g.selectAll("rect")
-                    .attr("height",0);
+                if(brush_rv_g!= undefined){
+                    brush_rv_g.selectAll("rect")
+                        .attr("height",0);
+            }
             }else{
                 brush_rv.x(widthScale);
                 if(brush_rv_g==undefined){
@@ -185,8 +192,8 @@ HTMLWidgets.widget({
                      .attr("rx", 2);
 
                 brush_rv_g.selectAll("rect")
-                    .attr("y",310)
-                    .attr("height",120);
+                    .attr("y",310 - mod)
+                    .attr("height",120 + mod);
                 brush_rv_g.selectAll(".extent")
                     .attr("fill","black")
                     .attr("opacity",0.09);
@@ -748,6 +755,8 @@ HTMLWidgets.widget({
                 intens_rev = x["intens_rev"];
                 rev = 1;
             }
+            var single_rev = x["single_rev"];
+            console.log("single_rev:"+single_rev);
             if(instance.instanceCounter>=1){ //cleanup after previous sample
                 instance.focus.selectAll(".area").remove();
                 instance.focus.selectAll(".line_f").remove();
@@ -799,10 +808,22 @@ HTMLWidgets.widget({
             //intron/exon boxes
             instance.setIntrexBoxes(intrex);
   			brush.x(width2Scale);
-            instance.finish_fwBrushInit(x["brush_fw"],rev);
+            var brush_fw_height = 120;
+            if(intens_rev == ""){
+                brush_fw_height = 280;
+            }
+            if(single_rev==true){
+                brush_fw_height = 0;
+            }
+            instance.finish_fwBrushInit(x["brush_fw"],rev,brush_fw_height);
+            console.log("brush_rv: ", x["brush_rv"])
             if(rev!=0){
-                instance.finish_rvBrushInit(x["brush_rv"],domain_x);
-            }else{
+                instance.finish_rvBrushInit(x["brush_rv"],domain_x,rev);
+            }else if(single_rev){
+                instance.finish_rvBrushInit(x["brush_fw"],domain_x,rev);
+
+            }
+            else{
                 instance.finish_rvBrushInit(0,0);
             }
 

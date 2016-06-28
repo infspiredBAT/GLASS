@@ -6,12 +6,13 @@
 #'
 #' @export
 
-chromatography <- function(intens, intens_rev = NULL, intrexdat, calls, choices, new_sample, noisy_neighbors, show_calls = FALSE,qual_present,brush_fw,brush_rv, width = NULL, height = NULL) {
+chromatography <- function(intens, intens_rev = NULL,single_rev, intrexdat, calls, choices, new_sample, noisy_neighbors, show_calls = FALSE,qual_present,brush_fw,brush_rv, width = NULL, height = NULL) {
 
   #data = fromJSON(file=Data)
     x <- list(
         intens     = intens,
         intens_rev = intens_rev,
+        single_rev = single_rev,
         intrexdat  = intrexdat,
         calls      = calls,
         choices    = choices,
