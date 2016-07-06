@@ -73,7 +73,32 @@ shinyUI(
 			#))),
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
 			column(2,  HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
-			column(10, htmlOutput("files"))
+			column(9, htmlOutput("files")),
+			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">update log</a>
+                                <!-- Update log -->
+                                <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
+			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
+			                    <div class="modal-content">
+			                    <div class="modal-header" style="padding-top:10px;">
+			                    <h4>Update Log</h4>
+			                    </div>
+			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+			                    <b>2016-07-01</b>
+			                    <ul>
+                                <li>Tool for filtering variants in the beginings of reads now implemented for all combinations of samples (forward,reverse,forward+reverse). The filter is at the end of reverse sequences since these are reverse complemented. </li>
+                                <li>Reference selector added. (Selected references will be used to autodetect strandedness). Not using all refernecss speeds up the upload process.</li>
+                                <li>Dialog preventing accidental "navigate away" added.</li>
+			                    <li>CALR reference added.</li>
+			                    <li>Update log started.</li>
+			                    </ul>
+	   		                    </div>
+			                    <div class="modal-footer" style="clear-both">
+			                    <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">Close</button>
+			                    </div>
+			                    </div>
+			                    </div>
+			                    </div>
+			                    ')))
 		),
 		tabsetPanel(id = 'tabs',
             tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),

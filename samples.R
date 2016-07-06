@@ -26,12 +26,12 @@ samples_load <- function(s_files,output,g_files,alignTo){
                         ref <- toupper(paste0(unlist(ref),collapse = ""))
                         pa <- pairwiseAlignment(pattern = ref, subject = seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                         score_fwd <- pa@score
-                        print(paste0("ref: ", alignTo[j]))
-                        print(paste0("bst: ",score_bst))
-                        print(paste0("fwd: ",pa@score))
+                        #print(paste0("ref: ", alignTo[j]))
+                        #print(paste0("bst: ",score_bst))
+                        #print(paste0("fwd: ",pa@score))
                         pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                         score_rev <- pa@score
-                        print(paste0("rev: ",pa@score))
+                        #print(paste0("rev: ",pa@score))
                         
                         if(score_fwd > score_bst || score_rev > score_bst){
                             

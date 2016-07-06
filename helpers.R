@@ -364,7 +364,8 @@ retranslate <- function(calls){
         #setkey(coding,coding_seq)
         push = push +1
     }
-    while(coding[nrow(coding),ord_in_cod] != 3){
+    #!infinite loop
+    while(coding[nrow(coding),ord_in_cod] < 3){
         coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
         #setkey(coding,coding_seq)
     }
