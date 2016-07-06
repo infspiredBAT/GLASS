@@ -85,8 +85,8 @@ shinyUI(
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
 			                    <b>2016-Jul-06</b>
 			                    <ul>
-                                <li>Tool for filtering variants in the beginings of reads now implemented for all combinations of samples (forward,reverse,forward+reverse). The filter is at the end of reverse sequences since these are reverse complemented. </li>
-                                <li>Reference selector added. (Selected references will be used to autodetect strandedness). Not using all refernecss speeds up the upload process.</li>
+                                <li>Tool for filtering variants the beginnings of reads now implemented for all combinations of samples (forward,reverse,forward+reverse). The filter is at the end of the reverse sequences since these are reverse complemented. </li>
+                                <li>Reference selector added. (Selected references will be used to autodetect strandedness). Not using all references speeds up the upload process.</li>
                                 <li>Dialog preventing accidental "navigate away" added.</li>
 			                    <li>CALR reference added.</li>
 			                    <li>Update log started.</li>
@@ -115,7 +115,7 @@ shinyUI(
                     ),
                     fluidRow(
                         column(12,tags$div(title="Uploaded abi files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
-                        checkboxGroupInput("alignTo", "Autodetect reference [?]", c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","CALR"),inline=TRUE)))
+                        checkboxGroupInput("alignTo", "autodetect reference [?]", c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","CALR"),inline=TRUE)))
                     ),
                     fluidRow(
                         column(6,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%'))
