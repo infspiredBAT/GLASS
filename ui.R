@@ -83,7 +83,7 @@ shinyUI(
 			                    <h4>Update Log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-			                    <b>2016-07-01</b>
+			                    <b>2016-Jul-06</b>
 			                    <ul>
                                 <li>Tool for filtering variants in the beginings of reads now implemented for all combinations of samples (forward,reverse,forward+reverse). The filter is at the end of reverse sequences since these are reverse complemented. </li>
                                 <li>Reference selector added. (Selected references will be used to autodetect strandedness). Not using all refernecss speeds up the upload process.</li>
