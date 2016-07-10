@@ -9,12 +9,7 @@ library(stringi)
 library(DT)
 #source("JS.R")
 
-
-
-
 shinyUI(
-
-
     fluidPage(
 #        useShinyjs(),
 #        extendShinyjs(text = jsDeleteRow),
@@ -53,8 +48,6 @@ shinyUI(
 		        #      DT::dataTableOutput('samples_table'),
 		        #      fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'))
 		        #         )
-
-
 		        #),
 		HTML(paste("&nbsp&nbsp<b><font size=4em>genomePD/ </font><font size=6em>GLASS</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
 		fluidRow(

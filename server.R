@@ -6,8 +6,6 @@ source("helpers.R")
 source("samples.R")
 
 
-
-
 shinyServer(function(input,output,session) {
     #options(shiny.reactlog=TRUE)
     g_calls                 <- NULL             #annotated basecall data
@@ -115,10 +113,14 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$browser_files)){
             g_not_loaded <- ""
             loaded <- ""
+            error = ""
             ret <- samples_load(input$browser_files,output,g_files,input$alignTo)
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
             g_files[,id:= 1:nrow(g_files)]
             g_files <<- g_files
+            if(length(ret$not_loaded>1)){
+                output$files <- renderPrint(paste0("<pre>Unable to load the following files: ",paste(ret$not_loaded[2:length(ret$not_loaded)],collapse="<br>"),"</pre>" ))
+            }
         }
     })
 

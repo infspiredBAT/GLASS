@@ -10,11 +10,15 @@ samples_load <- function(s_files,output,g_files,alignTo){
             }else{
                 incProgress(0,detail = paste("file ",i," of ",nrow(s_files)))
                 abi<-NULL
+                seq<-NULL
                 tryCatch(
-                    abi <- sangerseqR::read.abif(s_files[i,]$datapath)@data
+                    {abi <- sangerseqR::read.abif(s_files[i,]$datapath)@data
+                    seq <- DNAString(gsub("\\*","N",abi$PBAS.1))},
+                    error = function(e){output$files <- renderPrint(paste0("<pre>error while loading abi file : ",e$message,"</pre>" ))}
                 )
-                if(!is.null(abi)) {
-                    seq <- DNAString(gsub("\\*","N",abi$PBAS.1))
+                if(!is.null(abi)&&!is.null(seq)) {
+                    #try catch
+                    #seq <- DNAString(gsub("\\*","N",abi$PBAS.1))
                     mas <- 60                   #Minimum alignment score (Guess)
                     score_bst <- 0
                     ref_name <- "-"
