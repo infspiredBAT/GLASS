@@ -18,7 +18,7 @@ shinyUI(
 		tags$head(
 		    includeCSS("www/samples.css"),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
-            tags$title("genomePD/GLASS"),
+            tags$title("GLASS"),
 		    #tags$head(tags$script(src="selectize.min.js")),
 		    #tags$script(incljs),
             # script for input file cleaning
@@ -49,7 +49,7 @@ shinyUI(
 		        #      fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'))
 		        #         )
 		        #),
-		HTML(paste("&nbsp&nbsp<b><font size=4em>genomePD/ </font><font size=6em>GLASS</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
+		HTML(paste("&nbsp&nbsp<b><font size=6em>GLASS</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
 		fluidRow(
 			#column(1, selectInput("gene_of_interest",NULL,choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
 			#column(1, selectInput("gene_of_interest",NULL,choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
@@ -73,16 +73,16 @@ shinyUI(
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
 			                    <div class="modal-content">
 			                    <div class="modal-header" style="padding-top:10px;">
-			                    <h4>Update Log</h4>
+			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
 			                    <b>2016-Jul-06</b>
 			                    <ul>
-                                <li>Tool for filtering variants the beginnings of reads now implemented for all combinations of samples (forward,reverse,forward+reverse). The filter is at the end of the reverse sequences since these are reverse complemented. </li>
-                                <li>Reference selector added. (Selected references will be used to autodetect strandedness). Not using all references speeds up the upload process.</li>
-                                <li>Dialog preventing accidental "navigate away" added.</li>
-			                    <li>CALR reference added.</li>
-			                    <li>Update log started.</li>
+                                <li>Implemented brush-able filtering-out of variants from the beginning of reads (the filter is at the end of the reverse sequences since these are reverse complemented). </li>
+                                <li>Added reference selector, with selected references used to autodetect strandedness - not using all references speeds up the upload process.</li>
+                                <li>Added dialog preventing accidental "navigate away".</li>
+			                    <li>Added CALR reference.</li>
+			                    <li>Started this log.</li>
 			                    </ul>
 	   		                    </div>
 			                    <div class="modal-footer" style="clear-both">
@@ -98,23 +98,21 @@ shinyUI(
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
                         <b>(very) quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) press blue 'load' button</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under status and are exportable with green 'export' button
-                        </div>
-  		            "), sep = ""))))),
+                        </div>"), sep = ""))))),
+                fluidRow(
+                    column(12,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
+                        HTML(paste("<b>upload and process ABI files</b> [?]"))))
+                ),
+                fluidRow(
+                    column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
+                        checkboxGroupInput("alignTo", "select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","CALR"),inline=TRUE)))
+                ),
                 fluidRow(
                     column(6,
-                    fluidRow(
-                    column(12,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
-                                      HTML(paste("<b>upload ABI files</b> [?]"))))
-                    ),
-                    fluidRow(
-                        column(12,tags$div(title="Uploaded abi files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
-                        checkboxGroupInput("alignTo", "autodetect reference [?]", c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","CALR"),inline=TRUE)))
-                    ),
-                    fluidRow(
-                        column(6,fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%'))
-                    )
-                    ),
-                    column(2,tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",downloadButton('export_btn','export [?]',class = "exp_btn")))
+                        fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
+                    column(2,
+                        tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",
+                            downloadButton('export_btn','export variants [?]',class = "exp_btn")))
 		        ),
 		        DT::dataTableOutput('samples_table')
             ),
@@ -132,7 +130,8 @@ shinyUI(
                             actionButton("change_btn","change", icon = icon("exchange"), width='100%'))
 					),
 					column(4,
-				        HTML(paste("general infobox", sep="")),
+                        tags$div(title="information about the current position, also highlighted in light blue, including all nucleotides (called, reference, mutated), coordinates, qualities (Q), peak %s, signal-to-noise (S/N) ratios, etc",
+    				        HTML(paste("general infobox [?]", sep=""))),
 					    verbatimTextOutput("infobox")
 					),
 					column(2,
