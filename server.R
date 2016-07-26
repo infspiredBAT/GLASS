@@ -118,7 +118,7 @@ shinyServer(function(input,output,session) {
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
             g_files[,id:= 1:nrow(g_files)]
             g_files <<- g_files
-            if(length(ret$not_loaded>1)){
+            if(length(ret$not_loaded)>1){
                 output$files <- renderPrint(paste0("<pre>Unable to load the following files: ",paste(ret$not_loaded[2:length(ret$not_loaded)],collapse="<br>"),"</pre>" ))
             }
         }
@@ -283,6 +283,7 @@ shinyServer(function(input,output,session) {
                 rev_file <- rev_file_name <- ex[2]
                 ref = "TP53"
             }
+            #if ref == "-"
             g_glassed_ref <<- paste("data/refs/",ref,".glassed.intrex.fasta",sep="")
             g_glassed_cod <<- paste("data/refs/",ref,".glassed.codons.rdata",sep="")
 
@@ -370,8 +371,6 @@ shinyServer(function(input,output,session) {
             }
 
             withProgress(message = paste('processing...',sep=" "), value = 1, {
-                # TODO - make sure shiny only allows ab1 files (???)
-                #        - otherwise chceck if file has correct format
 
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,

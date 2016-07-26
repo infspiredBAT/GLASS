@@ -13,7 +13,7 @@ samples_load <- function(s_files,output,g_files,alignTo){
                 seq<-NULL
                 tryCatch(
                     {abi <- sangerseqR::read.abif(s_files[i,]$datapath)@data
-                    seq <- DNAString(gsub("\\*","N",abi$PBAS.1))},
+                    seq <- DNAString(gsub("[\\*,!]","N",abi$PBAS.1))},
                     error = function(e){output$files <- renderPrint(paste0("<pre>error while loading abi file : ",e$message,"</pre>" ))}
                 )
                 if(!is.null(abi)&&!is.null(seq)) {
@@ -66,7 +66,8 @@ samples_load <- function(s_files,output,g_files,alignTo){
                         rev_name <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",s_files[i,]$name) #remove date
                         rev_name <- gsub(".abi",".ab1",rev_name) #normalize extension
                         rev_name <- gsub(".ab1","",rev_name)     #remove extension
-                        rev_name <- substr(rev_name,1,nchar(rev_name)-1) #remove last letter "R"/"F" naming style
+                        if(substr(rev_name,nchar(rev_name),nchar(rev_name))=="R" || substr(rev_name,nchar(rev_name),nchar(rev_name))=="F")
+                            rev_name <- substr(rev_name,1,nchar(rev_name)-1) #remove last letter "R"/"F" naming style
                         matches <- grep(rev_name,loaded$FWD_name)
                         if(length(matches)==1){
                             if(loaded[matches]$REV_name == "-"&& loaded[matches]$REF==ref_name)

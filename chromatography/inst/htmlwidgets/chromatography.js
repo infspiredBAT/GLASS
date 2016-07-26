@@ -31,7 +31,6 @@ HTMLWidgets.widget({
                 var width_new   = width_in - margin.left - margin.right;
                 width2Scale.range([0,width_new]);
                 widthScale.range([0,width_new]);
-
             }
 
         var line_fwd = d3.svg.line()
@@ -58,9 +57,18 @@ HTMLWidgets.widget({
         var svg = d3.select(el).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
-        var brush    = d3.svg.brush().on("brushend",brushed   );
+        var brush    = d3.svg.brush().on("brush",brushed   );
         var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
         var brush_rv = d3.svg.brush().on("brushend",brushed_rv);
+        var brush_fw_mini = svg.append("line")
+                               .attr("x1", 10)
+                               .attr("y1", 18)
+                               .attr("x2", 250)
+                               .attr("y2", 18)
+                               .attr("stroke-width", 2)
+                               .style("stroke-dasharray", ("3, 3"))
+                               .attr("stroke", "black")
+                               .attr("opacity",0.4);
         var brush_fw_g;
         var brush_rv_g;
         var brush_fw_extent;
@@ -214,6 +222,9 @@ HTMLWidgets.widget({
             var extent1 = [0,extent0[1]];
             Shiny.onInputChange("brush_fw", {coord: extent1[1]});
             brush_fw_extent = extent1;
+            brush_fw_mini.attr("x2",width2Scale(extent1[1]));
+            console.log(extent1[1]);
+            console.log(width2Scale(extent1[1]));
             d3.select(this).transition()
                 .call(brush_fw.extent(extent1))
                 .call(brush_fw.event);
@@ -357,7 +368,12 @@ HTMLWidgets.widget({
                         if(typeof(d[label])=='undefined'){ console.log(label);console.log(d);}
                         return d[label].toLowerCase();
                     } else {
-                        return d[label];}
+                        if(label=="reference" & d[label]!="NA"){
+                                if(d["exon_intron"].indexOf("exon")>-1){
+                                    return d[label];
+                                }
+                        }
+                        return d[label].toLowerCase();}
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})

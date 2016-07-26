@@ -1,13 +1,19 @@
 annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
 
     #contains codons table
-    load(glassed_cod)
-    calls <- merge(x = calls, y = cod_table[,list(gen_coord,codon,ord_in_cod,coding_seq,aa_ref=AA)], by = "gen_coord", all.x = TRUE)
-    calls[aa_ref != "",aa_ref:=aaa(toupper(aa_ref))]
+    if(gsub(".glassed.codons.rdata","",gsub("data/refs/","",glassed_cod))=="-"){
+        calls[,`:=`(codon=NA,ord_in_cod=NA,coding_seq=NA,aa_ref=NA)]
+    }else{
+        load(glassed_cod)
+        calls <- merge(x = calls, y = cod_table[,list(gen_coord,codon,ord_in_cod,coding_seq,aa_ref=AA)], by = "gen_coord", all.x = TRUE)
+        calls[aa_ref != "",aa_ref:=aaa(toupper(aa_ref))]
+        cod_table <<- cod_table
+    }
     calls[,c("aa_sample","aa_mut"):=aa_ref]
-    cod_table <<- cod_table
     #reorder columns so that id is first (so that the checkbox from the shiny data table selects the correct value and the delete button knows what to delete)
-    setcolorder(calls,c("id",colnames(calls)[-2]))
+    if(colnames(calls)[1]!="id"){
+        setcolorder(calls,c("id",colnames(calls)[-2]))
+    }
 
     #calculate the noise levels
     calls[,noise_abs_fwd:=noise(iA_fwd,iC_fwd,iG_fwd,iT_fwd,TRUE),by=1:nrow(calls)]
@@ -338,6 +344,9 @@ retranslate <- function(calls){
     setnames(coding,"V1","coding_seq")
     push = 0
     #get missing bases for the first frame if incomplete
+    if(is.na(coding[1,ord_in_cod])){
+        return(calls)
+    }
     while(coding[1,ord_in_cod]!=1){
         coding<-rbind(cod_table[coding_seq==(as.numeric(coding[1,coding_seq])-1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)],coding)
         #setkey(coding,coding_seq)

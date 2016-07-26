@@ -18,20 +18,20 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
             qual_present <- TRUE
         }
         if(single_rev) {
-            res   <- generate_ref(complement(reverse(gsub('\\*','',data$PBAS.1))),glassed_ref)
+            res   <- generate_ref(complement(reverse(gsub('[\\*,!]','',data$PBAS.1))),glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
-                                ,user_sample = str_split(complement(gsub('\\*','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
-                                ,call        = str_split(complement(gsub('\\*','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
-                                ,reference   = str_split(complement(gsub('\\*','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
+                                ,user_sample = str_split(complement(gsub('[\\*,!]','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
+                                ,call        = str_split(complement(gsub('[\\*,!]','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
+                                ,reference   = str_split(complement(gsub('[\\*,!]','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual[length(qual):1]
                                 )
         }else{
-            res   <- generate_ref(gsub('\\*','',data$PBAS.1),glassed_ref)
+            res   <- generate_ref(gsub('[\\*,!]','',data$PBAS.1),glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
-                                ,user_sample = str_split(gsub('\\*','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
-                                ,call        = str_split(gsub('\\*','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
-                                ,reference   = str_split(gsub('\\*','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,user_sample = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,call        = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,reference   = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual)
         }
@@ -56,7 +56,7 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
             rev_qual <- get_pseudo_qual(rev_data)
             qual_present <- FALSE
         }
-        user_align <- get_fwd_rev_align(gsub('\\*','',data$PBAS.1),gsub('\\*','',data_rev$PBAS.1),fwd_qual,rev_qual)
+        user_align <- get_fwd_rev_align(gsub('[\\*,!]','',data$PBAS.1),gsub('[\\*,!]','',data_rev$PBAS.1),fwd_qual,rev_qual)
         res <- generate_ref(paste(user_align[[1]],collapse = ""),glassed_ref)
         calls <- data.table(id              = seq_along(user_align[[1]])
                             ,user_sample    = user_align[[1]]
@@ -82,9 +82,12 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
 
     deletions <- res[[3]]
     calls <- merge(calls,res[[1]],all.x = T,by = "id")
-
-    data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
-    data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
+    if(nrow(res[[2]])>0){
+        data.table::set(calls,which(calls[["id"]] %in% res[[2]][type != "I"][["t_pos"]]),"reference",res[[2]][type != "I"][["replace"]])
+    }
+    if(!gsub("data/refs/","",gsub(".glassed.intrex.fasta","",glassed_ref))=="-"){
+        data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
+    }
 
     return(list(calls=calls,deletions=deletions,qual_present=qual_present))
 }
@@ -148,6 +151,10 @@ align_intens_calls <- function(calls_fwd,intens_fwd,calls_rev=NULL,intens_rev=NU
 }
 
 generate_ref <-function(user_seq,glassed_ref){
+    #dummy return in case there is no reference 
+    if(gsub("data/refs/","",gsub(".glassed.intrex.fasta","",glassed_ref))=="-"){
+        return(list(data.table(exon_intron=NA,id=c(1:length(user_seq)),gen_coord=NA),data.table(id=numeric(0)),numeric(0)))
+    }
     ref_aln_cover_init <- 0.75 # 0.85
     ref_aln_score_init <- 50 # 50
     ref_aln_lngth_gaps <- 50 # 50
