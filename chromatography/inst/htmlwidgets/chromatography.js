@@ -31,7 +31,10 @@ HTMLWidgets.widget({
                 var width_new   = width_in - margin.left - margin.right;
                 width2Scale.range([0,width_new]);
                 widthScale.range([0,width_new]);
-            }
+                brush_fw_mini.attr("x2",width2Scale(brush_fw_extent[1]));
+                brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
+                             .attr("x2",width2Scale.domain()[1]);
+        }
 
         var line_fwd = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
@@ -65,6 +68,15 @@ HTMLWidgets.widget({
                                .attr("y1", 18)
                                .attr("x2", 250)
                                .attr("y2", 18)
+                               .attr("stroke-width", 2)
+                               .style("stroke-dasharray", ("3, 3"))
+                               .attr("stroke", "black")
+                               .attr("opacity",0.4);
+        var brush_rv_mini = svg.append("line")
+                               //.attr("x1", 10)
+                               .attr("y1", 72)
+                               //.attr("x2", 250) // don't know before init
+                               .attr("y2", 72)
                                .attr("stroke-width", 2)
                                .style("stroke-dasharray", ("3, 3"))
                                .attr("stroke", "black")
@@ -207,6 +219,8 @@ HTMLWidgets.widget({
                     .attr("opacity",0.09);
                 brush_rv.extent([from,to]);
                 brush_rv_extent = brush_rv.extent();
+                brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
+                             .attr("x2",width2Scale.domain()[1]);
                 //brush_rv(brush_rv_g);
                 //brush_rv.event(d3.select(".brush_rv"));
                 //console.log("setting brush rv" + brush_rv_extent);
@@ -236,6 +250,8 @@ HTMLWidgets.widget({
             var extent0 = brush_rv.extent();
             var extent1 = [extent0[0],width2Scale.domain()[1]];
             Shiny.onInputChange("brush_rv", {coord: extent1[0]});
+            brush_rv_mini.attr("x1",width2Scale(extent1[0]))
+                         .attr("x2",width2Scale.domain()[1]);
             brush_rv_extent = extent1;
             d3.select(this).transition()
                 .call(brush_rv.extent(extent1))
