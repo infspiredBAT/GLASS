@@ -67,7 +67,7 @@ shinyUI(
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
 			column(2,  HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
 			column(9, htmlOutput("files")),
-			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">update log</a>
+			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.1.1 <br> (2016-Jul-27)</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -76,7 +76,13 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-			                    <b>2016-Jul-06</b>
+                                <b>ver 0.1.1 (2016-Jul-27)</b>
+			                    <ul>
+			                    <li>Filters of beginnings and ends of reads visualised in minimap.</li>
+                                <li>Reference "case sensitive"; exons shown in upper case, everything else is in lower case.</li>
+                                <li>It\'s now possible to load samples without a reference.</li>
+			                    </ul>
+			                    <b>ver 0.1.0 (2016-Jul-06)</b>
 			                    <ul>
                                 <li>Implemented brush-able filtering-out of variants from the beginning of reads (the filter is at the end of the reverse sequences since these are reverse complemented). </li>
                                 <li>Added reference selector, with selected references used to autodetect strandedness - not using all references speeds up the upload process.</li>
