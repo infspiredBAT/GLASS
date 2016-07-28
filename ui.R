@@ -79,7 +79,7 @@ shinyUI(
                                 <b>ver 0.1.1 (2016-Jul-27)</b>
 			                    <ul>
 			                    <li>Filters of beginnings and ends of reads visualised in minimap.</li>
-                                <li>Reference "case sensitive"; exons shown in upper case, everything else is in lower case.</li>
+                                <li>Reference "case sensitive"; exons shown in uppercase, everything else is in lowercase.</li>
                                 <li>It\'s now possible to load samples without a reference.</li>
 			                    </ul>
 			                    <b>ver 0.1.0 (2016-Jul-06)</b>
