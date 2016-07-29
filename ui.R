@@ -67,7 +67,7 @@ shinyUI(
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
 			column(2,  HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
 			column(9, htmlOutput("files")),
-			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.1.1 <br> (2016-Jul-27)</a>
+			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.1.2 <br> (2016-Jul-29)</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -76,6 +76,13 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.1.2 (2016-Jul-29)</b>
+			                    <ul>
+			                    <li>Mainly brush(navigation tool) appearence and behaviour.</li>
+			                    <li>More seamless transition.</li>
+			                    <li>Box represenging zoomed in area.</li>
+                                <li>Filters of beginnings of reads stylised in chromatogram and also minimap.</li>
+			                    </ul>
                                 <b>ver 0.1.1 (2016-Jul-27)</b>
 			                    <ul>
 			                    <li>Filters of beginnings and ends of reads visualised in minimap.</li>
@@ -183,7 +190,7 @@ shinyUI(
 				),
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=red>dashed red box = resize and/or move for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
+                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=orangered>Orange box = resize/move for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
                         <b>chromatogram</b>: click text to highlight call and show info^ | sequences from top = reference, call/primary, mutation/secondary | striped verticals = indicators e.g. variants | grey bars = quality</br>
                         <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'x' = ignore for the session | 'confirm' = keep for the session (even if you change parameters) and make them exportable from 'samples' panel
                         </div>

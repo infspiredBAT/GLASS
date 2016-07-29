@@ -10,7 +10,7 @@ HTMLWidgets.widget({
         var max_y = 0;
         //var margin  = {top: 10,  right: 10, bottom: 100, left: 40},   //minimap on bottom
         //    margin2 = {top: 430, right: 10, bottom: 20,  left: 40},   //minimap on top
-        var margin  = {top: 55, right: 10,bottom: 20, left:10},
+        var margin  = {top: 65, right: 10,bottom: 20, left:10},
             margin2 = {top: 20, right: 10,bottom: 420,  left:10},
             width   = w - margin.left - margin.right,
             height  = h - margin.top  - margin.bottom,
@@ -26,15 +26,6 @@ HTMLWidgets.widget({
             //heightScale_rev = heightScale;
             heightScale_fwd = heightScale_fwd_split;
             heightScale_rev = heightScale_rev_split;
-
-        function rescaleWidth(width_in){
-                var width_new   = width_in - margin.left - margin.right;
-                width2Scale.range([0,width_new]);
-                widthScale.range([0,width_new]);
-                brush_fw_mini.attr("x2",width2Scale(brush_fw_extent[1]));
-                brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
-                             .attr("x2",width2Scale.domain()[1]);
-        }
 
         var line_fwd = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
@@ -60,7 +51,19 @@ HTMLWidgets.widget({
         var svg = d3.select(el).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
-        var brush    = d3.svg.brush().on("brush",brushed   );
+        var frame = svg.append("rect").attr("x", 0 + margin.right)
+                                      .attr("y",0+margin.top+30)
+                                      .attr("rx",3)
+                        			  .attr("ry",3)
+                                      .attr("width",width)
+                                      .attr("height",height-20)
+                                      .attr("stroke","orangered")
+                                      .attr("opacity",0.6)
+                                      .attr("fill","white")
+                                      .attr("stroke-width",2);
+        var brush    = d3.svg.brush().on("brush",redrawLines)
+                                     .on("brushend",brushed)
+                                     .on("brushstart",hideLabels);
         var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
         var brush_rv = d3.svg.brush().on("brushend",brushed_rv);
         var brush_fw_mini = svg.append("line")
@@ -68,18 +71,18 @@ HTMLWidgets.widget({
                                .attr("y1", 18)
                                .attr("x2", 250)
                                .attr("y2", 18)
-                               .attr("stroke-width", 2)
+                               .attr("stroke-width", 3)
                                .style("stroke-dasharray", ("3, 3"))
-                               .attr("stroke", "black")
+                               .attr("stroke", "red")
                                .attr("opacity",0.4);
         var brush_rv_mini = svg.append("line")
                                //.attr("x1", 10)
                                .attr("y1", 72)
                                //.attr("x2", 250) // don't know before init
                                .attr("y2", 72)
-                               .attr("stroke-width", 2)
+                               .attr("stroke-width", 3)
                                .style("stroke-dasharray", ("3, 3"))
-                               .attr("stroke", "black")
+                               .attr("stroke", "red")
                                .attr("opacity",0.4);
         var brush_fw_g;
         var brush_rv_g;
@@ -169,13 +172,13 @@ HTMLWidgets.widget({
                  .attr("rx", 2);
 
             brush_fw_g.selectAll("rect")
-                .attr("y",150)
+                .attr("y",138)
                 //.attr("height",function (d){if(rev!=0){return 120;}else{return 280;}});
                 .attr("height",height);
 
             brush_fw_g.selectAll(".extent")
-                .attr("fill","black")
-                .attr("opacity",0.09);
+                .attr("fill","white")
+                .attr("opacity",0.6);
             //console.log(widthScale);
             //console.log("brush fw extent in init",to);
             brush_fw.extent([0,to]);
@@ -212,11 +215,11 @@ HTMLWidgets.widget({
                      .attr("rx", 2);
 
                 brush_rv_g.selectAll("rect")
-                    .attr("y",310 - mod)
-                    .attr("height",120 + mod);
+                    .attr("y",295 - mod)
+                    .attr("height",140 + mod);
                 brush_rv_g.selectAll(".extent")
-                    .attr("fill","black")
-                    .attr("opacity",0.09);
+                    .attr("fill","white")
+                    .attr("opacity",0.6);
                 brush_rv.extent([from,to]);
                 brush_rv_extent = brush_rv.extent();
                 brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
@@ -273,26 +276,57 @@ HTMLWidgets.widget({
             heightScale_rev_split.domain([0,domain_y-1]);
             redraw();
         }
+        function rescaleWidth(width_in){
+                var width_new   = width_in - margin.left - margin.right;
+                width2Scale.range([0,width_new]);
+                widthScale.range([0,width_new]);
+                brush_fw_mini.attr("x2",width2Scale(brush_fw_extent[1]));
+                brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
+                             .attr("x2",width2Scale.domain()[1]);
+                context.selectAll(".fullSeqW").attr("x2",width_new);
+                frame.attr("width",width_new);
+        }
+
+        function hideLabels(){
+            focus.selectAll(".peak_label").attr("visibility","hidden");
+            focus.selectAll("g").selectAll(".area_fwd").attr("visibility","hidden");
+            focus.selectAll("g").selectAll(".area_rev").attr("visibility","hidden");
+            focus.selectAll(".ref").attr("visibility","visible");
+            focus.selectAll(".user").attr("visibility","visible");
+            brush_fw_g.attr("visibility","hidden");
+            brush_rv_g.attr("visibility","hidden");
+        }
+        function redrawLines(){
+            widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
+            focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
+            focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
+            focus.selectAll(".ref").attr("x",function(d){return widthScale(d["trace_peak"]);});
+            focus.selectAll(".user").attr("x",function(d){return widthScale(d["trace_peak"]);});
+            //focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
+
+        }
         function redraw()  {
             //console.log("redraw");
             widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             //console.log("old"+old);
             //console.log("extent"+brush_fw.extent());
             //console.log("setting brush_fw_extent in redraw: "+ brush_fw_extent);
+            brush_fw_g.attr("visibility","visible");
             brush_fw.extent(brush_fw_extent);
             brush_fw(brush_fw_g);
             brush_fw.event(d3.select(".brush_fw").transition().delay(1));
             if(brush_rv_g!=undefined){ //this is not good
+                brush_rv_g.attr("visibility","visible");
                 brush_rv.extent(brush_rv_extent);
                 brush_rv(brush_rv_g);
                 brush_rv.event(d3.select(".brush_rv").transition().delay(1));
             }
             var w = brush.extent()[1]-brush.extent()[0] ;
-            focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
-            focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
+            //focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
+            //focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
 
-            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
-            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
+            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd).attr("visibility","visible");
+            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev).attr("visibility","visible");
             focus.selectAll(".scope").attr("x",function(d){return widthScale(d["trace_peak"])-12;});
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
@@ -576,7 +610,7 @@ HTMLWidgets.widget({
             iet.enter().append("text");
             iet.attr("class","context")
   				.attr("x",function(d){return width2Scale(d["start"]);})
-  				.attr("y",-4)
+  				.attr("y",-5)
   				.attr("opacity",0.8)
   				.attr("fill","black")
   				.text(function(d) {
@@ -587,7 +621,7 @@ HTMLWidgets.widget({
             ien.enter().append("text");
   		    ien.attr("class","context")
   				.attr("x",function(d){return width2Scale(d["start"]);})
-  				.attr("y",62)
+  				.attr("y",64)
   				.attr("opacity",0.8)
   				.text(function(d){return d["id"];})
   				.attr("fill","black");
@@ -830,7 +864,7 @@ HTMLWidgets.widget({
 
   			//visualise fullseq width
   			instance.full_line
-  				.append("line").attr("class","context")
+  				.append("line").attr("class","context fullSeqW")
   				.attr("x1",0)
   				.attr("y1",25)
   				.attr("x2",widthScale(domain_x))
@@ -840,7 +874,7 @@ HTMLWidgets.widget({
             //intron/exon boxes
             instance.setIntrexBoxes(intrex);
   			brush.x(width2Scale);
-            var brush_fw_height = 120;
+            var brush_fw_height = 140;
             if(intens_rev == ""){
                 brush_fw_height = 280;
             }
@@ -865,11 +899,11 @@ HTMLWidgets.widget({
                 .call(brush)
       			.selectAll("rect")
   				.attr("y", -16)
-                .attr("height", 80) //height2 + 10)
+                .attr("height", 82) //height2 + 10)
                 .attr("rx",3)
   				.attr("ry",3)
   				.attr("fill","rgba(255,255,255,0.3)")
-  				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
+  				.attr("stroke-width",2).attr("stroke","orangered")//.attr("stroke-dasharray","3,6")
   				.attr("opacity",0.6);
 
 
@@ -1006,6 +1040,7 @@ HTMLWidgets.widget({
                 if(show_calls){ instance.call_opacity = 0.8; }
                 else{ instance.call_opacity = 0; }
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
+                instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]));
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
                 instance.showNoisyNbr(noisy_neighbors);
@@ -1019,6 +1054,7 @@ HTMLWidgets.widget({
                 instance.setCodingLabel(calls);
 
   			}else if(x.resize == true){
+                console.log("resize line 1045");
                 instance.lastValue.resize = false;
                 instance.redraw();
                 instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]));
