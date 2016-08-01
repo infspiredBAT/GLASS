@@ -190,7 +190,7 @@ shinyUI(
 				),
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=orangered>Orange box = resize/move for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
+                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=orangered>orange box = resize/move for navigation</font> | horizontal grey line = full sequence | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
                         <b>chromatogram</b>: click text to highlight call and show info^ | sequences from top = reference, call/primary, mutation/secondary | striped verticals = indicators e.g. variants | grey bars = quality</br>
                         <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'x' = ignore for the session | 'confirm' = keep for the session (even if you change parameters) and make them exportable from 'samples' panel
                         </div>

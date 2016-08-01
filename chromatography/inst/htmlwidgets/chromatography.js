@@ -143,7 +143,7 @@ HTMLWidgets.widget({
         var exon_boxes        = context.append("g");
         var intrex_txt        = context.append("g");
         var intrex_num        = context.append("g");
-        var varim_gen         = context.append("g");
+        var varim_ref         = context.append("g");
         var varim_user_s      = context.append("g");
         var varim_user_m      = context.append("g");
         var noisyn_con        = context.append("g");  //noisy neighbours
@@ -333,12 +333,18 @@ HTMLWidgets.widget({
             focus.selectAll(".qual_rev").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".line").attr("x1",function(d){return widthScale(d["trace_peak"]);})
                                     .attr("x2",function(d){return widthScale(d["trace_peak"]);});
+
+
+            focus.selectAll(".var_noise_indic").attr("stroke-width",widthScale(12)-widthScale(0));
+            //sconsole.log(widthScale(12)-widthScale(0));
             //conditional visibility
             if(w<260){
                 focus.selectAll(".peak_label").attr("visibility","visible");
                 if(w===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
                 focus.selectAll(".peak_label").attr("visibility","hidden");
+                focus.selectAll(".ref").attr("visibility","visible");
+                focus.selectAll(".user").attr("visibility","visible");
                 if(w<800){
                   focus.selectAll(".qual_fwd").attr("visibility","visible");
                   focus.selectAll(".qual_rev").attr("visibility","visible");
@@ -449,18 +455,18 @@ HTMLWidgets.widget({
             text.exit().remove();
         }
         function showVarInMinimap(choices){
-            //genomic
+            //reference
             //console.log("showVarInMinimap");
-            var g = varim_gen.selectAll("line").data(choices);
-            g.enter().append("line").attr("class","enter");
-            g.attr("class","minimap context")
+            var r = varim_ref.selectAll("line").data(choices);
+            r.enter().append("line").attr("class","enter");
+            r.attr("class","minimap context")
       			.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
       			.attr("y1",4)
       			.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
       			.attr("y2",24)
       			.attr("stroke-width",3)
       			.attr("stroke",function(d) { return get_color(d["reference"])});
-            g.exit().remove();
+            r.exit().remove();
   			    // user
             var us = varim_user_s.selectAll("line").data(choices);
             us.enter().append("line").attr("class","enter");
@@ -483,14 +489,17 @@ HTMLWidgets.widget({
   				.attr("stroke-width",3)
   				.attr("stroke",function(d) { return get_color(d["user_mut"])});
             um.exit().remove();
+
+            console.log(choices);
             var v = var_ind_focus.selectAll("line").data(choices);
+            //strandness in choices 0 = undetermined (should not occure); 1 = forward strand; 2 = reverse strand; 3 = both
             v.enter().append("line").attr("class","enter");
             v.attr("class","peak_label short line var_noise_indic")
   		        .attr("x1",function(d){return widthScale(d["trace_peak"]);})
-  		        .attr("y1",140)
+  		        .attr("y1",function(d){if(d["strand"]==2){return 280;}else{return 140;}})
   		        .attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  		        .attr("y2",400)
-  		        .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
+  		        .attr("y2",function(d){if(d["strand"]==1){return 280;}else{return 420;}})
+  		        .attr("stroke-width",widthScale(12)-widthScale(0)).attr("stroke","rgba(255,0,0,0.50)").attr("stroke-dasharray","1,7");
             v.exit().remove();
 
         }
@@ -1054,7 +1063,6 @@ HTMLWidgets.widget({
                 instance.setCodingLabel(calls);
 
   			}else if(x.resize == true){
-                console.log("resize line 1045");
                 instance.lastValue.resize = false;
                 instance.redraw();
                 instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]));
