@@ -79,6 +79,16 @@ HTMLWidgets.widget({
 
         var brush_fw_extent;
         var brush_rv_extent;
+        var frame = svg.append("rect").attr("x", 0 + margin.right)
+                                      .attr("y",0+margin.top+30)
+                                      .attr("rx",3)
+                        			  .attr("ry",3)
+                                      .attr("width",width)
+                                      .attr("height",height-20)
+                                      .attr("stroke","rgb(70,130,180)") //steal blue
+                                      .attr("fill-opacity",0)
+                                      .attr("fill","white")
+                                      .attr("stroke-width",2);
 
         var focus = svg.append("g")
             .attr("class", "focus")
@@ -91,6 +101,25 @@ HTMLWidgets.widget({
         var context = svg.append("g")
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+            var defs = svg.append("defs");
+
+        var filter = defs.append("filter")
+                         .attr("id", "drop-shadow")
+                         .attr("height", "130%");
+        filter.append("feGaussianBlur")
+              .attr("in", "SourceAlpha")
+              .attr("stdDeviation", 5)
+              .attr("result", "blur");
+        filter.append("feOffset")
+              .attr("in", "blur")
+              .attr("dx", 5)
+              .attr("dy", 5)
+              .attr("result", "offsetBlur");
+        var feMerge = filter.append("feMerge");
+        feMerge.append("feMergeNode")
+               .attr("in", "offsetBlur");
+        feMerge.append("feMergeNode")
+               .attr("in", "SourceGraphic");
         var join = "FALSE";
 
         var label_pos = {};        //map for pisitioning labels representing called base
@@ -144,16 +173,6 @@ HTMLWidgets.widget({
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
 
-        var frame = svg.append("rect").attr("x", 0 + margin.right)
-                                      .attr("y",0+margin.top+30)
-                                      .attr("rx",3)
-                        			  .attr("ry",3)
-                                      .attr("width",width)
-                                      .attr("height",height-20)
-                                      .attr("stroke","rgb(70,130,180)")
-                                      .attr("fill-opacity",0)
-                                      .attr("fill","white")
-                                      .attr("stroke-width",2);
         function finish_fwBrushInit(to,rev,height){
             //console.log("brush fw finish:" + to + " " + rev);
 
@@ -344,8 +363,10 @@ HTMLWidgets.widget({
                 if(w===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
                 focus.selectAll(".peak_label").attr("visibility","hidden");
+                //following three lines added after changes in UI, makes more sense to always show these
                 focus.selectAll(".ref").attr("visibility","visible");
                 focus.selectAll(".user").attr("visibility","visible");
+                focus.selectAll(".var_noise_indic").attr("visibility","visible");
                 if(w<800){
                   focus.selectAll(".qual_fwd").attr("visibility","visible");
                   focus.selectAll(".qual_rev").attr("visibility","visible");
@@ -494,7 +515,7 @@ HTMLWidgets.widget({
 
             console.log(choices);
             var v = var_ind_focus.selectAll("line").data(choices);
-            //strandness in choices 0 = undetermined (should not occure); 1 = forward strand; 2 = reverse strand; 3 = both
+            //strandness in choices 0 = undetermined (should not occure); 1 = forward strand; 2 = reverse strand; 3 = both, 4 = undetermined indel, 5 = indel forward only, 6 = indel reverse only, 7 = indel both strands
             v.enter().append("line").attr("class","enter");
             v.attr("class","peak_label short line var_noise_indic")
   		        .attr("x1",function(d){return widthScale(d["trace_peak"]);})
@@ -913,10 +934,10 @@ HTMLWidgets.widget({
                 .attr("height", 82) //height2 + 10)
                 .attr("rx",3)
   				.attr("ry",3)
-  				.attr("fill","rgba(70,130,180,0.2)")
+  				.attr("fill","rgba(70,130,180,0.1)") //steal blue
+                .style("filter", "url(#drop-shadow)")
   				.attr("stroke-width",2).attr("stroke","rgb(70,130,180)")//.attr("stroke-dasharray","3,6")
   				.attr("opacity",1);
-
 
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
