@@ -411,6 +411,7 @@ get_choices <- function(calls){
         choices[,strand:= 0]
         choices[(call     != reference) | (mut_call_fwd!= reference), strand:=strand+1 ]
         choices[(call_rev != reference) | (mut_call_rev!= reference), strand:=strand+2 ]
+        choices[(user_sample == "-") | (user_mut == "-"),strand:=strand+4]
         #choices <- choices[,`:=` (user_sample=ambig_minus(user_sample,reference),user_mut=ambig_minus(user_mut,reference)),by=1:nrow(choices)]
         choices[,ids:=NA,by=1:nrow(choices)]
         choices[,user_sample:=ambig_minus(user_sample,reference),by=1:nrow(choices)]

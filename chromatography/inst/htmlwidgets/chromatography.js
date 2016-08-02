@@ -51,16 +51,6 @@ HTMLWidgets.widget({
         var svg = d3.select(el).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
-        var frame = svg.append("rect").attr("x", 0 + margin.right)
-                                      .attr("y",0+margin.top+30)
-                                      .attr("rx",3)
-                        			  .attr("ry",3)
-                                      .attr("width",width)
-                                      .attr("height",height-20)
-                                      .attr("stroke","orangered")
-                                      .attr("opacity",0.6)
-                                      .attr("fill","white")
-                                      .attr("stroke-width",2);
         var brush    = d3.svg.brush().on("brush",redrawLines)
                                      .on("brushend",brushed)
                                      .on("brushstart",hideLabels);
@@ -71,23 +61,25 @@ HTMLWidgets.widget({
                                .attr("y1", 18)
                                .attr("x2", 250)
                                .attr("y2", 18)
-                               .attr("stroke-width", 3)
+                               .attr("stroke-width", 2)
                                .style("stroke-dasharray", ("3, 3"))
                                .attr("stroke", "red")
-                               .attr("opacity",0.4);
+                               .attr("opacity",1);
         var brush_rv_mini = svg.append("line")
                                //.attr("x1", 10)
                                .attr("y1", 72)
                                //.attr("x2", 250) // don't know before init
                                .attr("y2", 72)
-                               .attr("stroke-width", 3)
+                               .attr("stroke-width", 2)
                                .style("stroke-dasharray", ("3, 3"))
                                .attr("stroke", "red")
-                               .attr("opacity",0.4);
+                               .attr("opacity",1);
         var brush_fw_g;
         var brush_rv_g;
+
         var brush_fw_extent;
         var brush_rv_extent;
+
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -152,9 +144,18 @@ HTMLWidgets.widget({
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
 
-
+        var frame = svg.append("rect").attr("x", 0 + margin.right)
+                                      .attr("y",0+margin.top+30)
+                                      .attr("rx",3)
+                        			  .attr("ry",3)
+                                      .attr("width",width)
+                                      .attr("height",height-20)
+                                      .attr("stroke","rgb(70,130,180)")
+                                      .attr("fill-opacity",0)
+                                      .attr("fill","white")
+                                      .attr("stroke-width",2);
         function finish_fwBrushInit(to,rev,height){
-            console.log("brush fw finish:" + to + " " + rev);
+            //console.log("brush fw finish:" + to + " " + rev);
 
             brush_fw.x(widthScale);
             if(brush_fw_g==undefined){
@@ -188,7 +189,7 @@ HTMLWidgets.widget({
             //resetHandlers_fw(brush_fw_g);
         }
         function finish_rvBrushInit(from,to,rev = null){
-            console.log("brush fw finish:" + from + " " + to);
+            //console.log("brush fw finish:" + from + " " + to);
             mod = 0;
             if(!rev){
                 mod = 160;
@@ -240,8 +241,8 @@ HTMLWidgets.widget({
             Shiny.onInputChange("brush_fw", {coord: extent1[1]});
             brush_fw_extent = extent1;
             brush_fw_mini.attr("x2",width2Scale(extent1[1]));
-            console.log(extent1[1]);
-            console.log(width2Scale(extent1[1]));
+            //console.log(extent1[1]);
+            //console.log(width2Scale(extent1[1]));
             d3.select(this).transition()
                 .call(brush_fw.extent(extent1))
                 .call(brush_fw.event);
@@ -322,8 +323,8 @@ HTMLWidgets.widget({
                 brush_rv.event(d3.select(".brush_rv").transition().delay(1));
             }
             var w = brush.extent()[1]-brush.extent()[0] ;
-            //focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
-            //focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
+            focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
+            focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
 
             focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd).attr("visibility","visible");
             focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev).attr("visibility","visible");
@@ -368,6 +369,7 @@ HTMLWidgets.widget({
                 heightScale_rev = heightScale;
                 redraw();
             }
+
         }
         function updateLine(data,base,rev){
             switch(base) {
@@ -498,7 +500,7 @@ HTMLWidgets.widget({
   		        .attr("x1",function(d){return widthScale(d["trace_peak"]);})
   		        .attr("y1",function(d){if(d["strand"]==2){return 280;}else{return 140;}})
   		        .attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  		        .attr("y2",function(d){if(d["strand"]==1){return 280;}else{return 420;}})
+  		        .attr("y2",function(d){if(d["strand"]==1){return 270;}else{return 420;}})
   		        .attr("stroke-width",widthScale(12)-widthScale(0)).attr("stroke","rgba(255,0,0,0.50)").attr("stroke-dasharray","1,7");
             v.exit().remove();
 
@@ -891,7 +893,7 @@ HTMLWidgets.widget({
                 brush_fw_height = 0;
             }
             instance.finish_fwBrushInit(x["brush_fw"],rev,brush_fw_height);
-            console.log("brush_rv: ", x["brush_rv"])
+            //console.log("brush_rv: ", x["brush_rv"])
             if(rev!=0){
                 instance.finish_rvBrushInit(x["brush_rv"],domain_x,rev);
             }else if(single_rev){
@@ -911,9 +913,9 @@ HTMLWidgets.widget({
                 .attr("height", 82) //height2 + 10)
                 .attr("rx",3)
   				.attr("ry",3)
-  				.attr("fill","rgba(255,255,255,0.3)")
-  				.attr("stroke-width",2).attr("stroke","orangered")//.attr("stroke-dasharray","3,6")
-  				.attr("opacity",0.6);
+  				.attr("fill","rgba(70,130,180,0.2)")
+  				.attr("stroke-width",2).attr("stroke","rgb(70,130,180)")//.attr("stroke-dasharray","3,6")
+  				.attr("opacity",1);
 
 
             instance.updateLine([intens["A"]],"A",false);
