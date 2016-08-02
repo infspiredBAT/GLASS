@@ -67,7 +67,7 @@ shinyUI(
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
 			column(2,  HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
 			column(9, htmlOutput("files")),
-			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.1.3 <br> (2016-Aug-3)</a>
+			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.1.3 <br> (2016-Aug-2)</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
