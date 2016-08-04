@@ -934,7 +934,7 @@ HTMLWidgets.widget({
                 .attr("height", 82) //height2 + 10)
                 .attr("rx",3)
   				.attr("ry",3)
-  				.attr("fill","rgba(70,130,180,0.1)") //steal blue
+  				.attr("fill","rgba(70,130,180,0.05)") //steal blue
                 .style("filter", "url(#drop-shadow)")
   				.attr("stroke-width",2).attr("stroke","rgb(70,130,180)")//.attr("stroke-dasharray","3,6")
   				.attr("opacity",1);
