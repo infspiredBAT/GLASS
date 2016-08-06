@@ -65,9 +65,9 @@ shinyUI(
     		#	column(7, fileInput("select_file",NULL,multiple=T,accept=c('.abi','.ab1')))
 			#))),
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
-			column(2,  HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
+			column(2, HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
 			column(9, htmlOutput("files")),
-			column(1,HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.2.2 <br>(2016-Aug-4)</a>
+			column(1, HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.2.2 <br>(2016-Aug-4)</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -78,27 +78,27 @@ shinyUI(
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
                                 <b>ver 0.2.2 (2016-Aug-4)</b>
                                 <ul>
-                                <li>Fixed bug causing single strand samples to crash. (Result of previous update.)</li>
-                                <li>Small change in navigation tool opacity.</li>
+                                <li>Fixed bug causing single strand samples to crash (result of previous update).</li>
+                                <li>Small change in minimap navigation box opacity.</li>
                                 </ul>
                                 <b>ver 0.2.1 (2016-Aug-2)</b>
 			                    <ul>
-			                    <li>Brush (navigation tool) changed to steal blue color to represent glass (magnifier) and added shadow to make it "pop-out".</li>
+			                    <li>Minimap navigation box coloured steel blue (~ magnifier glass) and shadow added to make it "pop-out".</li>
 			                    <li>Variant indicators are now strand specific.</li>
                                 <li>Variant indicator scales to peak width.</li>
 			                    </ul>
                                 <b>ver 0.2.0 (2016-Jul-29)</b>
 			                    <ul>
-			                    <li>Mainly brush (navigation tool) appearence and behaviour.</li>
-			                    <li>More seamless transition.</li>
-			                    <li>Box represenging zoomed in area.</li>
+			                    <li>Minimap navigation box appearence and behaviour.</li>
+			                    <li>More seamless chromatogram transitions.</li>
+			                    <li>Box representing zoomed-in area.</li>
                                 <li>Filters of beginnings of reads stylised in chromatogram and also minimap.</li>
 			                    </ul>
                                 <b>ver 0.1.1 (2016-Jul-27)</b>
 			                    <ul>
 			                    <li>Filters of beginnings and ends of reads visualised in minimap.</li>
-                                <li>Reference "case sensitive"; exons shown in uppercase, everything else is in lowercase.</li>
-                                <li>It\'s now possible to load samples without a reference.</li>
+                                <li>Reference now case sensitive: exons in uppercase, everything else in lowercase.</li>
+                                <li>It\'s now possible to load samples without a reference, just untick all genes.</li>
 			                    </ul>
 			                    <b>ver 0.1.0 (2016-Jul-06)</b>
 			                    <ul>
@@ -129,7 +129,7 @@ shinyUI(
                 ),
                 fluidRow(
                     column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
-                        checkboxGroupInput("alignTo", "select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","CALR"),inline=TRUE)))
+                        checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"),selected = c("TP53","CALR"),inline=TRUE)))
                 ),
                 fluidRow(
                     column(6,
@@ -202,8 +202,8 @@ shinyUI(
 				fluidRow(
 				    # "| horizontal grey line = full sequence |" left out of text bc of space
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=#4682B4>blue box = resize/move for navigation</font> | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=red>red dotted lines</font> = filter out noisy beginnings | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br> 
-                        <b>chromatogram</b>: click text to highlight call and show info^ | sequences from top = reference, call/primary, mutation/secondary | striped verticals = indicators e.g. variants | grey bars = quality</br>
+                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=#4682B4>blue box = resize/move for navigation</font> | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=red>red dotted lines</font> = filtered noisy beginnings | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
+                        <b>chromatogram</b>: click text to highlight call and print info^ | zoom-in enough for extra info, e.g. coords | sequences, from top = ref, call/pri, mut/sec | striped verticals = variants | grey bars = quality</br>
                         <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'x' = ignore for the session | 'confirm' = keep for the session (even if you change parameters) and make them exportable from 'samples' panel
                         </div>
   		            "), sep = ""))))),

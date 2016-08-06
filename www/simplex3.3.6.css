@@ -13,12 +13,12 @@
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 
-.samplesdt td{
-    padding:8px;
+#alignTo .shiny-options-group {
+    font-size: 1.2em;
 }
 
-#gene_of_interest {
-    font-size: 18px;
+.samplesdt td{
+    padding:8px;
 }
 
 .shiny-progress .progress-text {
