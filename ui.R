@@ -67,7 +67,7 @@ shinyUI(
 			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
 			column(2, HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
 			column(9, htmlOutput("files")),
-			column(1, HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.2.2 <br>(2016-Aug-4)</a>
+			column(1, HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.2.3 <br>(2016-Aug-11)</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -76,6 +76,11 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.3 (2016-Aug-11)</b>
+                                <ul>
+                                <li>"No reference" upload fixed and documented.</li>
+                                <li>Forward beginnings filter initial position updated.</li>
+                                </ul>
                                 <b>ver 0.2.2 (2016-Aug-4)</b>
                                 <ul>
                                 <li>Fixed bug causing single strand samples to crash (result of previous update).</li>
@@ -128,7 +133,11 @@ shinyUI(
                         HTML(paste("<b>upload and process ABI files</b> [?]"))))
                 ),
                 fluidRow(
-                    column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected. The more references are selected the longer the upload process wil take.",
+                    column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected.
+
+Selecting NONE of the references will assign no reference to your chromatogram. It is still possible to view it or change the reference afterwards.
+                                    
+The more references are selected the longer the upload process wil take.",
                         checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"),selected = c("TP53","CALR"),inline=TRUE)))
                 ),
                 fluidRow(

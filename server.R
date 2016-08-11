@@ -284,6 +284,7 @@ shinyServer(function(input,output,session) {
                 ref = "TP53"
             }
             #if ref == "-"
+            abc<-ref
             g_glassed_ref <<- paste("data/refs/",ref,".glassed.intrex.fasta",sep="")
             g_glassed_cod <<- paste("data/refs/",ref,".glassed.codons.rdata",sep="")
 
@@ -507,7 +508,7 @@ shinyServer(function(input,output,session) {
 
             g_expected_het_indel <<- get_expected_het_indels(g_calls)
             g_calls   <<- retranslate(g_calls)
-            g_choices <<- get_choices(g_calls)
+            g_choices <<- get_choices(g_calls,g_glassed_ref)
             return(TRUE)
 
         } else return(FALSE)

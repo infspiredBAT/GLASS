@@ -206,6 +206,7 @@ HTMLWidgets.widget({
             //brush_fw(brush_fw_g);
             //brush_fw.event(d3.select(".brush_fw"));
             //resetHandlers_fw(brush_fw_g);
+            brush_fw_mini.attr("x2",width2Scale(to));
         }
         function finish_rvBrushInit(from,to,rev = null){
             //console.log("brush fw finish:" + from + " " + to);
