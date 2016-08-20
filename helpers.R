@@ -407,7 +407,9 @@ retranslate <- function(calls){
 get_choices <- function(calls,ref){
     choices <- calls[user_sample != "N" & (user_sample != reference | user_mut != reference) & trace_peak != "NA" & !is.na(gen_coord)]
     if(gsub(".glassed.intrex.fasta","",gsub("data/refs/","",ref))=="-" & nrow(choices)==0){
-        choices <- calls[call != call_rev]
+        if("call_rev" %in% colnames(calls)){
+            choices <- calls[call != call_rev]
+        }
     }
     
     if (nrow(choices) > 0) {
@@ -449,12 +451,13 @@ get_choices <- function(calls,ref){
         choices[aa_mut   != aa_ref    & aa_sample   != aa_ref      & aa_sample   != aa_mut,                        protein:= paste0(protein, aa_mut)]#,                  "(", mut_peak_pct, "%)")]
         #choices[aa_mut != aa_ref & aa_sample== aa_ref & aa_mut=="-",                                           protein:= paste0("p.",aa_ref,codon,"fs")]
     }
+    
     setkey(choices,id)
     return(choices)
 }
 
 #remove consecutive single base deletions and replace them with one long deletion in table
-get_view<-function(calls,choices){
+get_view<-function(calls,choices,snps){
 
     computeConsecutives <- function(ids){
         ids <- round(ids * 100)
@@ -545,6 +548,12 @@ get_view<-function(calls,choices){
     }
 
     setkey(choices,id)
+    if(!is.null(snps)){
+        positionsStr  <- unlist(lapply(choices$gen_coord,toString))
+        positionsPair <- lapply(strsplit(positionsStr,"_"),function(x){if(is.na(x[2])){c(x[1],x[1])}else{x}})
+        rsids<-lapply(positionsPair,function(x){paste(snps[snps$"V4"==x[1]&snps$V5==x[2]]$V12,"",sep="")})
+        choices <- cbind(choices,"dbSNP"=unlist(rsids))
+    }
     return(choices)
 }
 mya <- function(x){
