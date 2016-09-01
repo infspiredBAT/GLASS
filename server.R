@@ -73,7 +73,7 @@ shinyServer(function(input,output,session) {
         input$goLock
 
         disabled <- rep(FALSE,nrow(g_files))
-        disabled[1] <- TRUE
+        disabled[1] <- FALSE
         g_files[,id:= 1:nrow(g_files)]
         g_files <<- g_files
         add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)),class="btn btn-info" )
@@ -787,26 +787,23 @@ shinyServer(function(input,output,session) {
         },
         content = function(con) {
             out<-data.table("Sample"=character(),"coding variant"=character(),"protein variant"=character())
-            if(nrow(g_files)==1){
-                out<-rbind(out,list("empty","",""))
-            }else{
-                for(i in 2:nrow(g_files)){
-                    if(g_files[i]$status=="new"){
-                        var = "NA"
-                    }else if(g_files[i]$status == "viewed"){
-                        var = "wt"
-                    }
-                    names<-gsub("<b>confirmed</b>:","",g_files[i]$status)
-                    names<-gsub("&nbsp","",names)
 
-                    names<-strsplit(names,"<br>")[[1]]
-                    coding <- names[1]
-                    if(!is.na(names[2])) protein <- names[2]
-                    else protein<-""
-                    out <- rbind(out,list(paste0(g_files[i]$FWD_name,":",g_files[i]$REV_name),coding,protein ))
+            for(i in 1:nrow(g_files)){
+                if(g_files[i]$status=="new"){
+                    var = "NA"
+                }else if(g_files[i]$status == "viewed"){
+                    var = "wt"
                 }
-                #out<-rbind(out,list("1","2","2"))
+                names<-gsub("<b>confirmed</b>:","",g_files[i]$status)
+                names<-gsub("&nbsp","",names)
+                names<-strsplit(names,"<br>")[[1]]
+                coding <- names[1]
+                if(!is.na(names[2])) protein <- names[2]
+                else protein<-""
+                out <- rbind(out,list(paste0(g_files[i]$FWD_name,":",g_files[i]$REV_name),coding, gsub(")","",gsub('(',"",protein,fixed=TRUE),fixed=TRUE)))
             }
+                #out<-rbind(out,list("1","2","2"))
+
 
             #g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
 
