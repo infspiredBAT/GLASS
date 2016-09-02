@@ -2385,9 +2385,9 @@ th {
 .table > thead > tr > td,
 .table > tbody > tr > td,
 .table > tfoot > tr > td {
-  padding: 0px;
-  padding-left: 2px;
-  line-height: 1.42857143;
+  padding: 0px 4px 0px 4px;
+  line-height: 1;
+  text-align: left !important;
   vertical-align: middle;
   border-right: 1px solid #dddddd;
   border-top: 0px;

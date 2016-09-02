@@ -1,5 +1,5 @@
 library(shiny)
-#library(shinyjs)
+library(shinyjs)
 library(data.table)
 library(rjson)
 library(htmlwidgets)
@@ -49,25 +49,9 @@ shinyUI(
 		        #      fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'))
 		        #         )
 		        #),
-		HTML(paste("&nbsp&nbsp<b><font size=6em>GLASS</font></b><font size=3em> | <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics Group @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font> | CESNET/MetaCentrum")),
 		fluidRow(
-			#column(1, selectInput("gene_of_interest",NULL,choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
-			#column(1, selectInput("gene_of_interest",NULL,choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
-            #column(1,
-            #    conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
-            #        actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
-			#column(1,actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;margin-bottom:4px;")),
-            #column(3,wellPanel(fluidRow(
-            #    column(5,
-    		#	       tags$div(title="please make sure either or both (in case of paired i.e. forward and reverse) files have an \"F\" or \"R\" before the .abi/.ab1 file extension,\ne.g. my_sampleF.abi and/or my_sampleR.abi\n\nuse \"*R.abi\" even if loading a single reverse file!",
-					# column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
-    		#	                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">up to two ABI files,</br>name fwd and rev as:</br>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi [?]</div>"), sep = "")))),
-    		#	column(7, fileInput("select_file",NULL,multiple=T,accept=c('.abi','.ab1')))
-			#))),
-			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
-			column(2, HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene aberrations from Sanger data</i></br></br>"))),
-			column(9, htmlOutput("files")),
-			column(1, HTML(paste(' <a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">version 0.2.4 <br>(2016-Aug-20)</a>
+			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
+			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.4&nbsp&nbsp&nbsp2016-Aug-20</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -119,18 +103,37 @@ shinyUI(
 			                    </ul>
 	   		                    </div>
 			                    <div class="modal-footer" style="clear-both">
-			                    <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">Close</button>
+			                    <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
 			                    </div>
 			                    </div>
 			                    </div>
 			                    </div>
-			                    ')))
+			                    '))),
+			column(10, HTML("<br><font size=2em>&nbsp&nbsp | R&D by <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font>&nbsp&nbsp | IT by <a href=https://metavo.metacentrum.cz/en/ target='_blank'>CESNET/MetaCentrum</a>&nbsp&nbsp | @ <a href=mailto:bat@infspire.org target='_blank'>email us</a>"))
+		),
+		fluidRow(
+			#column(1, selectInput("gene_of_interest",NULL,choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
+			#column(1, selectInput("gene_of_interest",NULL,choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
+            #column(1,
+            #    conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
+            #        actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
+			#column(1,actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;margin-bottom:4px;")),
+            #column(3,wellPanel(fluidRow(
+            #    column(5,
+    		#	       tags$div(title="please make sure either or both (in case of paired i.e. forward and reverse) files have an \"F\" or \"R\" before the .abi/.ab1 file extension,\ne.g. my_sampleF.abi and/or my_sampleR.abi\n\nuse \"*R.abi\" even if loading a single reverse file!",
+					# column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
+    		#	                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">up to two ABI files,</br>name fwd and rev as:</br>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi [?]</div>"), sep = "")))),
+    		#	column(7, fileInput("select_file",NULL,multiple=T,accept=c('.abi','.ab1')))
+			#))),
+			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
+			column(2, HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene variations from Sanger data</i></br></br>"))),
+			column(9, htmlOutput("files"))
 		),
 		tabsetPanel(id = 'tabs',
             tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-                        <b>(very) quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) press blue 'load' button</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under status and are exportable with green 'export' button
+                        <b>(very) quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names - if you tick relevant references beforehand, GLASS will align and auto-orientate against them</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) click the blue 'play' button to load the file(s)</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
                         </div>"), sep = ""))))),
                 fluidRow(
                     column(12,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
@@ -140,16 +143,16 @@ shinyUI(
                     column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected.
 
 Selecting NONE of the references will assign no reference to your chromatogram. It is still possible to view it or change the reference afterwards.
-                                    
+
 The more references are selected the longer the upload process wil take.",
-                        checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"),selected = c("TP53","CALR"),inline=TRUE)))
+                        checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"),selected = c("TP53"),inline=TRUE)))
                 ),
                 fluidRow(
                     column(6,
                         fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
                     column(2,
                         tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",
-                            downloadButton('export_btn','export variants [?]',class = "exp_btn")))
+                            shinyjs::hidden(downloadButton('export_btn','export variants [?]',class = "exp_btn"))))
 		        ),
 		        DT::dataTableOutput('samples_table')
             ),

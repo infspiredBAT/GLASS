@@ -84,7 +84,7 @@ shinyServer(function(input,output,session) {
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
-        out<-cbind("delete"=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?]</div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown,"load"=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status)])
+        out<-cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?]</div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status)])
         table_out <- DT::datatable(out,escape=FALSE,
                                    selection = "none",
                                    style = "bootstrap",
@@ -292,7 +292,7 @@ shinyServer(function(input,output,session) {
             }else{
                 g_glassed_snp <<- NULL
             }
-            
+
             if (fwd_file_name == "-"){
                 single_rev <- TRUE
                 fwd_file <- rev_file
@@ -302,7 +302,7 @@ shinyServer(function(input,output,session) {
                 single_rev <- FALSE
             if (rev_file_name == "-")
                 rev_file <- NULL
-            
+
             g_single_rev <<- single_rev
           #  file <- input$select_file$datapath
           #  name <- input$select_file$name
@@ -437,7 +437,7 @@ shinyServer(function(input,output,session) {
                     }
                     if(g_single_rev){
                         g_brush_fwd <<- calls[nrow(calls[call!="-",])-25]$trace_peak
-                        
+
                     }
                     updateTabsetPanel(session,'tabs',selected = "main")
 
@@ -460,7 +460,7 @@ shinyServer(function(input,output,session) {
         if(class(loading_processed_files())[1] != "my_UI_exception") {
             update_chosen_variants()
             goReset_handler()
-            g_reactval$updateVar 
+            g_reactval$updateVar
             #goBrush_fw()
 
             calls<-loading_processed_files()
@@ -594,8 +594,8 @@ shinyServer(function(input,output,session) {
             #input$lo
             if(varcall() & !is.null(g_choices)) {
                 g_view<<-get_view(g_calls,g_choices,g_glassed_snp)
-                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "goto",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
-                add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = "", ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)',class="btn dlt_btn" )
+                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
+                add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)',class="btn dlt_btn" )
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'console.log($("#DataTables_Table_1"));Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
                 out<-cbind(" "=add_goto_buttons, " "=add_reset_buttons, "<div title='Confirmed variants are kept for the session even if you change parameters,\nand appear in the samples panel from where they can be exported with the green export button.'>confirm [?]</div>"=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
                 if(!is.null(g_glassed_snp)){
@@ -700,8 +700,10 @@ shinyServer(function(input,output,session) {
                     prots <- paste0("<br>",big_space,"(",paste(g_view[set_by_user == TRUE]$protein,collapse=";"),")")
                 }
                 g_files<<-g_files[loaded==TRUE,status:=paste0("<b>confirmed</b>: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"),prots)]
+                # shinyjs::show("export_btn")
             }else{
                 g_files<<-g_files[loaded==TRUE,status:="viewed"]
+                # shinyjs::show("export_btn")
             }
             #output$goLock <- renderUI({actionButton(input$goLock, icon = icon("lock"))})
         })
@@ -786,7 +788,7 @@ shinyServer(function(input,output,session) {
             paste('data-', Sys.Date(), '.xlsx', sep='')
         },
         content = function(con) {
-            out<-data.table("Sample"=character(),"coding variant"=character(),"protein variant"=character())
+            out<-data.table("sample"=character(),"coding variant"=character(),"protein variant"=character())
 
             for(i in 1:nrow(g_files)){
                 if(g_files[i]$status=="new"){
