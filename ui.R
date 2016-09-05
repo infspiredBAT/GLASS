@@ -1,5 +1,5 @@
 library(shiny)
-library(shinyjs)
+#library(shinyjs)
 library(data.table)
 library(rjson)
 library(htmlwidgets)

@@ -286,9 +286,9 @@ shinyServer(function(input,output,session) {
             }
             g_glassed_ref <<- paste("data/refs/",ref,".glassed.intrex.fasta",sep="")
             g_glassed_cod <<- paste("data/refs/",ref,".glassed.codons.rdata",sep="")
-            snp_file      <-  paste("data/refs/",ref,".dbSNP.tsv",sep="")
+            snp_file      <-  paste("data/refs/",ref,".avsnp147.annovar.revcom.csv",sep="")
             if(file.exists(snp_file)){
-                g_glassed_snp <<- fread(snp_file)
+                g_glassed_snp <<- fread(snp_file,header=FALSE)
             }else{
                 g_glassed_snp <<- NULL
             }

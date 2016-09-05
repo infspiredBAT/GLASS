@@ -549,10 +549,15 @@ get_view<-function(calls,choices,snps){
 
     setkey(choices,id)
     if(!is.null(snps)){
-        positionsStr  <- unlist(lapply(choices$gen_coord,toString))
-        positionsPair <- lapply(strsplit(positionsStr,"_"),function(x){if(is.na(x[2])){c(x[1],x[1])}else{x}})
-        rsids<-lapply(positionsPair,function(x){paste(snps[snps$"V4"==x[1]&snps$V5==x[2]]$V12,"",sep="")})
-        choices <- cbind(choices,"dbSNP"=unlist(rsids))
+        ### Position based identification of SNPs
+        #positionsStr  <- unlist(lapply(choices$gen_coord,toString))
+        #positionsPair <- lapply(strsplit(positionsStr,"_"),function(x){if(is.na(x[2])){c(x[1],x[1])}else{x}})
+        #rsids<-lapply(positionsPair,function(x){paste(snps[snps$"V2"==x[1]&snps$V3==x[2]]$V8,"",sep="")})
+        #choices <- cbind(choices,"dbSNP"=unlist(rsids))
+        
+        #Exact matching for SNPs, probably needs finetuning for indels
+        getSNP  <- getSNP <- function(pos,call,mut){return(snps[snps$V2==pos & snps$V3==pos & (snps$V5==call | snps$V5==mut)]$V8)}
+        choices <- choices[,dbSNP:=getSNP(gen_coord,user_sample,user_mut),by=1:nrow(choices)]
     }
     return(choices)
 }
