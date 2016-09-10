@@ -1,5 +1,5 @@
 library(shiny)
-#library(shinyjs)
+library(shinyjs)
 library(data.table)
 library(rjson)
 library(htmlwidgets)
@@ -11,7 +11,7 @@ library(DT)
 
 shinyUI(
     fluidPage(
-#        useShinyjs(),
+         useShinyjs(),
 #        extendShinyjs(text = jsDeleteRow),
 #        extendShinyjs(text = jsSwapRow),
         theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
@@ -35,7 +35,20 @@ shinyUI(
               		$(id).css("visibility", "hidden");
               		});
               		'),
-            tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
+            tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }")),
+		    HTML("<style type='text/css'>
+                .form-control{
+                    background-color: white !important;
+                    margin-left: 4px !important;
+                }
+                .btn-file{
+                   
+                }
+                .exp_btn{
+                    display:none;
+		         }
+                
+		         </style>")
 		),
 
 		       #conditionalPanel(condition = "output.show_sample_brows==TRUE",
@@ -51,7 +64,7 @@ shinyUI(
 		        #),
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
-			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.4&nbsp&nbsp&nbsp2016-Aug-20</a>
+			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.5&nbsp&nbsp&nbsp2016-Sep-10</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -60,6 +73,15 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.5 (2016-Sep-10)</b>
+                                <ul>
+			                    <li>dbSNP annotation added for TP53 now uses exact matching instead of position matching.</li>
+                                <li>Added button to show/hide the help infobox in the variants panel.</li>
+                                <li>Titles, email us, table formatting, quick guide</li>
+                                <li>Modified export button behaviour; hide when nothing to export.</li>
+                                <li>Delete button in samples table behaviour fixed.</li>
+                                <li>Enabled the delete button on the example file.</li>
+			                    </ul>
                                 <b>ver 0.2.4 (2016-Aug-20)</b>
                                 <ul>
 			                    <li>Position based dbSNP annotation added for TP53. (Column "dbSNP" in the variants table.)</li>
@@ -152,7 +174,7 @@ The more references are selected the longer the upload process wil take.",
                         fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
                     column(2,
                         tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",
-                            shinyjs::hidden(downloadButton('export_btn','export variants [?]',class = "exp_btn"))))
+                            downloadButton('export_btn','export variants [?]',class = "exp_btn")))
 		        ),
 		        DT::dataTableOutput('samples_table')
             ),
@@ -213,16 +235,26 @@ The more references are selected the longer the upload process wil take.",
                         ,sliderInput("max_y_p","peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
 					    ,conditionalPanel(condition = "output.reverse && input.join_traces_checkbox" ,
 					                      sliderInput("opacity","R <trace opacity> F", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
+					    ,conditionalPanel(condition = "!input.join_traces_checkbox", HTML("<div id='spacer'>  </div>"))
+					    #,uiOutput('helpButton')
+					    ,actionButton("toggle_help",icon = icon("question"), "hide help",class = "show_hide_help")
+					    ,tags$style(HTML("#spacer{margin-top:43px;}"))
 					)
 				),
 				fluidRow(
-				    # "| horizontal grey line = full sequence |" left out of text bc of space
-					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=#4682B4>blue box = resize/move for navigation</font> | boxes = exons/introns | verticals = variants, ref>pri>sec | <font color=red>red dotted lines</font> = filtered noisy beginnings | <font color=brown>brown dots</font> = intensity anomalies (indels?)</br>
+				    #  === following lines left out of text bc of space ===
+				    # "| horizontal grey line = full sequence |" 
+				    #  | <font color=brown>brown dots</font> = intensity anomalies (indels?)
+				    
+				    #input.toggle_help  % 2 == 0
+				    
+					conditionalPanel("input.toggle_help % 2 == 0",column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
+                        <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=#4682B4>blue box = resize/move for navigation</font> | boxes = exons/introns | horizontal grey line = full sequence | verticals = variants, ref>pri>sec | <font color=red>red dotted lines</font> = filtered noisy beginnings</br>
                         <b>chromatogram</b>: click text to highlight call and print info^ | zoom-in enough for extra info, e.g. coords | sequences, from top = ref, call/pri, mut/sec | striped verticals = variants | grey bars = quality</br>
                         <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'x' = ignore for the session | 'confirm' = keep for the session (even if you change parameters) and make them exportable from 'samples' panel
                         </div>
-  		            "), sep = ""))))),
+  		            "), sep = "")))))
+				),
 				chromatographyOutput("plot"),
 				DT::dataTableOutput("chosen_variants_table"),
 				#conditionalPanel(condition=" output.chosen_variants_table ",downloadButton("export_btn","export")),

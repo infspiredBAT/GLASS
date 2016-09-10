@@ -60,6 +60,7 @@ shinyServer(function(input,output,session) {
 #     })
     ex <- NULL
     btn_counter <- 0
+    show_btn_counter <- 0
 
     #SAMPLE BROWSER STUFF
 
@@ -76,8 +77,12 @@ shinyServer(function(input,output,session) {
         disabled[1] <- FALSE
         g_files[,id:= 1:nrow(g_files)]
         g_files <<- g_files
+        if(nrow(g_files)==0){
+            shinyjs::hide("export_btn")
+            return(NULL)
+        }
         add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)),class="btn btn-info" )
-        add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id)',ico=rep("close",nrow(g_files)) ,dsbl = disabled,class="btn dlt_btn")
+        add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id + (Math.random()/10))',ico=rep("close",nrow(g_files)) ,dsbl = disabled,class="btn dlt_btn")
         add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
         #add_reference_dropdown <- shinyInput(selectizeInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM"),onchange = 'Shiny.onInputChange(\"goChangeSamples\",  this.id + (Math.random()/10))',label=NULL,width="100px") #selected = ref
         add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectGene_',choices=g_refs_avail, selected = g_files[,REF],width="80px")
@@ -106,6 +111,12 @@ shinyServer(function(input,output,session) {
                                                                   }')
                                                 )
                                    )
+        if(any( g_files$status!="new")){
+            shinyjs::show("export_btn")
+        }else{
+            shinyjs::hide("export_btn")
+        }
+        return(table_out)
     })
 
     #Handlers for the Sample Browser
@@ -166,7 +177,7 @@ shinyServer(function(input,output,session) {
     goDelete_sample_handler <- reactive({
         if(!is.null(input$goDeleteSamples)){
             isolate({
-                delete_id <- as.numeric(strsplit(input$goDeleteSamples, "_")[[1]][2])
+                delete_id <- floor(as.numeric(strsplit(input$goDeleteSamples, "_")[[1]][2]))/10
                 #g_files <<- g_files[-delete_id]
                 g_files <<- g_files[!g_files[,id==delete_id]]
                 #js$delRow(delete_id)
@@ -416,7 +427,10 @@ shinyServer(function(input,output,session) {
                         intrexdat$new_sample <- TRUE
                     g_intrexdat       <<- splice_variants(intrexdat)
                     calls             <-  data.table(calls,key="id")
-                    g_noisy_neighbors <<- get_noisy_neighbors(calls)
+                    
+                    # temporarily switching off functionality
+                    # 2 sept 16, Karol
+                    #g_noisy_neighbors <<- get_noisy_neighbors(calls)
                     if(!called$qual_present){
                         files_info <- paste0(files_info,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
                     }
@@ -700,10 +714,8 @@ shinyServer(function(input,output,session) {
                     prots <- paste0("<br>",big_space,"(",paste(g_view[set_by_user == TRUE]$protein,collapse=";"),")")
                 }
                 g_files<<-g_files[loaded==TRUE,status:=paste0("<b>confirmed</b>: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"),prots)]
-                # shinyjs::show("export_btn")
             }else{
                 g_files<<-g_files[loaded==TRUE,status:="viewed"]
-                # shinyjs::show("export_btn")
             }
             #output$goLock <- renderUI({actionButton(input$goLock, icon = icon("lock"))})
         })
@@ -747,7 +759,17 @@ shinyServer(function(input,output,session) {
         }
         g_reactval$updateVar <- runif(1,0,1)
     })
-
+    #output$helpButton <- renderUI({
+    #    actionButton("toggle_help",icon = icon("question"), label= label())
+    #})
+    observe({
+        if(!is.null(input$toggle_help )){
+            #show_btn_counter <<- show_btn_counter + 1
+            if(input$toggle_help %% 2 == 0) html("toggle_help",'<i class="fa fa-question"></i> hide help')
+            else html("toggle_help",'<i class="fa fa-question"></i> show help')
+        }
+    })
+    
 
     #
     # Send message to JS
