@@ -19,7 +19,7 @@ samples_load <- function(s_files,output,g_files,alignTo){
                 if(!is.null(abi)&&!is.null(seq)) {
                     #try catch
                     #seq <- DNAString(gsub("\\*","N",abi$PBAS.1))
-                    mas <- 60                   #Minimum alignment score (Guess)
+                    mas <- 60                   #Minimum alignment score (guess)
                     score_bst <- 0
                     ref_name <- "-"
                     rev <- FALSE
@@ -27,6 +27,7 @@ samples_load <- function(s_files,output,g_files,alignTo){
                     if(is.null(alignTo)){
                         ref <- "-"
                     }else{
+                        #find best matching reference
                         for(j in 1:length(alignTo)){
                             ref <- read.fasta(paste0("data/refs/",alignTo[j],".glassed.intrex.fasta"))
                             ref <- toupper(paste0(unlist(ref),collapse = ""))
@@ -46,7 +47,6 @@ samples_load <- function(s_files,output,g_files,alignTo){
                                 }else{
                                     score_bst <- score_rev
                                 }
-                                
                                 if(score_fwd > mas & score_fwd > score_rev){
                                     ref_name <- alignTo[j]
                                     rev <- FALSE
@@ -60,7 +60,7 @@ samples_load <- function(s_files,output,g_files,alignTo){
                     incProgress(1/nrow(s_files))
                     #test fwd/rev/ which reference
                     if(!rev)
-                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0))
+                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0,coding = '',protein = '',VAF=''))
                     else{
                         #pair fwd and rev samples with matching names
                         #if exactly one fwd file matches the stripped name of given rev file and this fwd file has no pair then:
@@ -76,10 +76,10 @@ samples_load <- function(s_files,output,g_files,alignTo){
                             if(loaded[matches]$REV_name == "-"&& loaded[matches]$REF==ref_name)
                                 loaded[matches,`:=`(REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath)]
                             else{
-                                loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0))
+                                loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0,coding = '',protein = '',VAF = '', dbSNP = '', dbSNP_id = ''))
                             }
                         }else{
-                            loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0))
+                            loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0,coding = '',protein = '',VAF = '',dbSNP = '', dbSNP_id = ''))
                         }
                     }
                         

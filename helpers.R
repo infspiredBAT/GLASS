@@ -426,7 +426,7 @@ get_choices <- function(calls,ref){
         choices[,sample_peak_pct := mround(sample_peak_pct,1),by=1:nrow(choices)]
         choices[,mut_peak_pct := mround(mut_peak_pct,1),by=1:nrow(choices)]
 
-        choices[,`:=`(coding = paste0("c.", coding_seq), protein="")]
+        choices[,`:=`(coding = paste0("c.", coding_seq), protein="p.?")]
     # 1st variant
         # mismatch
         choices[user_sample != reference & user_sample != "-" & reference   != "-", coding := paste0(coding, reference, ">", user_sample)]#, "(", sample_peak_pct, "%)")]
@@ -436,6 +436,8 @@ get_choices <- function(calls,ref){
         choices[user_sample != reference & user_sample == "-",                      coding := paste0(coding, "del", reference)]#,            "(", sample_peak_pct, "%)")]
         # protein
         choices[aa_sample   != aa_ref,                                              protein:= paste0("p.", aa_ref, codon, aa_sample)]#,      "(", sample_peak_pct, "%)")]
+        
+        choices[aa_sample   == aa_ref,                                              protein:= "p.(=)"]
     # 2nd variant
         # mismatch without 1st variant
         choices[user_mut != reference & user_sample == reference   & user_mut    != "-" & reference   != "-",      coding := paste0(coding, reference, ">", user_mut)]#, "(", mut_peak_pct, "%)")]

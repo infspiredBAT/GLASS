@@ -40,6 +40,7 @@ shinyServer(function(input,output,session) {
     g_reactval              <- reactiveValues()
     g_reactval$updateVar    <- 0
     g_refs_avail            <<- c("-","TP53","NOTCH1","ATM","CALR")
+    #g_files = a variable that represents the data table containing individual samples and information about them 
     g_files                 <- data.table(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
                                           FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
                                           REV_name=c("TP53 ; rev ; low freq w frameshift"),
@@ -50,7 +51,12 @@ shinyServer(function(input,output,session) {
                                           status="new",
                                           id=1,
                                           brush_fwd = 0,
-                                          brush_rev = 0
+                                          brush_rev = 0,
+                                          coding = '',
+                                          protein = '',
+                                          VAF = '',
+                                          dbSNP = '',
+                                          dbSNP_id = ''
                                 )
 
 #     get_file <- reactive({
@@ -89,7 +95,7 @@ shinyServer(function(input,output,session) {
         #add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectInput_',choices=c("TP53","NOTCH1","ATM","FOUR","FIVE","SIX"),label=NULL) #selected = ref
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
         #out<-cbind(g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,g_files[,list("reverse"=REV_name)],"reference"=add_reference_dropdown,delete=add_delete_buttons,load=add_load_buttons)
-        out<-cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?]</div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status)])
+        out<-cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?]</div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status,coding,protein,VAF,dbSNP)])
         table_out <- DT::datatable(out,escape=FALSE,
                                    selection = "none",
                                    style = "bootstrap",
@@ -127,7 +133,7 @@ shinyServer(function(input,output,session) {
             loaded <- ""
             error = ""
             ret <- samples_load(input$browser_files,output,g_files,input$alignTo)
-            g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded)
+            g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded,fill=TRUE)
             g_files[,id:= 1:nrow(g_files)]
             g_files <<- g_files
             if(length(ret$not_loaded)>1){
@@ -152,7 +158,7 @@ shinyServer(function(input,output,session) {
                 g_files[pos_at]$status <- "new"
                 g_files[pos_at]$brush_rev <- 0
                 g_files[pos_at]$calls = ""
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new",brush_fwd = 0, brush_rev = 0))
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new",brush_fwd = 0, brush_rev = 0, coding = '', protein = '', VAF = '',dbSNP = '',dbSNP_id = ''))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name
@@ -708,12 +714,16 @@ shinyServer(function(input,output,session) {
             }
 
             if(nrow(g_view[set_by_user==TRUE])>0){
-                big_space <- "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"
-                prots <- paste(g_view[set_by_user == TRUE]$protein,collapse="")
-                if(prots != ""){
-                    prots <- paste0("<br>",big_space,"(",paste(g_view[set_by_user == TRUE]$protein,collapse=";"),")")
-                }
-                g_files<<-g_files[loaded==TRUE,status:=paste0("<b>confirmed</b>: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"),prots)]
+                #prots <- paste(g_view[set_by_user == TRUE]$protein,collapse="")
+                #g_files<<-g_files[loaded==TRUE,status:=paste0("<b>confirmed</b>: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"),prots)]
+                n = nrow(g_view[set_by_user==TRUE])
+                
+                g_files<<-g_files[loaded==TRUE,':='(status = paste0(n," mut. found",collapse=""),
+                                                    coding = paste(g_view[set_by_user == TRUE]$coding,collapse="<br>"),
+                                                    protein = paste(g_view[set_by_user == TRUE]$protein ,collapse="<br>"),
+                                                    dbSNP = paste(g_view[set_by_user == TRUE]$dbSNP ,collapse="<br>"),
+                                                    dbSNP_id = paste(gsub("<a .*>(.*)</a>","\\1",g_view[set_by_user == TRUE]$dbSNP) ,collapse="<br>"),
+                                                    VAF=paste(g_view[set_by_user == TRUE]$mut_peak_pct,collapse=" <br> "))]
             }else{
                 g_files<<-g_files[loaded==TRUE,status:="viewed"]
             }
@@ -810,21 +820,21 @@ shinyServer(function(input,output,session) {
             paste('data-', Sys.Date(), '.xlsx', sep='')
         },
         content = function(con) {
-            out<-data.table("sample"=character(),"coding variant"=character(),"protein variant"=character())
+            out<-data.table("sample"=character(),"coding variant"=character(),"protein variant"=character(),"VAF"=character(),"dbSNP"=character())
 
             for(i in 1:nrow(g_files)){
                 if(g_files[i]$status=="new"){
                     var = "NA"
                 }else if(g_files[i]$status == "viewed"){
                     var = "wt"
+                }else {
+                    var = g_files[i]$coding
                 }
-                names<-gsub("<b>confirmed</b>:","",g_files[i]$status)
-                names<-gsub("&nbsp","",names)
-                names<-strsplit(names,"<br>")[[1]]
-                coding <- names[1]
-                if(!is.na(names[2])) protein <- names[2]
-                else protein<-""
-                out <- rbind(out,list(paste0(g_files[i]$FWD_name,":",g_files[i]$REV_name),coding, gsub(")","",gsub('(',"",protein,fixed=TRUE),fixed=TRUE)))
+                out <- rbind(out,list(paste0(g_files[i]$FWD_name,":",g_files[i]$REV_name),
+                                      gsub("<br>",";", var),
+                                      gsub("<br>",";", g_files[i]$protein),
+                                      gsub("<br>",";", g_files[i]$VAF),
+                                      gsub("<br>",";", g_files[i]$dbSNP_id) ))
             }
                 #out<-rbind(out,list("1","2","2"))
 
