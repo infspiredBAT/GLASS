@@ -10,37 +10,27 @@ HTMLWidgets.widget({
         var max_y = 0;
         //var margin  = {top: 10,  right: 10, bottom: 100, left: 40},   //minimap on bottom
         //    margin2 = {top: 430, right: 10, bottom: 20,  left: 40},   //minimap on top
-        var margin  = {top: 55, right: 10,bottom: 20, left:10},
+        var margin  = {top: 65, right: 10,bottom: 20, left:10},
             margin2 = {top: 20, right: 10,bottom: 420,  left:10},
             width   = w - margin.left - margin.right,
             height  = h - margin.top  - margin.bottom,
             half_height = height/1.6;
             height2 = h - margin2.top - margin2.bottom;
-        var widthScale   = d3.scaleLinear().range([0,width]),
-            width2Scale  = d3.scaleLinear().range([0,width]),  //remains constant, to be used with context
-            heightScale  = d3.scaleLinear().range([height,0]),
-    	    height2Scale = d3.scaleLinear().range([height2,0]),
-            heightScale_fwd_split = d3.scaleLinear().range([half_height,(2*half_height -  height)]),
-            heightScale_rev_split = d3.scaleLinear().range([height,half_height]);
+        var widthScale   = d3.scale.linear().range([0,width]),
+            width2Scale  = d3.scale.linear().range([0,width]),  //remains constant, to be used with context
+            heightScale  = d3.scale.linear().range([height,0]),
+    	    height2Scale = d3.scale.linear().range([height2,0]),
+            heightScale_fwd_split = d3.scale.linear().range([half_height,(2*half_height -  height)]),
+            heightScale_rev_split = d3.scale.linear().range([height,half_height]);
             //heightScale_fwd = heightScale;
             //heightScale_rev = heightScale;
-        var heightScale_fwd = heightScale_fwd_split;
+            heightScale_fwd = heightScale_fwd_split;
             heightScale_rev = heightScale_rev_split;
 
-        function rescaleWidth(width_in){
-                var width_new   = width_in - margin.left - margin.right;
-                width2Scale.range([0,width_new]);
-                widthScale.range([0,width_new]);
-                /* brush v4
-                brush_fw_mini.attr("x2",width2Scale(brush_fw_extent[1]));
-                brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
-                             .attr("x2",width2Scale.domain()[1]);
-                             v4 end*/
-        }
-        var line_fwd = d3.line()
+        var line_fwd = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return heightScale_fwd(d)});
-        var line_rev = d3.line()
+        var line_rev = d3.svg.line()
             .x(function(d,i){return widthScale(i)})
             .y(function(d){return heightScale_rev(d)});
         var call_opacity = 0;
@@ -50,21 +40,22 @@ HTMLWidgets.widget({
         //        .y(function(d){return heightScale(d[1]);});
         var mult = 2;
 
-        var noise_area_fwd = d3.area()
+        var noise_area_fwd = d3.svg.area()
                 .x(function(d){return widthScale(d[0]);})
                 .y0(function(d){return (heightScale_fwd(0)+2);})
                 .y1(function(d){return heightScale_fwd(d[1]*mult);});
-        var noise_area_rev = d3.area()
+        var noise_area_rev = d3.svg.area()
                 .x(function(d){return widthScale(d[0]);})
                 .y0(function(d){return heightScale_rev(0)+2;})
                 .y1(function(d){return heightScale_rev(d[1]*mult);});
         var svg = d3.select(el).append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom);
-        var brush    = d3.brushX().on("brush",brushed   );
-        /*v4
-        var brush_fw = d3.brushX().on("end",brushed_fw);
-        var brush_rv = d3.brushX().on("end",brushed_rv);
+        var brush    = d3.svg.brush().on("brush",redrawLines)
+                                     .on("brushend",brushed)
+                                     .on("brushstart",hideLabels);
+        var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
+        var brush_rv = d3.svg.brush().on("brushend",brushed_rv);
         var brush_fw_mini = svg.append("line")
                                .attr("x1", 10)
                                .attr("y1", 18)
@@ -72,8 +63,8 @@ HTMLWidgets.widget({
                                .attr("y2", 18)
                                .attr("stroke-width", 2)
                                .style("stroke-dasharray", ("3, 3"))
-                               .attr("stroke", "black")
-                               .attr("opacity",0.4);
+                               .attr("stroke", "red")
+                               .attr("opacity",1);
         var brush_rv_mini = svg.append("line")
                                //.attr("x1", 10)
                                .attr("y1", 72)
@@ -81,13 +72,24 @@ HTMLWidgets.widget({
                                .attr("y2", 72)
                                .attr("stroke-width", 2)
                                .style("stroke-dasharray", ("3, 3"))
-                               .attr("stroke", "black")
-                               .attr("opacity",0.4);
-                               v4 end*/
+                               .attr("stroke", "red")
+                               .attr("opacity",1);
         var brush_fw_g;
         var brush_rv_g;
+
         var brush_fw_extent;
         var brush_rv_extent;
+        var frame = svg.append("rect").attr("x", 0 + margin.right)
+                                      .attr("y",0+margin.top+30)
+                                      .attr("rx",3)
+                        			  .attr("ry",3)
+                                      .attr("width",width)
+                                      .attr("height",height-20)
+                                      .attr("stroke","rgb(70,130,180)") //steal blue
+                                      .attr("fill-opacity",0)
+                                      .attr("fill","white")
+                                      .attr("stroke-width",2);
+
         var focus = svg.append("g")
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -99,6 +101,25 @@ HTMLWidgets.widget({
         var context = svg.append("g")
             .attr("class", "context")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+            var defs = svg.append("defs");
+
+        var filter = defs.append("filter")
+                         .attr("id", "drop-shadow")
+                         .attr("height", "130%");
+        filter.append("feGaussianBlur")
+              .attr("in", "SourceAlpha")
+              .attr("stdDeviation", 5)
+              .attr("result", "blur");
+        filter.append("feOffset")
+              .attr("in", "blur")
+              .attr("dx", 5)
+              .attr("dy", 5)
+              .attr("result", "offsetBlur");
+        var feMerge = filter.append("feMerge");
+        feMerge.append("feMergeNode")
+               .attr("in", "offsetBlur");
+        feMerge.append("feMergeNode")
+               .attr("in", "SourceGraphic");
         var join = "FALSE";
 
         var label_pos = {};        //map for pisitioning labels representing called base
@@ -143,7 +164,7 @@ HTMLWidgets.widget({
         var exon_boxes        = context.append("g");
         var intrex_txt        = context.append("g");
         var intrex_num        = context.append("g");
-        var varim_gen         = context.append("g");
+        var varim_ref         = context.append("g");
         var varim_user_s      = context.append("g");
         var varim_user_m      = context.append("g");
         var noisyn_con        = context.append("g");  //noisy neighbours
@@ -151,11 +172,11 @@ HTMLWidgets.widget({
         var aa_ref            = focus.append("g");
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
-        /*v4
-        function finish_fwBrushInit(to,rev,height){
-            console.log("brush fw finish:" + to + " " + rev);
 
-            //brush_fw.x(widthScale);
+        function finish_fwBrushInit(to,rev,height){
+            //console.log("brush fw finish:" + to + " " + rev);
+
+            brush_fw.x(widthScale);
             if(brush_fw_g==undefined){
                  brush_fw_g = focus.append("g")
                     .attr("class","brush_fw excl")
@@ -171,13 +192,13 @@ HTMLWidgets.widget({
                  .attr("rx", 2);
 
             brush_fw_g.selectAll("rect")
-                .attr("y",150)
+                .attr("y",138)
                 //.attr("height",function (d){if(rev!=0){return 120;}else{return 280;}});
                 .attr("height",height);
 
             brush_fw_g.selectAll(".extent")
-                .attr("fill","black")
-                .attr("opacity",0.09);
+                .attr("fill","white")
+                .attr("opacity",0.6);
             //console.log(widthScale);
             //console.log("brush fw extent in init",to);
             brush_fw.extent([0,to]);
@@ -185,29 +206,26 @@ HTMLWidgets.widget({
             //brush_fw(brush_fw_g);
             //brush_fw.event(d3.select(".brush_fw"));
             //resetHandlers_fw(brush_fw_g);
+            brush_fw_mini.attr("x2",width2Scale(to));
         }
         function finish_rvBrushInit(from,to,rev = null){
-            console.log("brush rv finish:" + from + " " + to);
+            //console.log("brush fw finish:" + from + " " + to);
             mod = 0;
             if(!rev){
                 mod = 160;
             }
-            console.log("chckpnt1a");
             if(to == 0){
                 if(brush_rv_g!= undefined){
                     brush_rv_g.selectAll("rect")
                         .attr("height",0);
             }
             }else{
-                console.log("chckpnt1aa")
-                //brush_rv.x(widthScale);
+                brush_rv.x(widthScale);
                 if(brush_rv_g==undefined){
-                    console.log(brush_fw);
                      brush_rv_g = focus.append("g")
                         .attr("class","brush_rv excl")
                         .call(brush_fw);
                 };
-                console.log("chckpnt1b");
                 brush_rv_g.selectAll(".resize").append("rect")
                      .attr("class","hook")
                      .attr("fill", "red")
@@ -216,15 +234,13 @@ HTMLWidgets.widget({
                          return i ? 0 : -3;
                      })
                      .attr("rx", 2);
-                console.log("chckpnt1c");
 
                 brush_rv_g.selectAll("rect")
-                    .attr("y",310 - mod)
-                    .attr("height",120 + mod);
+                    .attr("y",295 - mod)
+                    .attr("height",140 + mod);
                 brush_rv_g.selectAll(".extent")
-                    .attr("fill","black")
-                    .attr("opacity",0.09);
-                console.log("chckpnt1d");
+                    .attr("fill","white")
+                    .attr("opacity",0.6);
                 brush_rv.extent([from,to]);
                 brush_rv_extent = brush_rv.extent();
                 brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
@@ -234,7 +250,6 @@ HTMLWidgets.widget({
                 //console.log("setting brush rv" + brush_rv_extent);
             }
         }
-        v4 end*/
 
         function brushed() { redraw(); }
         function brushed_fw() {
@@ -246,8 +261,8 @@ HTMLWidgets.widget({
             Shiny.onInputChange("brush_fw", {coord: extent1[1]});
             brush_fw_extent = extent1;
             brush_fw_mini.attr("x2",width2Scale(extent1[1]));
-            console.log(extent1[1]);
-            console.log(width2Scale(extent1[1]));
+            //console.log(extent1[1]);
+            //console.log(width2Scale(extent1[1]));
             d3.select(this).transition()
                 .call(brush_fw.extent(extent1))
                 .call(brush_fw.event);
@@ -272,9 +287,8 @@ HTMLWidgets.widget({
             //context.call(brush.extent([start,end]));
             //console.log(start+en);
             brush.extent([start,end]);
-            //v4 2 lines
-            //brush(d3.select(".brush").transition());
-            //brush.event(d3.select(".brush").transition().delay(100));
+            brush(d3.select(".brush").transition());
+            brush.event(d3.select(".brush").transition().delay(100));
             redraw();
         }
         function reHeight(domain_y){
@@ -283,42 +297,77 @@ HTMLWidgets.widget({
             heightScale_rev_split.domain([0,domain_y-1]);
             redraw();
         }
+        function rescaleWidth(width_in){
+                var width_new   = width_in - margin.left - margin.right;
+                width2Scale.range([0,width_new]);
+                widthScale.range([0,width_new]);
+                brush_fw_mini.attr("x2",width2Scale(brush_fw_extent[1]));
+                brush_rv_mini.attr("x1",width2Scale(brush_rv_extent[0]))
+                             .attr("x2",width2Scale.domain()[1]);
+                context.selectAll(".fullSeqW").attr("x2",width_new);
+                frame.attr("width",width_new);
+        }
+
+        function hideLabels(){
+            focus.selectAll(".peak_label").attr("visibility","hidden");
+            focus.selectAll("g").selectAll(".area_fwd").attr("visibility","hidden");
+            focus.selectAll("g").selectAll(".area_rev").attr("visibility","hidden");
+            focus.selectAll(".ref").attr("visibility","visible");
+            focus.selectAll(".user").attr("visibility","visible");
+            brush_fw_g.attr("visibility","hidden");
+            brush_rv_g.attr("visibility","hidden");
+        }
+        function redrawLines(){
+            widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
+            focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
+            focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
+            focus.selectAll(".ref").attr("x",function(d){return widthScale(d["trace_peak"]);});
+            focus.selectAll(".user").attr("x",function(d){return widthScale(d["trace_peak"]);});
+            //focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
+
+        }
         function redraw()  {
             //console.log("redraw");
-            //v4 2 lines
-            //widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
-            //widthScale.domain(brush.extent());
+            widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             //console.log("old"+old);
             //console.log("extent"+brush_fw.extent());
             //console.log("setting brush_fw_extent in redraw: "+ brush_fw_extent);
-        //v4 2 lines commented
-        //brush_fw.extent(brush_fw_extent);
-        //brush_fw(brush_fw_g);
-            //brush_fw.event(d3.select(".brush_fw").transition().delay(1));
+            brush_fw_g.attr("visibility","visible");
+            brush_fw.extent(brush_fw_extent);
+            brush_fw(brush_fw_g);
+            brush_fw.event(d3.select(".brush_fw").transition().delay(1));
             if(brush_rv_g!=undefined){ //this is not good
-                //v4 2 lines
-                //brush_rv.extent(brush_rv_extent);
-                //brush_rv(brush_rv_g);
-                //brush_rv.event(d3.select(".brush_rv").transition().delay(1));
+                brush_rv_g.attr("visibility","visible");
+                brush_rv.extent(brush_rv_extent);
+                brush_rv(brush_rv_g);
+                brush_rv.event(d3.select(".brush_rv").transition().delay(1));
             }
             var w = brush.extent()[1]-brush.extent()[0] ;
             focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
 
-            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd);
-            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev);
+            focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd).attr("visibility","visible");
+            focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev).attr("visibility","visible");
             focus.selectAll(".scope").attr("x",function(d){return widthScale(d["trace_peak"])-12;});
             focus.selectAll(".peak_label").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
             focus.selectAll(".qual_rev").attr("x",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".line").attr("x1",function(d){return widthScale(d["trace_peak"]);})
                                     .attr("x2",function(d){return widthScale(d["trace_peak"]);});
+
+
+            focus.selectAll(".var_noise_indic").attr("stroke-width",widthScale(12)-widthScale(0));
+            //sconsole.log(widthScale(12)-widthScale(0));
             //conditional visibility
             if(w<260){
                 focus.selectAll(".peak_label").attr("visibility","visible");
                 if(w===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
                 focus.selectAll(".peak_label").attr("visibility","hidden");
+                //following three lines added after changes in UI, makes more sense to always show these
+                focus.selectAll(".ref").attr("visibility","visible");
+                focus.selectAll(".user").attr("visibility","visible");
+                focus.selectAll(".var_noise_indic").attr("visibility","visible");
                 if(w<800){
                   focus.selectAll(".qual_fwd").attr("visibility","visible");
                   focus.selectAll(".qual_rev").attr("visibility","visible");
@@ -342,6 +391,7 @@ HTMLWidgets.widget({
                 heightScale_rev = heightScale;
                 redraw();
             }
+
         }
         function updateLine(data,base,rev){
             switch(base) {
@@ -429,18 +479,18 @@ HTMLWidgets.widget({
             text.exit().remove();
         }
         function showVarInMinimap(choices){
-            //genomic
+            //reference
             //console.log("showVarInMinimap");
-            var g = varim_gen.selectAll("line").data(choices);
-            g.enter().append("line").attr("class","enter");
-            g.attr("class","minimap context")
+            var r = varim_ref.selectAll("line").data(choices);
+            r.enter().append("line").attr("class","enter");
+            r.attr("class","minimap context")
       			.attr("x1",function(d){return width2Scale(d["trace_peak"]);})
       			.attr("y1",4)
       			.attr("x2",function(d){return width2Scale(d["trace_peak"]);})
       			.attr("y2",24)
       			.attr("stroke-width",3)
       			.attr("stroke",function(d) { return get_color(d["reference"])});
-            g.exit().remove();
+            r.exit().remove();
   			    // user
             var us = varim_user_s.selectAll("line").data(choices);
             us.enter().append("line").attr("class","enter");
@@ -463,14 +513,17 @@ HTMLWidgets.widget({
   				.attr("stroke-width",3)
   				.attr("stroke",function(d) { return get_color(d["user_mut"])});
             um.exit().remove();
+
+            console.log(choices);
             var v = var_ind_focus.selectAll("line").data(choices);
+            //strandness in choices 0 = undetermined (should not occure); 1 = forward strand; 2 = reverse strand; 3 = both, 4 = undetermined indel, 5 = indel forward only, 6 = indel reverse only, 7 = indel both strands
             v.enter().append("line").attr("class","enter");
             v.attr("class","peak_label short line var_noise_indic")
   		        .attr("x1",function(d){return widthScale(d["trace_peak"]);})
-  		        .attr("y1",140)
+  		        .attr("y1",function(d){if(d["strand"]==2){return 280;}else{return 140;}})
   		        .attr("x2",function(d){return widthScale(d["trace_peak"]);})
-  		        .attr("y2",400)
-  		        .attr("stroke-width",20).attr("stroke","rgba(255,0,0,0.15)").attr("stroke-dasharray","2,8");
+  		        .attr("y2",function(d){if(d["strand"]==1){return 270;}else{return 420;}})
+  		        .attr("stroke-width",widthScale(12)-widthScale(0)).attr("stroke","rgba(255,0,0,0.50)").attr("stroke-dasharray","1,7");
             v.exit().remove();
 
         }
@@ -590,7 +643,7 @@ HTMLWidgets.widget({
             iet.enter().append("text");
             iet.attr("class","context")
   				.attr("x",function(d){return width2Scale(d["start"]);})
-  				.attr("y",-4)
+  				.attr("y",-5)
   				.attr("opacity",0.8)
   				.attr("fill","black")
   				.text(function(d) {
@@ -601,7 +654,7 @@ HTMLWidgets.widget({
             ien.enter().append("text");
   		    ien.attr("class","context")
   				.attr("x",function(d){return width2Scale(d["start"]);})
-  				.attr("y",62)
+  				.attr("y",64)
   				.attr("opacity",0.8)
   				.text(function(d){return d["id"];})
   				.attr("fill","black");
@@ -742,10 +795,8 @@ HTMLWidgets.widget({
             context: context,
 	        brush:   brush,
             redraw:  redraw,
-            /*v4
             finish_fwBrushInit: finish_fwBrushInit,
             finish_rvBrushInit: finish_rvBrushInit,
-            v4 end*/
 	        join:    join,
             joinView:joinView,
             focus:   focus,
@@ -834,14 +885,11 @@ HTMLWidgets.widget({
   			var focus   = instance.focus;
   			var context = instance.context;
   			var brush   = instance.brush;
-  			//var widthScale  = instance.widthScale;
+  			var widthScale  = instance.widthScale;
   			var heightScale = instance.heightScale;
             var width2Scale = instance.width2Scale;
-            console.log(instance.widthScale(30));
-            console.log(domain_x);
-  			instance.widthScale.domain([0,domain_x]);
-            var widthScale  = instance.widthScale;
 
+  			widthScale.domain([0,domain_x]);
   			width2Scale.domain([0,domain_x]);
   			heightScale.domain([0,domain_y]);
   	        instance.heightScale_fwd_split.domain([0,domain_y]);
@@ -849,7 +897,7 @@ HTMLWidgets.widget({
 
   			//visualise fullseq width
   			instance.full_line
-  				.append("line").attr("class","context")
+  				.append("line").attr("class","context fullSeqW")
   				.attr("x1",0)
   				.attr("y1",25)
   				.attr("x2",widthScale(domain_x))
@@ -858,20 +906,17 @@ HTMLWidgets.widget({
 
             //intron/exon boxes
             instance.setIntrexBoxes(intrex);
-  			//brush.x(width2Scale);
-            var brush_fw_height = 120;
+  			brush.x(width2Scale);
+            var brush_fw_height = 140;
             if(intens_rev == ""){
                 brush_fw_height = 280;
             }
             if(single_rev==true){
                 brush_fw_height = 0;
             }
-            /* v4
             instance.finish_fwBrushInit(x["brush_fw"],rev,brush_fw_height);
-            console.log("brush_rv: ", x["brush_rv"])
-            console.log("chckpnt");
+            //console.log("brush_rv: ", x["brush_rv"])
             if(rev!=0){
-                console.log("domain_x: " + domain_x);
                 instance.finish_rvBrushInit(x["brush_rv"],domain_x,rev);
             }else if(single_rev){
                 instance.finish_rvBrushInit(x["brush_fw"],domain_x,rev);
@@ -880,20 +925,20 @@ HTMLWidgets.widget({
             else{
                 instance.finish_rvBrushInit(0,0);
             }
-            console.log("chckpnt2");
-            end V4*/
+
             context.append("g")
 //				.attr("class", "x brush")
-                .call(brush)
                 .attr("class","brush context")
+                .call(brush)
       			.selectAll("rect")
   				.attr("y", -16)
-                .attr("height", 80) //height2 + 10)
+                .attr("height", 82) //height2 + 10)
                 .attr("rx",3)
   				.attr("ry",3)
-  				.attr("fill","rgba(255,255,255,0.3)")
-  				.attr("stroke-width",2).attr("stroke","red").attr("stroke-dasharray","3,6")
-  				.attr("opacity",0.6);
+  				.attr("fill","rgba(70,130,180,0.05)") //steal blue
+                .style("filter", "url(#drop-shadow)")
+  				.attr("stroke-width",2).attr("stroke","rgb(70,130,180)")//.attr("stroke-dasharray","3,6")
+  				.attr("opacity",1);
 
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
@@ -917,12 +962,10 @@ HTMLWidgets.widget({
             }else{
                 instance.joinView("TRUE");
             }
-            console.log("test final");
-            console.log(instance.widthScale(30));
-            console.log(widthScale(30));
+
             instance.scope_g.selectAll("scope").data(calls).enter()        //scope (position indicator)
                  .append("rect").attr("class",function(d){return "scope ".concat("scope").concat(d["trace_peak"]);})
-                 .attr("x",function(d){return (instance.widthScale(d["trace_peak"])-12)})
+                 .attr("x",function(d){return (widthScale(d["trace_peak"])-12)})
                  .attr("y",20).attr("rx",2).attr("ry",2)
                  .attr("width",24).attr("height",instance.height-90)
                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
@@ -1030,6 +1073,7 @@ HTMLWidgets.widget({
                 if(show_calls){ instance.call_opacity = 0.8; }
                 else{ instance.call_opacity = 0; }
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
+                instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]));
                 instance.showVarInMinimap(choices);
                 instance.choices = x.choices;
                 instance.showNoisyNbr(noisy_neighbors);
