@@ -718,12 +718,13 @@ shinyServer(function(input,output,session) {
                 #g_files<<-g_files[loaded==TRUE,status:=paste0("<b>confirmed</b>: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"),prots)]
                 n = nrow(g_view[set_by_user==TRUE])
                 
-                g_files<<-g_files[loaded==TRUE,':='(status = paste0(n," mut. found",collapse=""),
-                                                    coding = paste(g_view[set_by_user == TRUE]$coding,collapse="<br>"),
-                                                    protein = paste(g_view[set_by_user == TRUE]$protein ,collapse="<br>"),
-                                                    dbSNP = paste(g_view[set_by_user == TRUE]$dbSNP ,collapse="<br>"),
+                g_files<<-g_files[loaded==TRUE,':='(status   = paste0(n," mut. found",collapse=""),
+                                                    coding   = paste(g_view[set_by_user == TRUE]$coding,  collapse="<br>"),
+                                                    protein  = paste(g_view[set_by_user == TRUE]$protein, collapse="<br>"),
+                                                    dbSNP    = paste(g_view[set_by_user == TRUE]$dbSNP,   collapse="<br>"),
                                                     dbSNP_id = paste(gsub("<a .*>(.*)</a>","\\1",g_view[set_by_user == TRUE]$dbSNP) ,collapse="<br>"),
-                                                    VAF=paste(g_view[set_by_user == TRUE]$mut_peak_pct,collapse=" <br> "))]
+                                                    VAF      = paste(g_view[set_by_user == TRUE]$VAF,     collapse=" <br> ")
+                                                    )]
             }else{
                 g_files<<-g_files[loaded==TRUE,status:="viewed"]
             }

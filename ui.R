@@ -64,7 +64,7 @@ shinyUI(
 		        #),
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
-			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.6&nbsp&nbsp&nbsp2016-Sep-29</a>
+			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.7&nbsp&nbsp&nbsp2016-Oct-7</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -73,6 +73,11 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.7 (2016-Oct-7)</b>
+                                <ul>
+			                     <li>A bug preventing the loading of some single nucleotide sequences fixed.</li>
+			                     <li>Correction in the way VAF (variant allele frequency) is estimated.</li>
+			                     </ul>
                                 <b>ver 0.2.6 (2016-Sep-29)</b>
                                 <ul>
 			                    <li>Small changes in the table of samples formating for a more comprehensive representation of variants and a more unified style in both the samples table and the final exported excel table.</li>

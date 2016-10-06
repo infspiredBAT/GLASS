@@ -25,7 +25,7 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
                                 ,reference   = str_split(complement(gsub('[\\*,!]','',data$PBAS.1)),pattern="")[[1]][seq_along(data$PLOC.1)][length(seq_along(data$PLOC.1)):1]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual[length(qual):1]
-                                )
+                                ,VAF         = 0)
         }else{
             res   <- generate_ref(gsub('[\\*,!]','',data$PBAS.1),glassed_ref)
             calls <- data.table(id           = seq_along(data$PLOC.1)
@@ -33,7 +33,8 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
                                 ,call        = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,reference   = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,trace_peak  = data$PLOC.1
-                                ,quality     = qual)
+                                ,quality     = qual
+                                ,VAF         = 0)
         }
         # calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
         setkey(res[[2]],id)
@@ -67,7 +68,8 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
                             ,quality_fwd    = user_align[[4]]
                             ,quality_rev    = user_align[[5]]
                             ,trace_peak     = data$PLOC.1
-                            ,trace_peak_rev = data_rev$PLOC.1)
+                            ,trace_peak_rev = data_rev$PLOC.1
+                            ,VAF            = 0)
 #         calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
 #         calls[,rm7qual_fwd := c(quality_fwd[1:3],rollmean(quality_fwd,k=7),quality[(length(quality_fwd) - 2):length(quality_fwd)])]
 #         calls[,rm7qual_rev := c(quality_rev[1:3],rollmean(quality_rev,k=7),quality[(length(quality_rev) - 2):length(quality_rev)])]
