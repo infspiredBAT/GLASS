@@ -545,7 +545,7 @@ shinyServer(function(input,output,session) {
     output$plot <- renderChromatography({
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            ret<-chromatography(g_intens,g_intens_rev,g_single_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,g_qual_present,g_brush_fwd,g_brush_rev)
+            ret<-chromatography(g_intens,g_intens_rev,g_single_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,input$show_qual_checkbox,g_qual_present,g_brush_fwd,g_brush_rev)
             g_new_sample <<- FALSE
             return(ret)
         }

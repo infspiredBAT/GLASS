@@ -46,7 +46,16 @@ shinyUI(
                 }
                 .exp_btn{
                     display:none;
-		         }
+                }
+                .irs-bar, .irs-bar-edge{
+                    visibility: hidden;
+                }
+                .irs-slider {
+                    background-color: #777;
+                }
+                .zoom{
+                    fill:white;
+                }
                 
 		         </style>")
 		),
@@ -236,7 +245,8 @@ The more references are selected the longer the upload process wil take.",
 					),
                     column(1),
 					column(1
-					    ,checkboxInput("show_calls_checkbox","   show calls", value = F)
+					    ,checkboxInput("show_qual_checkbox","show quality", value = F)
+					    ,checkboxInput("show_calls_checkbox","show calls", value = F)
 					    ,conditionalPanel(condition = "output.reverse",
                                           checkboxInput("join_traces_checkbox","join traces", value = F))
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
