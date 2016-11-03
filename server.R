@@ -239,7 +239,6 @@ shinyServer(function(input,output,session) {
                                       brush_rev=g_brush_rev)]
         }
 
-
     })
 #    change_reference <- observe ({
 #        input$gene_of_interest

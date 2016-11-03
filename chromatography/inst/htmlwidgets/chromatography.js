@@ -64,11 +64,13 @@ HTMLWidgets.widget({
         // var brush_rv = d3.svg.brush().on("brushend",brushed_rv);
         var filt_fwd_x = 0;
         var filt_rev_x = 0;
+        var filt_single_rev = false;
         var filt_fwd_mini = svg.append("line")
                                .attr("x1", 10)
                                .attr("y1", 18)
                                .attr("x2", 250)
                                .attr("y2", 18)
+                               .attr("clip-path","url(#clip)")
                                .attr("stroke-width", 2)
                                .style("stroke-dasharray", ("3, 3"))
                                .attr("stroke", "red")
@@ -78,6 +80,7 @@ HTMLWidgets.widget({
                                .attr("y1", 72)
                                //.attr("x2", 250) // don't know before init
                                .attr("y2", 72)
+                               .attr("clip-path","url(#clip)")
                                .attr("stroke-width", 2)
                                .style("stroke-dasharray", ("3, 3"))
                                .attr("stroke", "red")
@@ -135,12 +138,12 @@ HTMLWidgets.widget({
         feMerge.append("feMergeNode")
                .attr("in", "SourceGraphic");
 
-        //filter for Grayscale to be used on filtered part of traces
-        var filter_gs   = svg.append("filter")
-                           .attr("id","monochrome");
-        var colormatrix = filter_gs.append("feColorMatrix")
-                            .attr("type","saturate")
-                            .attr("values","0");
+        ////filter for Grayscale to be used on filtered part of traces
+        // var filter_gs   = svg.append("filter")
+        //                    .attr("id","monochrome");
+        // var colormatrix = filter_gs.append("feColorMatrix")
+        //                     .attr("type","saturate")
+        //                     .attr("values","0");
 
         var clip_fwd = svg.append("clipPath")
                         .attr("id", "rect_fwd_clip")
@@ -148,13 +151,13 @@ HTMLWidgets.widget({
                         .attr("x", 0)
                         .attr("y", 0)
                         .attr("width", 0)
-                        .attr("height",half_height)
+                        .attr("height",height)
                         .attr("clip-path","url(#clip)");
         var clip_rev = svg.append("clipPath")
                         .attr("id", "rect_rev_clip")
                         .append("rect")
                         .attr("x", 0)
-                        .attr("y", half_height)
+                        .attr("y", 0)
                         .attr("width", 0)
                         .attr("height",height);
         var join = "FALSE";
@@ -221,6 +224,23 @@ HTMLWidgets.widget({
         var aa_ref_line       = focus.append("g");
         var aa_sample_line    = focus.append("g");
         var aa_mut_line       = focus.append("g");
+        var filt_line_fwd = svg.append("line")
+                               .attr("class","filt_indic")
+                               .attr("x1", 0)
+                               .attr("y1", 0)
+                               .attr("x2", 0)
+                               .attr("y2", 0)
+                               .attr("stroke-width", 2)
+                               .attr("stroke", "red")
+                               .attr("opacity",1);
+        var filt_line_rev = svg.append("line")
+                               .attr("x1", 0)
+                               .attr("y1", 0)
+                               .attr("x2", 0)
+                               .attr("y2", 0)
+                               .attr("stroke-width", 2)
+                               .attr("stroke", "red")
+                               .attr("opacity",1);
 
         // function finish_fwBrushInit(to,rev,height){
         //     //console.log("brush fw finish:" + to + " " + rev);
@@ -420,14 +440,14 @@ HTMLWidgets.widget({
                                 .call(brush)
                                 .selectAll(".selection")
                                 .attr("fill","none")
-                                .attr("stroke-width",3).attr("stroke","#ff4444")//.attr("stroke-dasharray","3,6")
+                                .attr("stroke-width",3).attr("stroke","rgb(70,130,180)")//.attr("stroke-dasharray","3,6")
                                 .attr("y", -16)
                                 .attr("height", 82) //height2 + 10)
                                 .attr("rx",3)
                                 .attr("ry",3)
                                 .attr("opacity",1);
                 var nis = sin.map(width2Scale, width2Scale.invert);
-                console.log("nis:"+ nis);
+                //console.log("nis:"+ nis);
                 setBrush(sin[0],sin[1]);
                 context.selectAll(".fullSeqW").attr("x2",width_new);
                 d3.selectAll(".zoom").attr("width",width_new);
@@ -574,44 +594,80 @@ HTMLWidgets.widget({
                 .attr("d",l)
                 .attr("clip-path","url(#clip)")
                 .attr("fill","none").attr("stroke",col)
-                .attr("stroke-width",1);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+                .attr("stroke-width",1.5);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
             var line = g2.selectAll("path").data(data); //UPDATE
             line.exit().remove();                      //EXIT
             line.enter().append("path")                //enter
                 .merge(line).attr("class","path "+c)
                 .attr("d",l)
                 .attr("clip-path", cl)
-                .attr("filter","url(#monochrome)")
-                .attr("fill","none").attr("stroke",col)
-                .attr("stroke-width",2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+                //.attr("filter","url(#monochrome)")
+                .attr("fill","none").attr("stroke","WhiteSmoke")
+                .attr("stroke-width",1);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
         }
-        function updateFilt(fwd_x,rev_x){
-            if(fwd_x == undefined){
-                fwd_x = filt_fwd_x;
-            }
-            else{
-                filt_fwd_x = fwd_x;
-            }
-            if(rev_x == undefined){rev_x = filt_rev_x}else{filt_rev_x = rev_x}
+        function updateFilt(fwd_x,rev_x,single_rev){
+            if(fwd_x != undefined){filt_fwd_x = fwd_x;}
+            if(rev_x != undefined){filt_rev_x = rev_x;}
+            if(single_rev!=undefined){filt_single_rev = single_rev;}
             var fwd_width = 0;
-            if(widthScale(fwd_x)>0){fwd_width = widthScale(fwd_x)};
-            clip_fwd.attr("width",fwd_width);
+            if(widthScale(filt_fwd_x)>0){fwd_width = widthScale(filt_fwd_x)};
+            clip_fwd.attr("x",0).attr("width",fwd_width);
             filt_fwd_mini.attr("x2",width2Scale(filt_fwd_x));
-            console.log("filt_rev_x ", filt_rev_x);
-            console.log("widthScale(filt_rev_x) ", widthScale(filt_rev_x));
-            console.log("width",width);
-            console.log("width - widthScale(filt_rev_x)",width - widthScale(filt_rev_x));
-
-            if(filt_rev_x == 0  ){
-                clip_rev.attr("x",0).attr("width",0);
-                filt_rev_mini.attr("x1",0).attr("x2",0);
+            if(fwd_width!=0){
+                console.log("drawing line");
+                filt_line_fwd.attr("x1",widthScale(filt_fwd_x))
+                             .attr("x2",widthScale(filt_fwd_x))
+                             .attr("y1",200)
+                             .attr("y2",340);
             }else{
-                if(width - widthScale(filt_rev_x)<0){
-                    clip_rev.attr("x",0).attr("width",0);
+                filt_line_fwd.attr("x1",0)
+                         .attr("x2",0)
+                         .attr("y1",0)
+                         .attr("y2",0);
+            }
+            // console.log("filt_rev_x ", filt_rev_x);
+            // console.log("widthScale(filt_rev_x) ", widthScale(filt_rev_x));
+            // console.log("width",width);
+            // console.log("width - widthScale(filt_rev_x)",width - widthScale(filt_rev_x));
+            if(filt_single_rev){
+                if(filt_rev_x == 0  ){
+                    filt_rev_mini.attr("x1",0).attr("x2",0);
                 }else{
-                    clip_rev.attr("x",widthScale(filt_rev_x)).attr("width",(width - widthScale(filt_rev_x)));
+                    filt_rev_mini.attr("x1",width2Scale(filt_rev_x)).attr("x2",width);
                 }
-                filt_rev_mini.attr("x1",width2Scale(filt_rev_x)).attr("x2",width);
+                console.log("single_rev true");
+                console.log("filt_rev_x ",filt_rev_x);
+                if(width - widthScale(filt_rev_x)<0){
+                    clip_fwd.attr("x",0).attr("width",0);
+                }else{
+                    console.log("filt_rev_x",filt_rev_x);
+                    console.log("width filt_rev_x",(width - widthScale(filt_rev_x)));
+                    clip_fwd.attr("x",widthScale(filt_rev_x)).attr("width",(width - widthScale(filt_rev_x)));
+                }
+            }else{
+                if(filt_rev_x == 0  ){
+                    clip_rev.attr("x",0).attr("width",0);
+                    filt_rev_mini.attr("x1",0).attr("x2",0);
+                    filt_line_rev.attr("x1",0)
+                                 .attr("x2",0)
+                                 .attr("y1",0)
+                                 .attr("y2",0);
+
+                }else{
+                    if(width - widthScale(filt_rev_x)<0){
+                        clip_rev.attr("x",0).attr("width",0);
+                    }else{
+                        clip_rev.attr("x",widthScale(filt_rev_x)).attr("width",(width - widthScale(filt_rev_x)));
+                    }
+                    filt_rev_mini.attr("x1",width2Scale(filt_rev_x)).attr("x2",width);
+
+                    filt_line_rev.attr("x1",(widthScale(filt_rev_x)-1))
+                                     .attr("x2",(widthScale(filt_rev_x)-1))
+                                     .attr("y1",350)
+                                     .attr("y2",490);
+
+
+                }
             }
         }
         function setNoiseArea(fwd,rev){
@@ -1161,7 +1217,7 @@ HTMLWidgets.widget({
                 //instance.focus.selectAll(".zoom").remove();
                 instance.context.selectAll(".context").remove();
 //                 //instance.focus.selectAll(".excl").remove();
-                instance.updateFilt(0,0);
+                instance.updateFilt(0,0,single_rev);
             }
             instance.instanceCounter = instance.instanceCounter+1;
   			var intens_guide_line = x["intens_guide_line"];
@@ -1234,7 +1290,7 @@ HTMLWidgets.widget({
                 //.attr("class","main_brush selection")
                 //.attr("fill","rgba(70,130,180,0.05)") //steal blue
                 .attr("fill","none")
-                .attr("stroke-width",3).attr("stroke","#ff4444")//.attr("stroke-dasharray","3,6")
+                .attr("stroke-width",3).attr("stroke","rgb(70,130,180)")//.attr("stroke","#ff4444")//.attr("stroke-dasharray","3,6")
   		 		.attr("y", -16)
                 .attr("height", 82) //height2 + 10)
                 .attr("rx",3)
@@ -1246,7 +1302,11 @@ HTMLWidgets.widget({
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
             instance.updateLine([intens["T"]],"T",false);
-            instance.updateFilt(x["brush_fw"]);
+            if(single_rev){
+                instance.updateFilt(0,x["brush_fw"],single_rev);
+            }else{
+                instance.updateFilt(x["brush_fw"]);
+            }
 
             //noise indicator
             var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
