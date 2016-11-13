@@ -112,12 +112,7 @@ HTMLWidgets.widget({
         var clip_rect = clip.append("rect")
             .attr("width", width)
             .attr("height", height);
-        focus.append("rect")
-                 .attr("class", "zoom")
-                 .attr("y",25)
-                 .attr("width", width)
-                 .attr("height", zoom_height)
-                 .call(zoom);
+
         var defs = svg.append("defs");
 
         var filter = defs.append("filter")
@@ -138,12 +133,13 @@ HTMLWidgets.widget({
         feMerge.append("feMergeNode")
                .attr("in", "SourceGraphic");
 
-        ////filter for Grayscale to be used on filtered part of traces
-        // var filter_gs   = svg.append("filter")
-        //                    .attr("id","monochrome");
-        // var colormatrix = filter_gs.append("feColorMatrix")
-        //                     .attr("type","saturate")
-        //                     .attr("values","0");
+        //filter for Grayscale to be used on filtered part of traces
+        var filter_gs   = svg.append("filter")
+                           .attr("id","monochrome");
+        var colormatrix = filter_gs.append("feColorMatrix")
+                            .attr("type","matrix")
+                            .attr("values","2 0.5 0.5 0 0 0.5 2 0.5 0 0 0.5 0.5 2 0 0 0 0 0 1 0");
+
 
         var clip_fwd = svg.append("clipPath")
                         .attr("id", "rect_fwd_clip")
@@ -241,6 +237,12 @@ HTMLWidgets.widget({
                                .attr("stroke-width", 2)
                                .attr("stroke", "red")
                                .attr("opacity",1);
+        focus.append("rect")
+                 .attr("class", "zoom")
+                 .attr("y",25 +113)
+                 .attr("width", width)
+                 .attr("height", zoom_height - 108)
+                 .call(zoom);
 
         // function finish_fwBrushInit(to,rev,height){
         //     //console.log("brush fw finish:" + to + " " + rev);
@@ -345,6 +347,7 @@ HTMLWidgets.widget({
            //console.log(s);
            var t = s.map(width2Scale.invert, width2Scale)
            widthScale.domain(t);
+           updateFilt();
            redraw();
        }
        function zoom_start(){
@@ -422,37 +425,43 @@ HTMLWidgets.widget({
         function rescaleWidth(width_in){
                 var width_new   = width_in - margin.left - margin.right;
                 width = width_new;
-                clip_rect.attr("width",width_new);
+
+
 
                 var sel = d3.brushSelection(d3.select(".brush").node());
-                console.log("sel:"+ sel);
-                var sin = sel.map(width2Scale.invert, width2Scale);
+                //console.log("sel:"+ sel);
+                //if a brush selection exists redraw it in new scale
+                if(sel != null){
+                    var sin = sel.map(width2Scale.invert, width2Scale);
+                    width2Scale.range([0,width_new]);
+                    widthScale.range([0,width_new]);
+                    context.selectAll(".brush_context").remove();
+                    brush = d3.brushX().extent([[0, -16], [width, 68]])
+                                                 .on("brush",brushed)
+                                                 .on("start",brush_start)
+                                                 .on("end",brush_end);
+                    context.append("g").attr("class","brush context brush_context")
+                                    .call(brush)
+                                    .selectAll(".selection")
+                                    .attr("fill","none")
+                                    .attr("stroke-width",3).attr("stroke","rgb(70,130,180)")//.attr("stroke-dasharray","3,6")
+                                    .attr("y", -16)
+                                    .attr("height", 82) //height2 + 10)
+                                    .attr("rx",3)
+                                    .attr("ry",3)
+                                    .attr("opacity",1)
+                                    .attr("shape-rendering","geometricPrecision")
+                                    .style("filter", "url(#drop-shadow)");
+                    //var nis = sin.map(width2Scale, width2Scale.invert);
+                    setBrush(sin[0],sin[1]);
 
-                width2Scale.range([0,width_new]);
-                widthScale.range([0,width_new]);
-
-                context.selectAll(".brush_context").remove();
-                brush = d3.brushX().extent([[0, -16], [width, 68]])
-                                             .on("brush",brushed)
-                                             .on("start",brush_start)
-                                             .on("end",brush_end);
-                context.append("g").attr("class","brush context brush_context")
-                                .call(brush)
-                                .selectAll(".selection")
-                                .attr("fill","none")
-                                .attr("stroke-width",3).attr("stroke","rgb(70,130,180)")//.attr("stroke-dasharray","3,6")
-                                .attr("y", -16)
-                                .attr("height", 82) //height2 + 10)
-                                .attr("rx",3)
-                                .attr("ry",3)
-                                .attr("opacity",1);
-                var nis = sin.map(width2Scale, width2Scale.invert);
-                //console.log("nis:"+ nis);
-                setBrush(sin[0],sin[1]);
+                }else{
+                    width2Scale.range([0,width_new]);
+                    widthScale.range([0,width_new]);
+                }
+                clip_rect.attr("width",width_new);
                 context.selectAll(".fullSeqW").attr("x2",width_new);
                 d3.selectAll(".zoom").attr("width",width_new);
-
-                //frame.attr("width",width_new);
         }
 
         function hideLabels(){
@@ -601,9 +610,9 @@ HTMLWidgets.widget({
                 .merge(line).attr("class","path "+c)
                 .attr("d",l)
                 .attr("clip-path", cl)
-                //.attr("filter","url(#monochrome)")
-                .attr("fill","none").attr("stroke","WhiteSmoke")
-                .attr("stroke-width",1);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+                .attr("filter","url(#monochrome)")
+                .attr("fill","none").attr("stroke",col)
+                .attr("stroke-width",2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
         }
         function updateFilt(fwd_x,rev_x,single_rev){
             if(fwd_x != undefined){filt_fwd_x = fwd_x;}
@@ -614,7 +623,7 @@ HTMLWidgets.widget({
             clip_fwd.attr("x",0).attr("width",fwd_width);
             filt_fwd_mini.attr("x2",width2Scale(filt_fwd_x));
             if(fwd_width!=0){
-                console.log("drawing line");
+                //console.log("drawing line");
                 filt_line_fwd.attr("x1",widthScale(filt_fwd_x))
                              .attr("x2",widthScale(filt_fwd_x))
                              .attr("y1",200)
@@ -635,13 +644,13 @@ HTMLWidgets.widget({
                 }else{
                     filt_rev_mini.attr("x1",width2Scale(filt_rev_x)).attr("x2",width);
                 }
-                console.log("single_rev true");
-                console.log("filt_rev_x ",filt_rev_x);
+                //console.log("single_rev true");
+                //console.log("filt_rev_x ",filt_rev_x);
                 if(width - widthScale(filt_rev_x)<0){
                     clip_fwd.attr("x",0).attr("width",0);
                 }else{
-                    console.log("filt_rev_x",filt_rev_x);
-                    console.log("width filt_rev_x",(width - widthScale(filt_rev_x)));
+                    //console.log("filt_rev_x",filt_rev_x);
+                    //console.log("width filt_rev_x",(width - widthScale(filt_rev_x)));
                     clip_fwd.attr("x",widthScale(filt_rev_x)).attr("width",(width - widthScale(filt_rev_x)));
                 }
             }else{
@@ -937,7 +946,7 @@ HTMLWidgets.widget({
             q = rev ? "quality_fwd" : "quality";
             var qt = quals_txt.selectAll("text").data(calls);
             qt.enter().append("text")
-                    .merge(qt).attr("class","peak_label")
+                    .merge(qt).attr("class","peak_label q")
       		        .text(function(d){return d["quality"];})
       		        .attr("text-anchor", "middle")
       		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
@@ -1295,7 +1304,8 @@ HTMLWidgets.widget({
                 .attr("height", 82) //height2 + 10)
                 .attr("rx",3)
   		 		.attr("ry",3)
-                // .style("filter", "url(#drop-shadow)")
+                .attr("shape-rendering","geometricPrecision")
+                .style("filter", "url(#drop-shadow)")
   		 		.attr("opacity",1);
 
             instance.updateLine([intens["A"]],"A",false);
@@ -1333,23 +1343,23 @@ HTMLWidgets.widget({
 //                  .attr("y",20).attr("rx",2).attr("ry",2)
 //                  .attr("width",24).attr("height",instance.height-90)
 //                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
-//             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
-//                 .append("text").attr("class","peak_label")
-//                 .text(function(d){
-// //                    if   (d["coding_seq"] > 0){return d["coding_seq"]+" : "+d["codon"]+"."+d["ord_in_cod"];}
-//                     if   (d["coding_seq"] > 0){return d["coding_seq"];}
-//                     else {                     return "";}})
-//                 .attr("text-anchor", "middle")
-//                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-//                 .attr("y",(instance.label_pos["codon"]+rev))
-//                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
-//             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
-//                 .append("text").attr("class","peak_label")
-//                 .text(function(d){return d["gen_coord"];})
-//                 .attr("text-anchor", "middle")
-//                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-//                 .attr("y",(instance.label_pos["gen_coord"]+rev))
-//                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
+            focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
+                .append("text").attr("class","peak_label")
+                .text(function(d){
+//                    if   (d["coding_seq"] > 0){return d["coding_seq"]+" : "+d["codon"]+"."+d["ord_in_cod"];}
+                    if   (d["coding_seq"] > 0){return d["coding_seq"];}
+                    else {                     return "";}})
+                .attr("text-anchor", "middle")
+                .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                .attr("y",(instance.label_pos["codon"]+rev))
+                .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
+            focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
+                .append("text").attr("class","peak_label")
+                .text(function(d){return d["gen_coord"];})
+                .attr("text-anchor", "middle")
+                .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                .attr("y",(instance.label_pos["gen_coord"]+rev))
+                .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             instance.setPeakLabel(calls,"reference");
             instance.setPeakLabel(calls,"call");
             instance.setPeakLabel(calls,"mut_call_fwd");
@@ -1401,7 +1411,7 @@ HTMLWidgets.widget({
             }
 
         }else{
-            console.log("render");
+            //console.log("render");
 
             var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
             var rev = 0;

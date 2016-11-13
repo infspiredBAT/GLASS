@@ -54,7 +54,9 @@ shinyUI(
                     background-color: #777;
                 }
                 .zoom{
-                    fill:white;
+                    cursor: move;
+                    fill: none;
+		            pointer-events: all;
                 }
                 
 		         </style>")
