@@ -277,7 +277,7 @@ The more references are selected the longer the upload process wil take.",
 				    
 					conditionalPanel("input.toggle_help % 2 == 0",column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
                         <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=#4682B4>blue box = resize/move for navigation</font> | boxes = exons/introns | horizontal grey line = full sequence | verticals = variants, ref>pri>sec | <font color=red>red dotted lines</font> = filtered noisy beginnings</br>
-                        <b>chromatogram</b>: click text to highlight call and print info^ | zoom-in enough for extra info, e.g. coords | sequences, from top = ref, call/pri, mut/sec | striped verticals = variants | grey bars = quality</br>
+                        <b>chromatogram</b>: click text to print info^ | crosshair + click = drag | zoom-in for extra info (coords..) | sequences, from top = ref, call/pri, mut/sec | pink verticals = variants | grey bars = codons</br>
                         <b>variants&nbsp&nbsp&nbsp&nbsp</b>: 'goto' = go to variant on chromatogram | 'x' = ignore for the session | 'confirm' = keep for the session (even if you change parameters) and make them exportable from 'samples' panel
                         </div>
   		            "), sep = "")))))

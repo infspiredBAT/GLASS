@@ -187,6 +187,9 @@ HTMLWidgets.widget({
         var gLine_c_r  = focus.append("g");
   		var gLine_g_r  = focus.append("g");
   		var gLine_t_r  = focus.append("g");
+        var aa_ref_line       = focus.append("g");
+        var aa_sample_line    = focus.append("g");
+        var aa_mut_line       = focus.append("g");
         var gLine_a_gray    = focus.append("g");
       	var gLine_c_gray    = focus.append("g");
   		var gLine_g_gray    = focus.append("g");
@@ -214,12 +217,11 @@ HTMLWidgets.widget({
         var varim_user_m      = context.append("g");
         // var noisyn_con        = context.append("g");  //noisy neighbours
         // var noisyn_foc        = focus.append("g");
+
+
         var aa_ref            = focus.append("g");
         var aa_sample         = focus.append("g");
         var aa_mut            = focus.append("g");
-        var aa_ref_line       = focus.append("g");
-        var aa_sample_line    = focus.append("g");
-        var aa_mut_line       = focus.append("g");
         var filt_line_fwd = svg.append("line")
                                .attr("class","filt_indic")
                                .attr("x1", 0)
