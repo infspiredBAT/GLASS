@@ -244,7 +244,9 @@ HTMLWidgets.widget({
                  .attr("y",25 +113)
                  .attr("width", width)
                  .attr("height", zoom_height - 108)
-                 .call(zoom);
+                 .call(zoom).on("mousewheel.zoom", null)
+             .on("DOMMouseScroll.zoom", null) // disables older versions of Firefox
+             .on("wheel.zoom", null)
 
         // function finish_fwBrushInit(to,rev,height){
         //     //console.log("brush fw finish:" + to + " " + rev);
@@ -356,7 +358,7 @@ HTMLWidgets.widget({
            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
            var t = d3.event.transform;
            hideLabels();
-
+           console.log("zoomestart");
        }
        function zoomed() {
            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
@@ -368,18 +370,16 @@ HTMLWidgets.widget({
                                        .attr("width",s[1]-s[0])
            //context.select(".brush").call(brush.move, widthScale.range().map(t.invertX, t));
            redrawLines();
-           //console.log("zoom stuff");
+           console.log("zoome");
        }
        function zoom_end() {
            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
+           if(d3.event.sourceEvent==null) return;
            var t = d3.event.transform;
            widthScale.domain(t.rescaleX(width2Scale).domain());
            //focus.select(".area").attr("d", area);
            context.select(".brush").call(brush.move, widthScale.range().map(t.invertX, t));
-
-
-
-           //console.log("zoom end stuff");
+           console.log("zoomeend");
        }
         // function brushed_fw() {
         //
