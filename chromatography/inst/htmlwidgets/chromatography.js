@@ -490,9 +490,13 @@ HTMLWidgets.widget({
 
         function redraw()  {
 
-            var s = widthScale.domain();
-            var t = s.map(width2Scale.invert, width2Scale);
-            var w = t[1] - t[0];
+            var wsd = widthScale.domain();
+            var wsr = widthScale.range();
+            var bp = (wsd[1]-wsd[0])/(wsr[1]*11);  //base per
+            var bpt = bp*1000;
+
+            console.log('bpt',bpt);
+
             focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
             focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd).attr("visibility","visible");
@@ -536,22 +540,23 @@ HTMLWidgets.widget({
             focus.selectAll(".var_noise_indic").attr("stroke-width",widthScale(12)-widthScale(0));
         //     //conditional visibility
             //console.log(w);
-            if(w<600){
+            if(bpt<22){
                 focus.selectAll(".peak_label").attr("visibility","visible");
-                if(w===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
+                if(bp===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
                 focus.selectAll(".peak_label").attr("visibility","hidden");
                 focus.selectAll(".ref").attr("visibility","visible");
                 focus.selectAll(".user").attr("visibility","visible");
                 focus.selectAll(".var_noise_indic").attr("visibility","visible");
 
-                if(w<4000){
+                if(bpt<70){
                   focus.selectAll(".qual_fwd").attr("visibility","visible");
                   focus.selectAll(".qual_rev").attr("visibility","visible");
                   focus.selectAll(".aa").attr("visibility","visible");
+                  focus.selectAll(".coding_ten").attr("visibility","visible");
                   //focus.selectAll(".aa").attr("visibility","visible");
                 }
-                if(w<4000){focus.selectAll(".short").attr("visibility","visible");}
+                //if(bpt<25){focus.selectAll(".short").attr("visibility","visible");}
             }
             //console.log(show_qual); //setting quality bars on/off
             focus.selectAll(".q").attr("visibility",show_qual);
@@ -832,7 +837,7 @@ HTMLWidgets.widget({
                 .text(function(d){
 //                    if   (d["ord_in_cod"] == 1) {return d["aa_ref"].toUpperCase()+""+d["codon"];}
                     //if   (d["ord_in_cod"] == 1) {return d["aa_ref"]+""+d["codon"];}
-                    if   (d["ord_in_cod"] == 2) {return d["aa_ref"];}
+                    if   (d["ord_in_cod"] == 2) {return d["aa_ref"]+d["codon"];}
                     else {                       return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
@@ -1346,7 +1351,7 @@ HTMLWidgets.widget({
 //                  .attr("width",24).attr("height",instance.height-90)
 //                  .attr("fill","rgba(155, 155, 255, 0.12)").attr("opacity",0);
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
-                .append("text").attr("class","peak_label")
+                .append("text").attr("class",function(d){if(d["coding_seq"]%10==0){return "peak_label coding_ten"}else{return "peak_label";}})
                 .text(function(d){
 //                    if   (d["coding_seq"] > 0){return d["coding_seq"]+" : "+d["codon"]+"."+d["ord_in_cod"];}
                     if   (d["coding_seq"] > 0){return d["coding_seq"];}
@@ -1356,7 +1361,7 @@ HTMLWidgets.widget({
                 .attr("y",(instance.label_pos["codon"]+rev))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
-                .append("text").attr("class","peak_label")
+                .append("text").attr("class",function(d){if((d["coding_seq"]%10==0)&&(d["coding_seq"]>0)){return "peak_label coding_ten"}else{return "peak_label"}})
                 .text(function(d){return d["gen_coord"];})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})

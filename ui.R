@@ -75,7 +75,7 @@ shinyUI(
 		        #),
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
-			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.9&nbsp&nbsp&nbsp2016-Nov-17</a>
+			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.10&nbsp&nbsp&nbsp2017-Jan-13</a>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -84,6 +84,10 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.10 (2017-Jan-13)</b>
+                                <ul>
+			                     <li>Redefined the formula for estimating the resolution. New unit BasePerPixel should be consistent across different input sequence lengths and window sizes. </li>
+			                     </ul>
                                 <b>ver 0.2.9 (2016-Nov-17)</b>
                                 <ul>
 			                     <li>Scrolling events ignored on zoom (zoom on scroll was not seamless).</li>
