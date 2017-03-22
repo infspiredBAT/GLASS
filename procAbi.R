@@ -90,7 +90,10 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
     if(!gsub("data/refs/","",gsub(".glassed.intrex.fasta","",glassed_ref))=="-"){
         data.table::set(calls,which(is.na(calls[["gen_coord"]])),"reference","NA")
     }
-
+    
+    if(nrow(calls)<=11){
+        stop("none or too few called bases in abi file.")
+    }
     return(list(calls=calls,deletions=deletions,qual_present=qual_present))
 }
 

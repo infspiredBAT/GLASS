@@ -75,7 +75,8 @@ shinyUI(
 		        #),
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
-			column(1, HTML(paste('<br><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')">0.2.10&nbsp&nbsp&nbsp2017-Jan-13</a>
+			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" > 
+                                     ver 0.2.10 <br> (2017-Mar-22) </a></div>
                                 <!-- Update log -->
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
@@ -84,6 +85,11 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.11 (2017-Mar-22)</b>
+                                <ul>
+			                     <li>Improvments in error handling. </li>
+                                <li>Compatibility issue with new version of the data tables library addressed. </li>
+			                    </ul>
                                 <b>ver 0.2.10 (2017-Jan-13)</b>
                                 <ul>
 			                     <li>Redefined the formula for estimating the resolution. New unit BasePerPixel should be consistent across different input sequence lengths and window sizes. </li>
@@ -156,7 +162,7 @@ shinyUI(
                                 <li>Added reference selector, with selected references used to autodetect strandedness - not using all references speeds up the upload process.</li>
                                 <li>Added dialog preventing accidental "navigate away".</li>
 			                    <li>Added CALR reference.</li>
-			                    <li>Started this log.</li>
+			                    <li>Update log started.</li>
 			                    </ul>
 	   		                    </div>
 			                    <div class="modal-footer" style="clear-both">

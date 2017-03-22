@@ -1,3 +1,10 @@
+#initialize table for "disambiguating" sequences
+ambig_col <- rep(c("S","W","R","Y","K","M"),each = 2)
+ref_col   <- c("G","C","A","T","A","G","C","T","G","T","A","C")
+res_col   <- c("C","G","T","A","G","A","T","C","T","G","C","A")
+ambig_dt  <- data.table(ambig = ambig_col,ref = ref_col,res = res_col)
+setkey(ambig_dt,ambig,ref)
+
 annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
 
     #contains codons table
@@ -69,7 +76,9 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
     }
     calls[,set_by_user:=FALSE]
     # calls[,user_sample_orig:=user_sample]
-    calls[set_by_user == FALSE, user_sample_orig := ambig_minus(user_sample,reference),by=1:nrow(calls[set_by_user==FALSE,])]
+    
+    calls[set_by_user == FALSE, user_sample_orig := ambig_min(user_sample,reference)]
+    
     return(calls)
 }
 
@@ -216,14 +225,14 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
             #& quality_fwd >= qual_thres
             , mut_call_fwd := mut_peak_base_fwd
             ]
-        calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(mut_call_fwd,reference),by=1:nrow(calls[set_by_user==FALSE,])]
+        calls[set_by_user == FALSE, mut_call_fwd := ambig_min(mut_call_fwd,reference)]
         calls[
               mut_peak_pct_rev >= mut_min
             & mut_s2n_abs_rev >= s2n_min
             #& quality_rev >= qual_thres
             , mut_call_rev := mut_peak_base_rev
             ]
-        calls[set_by_user == FALSE, mut_call_rev := ambig_minus(mut_call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
+        calls[set_by_user == FALSE, mut_call_rev := ambig_min(mut_call_rev,reference)]
 #         calls[
 #               set_by_user == FALSE
 #             #& mut_call_fwd != call
@@ -281,7 +290,8 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
             , mut_call_fwd := mut_peak_base_fwd
             ]
         
-        calls[set_by_user == FALSE, mut_call_fwd := ambig_minus(mut_call_fwd,reference),by=1:nrow(calls[set_by_user==FALSE,])]
+        rows <- 1:nrow(calls[set_by_user==FALSE,])
+        calls[set_by_user == FALSE, mut_call_fwd := ambig_min(mut_call_fwd,reference)]
         #brush filter
         if(!single_rev){
             calls <- calls[trace_peak< brush_fwd ,call := "N" ]
@@ -307,34 +317,14 @@ complement <- function(base){
     return (chartr("ATGCRYKMBVDH","TACGYRMKVBHD",base))
 }
 
-ambig_minus <- function(ambig,ref){ # http://www.virology.wisc.edu/acp/CommonRes/SingleLetterCode.html
+
+ambig_min <- function(ambig,ref){
     ambig <- toupper(ambig)
     ref   <- toupper(ref)
-    if(ambig=="S"){
-        if(ref=="G") return("C")
-        else if(ref=="C") return("G")
-        else return(ambig)
-    }else if(ambig=="W"){
-        if(ref=="A") return("T")
-        else if(ref=="T") return("A")
-        else return(ambig)
-    }else if(ambig=="R"){
-        if(ref=="A") return("G")
-        else if(ref=="G") return("A")
-        else return(ambig)
-    }else if(ambig=="Y"){
-        if(ref=="C") return("T")
-        else if(ref=="T") return("C")
-        else return(ambig)
-    }else if(ambig=="K"){
-        if(ref=="G") return("T")
-        else if(ref=="T") return("G")
-        else return(ambig)
-    }else if(ambig=="M"){
-        if(ref=="A") return("C")
-        else if(ref=="C") return("A")
-        else return(ambig)
-    }else return(ambig)
+    search <- list(ambig,ref)
+    ret <- ambig_dt[search]
+    ret[is.na(res),res := ambig]
+    ret$res
 }
 
 retranslate <- function(calls){
@@ -357,7 +347,7 @@ retranslate <- function(calls){
         coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_sample=seq,reference=seq)])
         #setkey(coding,coding_seq)
     }
-    coding[,user_sample:=ambig_minus(ambig=user_sample,ref=reference),by=1:nrow(coding)]
+    coding[,user_sample:=ambig_min(ambig=user_sample,ref=reference)]
     trans <- seqinr::translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     #Shift annotation of codons by '-'s
     ord_sample<-rep(c(1,2,3),length(trans))
@@ -378,7 +368,7 @@ retranslate <- function(calls){
         coding<-rbind(coding,cod_table[coding_seq==(as.numeric(coding[nrow(coding),coding_seq])+1),list(coding_seq=as.numeric(coding_seq),codon,ord_in_cod,user_mut=seq,reference=seq)])
         #setkey(coding,coding_seq)
     }
-    coding[,user_mut:=ambig_minus(ambig=user_mut,ref=reference),by=1:nrow(coding)]
+    coding[,user_mut:=ambig_min(ambig=user_mut,ref=reference)]
 #! # ord<-rep(c(1,2,3),length(trans))
     trans <- seqinr::translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     ord_mut<-rep(c(1,2,3),length(trans))
@@ -421,8 +411,8 @@ get_choices <- function(calls,ref){
         choices[(user_sample == "-") | (user_mut == "-"),strand:=strand+4]
         #choices <- choices[,`:=` (user_sample=ambig_minus(user_sample,reference),user_mut=ambig_minus(user_mut,reference)),by=1:nrow(choices)]
         choices[,ids:=NA,by=1:nrow(choices)]
-        choices[,user_sample:=ambig_minus(user_sample,reference),by=1:nrow(choices)]
-        choices[,user_mut:=ambig_minus(user_mut,reference),by=1:nrow(choices)]
+        choices[,user_sample:=ambig_min(user_sample,reference)]
+        choices[,user_mut:=ambig_min(user_mut,reference)]
         choices[,sample_peak_pct := mround(sample_peak_pct,1),by=1:nrow(choices)]
         choices[,mut_peak_pct := mround(mut_peak_pct,1),by=1:nrow(choices)]
 
