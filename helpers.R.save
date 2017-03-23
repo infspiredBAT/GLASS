@@ -613,7 +613,7 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
 #         mut_rev <- mut_rev[-which(primery_seq == "-")]
 #     }
     names <- structure(c(1,1:4),names = c("N","A","C","G","T"))
-    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd[mut_fwd != "NA"],collapse = "")), gsub("[ -]","",paste(mut_rev[mut_rev != "NA"],collapse = "")),type = "overlap",substitutionMatrix = sm,gapOpening = -10, gapExtension = -1)
+    pa <- pairwiseAlignment(gsub("[ -]","",paste(mut_fwd,collapse = "")), gsub("[ -]","",paste(mut_rev,collapse = "")),type = "overlap",substitutionMatrix = sm,gapOpening = -10, gapExtension = -1)
     fwd <- strsplit(as.character(pattern(pa)),"")[[1]]
     rev <- strsplit(as.character(subject(pa)),"")[[1]]
     fwd_i <- numeric(length(fwd))

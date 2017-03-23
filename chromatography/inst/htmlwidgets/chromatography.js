@@ -1354,7 +1354,7 @@ HTMLWidgets.widget({
                 .append("text").attr("class",function(d){if(d["coding_seq"]%10==0){return "peak_label coding_ten"}else{return "peak_label";}})
                 .text(function(d){
 //                    if   (d["coding_seq"] > 0){return d["coding_seq"]+" : "+d["codon"]+"."+d["ord_in_cod"];}
-                    if   (d["coding_seq"] > 0){return d["coding_seq"];}
+                    if   (d["coding_seq"] > 0){return "c." + d["coding_seq"];}
                     else {                     return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
@@ -1362,7 +1362,7 @@ HTMLWidgets.widget({
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
                 .append("text").attr("class",function(d){if((d["coding_seq"]%10==0)&&(d["coding_seq"]>0)){return "peak_label coding_ten"}else{return "peak_label"}})
-                .text(function(d){return d["gen_coord"];})
+                .text(function(d){return "g." + d["gen_coord"];})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .attr("y",(instance.label_pos["gen_coord"]+rev))
