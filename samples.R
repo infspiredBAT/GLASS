@@ -93,3 +93,10 @@ samples_load <- function(s_files,output,g_files,alignTo){
     })
 }
 
+
+gbk_load <- function(file){
+    abc <- 234
+    bcd <- file
+    bcf <- 123
+    
+}

@@ -178,6 +178,7 @@ generate_ref <-function(user_seq,glassed_ref){
     ref_start <- as.numeric(sapply(ref_info,function(x) x[3]))
     ref_end <- as.numeric(sapply(ref_info,function(x) x[4]))
     align_split <- T
+    
     if(align_split){
         refs <- DNAStringSet(refs[seq(2,length(refs),2)])
         align <- get_alignment(refs,user_seq,cores)

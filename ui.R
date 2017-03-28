@@ -208,7 +208,22 @@ shinyUI(
 Selecting NONE of the references will assign no reference to your chromatogram. It is still possible to view it or change the reference afterwards.
 
 The more references are selected the longer the upload process wil take.",
-                        checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"),selected = c("TP53"),inline=TRUE)))
+                        checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR"),selected = c("TP53"),inline=TRUE)),
+                        #wellPanel(
+                            checkboxInput("showWP3", HTML(" Reference Settings <i class='fa fa-wrench' aria-hidden='true'></i>")),
+                            conditionalPanel(condition="input.showWP3",
+                                             fluidRow(
+                                                 column(3, 
+                                                        selectizeInput("additionalRefs", " Additional Variants",c("TP53","ATM","NOTHC1","CALR","ABC","CDE"), selected = c("TP53","ATM","NOTHC1","CALR"), multiple = TRUE,
+                                                                       options = NULL )),
+                                                 column(3, fileInput("custom_gb","Upload a custom genbank file",multiple=F,accept=c('.gb','.gbk'),width = '100%')
+                                                       )
+                                             )
+                                             
+                            )
+                        #)
+                    )
+                        
                 ),
                 fluidRow(
                     column(6,

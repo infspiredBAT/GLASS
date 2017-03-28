@@ -121,6 +121,13 @@ shinyServer(function(input,output,session) {
     })
 
     #Handlers for the Sample Browser
+    
+    loadGBK <- reactive({
+        if(!is.null(input$custom_gb)){
+            custom_gb <- gbk_load(input$custom_gb)
+            print("234")
+        }
+    })
 
     loadSamples <- reactive({
         if(!is.null(input$browser_files)){
