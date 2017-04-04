@@ -2,3 +2,25 @@
 \.Rhistory
 
 \.RData
+
+data/priv_abis/ATM/
+
+data/abis/ATM/
+
+data/priv_abis/BRCA/KSK/
+
+data/priv_abis/CALR/
+
+data/priv_abis/eric/
+
+data/priv_abis/fasay/
+
+data/priv_abis/NOTCH1_genomic/
+
+data/priv_abis/P53_cert/round1/
+
+data/priv_abis/P53_cert/round3/
+
+data/priv_abis/P53_genomic/
+
+data/priv_abis/P53_no_basecalls/

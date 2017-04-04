@@ -1030,7 +1030,7 @@ HTMLWidgets.widget({
   				.attr("x",function(d){return width2Scale(d["start"]);})
   				.attr("y",64)
   				.attr("opacity",0.8)
-  				.text(function(d){return d["id"];})
+  				.text(function(d){if(d["coding_seq"]==null){return d["id"]}else{return d["id"]+" (c."+d["coding_seq"]+")";}})
   				.attr("fill","black");
         }
         function setQual(value){

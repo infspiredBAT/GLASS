@@ -347,12 +347,12 @@ shinyServer(function(input,output,session) {
                     files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
                 })
             }
-            if(load_id == 1){
-                files_info  <<-  "demo file loaded\nframeshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
-                output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
-                base = ""
-                ex <- NULL
-            }
+            #if(load_id == 1){     
+            #    files_info  <<-  "demo file loaded\nframeshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
+            #    output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
+            #    base = ""
+            #    ex <- NULL
+            #}
 
             withProgress(message = paste('Loading abi file.',sep=" "), value = 1, {
                 
@@ -396,6 +396,8 @@ shinyServer(function(input,output,session) {
                         intrexdat$intrex     <- list()
                         intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
                         intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+                        cs<- unlist(lapply(intrexdat$intrex$id,function(x){calls[id==x]$coding_seq}))
+                        intrexdat$intrex[,coding_seq:=cs]
                         intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) # these numbers should be the same
                         intrexdat$new_sample <- TRUE
                     g_intrexdat       <<- splice_variants(intrexdat)
@@ -814,8 +816,8 @@ shinyServer(function(input,output,session) {
     
     #g_alignTo_options <- c("TP53","ATM","NOTCH1","CALR")
     g_alignTo_description <- list("TP53" = "Acc.: NM_000546.5<br>Ref: GRCh38"
-                                , "ATM" = "Acc.: <br> Ref:"
-                                , "NOTCH1" = "Acc.:<br> Ref:"
+                                , "ATM" = "Acc.: <br> Ref hg19:"
+                                , "NOTCH1" = "Acc.: NM_017617.4<br>Ref: GRCh38"
                                 , "CALR" = "Acc.:<br> Ref")
     
     output$alignTo_new <- renderUI({
@@ -826,7 +828,7 @@ shinyServer(function(input,output,session) {
                                                                             padding: 2px;
                                                                             background-color: #F5F5F5;
                                                                             box-shadow: 1px 1px 3px #888888;"
-                                                                 , h4(x), if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "load demo") else "demo not available"
+                                                                 , h4(x), if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "load demo") else "-"
                                                                  , div(HTML(g_alignTo_description[[x]]))))
                          )
         UI_out <- paste0(UI_out, collapse = "</td><td>")
@@ -862,7 +864,7 @@ shinyServer(function(input,output,session) {
             #try catch
             withProgress(
                 tryCatch({
-                        ret <- process_gbk(input$custom_gb)
+                        ret <- process_gbk(session,input$custom_gb)
                         g_custom_cod <<- ret$custom_cod
                         g_custom_ref <<- ret$custom_fasta
                     }

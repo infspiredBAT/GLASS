@@ -98,30 +98,30 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
 }
 
 
-process_gbk <- function(file){
-    
+process_gbk <- function(session,file){
+    #toggleModal(session, "modalnew", toggle = "close")
     input_orient = "+"  
     input_gene_start = 1
     input_chrom = "UN"
     input_gene_name = "UN"
     
     #  ret=system("dev/GLASS/ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
-    call <- paste0(c("python ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' ",file$datapath),collapse = "")
+    call <- paste0(c("python ext/gb2tab.py -f 'CDS' ",file$datapath),collapse = "")
     ret <- system(call,intern=TRUE)
     
     #extract info from the genbank file 
     
-    tab <- unlist(strsplit(ret[3],"\t"))
-    coordinates <- str_match(tab[[4]],'/GenBank.* REGION: [0-9]+..[0-9]+')[,1]
+    tab1 <- unlist(strsplit(ret[1],"\t"))
+    coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: [0-9]+..[0-9]+')[,1]
     input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))      #might not work for chr X,Y and MT
-    input_orient <- gsub("strand=\\\"","",str_match(tab[[4]],"strand=\\\"."))
+    input_orient <- gsub("strand=\\\"","",str_match(tab1[[4]],"strand=\\\"."))
     if(input_orient=="+"){
         input_gene_start <- as.numeric(gsub("REGION: ","",str_match(coordinates,"REGION: [0-9]+")))
     }else{
         input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
     }
     if(is.na(coordinates)){
-        coordinates <- str_match(tab[[4]],'/GenBank.* REGION: complement.[0-9]+..[0-9]+')[,1]
+        coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: complement.[0-9]+..[0-9]+')[,1]
         input_orient <- "-"
         input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))
         input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
@@ -129,14 +129,14 @@ process_gbk <- function(file){
     }
 
     
-    genedt<-data.table(which(strsplit(as.character(tab[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab[[3]]), '')[[1]]==')'))
+    genedt<-data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab1[[3]]), '')[[1]]==')'))
     setnames(genedt,c("start","end"))
     genedt[,id := seq_along(genedt$start)]
     genedt[,ex:=rep("exon",nrow(genedt))]
     genedt[,name := paste0(ex,id)]
     
     
-    intron<-data.table(which(strsplit(as.character(tab[[3]]), '')[[1]]=='D'),which(strsplit(as.character(tab[[3]]), '')[[1]]=='A'))
+    intron<-data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='D'),which(strsplit(as.character(tab1[[3]]), '')[[1]]=='A'))
     setnames(intron,c("start","end"))
     intron[,id := seq_along(intron$start)]
     intron[,ex:=rep("intron",nrow(intron))]
@@ -145,7 +145,7 @@ process_gbk <- function(file){
     
     genedt<-rbind(genedt,intron)
     setkey(genedt,start)
-    genedt[,seq := substring(as.character(tab[[2]]),start,end),by=1:nrow(genedt)]
+    genedt[,seq := substring(as.character(tab1[[2]]),start,end),by=1:nrow(genedt)]
     
     #strand specific
     
@@ -176,18 +176,19 @@ process_gbk <- function(file){
     #numbers differ in different genebank files grep for smth??
     #trans <- unlist(strsplit(unlist(strsplit(unlist(strsplit(as.character(tab[[4]]),";"))[5]," "))[11],"="))[9]
     #ret=system("dev/GLASS/ext/gb2tab.py -a 20000 -b 20000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
-    tab2  <- unlist(strsplit(ret[16],"\t"))
+    # tab2  <- unlist(strsplit(ret[3],"\t"))
     vec   <- strsplit(tab2[2],"")
     vecb  <- lapply(vec,function(x){x==toupper(x)})[[1]]
+    tab2 <- tab1
     trans <- gsub('/translation=\\"',"",str_match(tab2[[4]],'/translation=\"[A-Z]+')[,1])
     
     coding<-data.table(AA =c(unlist(strsplit(trans,split="")),"*"),codon = 1:length(c(unlist(strsplit(trans,split="")),"*")))
     coding <- rbindlist(lapply(1:nrow(coding),function(x) data.table(AA = rep(coding$AA[x],3),codon=as.character(rep(coding$codon[x],3)),ord_in_cod= as.integer(c(1,2,3)))))
     
     #remove non coding exons
-    cod_table <- cbind(cod_table, vecb)
+    # cod_table <- cbind(cod_table, vecb)
     
-    cod_table[!vecb][codon=="exon"]$codon = "non-coding_exon_seq"
+    # cod_table[!vecb][codon=="exon"]$codon = "non-coding_exon_seq"
     
     cod_table[codon=="exon"]$AA = coding$AA
     cod_table[codon=="exon"]$ord_in_cod = coding$ord_in_cod
