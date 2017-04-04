@@ -245,11 +245,13 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
        
         #calls <- calls[trace_peak< brush_fwd ,call := if(!is.null(call_rev)){call_rev}else{"N"} ]
         #calls <- calls[trace_peak< brush_fwd, mut_call_fwd := if(!is.null(mut_call_rev)){mut_call_rev}else{"N"} ]
-        calls <- calls[trace_peak< brush_fwd ,call := reference ]
-        calls <- calls[trace_peak< brush_fwd, mut_call_fwd := reference ]    
         
-        calls <- calls[trace_peak> brush_rev ,call := reference ]
-        calls <- calls[trace_peak> brush_rev, mut_call_rev := reference]
+        ##RETHINK BRUSH LOGIC!! 
+        #calls <- calls[trace_peak< brush_fwd ,call := reference ]
+        #calls <- calls[trace_peak< brush_fwd, mut_call_fwd := reference ]    
+        
+        #calls <- calls[trace_peak> brush_rev ,call := reference ]
+        #calls <- calls[trace_peak> brush_rev, mut_call_rev := reference]
         #}
         
         # setting user muts based on reference and quality
@@ -293,15 +295,15 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
         rows <- 1:nrow(calls[set_by_user==FALSE,])
         calls[set_by_user == FALSE, mut_call_fwd := ambig_min(mut_call_fwd,reference)]
         #brush filter
-        if(!single_rev){
-            calls <- calls[trace_peak< brush_fwd ,call := "N" ]
-            calls <- calls[trace_peak< brush_fwd, mut_call_fwd := "N" ]
-            calls <- calls[trace_peak< brush_fwd,c("user_sample","user_mut") := "N"]
-        }else{
-            calls <- calls[trace_peak> brush_fwd ,call := "N" ]
-            calls <- calls[trace_peak> brush_fwd, mut_call_fwd := "N" ]
-            calls <- calls[trace_peak> brush_fwd,c("user_sample","user_mut") := "N"]
-        }
+        #if(!single_rev){
+        #    calls <- calls[trace_peak< brush_fwd ,call := "N" ]
+        #    calls <- calls[trace_peak< brush_fwd, mut_call_fwd := "N" ]
+        #    calls <- calls[trace_peak< brush_fwd,c("user_sample","user_mut") := "N"]
+        #}else{
+        #    calls <- calls[trace_peak> brush_fwd ,call := "N" ]
+        #    calls <- calls[trace_peak> brush_fwd, mut_call_fwd := "N" ]
+        #    calls <- calls[trace_peak> brush_fwd,c("user_sample","user_mut") := "N"]
+        #}
         calls[
               set_by_user == FALSE
             & mut_call_fwd != call
@@ -407,6 +409,8 @@ get_choices <- function(calls,ref){
         if("call_rev" %in% names(choices)){
             choices[(call     != reference) | (mut_call_fwd!= reference), strand:=strand+1 ]
             choices[(call_rev != reference) | (mut_call_rev!= reference), strand:=strand+2 ]
+        }else{
+            choices[,strand:=strand+1]
         }
         choices[(user_sample == "-") | (user_mut == "-"),strand:=strand+4]
         #choices <- choices[,`:=` (user_sample=ambig_minus(user_sample,reference),user_mut=ambig_minus(user_mut,reference)),by=1:nrow(choices)]
@@ -449,7 +453,7 @@ get_choices <- function(calls,ref){
 }
 
 #remove consecutive single base deletions and replace them with one long deletion in table
-get_view<-function(calls,choices,snps){
+getView<-function(calls,choices,snps){
 
     computeConsecutives <- function(ids){
         ids <- round(ids * 100)
@@ -878,4 +882,31 @@ shinyInputRev <- function(FUN, ids, id, g_files, ...){
         }
     }
     inputs
+}
+updateSliders <- function(session,g_files){
+    
+    updateSliderInput(session,'mut_min',value=g_files[loaded==T,]$mut_min)
+    updateSliderInput(session,'qual_thres_to_call',value=g_files[loaded==T,]$qual_thres_to_call)
+    updateSliderInput(session,'s2n_min',value=g_files[loaded==T,]$s2n_min)
+    updateCheckboxInput(session,'show_calls_checkbox',value=g_files[loaded==T,]$show_calls_checkbox)
+    updateCheckboxInput(session,'join_traces_checkbox',value=g_files[loaded==T,]$join_traces_checkbox)
+    updateSliderInput(session,'max_y_p',value=g_files[loaded==T,]$max_y_p)
+    updateSliderInput(session,'opacity',value=g_files[loaded==T,]$opacity)
+    updateCheckboxInput(session,'incorporate_checkbox',value=g_files[loaded==T,]$incorporate_checkbox)
+}
+applyFilters <- function(g_view,fwd_start,fwd_end,rev_start,rev_end){
+    
+    g_view[,show:=TRUE]
+    g_view[strand==1]
+    
+    g_view[strand==1][id<=fwd_start]$show=FALSE
+    g_view[strand==1][id>=fwd_end]$show=FALSE
+    
+    g_view[strand==2][id<=rev_start]$show=FALSE
+    g_view[strand==2][id>=rev_end]$show=FALSE
+    
+    g_view[strand==3][id<=fwd_start && id <=rev_start]$show=FALSE
+    g_view[strand==3][id>=fwd_end && id >=rev_end]$show=FALSE
+    
+    return(g_view[show==TRUE])
 }

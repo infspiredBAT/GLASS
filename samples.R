@@ -1,4 +1,4 @@
-samples_load <- function(s_files,output,g_files,alignTo){
+samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
     not_loaded <- ""
     loaded <- data.table()
     withProgress(message="processing...",value=0,{
@@ -29,7 +29,11 @@ samples_load <- function(s_files,output,g_files,alignTo){
                     }else{
                         #find best matching reference
                         for(j in 1:length(alignTo)){
-                            ref <- read.fasta(paste0("data/refs/",alignTo[j],".glassed.intrex.fasta"))
+                            if(! alignTo[j] == "Custom"){
+                                ref <- read.fasta(paste0("data/refs/",alignTo[j],".glassed.intrex.fasta"))
+                            }else {
+                                ref <- read.fasta(g_custom_ref)
+                            }
                             ref <- toupper(paste0(unlist(ref),collapse = ""))
                             pa <- pairwiseAlignment(pattern = ref, subject = seq,type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                             score_fwd <- pa@score
@@ -60,7 +64,7 @@ samples_load <- function(s_files,output,g_files,alignTo){
                     incProgress(1/nrow(s_files))
                     #test fwd/rev/ which reference
                     if(!rev)
-                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0,coding = '',protein = '',VAF='',dbSNP = '', dbSNP_id = ''))
+                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start= 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF='',dbSNP = '', dbSNP_id = ''))
                     else{
                         #pair fwd and rev samples with matching names
                         #if exactly one fwd file matches the stripped name of given rev file and this fwd file has no pair then:
@@ -76,10 +80,10 @@ samples_load <- function(s_files,output,g_files,alignTo){
                             if(loaded[matches]$REV_name == "-"&& loaded[matches]$REF==ref_name)
                                 loaded[matches,`:=`(REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath)]
                             else{
-                                loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0,coding = '',protein = '',VAF = '', dbSNP = '', dbSNP_id = ''))
+                                loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start = 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF = '', dbSNP = '', dbSNP_id = ''))
                             }
                         }else{
-                            loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd = 0,brush_rev = 0,coding = '',protein = '',VAF = '',dbSNP = '', dbSNP_id = ''))
+                            loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start = 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF = '',dbSNP = '', dbSNP_id = ''))
                         }
                     }
                         
@@ -94,9 +98,124 @@ samples_load <- function(s_files,output,g_files,alignTo){
 }
 
 
-gbk_load <- function(file){
-    abc <- 234
-    bcd <- file
-    bcf <- 123
+process_gbk <- function(file){
+    
+    input_orient = "+"  
+    input_gene_start = 1
+    input_chrom = "UN"
+    input_gene_name = "UN"
+    
+    #  ret=system("dev/GLASS/ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
+    call <- paste0(c("python ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' ",file$datapath),collapse = "")
+    ret <- system(call,intern=TRUE)
+    
+    #extract info from the genbank file 
+    
+    tab <- unlist(strsplit(ret[3],"\t"))
+    coordinates <- str_match(tab[[4]],'/GenBank.* REGION: [0-9]+..[0-9]+')[,1]
+    input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))      #might not work for chr X,Y and MT
+    input_orient <- gsub("strand=\\\"","",str_match(tab[[4]],"strand=\\\"."))
+    if(input_orient=="+"){
+        input_gene_start <- as.numeric(gsub("REGION: ","",str_match(coordinates,"REGION: [0-9]+")))
+    }else{
+        input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
+    }
+    if(is.na(coordinates)){
+        coordinates <- str_match(tab[[4]],'/GenBank.* REGION: complement.[0-9]+..[0-9]+')[,1]
+        input_orient <- "-"
+        input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))
+        input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
+        
+    }
+
+    
+    genedt<-data.table(which(strsplit(as.character(tab[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab[[3]]), '')[[1]]==')'))
+    setnames(genedt,c("start","end"))
+    genedt[,id := seq_along(genedt$start)]
+    genedt[,ex:=rep("exon",nrow(genedt))]
+    genedt[,name := paste0(ex,id)]
+    
+    
+    intron<-data.table(which(strsplit(as.character(tab[[3]]), '')[[1]]=='D'),which(strsplit(as.character(tab[[3]]), '')[[1]]=='A'))
+    setnames(intron,c("start","end"))
+    intron[,id := seq_along(intron$start)]
+    intron[,ex:=rep("intron",nrow(intron))]
+    intron[ ,`:=`( name =paste0(ex,id))]
+    
+    
+    genedt<-rbind(genedt,intron)
+    setkey(genedt,start)
+    genedt[,seq := substring(as.character(tab[[2]]),start,end),by=1:nrow(genedt)]
+    
+    #strand specific
+    
+    if(input_orient == "+"){
+        genedt[,start_chr := input_gene_start + start -1]
+        genedt[,end_chr := input_gene_start + end -1]
+    }else{
+        genedt[,start_chr := input_gene_start - start +1]
+        genedt[,end_chr := input_gene_start - end +1]
+    }
+    genedt[,len := end-start +1]
+    genedt[,chr := rep(input_chrom,nrow(genedt))]
+    custom_fasta <- tempfile()
+    for(i in nrow(genedt)){writeLines(paste0(">ref_",genedt$name,"_",genedt$chr,"_",genedt$start_chr,"_",genedt$end_chr,"_",genedt$end-genedt$start,"\n",genedt$seq),custom_fasta)}
+    #close(con) #fasta
+    
+    cod_table <- rbindlist(
+        lapply(1:nrow(genedt),
+               function(x) data.table(codon = genedt$ex[x],
+                                      gen_coord = genedt$start_chr[x]:genedt$end_chr[x],
+                                      coding_seq = as.character(0),
+                                      intrex =  as.character(genedt$id[x]),
+                                      ord_in_cod = as.integer(0),AA = "",
+                                      seq = unlist(strsplit(genedt$seq[x],split = "")))
+               )
+        )
+    
+    #numbers differ in different genebank files grep for smth??
+    #trans <- unlist(strsplit(unlist(strsplit(unlist(strsplit(as.character(tab[[4]]),";"))[5]," "))[11],"="))[9]
+    #ret=system("dev/GLASS/ext/gb2tab.py -a 20000 -b 20000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
+    tab2  <- unlist(strsplit(ret[16],"\t"))
+    vec   <- strsplit(tab2[2],"")
+    vecb  <- lapply(vec,function(x){x==toupper(x)})[[1]]
+    trans <- gsub('/translation=\\"',"",str_match(tab2[[4]],'/translation=\"[A-Z]+')[,1])
+    
+    coding<-data.table(AA =c(unlist(strsplit(trans,split="")),"*"),codon = 1:length(c(unlist(strsplit(trans,split="")),"*")))
+    coding <- rbindlist(lapply(1:nrow(coding),function(x) data.table(AA = rep(coding$AA[x],3),codon=as.character(rep(coding$codon[x],3)),ord_in_cod= as.integer(c(1,2,3)))))
+    
+    #remove non coding exons
+    cod_table <- cbind(cod_table, vecb)
+    
+    cod_table[!vecb][codon=="exon"]$codon = "non-coding_exon_seq"
+    
+    cod_table[codon=="exon"]$AA = coding$AA
+    cod_table[codon=="exon"]$ord_in_cod = coding$ord_in_cod
+    cod_table[codon=="exon",]$coding_seq = as.character(1:nrow(cod_table[codon == "exon",]))
+    cod_table[codon=="exon"]$codon = coding$codon
+    
+    
+    extra <- cod_table
+    plus = extra[,max(as.numeric(coding_seq)),by=intrex][,V1]
+    plus <- plus[1:length(plus)-1]
+    minus <- plus + 1
+    
+    
+    l1 <-unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x])))
+    l2 <-unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x])))
+    
+    intr_cod <- data.table(plus = unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x]))),minus=unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x]))),p = unlist(lapply(1:length(plus), function(x) 1:genedt[ex=="intron"]$len[x] )),m = unlist(lapply(1:length(minus), function(x) genedt[ex=="intron"]$len[x]:1 )))
+    
+    intron_name <- unlist(lapply(1:nrow(intr_cod), function(x) {if(intr_cod[x,]$p<intr_cod[x,]$m){ return(paste0(intr_cod[x,]$plus,"+",intr_cod[x,]$p))} else {return(paste0(intr_cod[x,]$minus,"-",intr_cod[x,]$m))}}))
+    cod_table[codon=="intron"]$coding_seq = intron_name
+    
+    cod_table<- cod_table
+    file_cod=paste0(input_gene_name,".glassed.codons.rdata")
+    custom_cod <- tempfile()
+    save(cod_table,file=custom_cod)
+    
+    incProgress(amount=1,message="Done")
+    
+    return(list(custom_cod=custom_cod,custom_fasta=custom_fasta))
     
 }
