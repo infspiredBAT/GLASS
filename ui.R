@@ -239,7 +239,7 @@ The more references are selected the longer the upload process wil take."
                                              fluidRow(
                                                  HTML("<br>"),
                                                  column(3, 
-                                                        selectizeInput("additionalRefs", " Add reference from currated list,",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","NOTCH1","CALR"), multiple = TRUE,
+                                                        selectizeInput("additionalRefs", " Add reference from currated list,",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","NOTCH1"), multiple = TRUE,
                                                                        options = list(maxItems = 4))
                                                  ),
                                                  column(3, fileInput("custom_gb",label = HTML("OR upload your own GenBank file. <b style='display:inline; color:red;' id ='q1'> [?!]</b> "
