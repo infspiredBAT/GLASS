@@ -19,11 +19,6 @@ shinyServer(function(input,output,session) {
     g_custom_ref            <- NULL
     g_custom_cod            <- NULL
     g_glassed_snp           <- NULL
-    g_alignTo_options       <- c("TP53","ATM","NOTCH1","CALR")
-    g_alignTo_description   <- list("TP53"   = "<b>TP53</b> description"
-                                  , "ATM"    = "<b>ATM</b> description"
-                                  , "NOTCH1" = "<b>NOTCH1</b> description"
-                                  , "CALR"   = "<b>CALR</b> description")
     g_choices               <- NULL
     g_noisy_neighbors       <- NULL
     g_view                  <- NULL
@@ -47,31 +42,24 @@ shinyServer(function(input,output,session) {
     g_reactval              <- reactiveValues()
     g_reactval$updateVar    <- 0
     g_refs_avail            <<- c("-","TP53","NOTCH1","ATM","CALR","Custom")
-    #g_files = a variable that represents the data table containing individual samples and information about them
-    TP53_demo               <- list(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
-                                    FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
-                                    REV_name=c("TP53 ; rev ; low freq w frameshift"),
-                                    REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
-                                    REF=c("TP53"),
-                                    mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
-                                    calls = "",
-                                    status="new",
-                                    id=1,
-                                    brush_fwd_start = 0,
-                                    brush_fwd_end = 0,
-                                    brush_rev_start = 0,
-                                    brush_rev_end = 0,
-                                    coding = '',
-                                    protein = '',
-                                    VAF = '',
-                                    dbSNP = '',
-                                    dbSNP_id = '')
-    g_files                 <- data.table(FWD_name=character(),FWD_file=character(),REV_name=character(),REV_file=character(),REF=character(),mut_min=numeric(),
-                                           qual_thres_to_call=numeric(),s2n_min=numeric(),show_calls_checkbox=logical(),join_traces_checkbox=logical(),max_y_p=numeric(),opacity=numeric(), 
-                                           incorporate_checkbox=logical(),loaded=logical(),calls=character(),status=character(),id=integer(),brush_fwd_start=numeric(),
-                                           brush_fwd_end=numeric(),brush_rev_start=numeric(),brush_rev_end=numeric(),coding=character(),protein=character(),VAF=character(), 
-                                           dbSNP=character(),dbSNP_id=character())
-    #g_files[,`:=` ]
+    #g_files = a variable that represents the data table containing individual samples and information about them 
+    g_files                 <- data.table(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
+                                          FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
+                                          REV_name=c("TP53 ; rev ; low freq w frameshift"),
+                                          REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
+                                          REF=c("TP53"),
+                                          mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
+                                          calls = "",
+                                          status="new",
+                                          id=1,
+                                          brush_fwd = 0,
+                                          brush_rev = 0,
+                                          coding = '',
+                                          protein = '',
+                                          VAF = '',
+                                          dbSNP = '',
+                                          dbSNP_id = ''
+                                )
 
 #     get_file <- reactive({
 #        # if (!is.null(input$select_file)) return(input$select_file$datapath)
@@ -85,8 +73,6 @@ shinyServer(function(input,output,session) {
     #SAMPLE BROWSER STUFF
 
     output$samples_table <- DT::renderDataTable({
-
-        updateRefs()
         loadSamples()
         goRef_handler()
         goDelete_sample_handler()
@@ -94,9 +80,6 @@ shinyServer(function(input,output,session) {
         goChangeRev_handler()
         loading_processed_files()
         input$goLock
-        loadDemo()
-        
-        
 
         disabled <- rep(FALSE,nrow(g_files))
         disabled[1] <- FALSE
@@ -109,15 +92,14 @@ shinyServer(function(input,output,session) {
         add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)),class="btn btn-info" )
         add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id + (Math.random()/10))',ico=rep("close",nrow(g_files)) ,dsbl = disabled,class="btn dlt_btn")
         add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
-        add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files),'selectGene_', choices=c("-",g_alignTo_options), selected = g_files[,REF],width="80px")
+        add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files), 'selectGene_',choices=g_refs_avail, selected = g_files[,REF],width="80px")
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
-        out <- cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?] </div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status,coding,protein,VAF,dbSNP)])
+        out <- cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?]</div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status,coding,protein,VAF,dbSNP)])
         table_out <- DT::datatable(out,escape=FALSE,selection = "none",
-                                   style ="bootstrap",
-                                   class="compact samplesdt",
+                                   style = "bootstrap",class="compact",
                                    #id = "samplesdt",
                                    options=list("ordering"=FALSE,"paging"=FALSE,"searching"=FALSE,"autoWidth"=FALSE,"bInfo"=FALSE,"id"="samplesdt",
-                                                initComplete = JS('function(settings, json) {
+                                                initComplete = JS('function(setting, json) {
                                                                         $(\'[id*="selectGene"]\').change(function() {
                                                                                 var sel = $(this).find(":selected").text();
                                                                                 Shiny.onInputChange("goChangeRef",{id: this.id,
@@ -142,12 +124,22 @@ shinyServer(function(input,output,session) {
 
     #Handlers for the Sample Browser
     
+    loadGBK <- observe({
+        if(!is.null(input$custom_gb)){
+            withProgress(
+                ret <- process_gbk(input$custom_gb),message = "processing GenBank file."
+            )
+            g_custom_cod <<- ret$custom_cod
+            g_custom_ref <<- ret$custom_fasta
+        }
+    })
+
     loadSamples <- reactive({
         if(!is.null(input$browser_files)){
             g_not_loaded <- ""
             loaded <- ""
             error = ""
-            ret <- samplesLoad(input$browser_files,output,g_files,g_alignTo_options,g_custom_ref)
+            ret <- samples_load(input$browser_files,output,g_files,input$alignTo)
             g_files <<- rbind(g_files[,!c("id"),with=FALSE],ret$loaded,fill=TRUE)
             g_files[,id:= 1:nrow(g_files)]
             g_files <<- g_files
@@ -173,18 +165,7 @@ shinyServer(function(input,output,session) {
                 g_files[pos_at]$status <- "new"
                 g_files[pos_at]$brush_rev <- 0
                 g_files[pos_at]$calls = ""
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",
-                                                 REV_name=rev_name,REV_file=rev_file,
-                                                 REF=ref,id=nrow(g_files)+1),
-                                                 mut_min=20,qual_thres_to_call=0,
-                                                 s2n_min=2,show_calls_checkbox=F,
-                                                 join_traces_checkbox=F,max_y_p=100,
-                                                 opacity=0,incorporate_checkbox=F,
-                                                 calls = "",loaded= FALSE, 
-                                                 status = "new",
-                                                 brush_fwd_start = 0,brush_fwd_end=0,
-                                                 brush_rev_start=0, brush_rev_end = 0,
-                                                 coding = '', protein = '', VAF = '',dbSNP = '',dbSNP_id = ''))
+                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",REV_name=rev_name,REV_file=rev_file,REF=ref,id=nrow(g_files)+1),mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,calls = "",loaded= FALSE, status = "new",brush_fwd = 0, brush_rev = 0, coding = '', protein = '', VAF = '',dbSNP = '',dbSNP_id = ''))
             }else{          #combine
                 setkey(g_files,id)
                 rev_name <- name
@@ -251,10 +232,6 @@ shinyServer(function(input,output,session) {
         input$opacity
         input$incorporate_checkbox
         g_reactval$updateVar
-        input$trim_fwd_end
-        input$trim_fwd_start
-        input$trim_rev_end
-        input$trim_rev_start
 
         if(nrow(g_files[loaded==TRUE,]) ==1){
             g_files <<- g_files[loaded==TRUE,`:=`(mut_min=input$mut_min,
@@ -265,8 +242,8 @@ shinyServer(function(input,output,session) {
                                       max_y_p=input$max_y_p,
                                       opacity=input$opacity,
                                       incorporate_checkbox=input$incorporate_checkbox,
-                                      brush_fwd_start=input$trim_fwd_start,
-                                      brush_rev_end=input$trim_rev_end)]
+                                      brush_fwd=g_brush_fwd,
+                                      brush_rev=g_brush_rev)]
         }
 
     })
@@ -288,10 +265,20 @@ shinyServer(function(input,output,session) {
                 g_files[,loaded:=F]
                 
                 g_files[load_id,loaded:=T]
-                #if(g_files[loaded==T,]$calls == "") g_files[load_id,status:="viewed"]
-                
-                updateSliders(session,g_files)
+                if(g_files[loaded==T,]$calls == ""){
+                    g_files[load_id,status:="viewed"]
+                }
+                updateSliderInput(session,'mut_min',value=g_files[loaded==T,]$mut_min)
+                updateSliderInput(session,'qual_thres_to_call',value=g_files[loaded==T,]$qual_thres_to_call)
+                updateSliderInput(session,'s2n_min',value=g_files[loaded==T,]$s2n_min)
+                updateCheckboxInput(session,'show_calls_checkbox',value=g_files[loaded==T,]$show_calls_checkbox)
+                updateCheckboxInput(session,'join_traces_checkbox',value=g_files[loaded==T,]$join_traces_checkbox)
+                updateSliderInput(session,'max_y_p',value=g_files[loaded==T,]$max_y_p)
+                updateSliderInput(session,'opacity',value=g_files[loaded==T,]$opacity)
+                updateCheckboxInput(session,'incorporate_checkbox',value=g_files[loaded==T,]$incorporate_checkbox)
+                #updateCheckboxInput(session,'incorporate_checkbox',value=FALSE)
                 g_files<<-g_files
+                
             })
         }
         
@@ -410,33 +397,22 @@ shinyServer(function(input,output,session) {
                     files_info <- paste0("<pre>",files_info,"</pre>")
                     output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
-                    
-                    #initialize or load trim brushes
-                    lapply(c("trim_fwd_start","trim_fwd_end","trim_rev_start","trim_rev_end"),function(x){updateNumericInput(session,max = nrow(calls),inputId=x)})
-                    
-                    if(g_files[loaded==TRUE,]$status =="new"){
-                        g_files[loaded==TRUE,]$brush_fwd_start<<-calls[call!="-",][25]$id 
-                        g_files[loaded==TRUE,]$brush_fwd_end<<-calls[nrow(calls)-25]$id
-                    }
-                    updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_start,inputId = "trim_fwd_start" )
-                    updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_end,inputId = "trim_fwd_end" )
-                    
-                    
-                    if(!is.null(g_abif_rev)){
-                        if(g_files[loaded==TRUE,]$status =="new"){
-                            g_files[loaded==TRUE,]$brush_rev_start<<-calls[call_rev!="-",][25]$id
-                            g_files[loaded==TRUE,]$brush_rev_end<<-calls[nrow(calls[call_rev!="-",])-25]$id
-                        }
-                        updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_rev_start,inputId = "trim_rev_start" )
-                        updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_rev_end,inputId = "trim_rev_end" )
+                    if(g_files[loaded==TRUE,]$brush_fwd ==0){
+                        g_brush_fwd        <<- calls[call!="-",][25]$trace_peak
                     }else{
-                        updateNumericInput(session,value=0,inputId = "trim_rev_start" )
-                        updateNumericInput(session,value=nrow(calls),inputId = "trim_rev_end" )
+                        g_brush_fwd <<- g_files[loaded==TRUE,]$brush_fwd
                     }
-                    #if(g_single_rev){
-                    #    g_brush_fwd <<- calls[nrow(calls[call!="-",])-25]$trace_peak
+                    if(!is.null(g_abif_rev)){
+                        if(g_files[loaded==TRUE,]$brush_rev ==0){
+                            g_brush_rev        <<- calls[nrow(calls[call_rev!="-",])-25]$trace_peak
+                        }else{
+                            g_brush_rev <<- g_files[loaded==TRUE,]$brush_rev
+                        }
+                    }
+                    if(g_single_rev){
+                        g_brush_fwd <<- calls[nrow(calls[call!="-",])-25]$trace_peak
 
-                    #}
+                    }
                     #if reloading a previously loaded file 
                     if(nrow(g_files[loaded==T,]) == 1){                  #g_calls saved from previous session we test if they are compatible to reload
                         if(g_files[loaded==T,]$calls != ""){
@@ -463,7 +439,7 @@ shinyServer(function(input,output,session) {
 
     varcall <- reactive({
         if(class(loading_processed_files())[1] != "my_UI_exception") {
-            updateChosenVariants()
+            update_chosen_variants()
             goReset_handler()
             g_reactval$updateVar
             #goBrush_fw()
@@ -489,7 +465,6 @@ shinyServer(function(input,output,session) {
             }
             foo <- get_mut_min()
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
-            #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,0,0,input$incorporate_checkbox,g_single_rev)
             setkey(g_calls,id)
 
             report                  <- report_hetero_indels(g_calls)
@@ -532,13 +507,7 @@ shinyServer(function(input,output,session) {
         if(varcall()) {
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
             withProgress(message = paste('Plotting chromatogram.',sep=" "), value = 1 ,{
-                ret<-chromatography(g_intens,g_intens_rev,g_single_rev,g_intrexdat,
-                                    g_calls,g_choices,g_new_sample,
-                                    g_noisy_neighbors,
-                                    input$show_calls_checkbox,input$show_qual_checkbox,
-                                    g_qual_present,
-                                    g_calls[input$trim_fwd_start]$trace_peak,g_calls[input$trim_fwd_end]$trace_peak,
-                                    g_calls[input$trim_rev_start]$trace_peak,g_calls[input$trim_rev_end]$trace_peak)
+                ret<-chromatography(g_intens,g_intens_rev,g_single_rev,g_intrexdat,g_calls,g_choices,g_new_sample,g_noisy_neighbors,input$show_calls_checkbox,input$show_qual_checkbox,g_qual_present,g_brush_fwd,g_brush_rev)
                 g_new_sample <<- FALSE
                 return(ret)
             })
@@ -575,7 +544,7 @@ shinyServer(function(input,output,session) {
     #
     # Change single / Change button
     #
-    updateChosenVariants <- reactive({
+    update_chosen_variants <- reactive({
         input$change_btn
         isolate({
             if(!is.null(g_calls[["id"]])){
@@ -608,8 +577,7 @@ shinyServer(function(input,output,session) {
             #input$reset_btn
             #input$lo
             if(varcall() & !is.null(g_choices)) {
-                g_view <<- getView(g_calls,g_choices,g_glassed_snp)
-                g_view <<- applyFilters(g_view,g_files[loaded==TRUE,]$brush_fwd_start,g_files[loaded==TRUE,]$brush_fwd_end,g_files[loaded==TRUE,]$brush_rev_start,g_files[loaded==TRUE,]$brush_rev_end)
+                g_view<<-get_view(g_calls,g_choices,g_glassed_snp)
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)',class="btn dlt_btn" )
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'console.log($("#DataTables_Table_1"));Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
@@ -807,79 +775,6 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
-    
-    #######################
-    # alignTo_new (start) #
-    #######################
-    
-    #g_alignTo_options <- c("TP53","ATM","NOTCH1","CALR")
-    g_alignTo_description <- list("TP53" = "Acc.: NM_000546.5<br>Ref: GRCh38"
-                                , "ATM" = "Acc.: <br> Ref:"
-                                , "NOTCH1" = "Acc.:<br> Ref:"
-                                , "CALR" = "Acc.:<br> Ref")
-    
-    output$alignTo_new <- renderUI({
-        updateRefs()
-        UI_out <- lapply(g_alignTo_options, function(x) paste0(div(id = paste0(x, '_alignTo_div')
-                                                                 , class = 'alignTo_class'
-                                                                 , style = "margin: 2px;
-                                                                            padding: 2px;
-                                                                            background-color: #F5F5F5;
-                                                                            box-shadow: 1px 1px 3px #888888;"
-                                                                 , h4(x), if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "load demo") else "demo not available"
-                                                                 , div(HTML(g_alignTo_description[[x]]))))
-                         )
-        UI_out <- paste0(UI_out, collapse = "</td><td>")
-        UI_out <- paste0("<table><tr><td>", UI_out, "</td></tr></table>")
-        return(HTML(UI_out))
-    })
-
-    
-    loadDemo <- reactive({
-        if(!is.null(g_reactval$link)){
-            if(g_reactval$link=="TP53"){
-                g_files <<- rbind(g_files,TP53_demo)
-            }
-        }
-    })
-    
-    updateRefs <-function() {
-        loadGBK()
-        g_alignTo_options <<- input$additionalRefs
-        if(!is.null(g_custom_ref)){
-            g_alignTo_options <<- c(g_alignTo_options,"Custom")
-        }
-        
-        lapply(g_alignTo_options, function(x) {
-            observeEvent(input[[paste0(x, "_alignTo_lnk")]], {
-                g_reactval$link <- x
-            })
-        })
-    }
-    
-    loadGBK <- reactive({
-        if(!is.null(input$custom_gb)){
-            #try catch
-            withProgress(
-                tryCatch({
-                        ret <- process_gbk(input$custom_gb)
-                        g_custom_cod <<- ret$custom_cod
-                        g_custom_ref <<- ret$custom_fasta
-                    }
-                    ,error = function(e){
-                        output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" ))
-                        g_custom_cod <<- NULL
-                        g_custom_ref <<- NULL
-                    }
-                ),message = "processing GenBank file."
-            )
-            
-        }
-    })
-    
-    #####################
-    # alignTo_new (end) #
-    #####################
 
 
     #EXPORT

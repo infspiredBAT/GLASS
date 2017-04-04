@@ -7,7 +7,6 @@ library(chromatography)
 library(stringr)
 library(stringi)
 library(DT)
-library(shinyBS)
 #source("JS.R")
 
 shinyUI(
@@ -40,7 +39,7 @@ shinyUI(
 		    HTML("<style type='text/css'>
                 .form-control{
                     background-color: white !important;
-                    //margin-left: 4px !important;
+                    margin-left: 4px !important;
                 }
                 .btn-file{
                    
@@ -200,64 +199,40 @@ shinyUI(
                         <b>(very) quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names - if you tick relevant references beforehand, GLASS will align and auto-orientate against them</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) click the blue 'play' button to load the file(s)</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
                         </div>"), sep = ""))))),
                 fluidRow(
-                    column(12,tags$div(title="",HTML(paste("<div style='display:inline;'><h3 style='display:inline;'>References </h3><b style='display:inline;' id ='ref_help'>[?]</b></div>")))
-                           ,bsTooltip(id = "ref_help","Set of working references <hr> Displayed as cards are the references against which new samples are aligned (auto detect reference) and also appeare in the \"reference dropdown menu\" in the Samples table below.", placement = "right", trigger = "hover",
-                                      options = NULL)
-                           )
-                    
+                    column(12,tags$div(title="Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.",
+                        HTML(paste("<b>upload and process ABI files</b> [?]"))))
                 ),
-				
                 fluidRow(
                     column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected.
 
 Selecting NONE of the references will assign no reference to your chromatogram. It is still possible to view it or change the reference afterwards.
 
-The more references are selected the longer the upload process wil take."
-                        #,checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR","Custom"),selected = c("TP53"),inline=TRUE)
-                    ),
-                        #######################
-                        # alignTo_new (start) #
-                        #######################
-                        
-                        uiOutput("alignTo_new"),
-                        uiOutput("alignTo_new_debug"),
-                        #####################
-                        # alignTo_new (end) #
-                        #####################
+The more references are selected the longer the upload process wil take.",
+                        checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR","Custom"),selected = c("TP53"),inline=TRUE)),
                         #wellPanel(
-                            checkboxInput("showWP3", HTML("Manage References <i class='fa fa-wrench' aria-hidden='true'></i>")),
+                            checkboxInput("showWP3", HTML(" Reference Settings <i class='fa fa-wrench' aria-hidden='true'></i>")),
                             conditionalPanel(condition="input.showWP3",
                                              fluidRow(
-                                                 HTML("<br>"),
                                                  column(3, 
-                                                        selectizeInput("additionalRefs", " Add reference from currated list,",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","ATM","NOTHC1","CALR"), multiple = TRUE,
-                                                                       options = list(maxItems = 4))
-                                                 ),
-                                                 column(3, fileInput("custom_gb",label = HTML("OR upload your own GenBank file. <b style='display:inline; color:red;' id ='q1'> [?!]</b> "
-                                                                                            ),
-                                                                     multiple=F,accept=c('.gb','.gbk'),width = '100%'),
-                                                                     bsTooltip(id = "q1","Currently an experimental feature. Help imporove it by reporting errors.", placement = "right", trigger = "hover",
-                                                                                                                                 options = NULL)
+                                                        selectizeInput("additionalRefs", " Additional Variants",c("TP53","ATM","NOTHC1","CALR","ABC","CDE"), selected = c("TP53","ATM","NOTHC1","CALR"), multiple = TRUE,
+                                                                       options = NULL )),
+                                                 column(3, fileInput("custom_gb","Upload a custom genbank file",multiple=F,accept=c('.gb','.gbk'),width = '100%')
                                                        )
                                              )
+                                             
                             )
                         #)
                     )
                         
-                )
-				,column(12,tags$div(title="",HTML(paste("<br><br><div style='display:inline;'><h3 style='display:inline;'>Samples </h3><b style='display:inline;' id ='samples_ui'>[?]</b></div><br><br>")))
-				        ,bsTooltip(id = "samples_ui","Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.", placement = "right", trigger = "hover",
-				                   options = NULL)
-				)
-				,fluidRow(
+                ),
+                fluidRow(
                     column(6,
                         fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
                     column(2,
                         tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",
                             downloadButton('export_btn','export variants [?]',class = "exp_btn")))
-                    ,DT::dataTableOutput('samples_table')
-		        )
-				
+		        ),
+		        DT::dataTableOutput('samples_table')
             ),
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
 				fluidRow(
@@ -272,7 +247,7 @@ The more references are selected the longer the upload process wil take."
     					    # textInput("change_variant","change variant to"),
                             actionButton("change_btn","change", icon = icon("exchange"), width='100%'))
 					),
-					column(3,
+					column(4,
                         tags$div(title="information about the current position, also highlighted in light blue, including all nucleotides (called, reference, mutated), coordinates, qualities (Q), peak %s, signal-to-noise (S/N) ratios, etc",
     				        HTML(paste("general infobox [?]", sep=""))),
 					    verbatimTextOutput("infobox")
@@ -302,22 +277,10 @@ The more references are selected the longer the upload process wil take."
                         )
 					),
 					column(1
-					        ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 0)
-					    
+					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 0)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
-                    column(2
-                        ,column(12,h4("Read trimming"))
-                        ,column(6
-                            ,numericInput("trim_fwd_start","start of fwd",value = 20,min = 0,max=1000)
-                            ,numericInput("trim_rev_start","start of rev",value = 20,min = 0,max=1000)
-                        )
-                        ,column(6
-                            ,numericInput("trim_fwd_end","end of fwd",value = 20,min = 0,max=1000)
-                            ,numericInput("trim_rev_end","end of rev",value = 20,min = 0,max=1000)
-                        )
-                        
-                    ),
+                    column(1),
 					column(1
 					    ,checkboxInput("show_qual_checkbox","show quality", value = F)
 					    ,checkboxInput("show_calls_checkbox","show calls", value = F)
@@ -334,7 +297,7 @@ The more references are selected the longer the upload process wil take."
 					    #,actionButton("toggle_help",icon = icon("question"), "hide help",class = "show_hide_help")
 					    ,HTML('<button class="btn btn-default action-button show_hide_help shiny-bound-input" type="button" onclick="$(\'#disclaimer-modal2\').modal(\'show\')"><i class="fa fa-question" ></i> show help</button>
 					            
-<div class="modal fade" id="disclaimer-modal2" tabindex="-1" role="dialog">
+                               <div class="modal fade" id="disclaimer-modal2" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
 					           <div class="modal-content">
 
@@ -343,31 +306,12 @@ The more references are selected the longer the upload process wil take."
 					          </div>
 
 					          <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-                                <br>
-                              <ul class="nav nav-tabs">
-                                <li class="active"><a data-toggle="tab" href="#home">Navigation</a></li>
-                                <li><a data-toggle="tab" href="#menu1">Peaks</a></li>
-                                <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
-                              </ul>
+					          <b>Use minimap navigation tool for scrolling along the sequence.</b>
+                              <img src="navbar_scroll.gif" alt="Navbar zoom" >
+                              <b>Use minimap navigation tool for zooming in and out.</b>
+                              <img src="navbar_zoom.gif" alt="Navbar zoom" >
+					          </div>
 
-                              <div class="tab-content">
-                                <div id="home" class="tab-pane fade in active">
-                                  <h3>Scrolling along the sequence.</h3>
-                                    <img src="navbar_scroll.gif" alt="Navbar zoom" >
-                                    <h3>Zooming.</h3>
-                                    <img src="navbar_zoom.gif" alt="Navbar zoom" >
-                                </div>
-                                <div id="menu1" class="tab-pane fade">
-                                  <h3>Menu 1</h3>
-                                  <p>Some content in menu 1.</p>
-                                </div>
-                                <div id="menu2" class="tab-pane fade">
-                                  <h3>Menu 2</h3>
-                                  <p>Some content in menu 2.</p>
-                                </div>
-                              </div>
-                               
-                                </div>
 					          <div class="modal-footer" style="clear-both">
 					          <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
 					          </div>

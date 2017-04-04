@@ -1,0 +1,1017 @@
+LOCUS       NC_000017              19149 bp    DNA     linear   CON 13-AUG-2013
+DEFINITION  Homo sapiens chromosome 17, GRCh37.p13 Primary Assembly.
+ACCESSION   NC_000017 REGION: complement(7571720..7590868) GPC_000000041
+VERSION     NC_000017.10
+DBLINK      BioProject: PRJNA168
+            Assembly: GCF_000001405.25
+KEYWORDS    RefSeq.
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini;
+            Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 19149)
+  AUTHORS   Zody,M.C., Garber,M., Adams,D.J., Sharpe,T., Harrow,J.,
+            Lupski,J.R., Nicholson,C., Searle,S.M., Wilming,L., Young,S.K.,
+            Abouelleil,A., Allen,N.R., Bi,W., Bloom,T., Borowsky,M.L.,
+            Bugalter,B.E., Butler,J., Chang,J.L., Chen,C.K., Cook,A., Corum,B.,
+            Cuomo,C.A., de Jong,P.J., DeCaprio,D., Dewar,K., FitzGerald,M.,
+            Gilbert,J., Gibson,R., Gnerre,S., Goldstein,S., Grafham,D.V.,
+            Grocock,R., Hafez,N., Hagopian,D.S., Hart,E., Norman,C.H.,
+            Humphray,S., Jaffe,D.B., Jones,M., Kamal,M., Khodiyar,V.K.,
+            LaButti,K., Laird,G., Lehoczky,J., Liu,X., Lokyitsang,T.,
+            Loveland,J., Lui,A., Macdonald,P., Major,J.E., Matthews,L.,
+            Mauceli,E., McCarroll,S.A., Mihalev,A.H., Mudge,J., Nguyen,C.,
+            Nicol,R., O'Leary,S.B., Osoegawa,K., Schwartz,D.C., Shaw-Smith,C.,
+            Stankiewicz,P., Steward,C., Swarbreck,D., Venkataraman,V.,
+            Whittaker,C.A., Yang,X., Zimmer,A.R., Bradley,A., Hubbard,T.,
+            Birren,B.W., Rogers,J., Lander,E.S. and Nusbaum,C.
+  TITLE     DNA sequence of human chromosome 17 and analysis of rearrangement
+            in the human lineage
+  JOURNAL   Nature 440 (7087), 1045-1049 (2006)
+   PUBMED   16625196
+REFERENCE   2  (bases 1 to 19149)
+  CONSRTM   International Human Genome Sequencing Consortium
+  TITLE     Finishing the euchromatic sequence of the human genome
+  JOURNAL   Nature 431 (7011), 931-945 (2004)
+   PUBMED   15496913
+REFERENCE   3  (bases 1 to 19149)
+  AUTHORS   Lander,E.S., Linton,L.M., Birren,B., Nusbaum,C., Zody,M.C.,
+            Baldwin,J., Devon,K., Dewar,K., Doyle,M., FitzHugh,W., Funke,R.,
+            Gage,D., Harris,K., Heaford,A., Howland,J., Kann,L., Lehoczky,J.,
+            LeVine,R., McEwan,P., McKernan,K., Meldrim,J., Mesirov,J.P.,
+            Miranda,C., Morris,W., Naylor,J., Raymond,C., Rosetti,M.,
+            Santos,R., Sheridan,A., Sougnez,C., Stange-Thomann,N.,
+            Stojanovic,N., Subramanian,A., Wyman,D., Rogers,J., Sulston,J.,
+            Ainscough,R., Beck,S., Bentley,D., Burton,J., Clee,C., Carter,N.,
+            Coulson,A., Deadman,R., Deloukas,P., Dunham,A., Dunham,I.,
+            Durbin,R., French,L., Grafham,D., Gregory,S., Hubbard,T.,
+            Humphray,S., Hunt,A., Jones,M., Lloyd,C., McMurray,A., Matthews,L.,
+            Mercer,S., Milne,S., Mullikin,J.C., Mungall,A., Plumb,R., Ross,M.,
+            Shownkeen,R., Sims,S., Waterston,R.H., Wilson,R.K., Hillier,L.W.,
+            McPherson,J.D., Marra,M.A., Mardis,E.R., Fulton,L.A.,
+            Chinwalla,A.T., Pepin,K.H., Gish,W.R., Chissoe,S.L., Wendl,M.C.,
+            Delehaunty,K.D., Miner,T.L., Delehaunty,A., Kramer,J.B., Cook,L.L.,
+            Fulton,R.S., Johnson,D.L., Minx,P.J., Clifton,S.W., Hawkins,T.,
+            Branscomb,E., Predki,P., Richardson,P., Wenning,S., Slezak,T.,
+            Doggett,N., Cheng,J.F., Olsen,A., Lucas,S., Elkin,C.,
+            Uberbacher,E., Frazier,M., Gibbs,R.A., Muzny,D.M., Scherer,S.E.,
+            Bouck,J.B., Sodergren,E.J., Worley,K.C., Rives,C.M., Gorrell,J.H.,
+            Metzker,M.L., Naylor,S.L., Kucherlapati,R.S., Nelson,D.L.,
+            Weinstock,G.M., Sakaki,Y., Fujiyama,A., Hattori,M., Yada,T.,
+            Toyoda,A., Itoh,T., Kawagoe,C., Watanabe,H., Totoki,Y., Taylor,T.,
+            Weissenbach,J., Heilig,R., Saurin,W., Artiguenave,F., Brottier,P.,
+            Bruls,T., Pelletier,E., Robert,C., Wincker,P., Smith,D.R.,
+            Doucette-Stamm,L., Rubenfield,M., Weinstock,K., Lee,H.M.,
+            Dubois,J., Rosenthal,A., Platzer,M., Nyakatura,G., Taudien,S.,
+            Rump,A., Yang,H., Yu,J., Wang,J., Huang,G., Gu,J., Hood,L.,
+            Rowen,L., Madan,A., Qin,S., Davis,R.W., Federspiel,N.A.,
+            Abola,A.P., Proctor,M.J., Myers,R.M., Schmutz,J., Dickson,M.,
+            Grimwood,J., Cox,D.R., Olson,M.V., Kaul,R., Raymond,C., Shimizu,N.,
+            Kawasaki,K., Minoshima,S., Evans,G.A., Athanasiou,M., Schultz,R.,
+            Roe,B.A., Chen,F., Pan,H., Ramser,J., Lehrach,H., Reinhardt,R.,
+            McCombie,W.R., de la Bastide,M., Dedhia,N., Blocker,H.,
+            Hornischer,K., Nordsiek,G., Agarwala,R., Aravind,L., Bailey,J.A.,
+            Bateman,A., Batzoglou,S., Birney,E., Bork,P., Brown,D.G.,
+            Burge,C.B., Cerutti,L., Chen,H.C., Church,D., Clamp,M.,
+            Copley,R.R., Doerks,T., Eddy,S.R., Eichler,E.E., Furey,T.S.,
+            Galagan,J., Gilbert,J.G., Harmon,C., Hayashizaki,Y., Haussler,D.,
+            Hermjakob,H., Hokamp,K., Jang,W., Johnson,L.S., Jones,T.A.,
+            Kasif,S., Kaspryzk,A., Kennedy,S., Kent,W.J., Kitts,P.,
+            Koonin,E.V., Korf,I., Kulp,D., Lancet,D., Lowe,T.M., McLysaght,A.,
+            Mikkelsen,T., Moran,J.V., Mulder,N., Pollara,V.J., Ponting,C.P.,
+            Schuler,G., Schultz,J., Slater,G., Smit,A.F., Stupka,E.,
+            Szustakowski,J., Thierry-Mieg,D., Thierry-Mieg,J., Wagner,L.,
+            Wallis,J., Wheeler,R., Williams,A., Wolf,Y.I., Wolfe,K.H.,
+            Yang,S.P., Yeh,R.F., Collins,F., Guyer,M.S., Peterson,J.,
+            Felsenfeld,A., Wetterstrand,K.A., Patrinos,A., Morgan,M.J., de
+            Jong,P., Catanese,J.J., Osoegawa,K., Shizuya,H., Choi,S. and
+            Chen,Y.J.
+  CONSRTM   International Human Genome Sequencing Consortium
+  TITLE     Initial sequencing and analysis of the human genome
+  JOURNAL   Nature 409 (6822), 860-921 (2001)
+   PUBMED   11237011
+  REMARK    Erratum:[Nature 2001 Aug 2;412(6846):565]
+COMMENT     REFSEQ INFORMATION: The reference sequence is identical to
+            CM000679.1.
+            [WARNING] On Feb 3, 2014 this sequence was replaced by
+            gi:568815581.
+            On Jun 10, 2009 this sequence version replaced gi:51511734.
+            Assembly Name: GRCh37.p13 Primary Assembly
+            The DNA sequence is composed of genomic sequence, primarily
+            finished clones that were sequenced as part of the Human Genome
+            Project. PCR products and WGS shotgun sequence have been added
+            where necessary to fill gaps or correct errors. All such additions
+            are manually curated by GRC staff. For more information see:
+            http://genomereference.org.
+            
+            ##Genome-Annotation-Data-START##
+            Annotation Provider         :: NCBI
+            Annotation Status           :: Full annotation
+            Annotation Version          :: Homo sapiens Annotation Release 105
+            Annotation Pipeline         :: NCBI eukaryotic genome annotation
+                                           pipeline
+            Annotation Software Version :: 5.1
+            Annotation Method           :: Best-placed RefSeq; Gnomon
+            Features Annotated          :: Gene; mRNA; CDS; ncRNA
+            ##Genome-Annotation-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..19149
+                     /organism="Homo sapiens"
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="17"
+     gene            1..19149
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="tumor protein p53; Derived by automated
+                     computational analysis using gene prediction method:
+                     BestRefSeq,Gnomon."
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10932..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 2"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001126112.2"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10932..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 2"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001276761.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 1"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_000546.5"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 1"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001276760.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14285..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 4"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001126113.2"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14285..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 4"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001276695.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14212..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 3"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001126114.2"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14212..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 3"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001276696.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(1..174,10929..11169,11279..11557,12315..12498,
+                     12580..12692,13261..13370,13714..13850,13943..14016,
+                     16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 8"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001126118.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(12058..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 5"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001126115.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(12058..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 5"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001276697.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(12058..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14285..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 7"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001126117.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(12058..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14285..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 7"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001276699.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(12058..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14212..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 6"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001126116.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(12058..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14212..14344,16836..16942,17861..19149)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant 6"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001276698.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     mRNA            join(14..174,10929..11030,11148..11169,11279..11357,
+                     11418..11557,12315..12498,12580..12692,13261..13370,
+                     13714..13850,13943..14016,16836..16942,17861..19130)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant X1"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: Gnomon. Supporting evidence
+                     includes similarity to: 88 mRNAs, 38 ESTs, 6 Proteins, and
+                     91% coverage of the annotated genomic feature by RNAseq
+                     alignments"
+                     /transcript_id="XM_005256778.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     misc_RNA        join(64..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14285..14344,16836..16942,17861..19130)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant X2"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: Gnomon. Supporting evidence
+                     includes similarity to: 94 mRNAs, 56 ESTs, 6 Proteins, and
+                     89% coverage of the annotated genomic feature by RNAseq
+                     alignments"
+                     /transcript_id="XR_243565.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     misc_RNA        join(64..174,10929..11030,11148..11169,11279..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14212..14344,16836..16942,17861..19130)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /product="tumor protein p53, transcript variant X3"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: Gnomon. Supporting evidence
+                     includes similarity to: 95 mRNAs, 56 ESTs, 7 Proteins, and
+                     91% coverage of the annotated genomic feature by RNAseq
+                     alignments"
+                     /transcript_id="XR_243566.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+     CDS             join(10957..11030,11148..11169,11279..11357,11418..11557,
+                     12315..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: Gnomon."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform X1"
+                     /protein_id="XP_005256835.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLM
+                     LSPDDIEQWFTEDPAPTPAAPAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSV
+                     TCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHE
+                     RCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMC
+                     NSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPH
+                     HELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQ
+                     AGKEPGGSRAHSSHLKSKKGQSTSRHKKLMFKTEGPDSD"
+     CDS             join(10957..11030,11148..11169,11279..11557,12315..12498,
+                     12580..12692,13261..13370,13714..13850,13943..14016,
+                     16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform a is encoded by transcript variant 1;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform a"
+                     /protein_id="NP_000537.3"
+                     /db_xref="CCDS:CCDS11118.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLM
+                     LSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKT
+                     YQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAM
+                     AIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVV
+                     PYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCA
+                     CPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRG
+                     RERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSRHKKLMFKTEGPDS
+                     D"
+     CDS             join(10957..11030,11148..11169,11279..11557,12315..12498,
+                     12580..12692,13261..13370,13714..13850,13943..14016,
+                     16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform a is encoded by transcript variant 2;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform a"
+                     /protein_id="NP_001119584.1"
+                     /db_xref="CCDS:CCDS11118.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLM
+                     LSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKT
+                     YQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAM
+                     AIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVV
+                     PYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCA
+                     CPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRG
+                     RERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSRHKKLMFKTEGPDS
+                     D"
+     CDS             join(11300..11557,12315..12498,12580..12692,13261..13370,
+                     13714..13850,13943..14016,16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform g is encoded by transcript variant 8;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform g"
+                     /protein_id="NP_001119590.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPA
+                     APAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTC
+                     PVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEG
+                     NLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITL
+                     EDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSS
+                     PQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKK
+                     GQSTSRHKKLMFKTEGPDSD"
+     CDS             join(11300..11557,12315..12498,12580..12692,13261..13370,
+                     13714..13850,13943..14016,16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform g is encoded by transcript variant 1;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform g"
+                     /protein_id="NP_001263689.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPA
+                     APAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTC
+                     PVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEG
+                     NLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITL
+                     EDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSS
+                     PQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKK
+                     GQSTSRHKKLMFKTEGPDSD"
+     CDS             join(11300..11557,12315..12498,12580..12692,13261..13370,
+                     13714..13850,13943..14016,16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform g is encoded by transcript variant 2;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform g"
+                     /protein_id="NP_001263690.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPA
+                     APAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTC
+                     PVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEG
+                     NLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITL
+                     EDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSS
+                     PQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKK
+                     GQSTSRHKKLMFKTEGPDSD"
+     CDS             join(12336..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform d is encoded by transcript variant 5;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform d"
+                     /protein_id="NP_001119587.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MFCQLAKTCPVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRC
+                     PHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHY
+                     NYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKK
+                     GEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALEL
+                     KDAQAGKEPGGSRAHSSHLKSKKGQSTSRHKKLMFKTEGPDSD"
+     CDS             join(12417..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,16836..16942,17861..17942)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform j is encoded by transcript variant 5;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform j"
+                     /protein_id="NP_001263626.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRV
+                     EYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSS
+                     GNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPK
+                     KKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQST
+                     SRHKKLMFKTEGPDSD"
+     CDS             join(10957..11030,11148..11169,11279..11557,12315..12498,
+                     12580..12692,13261..13370,13714..13850,13943..14016,
+                     14285..14332)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform c is encoded by transcript variant 4;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform c"
+                     /protein_id="NP_001119585.1"
+                     /db_xref="CCDS:CCDS45605.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLM
+                     LSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKT
+                     YQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAM
+                     AIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVV
+                     PYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCA
+                     CPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQMLL
+                     DLRWCYFLINSS"
+     CDS             join(11300..11557,12315..12498,12580..12692,13261..13370,
+                     13714..13850,13943..14016,14285..14332)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform h is encoded by transcript variant 4;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform h"
+                     /protein_id="NP_001263624.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPA
+                     APAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTC
+                     PVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEG
+                     NLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITL
+                     EDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSS
+                     PQPKKKPLDGEYFTLQMLLDLRWCYFLINSS"
+     CDS             join(12336..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14285..14332)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform f is encoded by transcript variant 7;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform f"
+                     /protein_id="NP_001119589.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MFCQLAKTCPVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRC
+                     PHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHY
+                     NYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKK
+                     GEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQMLLDLRWCYFLINSS"
+     CDS             join(12417..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14285..14332)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform l is encoded by transcript variant 7;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform l"
+                     /protein_id="NP_001263628.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRV
+                     EYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSS
+                     GNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPK
+                     KKPLDGEYFTLQMLLDLRWCYFLINSS"
+     CDS             join(10957..11030,11148..11169,11279..11557,12315..12498,
+                     12580..12692,13261..13370,13714..13850,13943..14016,
+                     14212..14244)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform b is encoded by transcript variant 3;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform b"
+                     /protein_id="NP_001119586.1"
+                     /db_xref="CCDS:CCDS45606.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLM
+                     LSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKT
+                     YQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQLWVDSTPPPGTRVRAM
+                     AIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVV
+                     PYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCA
+                     CPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQDQT
+                     SFQKENC"
+     CDS             join(11300..11557,12315..12498,12580..12692,13261..13370,
+                     13714..13850,13943..14016,14212..14244)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform i is encoded by transcript variant 3;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform i"
+                     /protein_id="NP_001263625.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPA
+                     APAPAPSWPLSSSVPSQKTYQGSYGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTC
+                     PVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEG
+                     NLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITL
+                     EDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSS
+                     PQPKKKPLDGEYFTLQDQTSFQKENC"
+     CDS             join(12336..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14212..14244)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform e is encoded by transcript variant 6;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform e"
+                     /protein_id="NP_001119588.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MFCQLAKTCPVQLWVDSTPPPGTRVRAMAIYKQSQHMTEVVRRC
+                     PHHERCSDSDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPPEVGSDCTTIHY
+                     NYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENLRKK
+                     GEPHHELPPGSTKRALPNNTSSSPQPKKKPLDGEYFTLQDQTSFQKENC"
+     CDS             join(12417..12498,12580..12692,13261..13370,13714..13850,
+                     13943..14016,14212..14244)
+                     /gene="TP53"
+                     /gene_synonym="BCC7; LFS1; P53; TRP53"
+                     /note="isoform k is encoded by transcript variant 6;
+                     Derived by automated computational analysis using gene
+                     prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="cellular tumor antigen p53 isoform k"
+                     /protein_id="NP_001263627.1"
+                     /db_xref="GeneID:7157"
+                     /db_xref="HGNC:HGNC:11998"
+                     /db_xref="MIM:191170"
+                     /translation="MAIYKQSQHMTEVVRRCPHHERCSDSDGLAPPQHLIRVEGNLRV
+                     EYLDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSS
+                     GNLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPPGSTKRALPNNTSSSPQPK
+                     KKPLDGEYFTLQDQTSFQKENC"
+     gene            complement(<1..1480)
+                     /gene="WRAP53"
+                     /gene_synonym="DKCB3; TCAB1; WDR79"
+                     /note="WD repeat containing, antisense to TP53; Derived by
+                     automated computational analysis using gene prediction
+                     method: BestRefSeq."
+                     /db_xref="GeneID:55135"
+                     /db_xref="HGNC:HGNC:25522"
+                     /db_xref="MIM:612661"
+     mRNA            complement(1327..1480)
+                     /gene="WRAP53"
+                     /gene_synonym="DKCB3; TCAB1; WDR79"
+                     /product="WD repeat containing, antisense to TP53,
+                     transcript variant 2"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001143990.1"
+                     /db_xref="GeneID:55135"
+                     /db_xref="HGNC:HGNC:25522"
+                     /db_xref="MIM:612661"
+     mRNA            complement(1..111)
+                     /gene="WRAP53"
+                     /gene_synonym="DKCB3; TCAB1; WDR79"
+                     /product="WD repeat containing, antisense to TP53,
+                     transcript variant 3"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_001143991.1"
+                     /db_xref="GeneID:55135"
+                     /db_xref="HGNC:HGNC:25522"
+                     /db_xref="MIM:612661"
+ORIGIN      
+        1 gatgggattg gggttttccc ctcccatgtg ctcaagactg gcgctaaaag ttttgagctt
+       61 ctcaaaagtc tagagccacc gtccagggag caggtagctg ctgggctccg gggacacttt
+      121 gcgttcgggc tgggagcgtg ctttccacga cggtgacacg cttccctgga ttgggtaagc
+      181 tcctgactga acttgatgag tcctctctga gtcacgggct ctcggctccg tgtattttca
+      241 gctcgggaaa atcgctgggg ctgggggtgg ggcagtgggg acttagcgag tttgggggtg
+      301 agtgggatgg aagcttggct agagggatca tcataggagt tgcattgttg ggagacctgg
+      361 gtgtagatga tggggatgtt aggaccatcc gaactcaaag ttgaacgcct aggcagagga
+      421 gtggagcttt ggggaacctt gagccggcct aaagcgtact tctttgcaca tccacccggt
+      481 gctgggcgta gggaatccct gaaataaaag atgcacaaag cattgaggtc tgagactttt
+      541 ggatctcgaa acattgagaa ctcatagctg tatattttag agcccatggc atcctagtga
+      601 aaactggggc tccattccga aatgatcatt tgggggtgat ccggggagcc caagctgcta
+      661 aggtcccaca acttccggac ctttgtcctt cctggagcga tctttccagg cagcccccgg
+      721 ctccgctaga tggagaaaat ccaattgaag gctgtcagtc gtggaagtga gaagtgctaa
+      781 accaggggtt tgcccgccag gccgaggagg accgtcgcaa tctgagaggc ccggcagccc
+      841 tgttattgtt tggctccaca tttacatttc tgcctcttgc agcagcattt ccggtttctt
+      901 tttgccggag cagctcacta ttcacccgat gagaggggag gagagagaga gaaaatgtcc
+      961 tttaggccgg ttcctcttac ttggcagagg gaggctgcta ttctccgcct gcatttcttt
+     1021 ttctggatta cttagttatg gcctttgcaa aggcaggggt atttgttttg atgcaaacct
+     1081 caatccctcc ccttctttga atggtgtgcc ccaccccgcg ggtcgcctgc aacctaggcg
+     1141 gacgctacca tggcgtgaga cagggaggga aagaagtgtg cagaaggcaa gcccggaggt
+     1201 attttcaaga atgagtatat ctcatcttcc cggaggaaaa aaaaaaagaa tgggtacgtc
+     1261 tgagaatcaa attttgaaag agtgcaatga tgggtcgttt gataatttgt cggaaaaaca
+     1321 atctacctgt tatctagctt tgggctaggc cattccagtt ccagacgcag gctgaacgtc
+     1381 gtgaagcgga aggggcgggc ccgcaggcgt ccgtgtggtc ctccgtgcag ccctccggcc
+     1441 cgagccggtt cttcctggta ggaggcggaa ctcgaattca tttctcccgc tgccccatct
+     1501 cttagctcgc ggttgtttca ttccgcagtt tcttcccatg cacctgccgc gtaccggcca
+     1561 ctttgtgccg tacttacgtc atctttttcc taaatcgagg tggcatttac acacagcgcc
+     1621 agtgcacaca gcaagtgcac aggaagatga gttttggccc ctaaccgctc cgtgatgcct
+     1681 accaagtcac agaccctttt catcgtccca gaaacgtttc atcacgtctc ttcccagtcg
+     1741 attcccgacc ccacctttat tttgatctcc ataaccattt tgcctgttgg agaacttcat
+     1801 atagaatgga atcaggctgg gcgctgtggc tcacgcctgc actttgggag gccgaggcgg
+     1861 gcggattact tgaggatagg agttccagac cagcgtggcc aacgtggtga atccccgtct
+     1921 ctactaaaaa atacaaaaat tagctgggcg tggtgggtgc ctgtaatccc agctattcgg
+     1981 gagggtgagg caggagaatc gcttgaaccc gggaggcaga ggttgcagtg agccaagatc
+     2041 gtgccactac actccagcct gggcgacaag aacgaaactc cgtctcaaaa aaaagggggg
+     2101 aatcatacat tatgtgctca tttttgtcgg gcttctgtcc ttcaatgtac tgtctgacat
+     2161 tcgttcatgt tgtatatatc agtattttgc tccttttcat ttagtatagt ccatcgattg
+     2221 tatatccgtc cttttgatgg ccttttgagt tgtttcccat ttgcggttat gaaataaagc
+     2281 tgctataaac attcttgtac aattcttttt gtgatcatat gttttcgtgt ttcttggaga
+     2341 aatacttagg aggggaattg cgagtttgga agtaaaaagt agctgtattt tgaacttttt
+     2401 cagaagctct gagttttcca gagcggttgt accattttac actccaacta gcaaggtatg
+     2461 ggagttatta tggttgtgcc acagccttcc ggacattagg tattgtcagt ctttctaatg
+     2521 tggtatatcc ttgtggttgt aatttacagt tctctattga ctaaggatgt tcagcatttt
+     2581 ttcatgtgcc tattggccat tcgtattttg tttgtaaagt agctcttcga gtcttttacc
+     2641 tgttattttg gttttttgtt tgtttttatt gttcagttgt gggactgctt tatacattct
+     2701 ggatacaagt cctttatcag atccatgtgt cgtgaatgtt ttcttctgat ctgttgcttg
+     2761 cctatttgtt tgctttacag agtttacagt atcttaagag gagtggattt atctttttta
+     2821 tgttcagtat ttgccttgtc ctgtttagga catctttttt ttttttttta accccagggt
+     2881 catgaagata ttatcttaca ttttctttta ggacctttat ggttgtaagt tttacagtaa
+     2941 ggtccttgag ccattaatta attcttaaaa ttaattgttt atggtgtgag gtgtaggagt
+     3001 cagtctctgg tatctttcct gtatggaaat ccagttattc tgtctccact tgttgaaata
+     3061 ggcttccttt ctctactgaa tgcttttaat tttaattatt ttacagttgg agtatagggc
+     3121 taccatttta gtgctatttt ctttttttct ttgttaattt ttgagacagg gactcacact
+     3181 gttgcccagg ctagagtaca atggcacaat caaggcttac tgcagcctcg aacccctggg
+     3241 ctcaagcagt cctctagcag cctcacgagt agctgggatt actccaccac acccagctaa
+     3301 ctattttatt tttttgtatt gacaggatct cactatgttg cccaggctgg tctcaaactg
+     3361 ctggcctcaa gctttcatcc catctcggcc tcccaaagtg ctgggattac aggtgtgagc
+     3421 caccatgcct gacctcttag tgctattttc tatttatctc ctctgttctc tgctctcttt
+     3481 aaacgttgga ggaagaaaca gtacccatct tacacaaact cttcagaaaa cagaggaaca
+     3541 gactgggcgc ggtggctcat acctgtaatc tcagcacttt ggtacgctga ggcaggggat
+     3601 catttgaggt cgggagttcg agaccagcct ggccaacacg gcgaaacccc atctctacta
+     3661 aaaatacaaa aagtagctag gcgtggtgac acatacctgt aatgccagtt actcaggagg
+     3721 ctgaggcaca agaatccctt gaacctggga agcggaggtt gcagtgagcc gagattgcgc
+     3781 cactgcactc cagcctgggc aacagagtga gaccctgtct cagaaaaaaa aagaaagaaa
+     3841 gaaaaaatag aggaatattt cccaacttgt tttcgaagcc agcataatcc tggtaccaaa
+     3901 accaaacaag gacattataa gaaaagaaaa tatagaccaa tattcctgtt agcatagaca
+     3961 tgcaacagct aaccaatttt agcaaaccaa acctggtaat atagaaaaaa ggataaatag
+     4021 gccagtcgcg gtggctcacg cctgtaatcc cagcactttg ggaggctgag gcaggcagat
+     4081 cacttgaggt caggagtttg agaccagcct gaccaacatg gtgaaacccc gtttctaata
+     4141 aaaatacaaa aatcaggctg ggcacggtgg ctcacgcctg taatcccagc actttgggag
+     4201 gccgaggtgg gcagatcacg aggtcaggag ttcaagacca gcctgaccaa tgtggtgaaa
+     4261 cgccatctct actaaaaata caaaaatcag ccggtgtggt ggcacctgcc tgtaatccca
+     4321 gctactcagg aggctgaggc agaattgctt gaacccggga ggcagaggtt gcagtgagcc
+     4381 aagatcgtgc cactgcactc cagcctgggc gacagagcaa gacttcatct caaaaaaaaa
+     4441 aaaaaattag ctgggcatgg tggtgggcac ctgaaatccc agctactcgg gagtctgagg
+     4501 caggagaatc gcttgaaccc aggaggcaga agttgcactg agctgggatc acaccattgc
+     4561 actccagcct gggcaacaga gtgagactcc atctcaaaaa aagaaaaaga aaaaggataa
+     4621 atacattcta accaaataat gtttatctca tgattgtagc tgattcaaca ttcaaaaatt
+     4681 ggcctggtgc agtagctcag gcctgtaatc ccaacatttt aggaggctga ggcaggaaga
+     4741 tctcttgagc ccaggatttc aagaccagcc tgggcaacat agtcagactg gtctttactg
+     4801 gggggaaaaa aatcagtctg tgtaattcac cacattaaca aagggaaaca taaaaaccct
+     4861 atgatcattt caacagatgt agcaaaagca gttaatgata ttcaacacat atgcatgatt
+     4921 acaaaccaac caacctccta gcaaactagg gaaaggaaac ttaacctagt ttgataacag
+     4981 ggcgtccaca gtcggagttc cactagcagc atacataatg gtagaaaact cagtgctgcc
+     5041 gggcgcggtg gctcacgcct gtaatgccag cactttggga ggcctaggcg ggcggatcac
+     5101 gaggtcagga gatcgagact gtcctgacta gcatgctgaa accccgtctc tactaaaaat
+     5161 acaaaaacaa aaaattagcc gggcatggtg gcgggcgcct atagtcccag ctactcggga
+     5221 ggctgaggcg agagaatggc gtgaacccgg gaggcggagc ttgcagagcc tagatcgtgc
+     5281 cactgcactc cagcctgggt gacagagtga gacttcgtct caaaaaaaaa aaaaaaaaaa
+     5341 aaagaaaaga aaactcaacg ctttttcctc taagatcagg aactagaaaa ggatttgact
+     5401 ctcacaacgt tgataccata ctggaggttt taaccaggca agaaaaagaa ataatgaggg
+     5461 ccgggtgcgg tggctcaggc ctgtaatccc agcactttgg gaagccgaga cgggtggatc
+     5521 acgaggtcag gagatcgaga ccatcctggc taacacggtg aaaccctgtc tctactaaat
+     5581 atacaaaaaa ttagccgggc gtagtggcgg gcgcctgtag tcccagctac tcgggaggct
+     5641 gaggcaggag aatggcgtga actcaggggg cggagcttgc agtgagctga gatcgagcca
+     5701 ctgcactcca gcctgggcga cagagcaaga ctgtgtctca aaaaaaaaaa aagaaaaaga
+     5761 aataatgatt agtggcccga tgtctcacgc ctataatccc agcactttgg gaggccgagg
+     5821 tgggcagatc acctgaggtc tggagttgga gaccagcctg acaaagatgg tgaaacctcg
+     5881 tctctattaa aatattaaaa aaatagccag gcgttggccg ggtacagtgg ctcatgcctg
+     5941 taatcccagc actttgggag gccgaggtgg gtggatcacc tgaggtcagg agttcaacac
+     6001 cagcctggcc aacatggtga aaccccatct ctactaaaaa tacaaaaatt agccgggcgt
+     6061 agtggcgggc gcctgtaatc ccagctactt gggaggctta ggcaggagaa tcgcttgaac
+     6121 ctgggaggcg gaggttgtag tgagccgaga ttgcaccatt gcactccagc ctgggtgaca
+     6181 aaagcaaaaa ctccgtctca aaaaaaaaag aattagccag gggtagtggt gaacgcctgt
+     6241 agtcccagct actcaggagg cagaggcagg agaatcactt gaacccagga ggcagaggtt
+     6301 gcagtgagcc gagattgtcc cattgcactc cagcctaggc gacaagagca aaattccatg
+     6361 tcaaaaaaaa aaaaaaaaaa ggaaagaaaa aaaataacga ttagaaagga agaaataaaa
+     6421 cacattcaca gccagtatga ttctatacat acatgtccta atggggccag gcgtggtggc
+     6481 tcatgcctgt aatcctagca cttttaggag gctgaggcag gtggcttccc tgggaccagc
+     6541 ctggccaaca tggtgaaacc ccaactctaa taaaaataca aaaaatcagc caggcgtggt
+     6601 gacgggcacc tctaatccca gctactcagg aggctgaggc aggagaattg cttggacctg
+     6661 ggaggcagag gttgcagtga gccgagatcg cgctattgca ctccagcctg ggcaacaaga
+     6721 gtgaaactcc ggcagggtgt ggtggcttac gcctgtaatc ccagcacttc gggaggctga
+     6781 ggcaggccga tcacctgagg tcaggagttt gagaccaacc taacatggtg aaaccccgtc
+     6841 tctactaaaa atacaagaat tagctgggtg tagtggtggg cgcctgtaat cccagctact
+     6901 tgggaggctg agacagaaga attgcttgaa cccaggaggt ggaggttgca gtgagctgag
+     6961 atcatgccat tgcacaccac gccgggcaac agagcgagat tccgtctcaa aaaaaaaaaa
+     7021 aaagagtgaa actctatctc aaaaaaaaaa aaaagtccta atggaaaatc cataaaaagc
+     7081 taccaaaact aataaataaa tatagcaggg ttgcaggtta cagggcaata tagttatccc
+     7141 tctatctgta ggggcttggt tctgggactc ctcacacacc aaacccacag atgtctaagt
+     7201 cccatatata agacggtata gtatttggat ttaacctaca catatcctcc catatagttt
+     7261 aaattatctc tagattactt acattacccc catacaatga aaatgctaat gtacatgcaa
+     7321 gtatgtatgt aagtacttgt actatattgt ttagggaatc actggacata taggccttca
+     7381 agactgatac cagcagccac tgttaagatt ctggtcaggc ctgcccctgt ttggggtctc
+     7441 agttgatctc attgccttcc cacccagcca agggcacctg catttctctt ggctccctgg
+     7501 ccatttggaa ggcctagttc agcctggcac atttgtatcc tggcccactg atgctggtac
+     7561 ccctgggaag gtcctgctct gaaaaacacg gagattttag ttgctactga agatttgaga
+     7621 gataaagaca gggagacctg tctgtagacc tgtgtccctc caagtgggat tgagactttg
+     7681 ggccccccat ttcaggacag cacctcctgg cctgttgact gaatagatcc ctgaaggagg
+     7741 tgtacttgca ttaatggagt gggggtggga gcagtaccac agatccgcac taacaatcac
+     7801 acagttctct ctagaataat aatatagaac aagtgaaata gaacaattgc agaaagagct
+     7861 aacctttgtt gagctcttac tgtgtgccca gcactttcct caactctaca tttcccataa
+     7921 tacacagagt actaggtagg ccaggcttgg tggctcacgc ctgtaatccc agcactttag
+     7981 gaggccaagg ggggtggatc acctgaggtc gggagttcaa gaccagcctg accaacatgg
+     8041 tgaaaccccg tctctactag aagtacaaaa ttagccaggt gtggtggcac atgcttgtag
+     8101 tcctagctac tcagcaggct gaggcaggag aatcatttga atccgggagg aggttgcagt
+     8161 aagcggagat agtgccactg tactccagcc tgggcaataa gagctgagac tccgtctcaa
+     8221 aataaaataa aataaaataa aataaaataa aataaaataa aaaaagaaaa gagcctgcca
+     8281 ttaaaggagc tgtttggtag gggatgtttt gtcagtgcaa acaacagaaa agtgggctgg
+     8341 gcacagtggt tcatgcctgt aatcccagca ctttgggagg ccaaggcggg cggatcacct
+     8401 gaagttggga gttcaagacc agcctgacca atatggagaa accccgtctc tactaaaaat
+     8461 acaaaattag ccgggcgcag tggcgcatgc ctgtaatccc agctactcgg gaggctgagg
+     8521 caggagaatc gcttgaacct gggaggcaga ggttgcggtg agccgagatc gcaccattgc
+     8581 actccagcct ggacgagagc aaaactctgt ctcaaaaaaa aaaaaaaaca gaaaagtgta
+     8641 acaaacactt acagtaggca tgtttcttag caaatctgat gacaaatttg gcataaagaa
+     8701 agagagcatc cctgaaaaaa aaaaaaagaa aaagaaagag agcatcctgc ctgggcaaca
+     8761 tagtgaaacc ctgcctctac aaaaaaactc aaaaattggc cgggtgcagt ggctcacacc
+     8821 tgtaatccca gcactttggg agtcggaggc gggaggatca cctgaggtca ggagttcgaa
+     8881 accagcctgg ccaacatggc aaaaccccat ctctactaaa aatacaaaaa attaatcagg
+     8941 cgcattggtg ggcgcctgta atcccagcta ctcaggaagt tgaggcaaga ggatcgcttg
+     9001 aatctgggag gtggaggtta cagtgagtcg agatcacacc actgcactct agcctgggtg
+     9061 acagggcgag actccgtctc caaaaaaaaa aagaaaaaga aaaagactaa aaaattagcc
+     9121 aggcaggcct ctgtggtccc agctacttgg gaggctgagg caggagaatc actgagccca
+     9181 ggagtccgag gctgtagtga gccatgattg caccactgta ccctagcttg ggcaacaaag
+     9241 caagaccctg cctcaaaaga aaaaagaaag aaagaaagaa catggcgggc caggcacagt
+     9301 ggctcacacc tgtaatccca gcgctttgag aggccgaggc aggtggatca caaggtcagg
+     9361 agttccacac cagcctggcc aacatggtga aaccctgtct ctactaaaaa tacaaaaaat
+     9421 cagccaggca tggtggcagg ggcctgtaat cccagctact cgggaggctg aggcaggaga
+     9481 attgcttgaa accagaaggc agaggttgca gtgagcctag actgcaccac tgcactccag
+     9541 cctgggcgaa aagagccaaa ctccatctca aaaaacaaac aaaaaaacaa aacaaaagaa
+     9601 aacatggcaa agcctttgaa agcttgtctg ggagaaggtg cgatgatagt tgcataactt
+     9661 cgtgcaagat gctggtccac acaggggctg ccccttgctc tttctcgctc tcttaacctc
+     9721 tcatataaca ggcttgtgtg ttattcacat ttattgagcc caagcaggtg caaggcattg
+     9781 tgatctaata ctttggtcag caagacaaca agatagatca ctgccctgcc cttaggaagt
+     9841 gtatatgcta ttagaggaaa cagataaaat aaacaaggaa aagtatcaga caatgtaagt
+     9901 gctatgagaa tgcaaatgag gtgatgtgaa ttaaaatagg atgacttaaa gtctgcacgg
+     9961 gaaggagcct acccccatgt tcctggctag ccaaggaacc accagttgat tagcagagaa
+    10021 gggcagccag tctagctaga gcttttgggg aagagggagt ggttgttaag agatgagatt
+    10081 aaagaagccg agacgggcca ttcgtgaggg gtttgtaatg cagggctgag gagtgtccga
+    10141 agagaatggg caggtgagcg gtgagacagt tgttcttcca gaagctttgc agtgaaagga
+    10201 atcaaagaaa tggagccgtg tatcaggtgg ggaagggtgg gggccaaggg ggtgtccttc
+    10261 cccatacaga gattgcaggc tgagaatgac tatatccttg ttaacaggag gtgggagcag
+    10321 ggcacggtag ctcacacctg taatcttggc actttaggag gctgaggcgg gccgatcacc
+    10381 tgaagtaagg agttcgagac cagcctggcc aacatgcaaa gccctgtctc tactaaaaat
+    10441 acaaaaatta gctgggtgtg gtggtactcg cctgtaatcc cagctactcg ggagactgag
+    10501 gcaggagaat ggcttgaacc cggaaggtag aggttgcagt gagctgagat catgccactg
+    10561 tgctccagcc taggtgacag agagagactc catctcaaaa aaaaaaaaaa aatacaggaa
+    10621 gggagttggg aatagggtgc acatttagga agtcttgggg atttagtggt gggaaggttg
+    10681 gaagtccctc tctgattgtc ttttcctcaa agaagtgcat ggctggtgag gggtggggca
+    10741 ggagtgcttg ggttgtggtg aaacattgga agagagaatg tgaagcagcc attcttttcc
+    10801 tgctccacag gaagccgagc tgtctcagac actggcatgg tgttggggga gggggttcct
+    10861 tctctgcagg cccaggtgac ccagggttgg aagtgtctca tgctggatcc ccacttttcc
+    10921 tcttgcagca gccagactgc cttccgggtc actgccatgg aggagccgca gtcagatcct
+    10981 agcgtcgagc cccctctgag tcaggaaaca ttttcagacc tatggaaact gtgagtggat
+    11041 ccattggaag ggcaggccca ccacccccac cccaacccca gccccctagc agagacctgt
+    11101 gggaagcgaa aattccatgg gactgacttt ctgctcttgt ctttcagact tcctgaaaac
+    11161 aacgttctgg taaggacaag ggttgggctg gggacctgga gggctgggga cctggagggc
+    11221 tggggggctg gggggctgag gacctggtcc tctgactgct cttttcaccc atctacagtc
+    11281 ccccttgccg tcccaagcaa tggatgattt gatgctgtcc ccggacgata ttgaacaatg
+    11341 gttcactgaa gacccaggtc cagatgaagc tcccagaatg ccagaggctg ctccccccgt
+    11401 ggcccctgca ccagcagctc ctacaccggc ggcccctgca ccagccccct cctggcccct
+    11461 gtcatcttct gtcccttccc agaaaaccta ccagggcagc tacggtttcc gtctgggctt
+    11521 cttgcattct gggacagcca agtctgtgac ttgcacggtc agttgccctg aggggctggc
+    11581 ttccatgaga cttcaatgcc tggccgtatc cccctgcatt tcttttgttt ggaactttgg
+    11641 gattcctctt caccctttgg cttcctgtca gtgttttttt atagtttacc cacttaatgt
+    11701 gtgatctctg actcctgtcc caaagttgaa tattcccccc ttgaatttgg gcttttatcc
+    11761 atcccatcac accctcagca tctctcctgg ggatgcagaa cttttctttt tcttcatcca
+    11821 cgtgtattcc ttggcttttg aaaataagct cctgaccagg cttggtggct cacacctgca
+    11881 atcccagcac tctcaaagag gccaaggcag gcagatcacc tgagcccagg agttcaagac
+    11941 cagcctgggt aacatgatga aacctcgtct ctacaaaaaa atacaaaaaa ttagccaggc
+    12001 atggtggtgc acacctatag tcccagccac ttaggaggct gaggtgggaa gatcacttga
+    12061 ggccaggaga tggaggctgc agtgagctgt gatcacacca ctgtgctcca gcctgagtga
+    12121 cagagcaaga ccctatctca aaaaaaaaaa aaaaaaagaa aagctcctga ggtgtagacg
+    12181 ccaactctct ctagctcgct agtgggttgc aggaggtgct tacgcatgtt tgtttctttg
+    12241 ctgccgtctt ccagttgctt tatctgttca cttgtgccct gactttcaac tctgtctcct
+    12301 tcctcttcct acagtactcc cctgccctca acaagatgtt ttgccaactg gccaagacct
+    12361 gccctgtgca gctgtgggtt gattccacac ccccgcccgg cacccgcgtc cgcgccatgg
+    12421 ccatctacaa gcagtcacag cacatgacgg aggttgtgag gcgctgcccc caccatgagc
+    12481 gctgctcaga tagcgatggt gagcagctgg ggctggagag acgacagggc tggttgccca
+    12541 gggtccccag gcctctgatt cctcactgat tgctcttagg tctggcccct cctcagcatc
+    12601 ttatccgagt ggaaggaaat ttgcgtgtgg agtatttgga tgacagaaac acttttcgac
+    12661 atagtgtggt ggtgccctat gagccgcctg aggtctggtt tgcaactggg gtctctggga
+    12721 ggaggggtta agggtggttg tcagtggccc tccaggtgag cagtaggggg gctttctcct
+    12781 gctgcttatt tgacctccct ataaccccat gagatgtgca aagtaaatgg gtttaactat
+    12841 tgcacagttg aaaaaactga agcttacaga ggctaagggc ctcccctgct tggctgggcg
+    12901 cagtggctca tgcctgtaat cccagcactt tgggaggcca aggcaggcgg atcacgaggt
+    12961 tgggagatcg agaccatcct ggctaacggt gaaaccccgt ctctactgaa aaatacaaaa
+    13021 aaaaattagc cgggcgtggt gctgggcacc tgtagtccca gctactcggg aggctgagga
+    13081 aggagaatgg cgtgaacctg ggcggtggag cttgcagtga gctgagatca cgccactgca
+    13141 ctccagcctg ggcgacagag cgagattcca tctcaaaaaa aaaaaaaaaa ggcctcccct
+    13201 gcttgccaca ggtctcccca aggcgcactg gcctcatctt gggcctgtgt tatctcctag
+    13261 gttggctctg actgtaccac catccactac aactacatgt gtaacagttc ctgcatgggc
+    13321 ggcatgaacc ggaggcccat cctcaccatc atcacactgg aagactccag gtcaggagcc
+    13381 acttgccacc ctgcacactg gcctgctgtg ccccagcctc tgcttgcctc tgacccctgg
+    13441 gcccacctct taccgatttc ttccatacta ctacccatcc acctctcatc acatccccgg
+    13501 cggggaatct ccttactgct cccactcagt tttcttttct ctggctttgg gacctcttaa
+    13561 cctgtggctt ctcctccacc tacctggagc tggagcttag gctccagaaa ggacaagggt
+    13621 ggttgggagt agatggagcc tggtttttta aatgggacag gtaggacctg atttccttac
+    13681 tgcctcttgc ttctcttttc ctatcctgag tagtggtaat ctactgggac ggaacagctt
+    13741 tgaggtgcgt gtttgtgcct gtcctgggag agaccggcgc acagaggaag agaatctccg
+    13801 caagaaaggg gagcctcacc acgagctgcc cccagggagc actaagcgag gtaagcaagc
+    13861 aggacaagaa gcggtggagg agaccaaggg tgcagttatg cctcagattc acttttatca
+    13921 cctttccttg cctctttcct agcactgccc aacaacacca gctcctctcc ccagccaaag
+    13981 aagaaaccac tggatggaga atatttcacc cttcaggtac taagtcttgg gacctcttat
+    14041 caagtggaaa gtttccagtc taacactcaa aatgccgttt tcttcttgac tgttttacct
+    14101 gcaattgggg catttgccat cagggggcag tgatgcctca aagacaatgg ctcctggttg
+    14161 tagctaacta acttcagaac accaacttat accataatat atattttaaa ggaccagacc
+    14221 agctttcaaa aagaaaattg ttaaagagag catgaaaatg gttctatgac tttgcctgat
+    14281 acagatgcta cttgacttac gatggtgtta cttcctgata aactcgtcgt aagttgaaaa
+    14341 tattgtaagt tgaaaatgga tttaatacac ctaatctaag gaacatcata gcttagccta
+    14401 gcctgctttt tttttttttt tttttggaga cagagtctca ctctgtcacc caggctggag
+    14461 tgcagtggcg ggatctcggc tcactgcaac ctccgccttc tgggttcaag cgattctcct
+    14521 gcctcagccc actgagtagc tgggattaca ggcacctgcc ccgacgccca gctaattttt
+    14581 tgttatttat ttattttttt ttttagtaga gatgaggttt caccatgttg gccaggctag
+    14641 tctcgaactc ctgaccttgt gatctgcctg ccttggcctc ccaaagtgct gggattacag
+    14701 gcgtgagcca ccgcacccgg cctgcctagc ctacttttat tttattttta atggagacag
+    14761 catcttgctc tgttgcccag gctggattac agtgatgtga tcatagctca ttataccctc
+    14821 ctgggctcaa gcaatccccc taactctgcc tccccagtag ctaggaccac aggcatacac
+    14881 caccataccc agctaatttt taaaattttt tgtagataga tagagtctca ctatgttgcc
+    14941 caggctggtc tctagcctac ttttttgaga caaggtcttg ctctgtcacc caggctggat
+    15001 agagtgcagt agtgcagtca cagctcactg cagcctccac ctcccaggct ccatccatcc
+    15061 tcccagctca gcctcccaag ttgcttcaac tacaggcctg caccaccatg cctggctaat
+    15121 ttttatttat ttatttttat tttattttat tttatttttt tgagactcag tctcactctg
+    15181 tcgcccaggc tggagtgcag tggcatgatc tcggctcact gcaacctctg cctcctgggt
+    15241 tcaagtgatt ctcctgcctc agcctcccga atagctagga ctacaagcgc ctgctaccac
+    15301 gcccagctaa tttttgtatt tttagtagag acagggtttc accatgttgg ccaggctggt
+    15361 ctcgaacttc tgaccatgtg atccgcccgc ctcggcctcc caaagtgctg ggattacagg
+    15421 tgtgagccac cacgcccggc taatttttat ttatttattt aaagacagag tctcactctg
+    15481 tcactcaggc tagagtgcag tggcaccatc tcagctcact gcagccttga cctccctggg
+    15541 ctccggtgat ttcaccctcc caagtagcta ggactacagg cacatgccac gacacccagc
+    15601 taatttttta ttttctgtga agtcaaggtc ttgctacgtt gcccatgctg gtatcaaacc
+    15661 cctgggctca atcaatcctt ccacctcagc ctccccaagt attggggtta caggcatgag
+    15721 ctaccacact cagccctagc ctacttgaaa cgtgttcaga gcatttaagt taccctacag
+    15781 ttgggcaaag tcatctaaca caaagccctt tttatagtaa taaaatgttg tatatctcat
+    15841 gtgatttatt gaatattgtt actgaaagtg agaaacagca tggttgcatg aaaggaggca
+    15901 cagtcgagcc aggcacagcc tgggcgcaga gcgagactca aaaaaagaaa aggccaggcg
+    15961 cactggctca cgcctgtaat cccagcattt cgggaggctg aggcgggtgg atcacctgag
+    16021 gtcaggagtt caagaccagc ctagccaaca tggtgaaacc ccgtctctac taaaatacaa
+    16081 aaattaaccg ggcgtgatgg caggtgcctg taatcccagc tacttgggag gctgaggcag
+    16141 gagaatcgct tgaaccagga ggcggaggtt gcagggagcc aagatggcgc cactgcactc
+    16201 cagcctgggc gatagagtga gactccgtct cagaaaaaaa agaaaagaaa cgaggcacag
+    16261 tcgcatgcac atgtagtccc agttacttga gaggctaagg caggaggatc tcttgagccc
+    16321 aagagtttga gtccagcctg aacaacatag caagacatca tctctaaaat ttaaaaaagg
+    16381 gccgggcaca gtggctcaca cctgtaatcc cagcactttg ggaggtggag gtgggtagat
+    16441 cacctgacgt caggagttgg aaaccagcct ggctaacatg gtgaagcccc atctctacta
+    16501 aaaacacaaa aattagccag gtgtggtagc acacgcctgt agtcccagct actcgggagg
+    16561 ctgaggcaca agaatcactt gaaccccaga ggcggagatt gcaatcagcc aagattgcac
+    16621 cattgcactc ccgcctgggc aacagagtga gaccccatct caaaataaat aaataaatat
+    16681 ttttaaaagt cagctgtata ggtacttgaa gtgcagtttc tactaaatgc atgttgcttt
+    16741 tgtaccgtca taaagtcaaa caattgtaac ttgaaccatc ttttaactca ggtactgtgt
+    16801 atatacttac ttctccccct cctctgttgc tgcagatccg tgggcgtgag cgcttcgaga
+    16861 tgttccgaga gctgaatgag gccttggaac tcaaggatgc ccaggctggg aaggagccag
+    16921 gggggagcag ggctcactcc aggtgagtga cctcagcccc ttcctggccc tactcccctg
+    16981 ccttcctagg ttggaaagcc ataggattcc attctcatcc tgccttcatg gtcaaaggca
+    17041 gctgacccca tctcattggg tcccagccct gcacagacat ttttttagtc ttcctccggt
+    17101 tgaatcctat aaccacattc ttgcctcagt gtatccacag aacatccaaa cccagggacg
+    17161 agtgtggata cttctttgcc attctccgca actcccagcc cagagctgga gggtctcaag
+    17221 gaggggccta ataattgtgt aatactgaat acagccagag tttcaggtca tatactcagc
+    17281 cctgccatgc accggcaggt cctaggtgac ccccgtcaaa ctcagtttcc ttatatataa
+    17341 aatggggtaa gggggccggg cgcagtggct cacgaatccc acactctggg aggccaaggc
+    17401 gagtggatca cctgaggtcg ggagtttgag cccagcctga ccaacatgga gaaaccccat
+    17461 ctctactaaa aatacaaaag tagccgggcg tggtgatgca tgcctgtaat cccagctacc
+    17521 tactcgggag gctgaggcag gagaatcgct tgaacccggg aggcagaggt tgcggtgagc
+    17581 tgagatctca ccattacact ccagcctggg caacaagagt gaaactccgt ctcaaaaaag
+    17641 ataaataaag taaaatgggg taagggaaga ttacgagact aatacacact aatactctga
+    17701 ggtgctcagt aaacatattt gcatggggtg tggccaccat cttgatttga attcccgttg
+    17761 tcccagcctt aggcccttca aagcattggt cagggaaaag gggcacagac cctctcactc
+    17821 atgtgatgtc atctctcctc cctgcttctg tctcctacag ccacctgaag tccaaaaagg
+    17881 gtcagtctac ctcccgccat aaaaaactca tgttcaagac agaagggcct gactcagact
+    17941 gacattctcc acttcttgtt ccccactgac agcctcccac ccccatctct ccctcccctg
+    18001 ccattttggg ttttgggtct ttgaaccctt gcttgcaata ggtgtgcgtc agaagcaccc
+    18061 aggacttcca tttgctttgt cccggggctc cactgaacaa gttggcctgc actggtgttt
+    18121 tgttgtgggg aggaggatgg ggagtaggac ataccagctt agattttaag gtttttactg
+    18181 tgagggatgt ttgggagatg taagaaatgt tcttgcagtt aagggttagt ttacaatcag
+    18241 ccacattcta ggtaggggcc cacttcaccg tactaaccag ggaagctgtc cctcactgtt
+    18301 gaattttctc taacttcaag gcccatatct gtgaaatgct ggcatttgca cctacctcac
+    18361 agagtgcatt gtgagggtta atgaaataat gtacatctgg ccttgaaacc accttttatt
+    18421 acatggggtc tagaacttga cccccttgag ggtgcttgtt ccctctccct gttggtcggt
+    18481 gggttggtag tttctacagt tgggcagctg gttaggtaga gggagttgtc aagtctctgc
+    18541 tggcccagcc aaaccctgtc tgacaacctc ttggtgaacc ttagtaccta aaaggaaatc
+    18601 tcaccccatc ccacaccctg gaggatttca tctcttgtat atgatgatct ggatccacca
+    18661 agacttgttt tatgctcagg gtcaatttct tttttctttt tttttttttt ttttcttttt
+    18721 ctttgagact gggtctcgct ttgttgccca ggctggagtg gagtggcgtg atcttggctt
+    18781 actgcagcct ttgcctcccc ggctcgagca gtcctgcctc agcctccgga gtagctggga
+    18841 ccacaggttc atgccaccat ggccagccaa cttttgcatg ttttgtagag atggggtctc
+    18901 acagtgttgc ccaggctggt ctcaaactcc tgggctcagg cgatccacct gtctcagcct
+    18961 cccagagtgc tgggattaca attgtgagcc accacgtcca gctggaaggg tcaacatctt
+    19021 ttacattctg caagcacatc tgcattttca ccccaccctt cccctccttc tcccttttta
+    19081 tatcccattt ttatatcgat ctcttatttt acaataaaac tttgctgcca cctgtgtgtc
+    19141 tgaggggtg
+//
+

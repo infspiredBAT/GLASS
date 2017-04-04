@@ -29,5 +29,10 @@
 }
 .samplesdt td{
     padding:8px;
+    margin: 2px;
+    background-color: #F5F5F5;
+    box-shadow: 1px 1px 3px #888888 !important;
 }
-
+#samples_table table{
+    box-shadow: 1px 1px 3px #888888 !important;
+}
