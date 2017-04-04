@@ -87,7 +87,7 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-                                <b>ver 0.2.12 (2017-Mar-22)</b>
+                                <b>ver 0.2.12 (2017-Apr-3)</b>
                                 <ul>
 			                     <li>Help images </li>
 			                     <li>Custom GenBank file experimental feature introduced.</li>
