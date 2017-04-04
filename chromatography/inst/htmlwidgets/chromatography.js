@@ -62,29 +62,42 @@ HTMLWidgets.widget({
                      .on("end",zoom_end);
         // var brush_fw = d3.svg.brush().on("brushend",brushed_fw);
         // var brush_rv = d3.svg.brush().on("brushend",brushed_rv);
-        var filt_fwd_x = 0;
-        var filt_rev_x = 0;
-        var filt_single_rev = false;
-        var filt_fwd_mini = svg.append("line")
-                               .attr("x1", 10)
-                               .attr("y1", 18)
-                               .attr("x2", 250)
-                               .attr("y2", 18)
-                               .attr("clip-path","url(#clip)")
-                               .attr("stroke-width", 2)
-                               .style("stroke-dasharray", ("3, 3"))
-                               .attr("stroke", "red")
-                               .attr("opacity",1);
-        var filt_rev_mini = svg.append("line")
-                               //.attr("x1", 10)
-                               .attr("y1", 72)
-                               //.attr("x2", 250) // don't know before init
-                               .attr("y2", 72)
-                               .attr("clip-path","url(#clip)")
-                               .attr("stroke-width", 2)
-                               .style("stroke-dasharray", ("3, 3"))
-                               .attr("stroke", "red")
-                               .attr("opacity",1);
+        var filt_fwd_start = 0;
+        var filt_rev_start = 0;
+        var filt_fwd_end = 0;
+        var filt_rev_end = 0;
+        var filt_has_rev = false;
+        var filt_fwd_start_mini = svg.append("line")
+                            .attr("x1", 10).attr("y1", 18)
+                            .attr("x2", 250).attr("y2", 18)
+                            .attr("clip-path","url(#clip)")
+                            .attr("stroke-width", 2)
+                            .style("stroke-dasharray", ("3, 3"))
+                            .attr("stroke", "red").attr("opacity",1);
+        var filt_fwd_end_mini = svg.append("line")
+                            .attr("y1", 18).attr("y2", 18)
+                            //.attr("x1", 10).attr("x2", 250) // don't know before init
+                            .attr("clip-path","url(#clip)")
+                            .attr("stroke-width", 2)
+                            .style("stroke-dasharray", ("3, 3"))
+                            .attr("stroke", "red").attr("opacity",1);
+
+        var filt_rev_start_mini = svg.append("line")
+                            .attr("x1", 10).attr("y1", 72)
+                            .attr("x2", 250).attr("y2", 72)
+                            .attr("clip-path","url(#clip)")
+                            .attr("stroke-width", 2)
+                            .style("stroke-dasharray", ("3, 3"))
+                            .attr("stroke", "red").attr("opacity",1);
+
+        var filt_rev_end_mini = svg.append("line")
+                            .attr("y1", 72).attr("y2", 72)
+                            //.attr("x1", 10).attr("x2", 250) // don't know before init
+                            .attr("clip-path","url(#clip)")
+                            .attr("stroke-width", 2)
+                            .style("stroke-dasharray", ("3, 3"))
+                            .attr("stroke", "red").attr("opacity",1);
+
         // var brush_fw_g;
         // var brush_rv_g;
 
@@ -493,9 +506,9 @@ HTMLWidgets.widget({
             var wsd = widthScale.domain();
             var wsr = widthScale.range();
             var bp = (wsd[1]-wsd[0])/(wsr[1]*11);  //base per
-            var bpt = bp*1000;
+            var bpt = bp*1000; //base per 1000
 
-            console.log('bpt',bpt);
+            //console.log('bpt',bpt);
 
             focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
             focus.selectAll("g").selectAll(".line_r").attr("d",line_rev);
@@ -533,23 +546,27 @@ HTMLWidgets.widget({
                                                                 else {return widthScale(d["trace_peak"]);}})
                                            .attr("stroke-width",function(d){if(d["mut_ord_in_cod"]==0||!d["mut_ord_in_cod"]){return 0}
                                                                 else{return (widthScale(10)-widthScale(0))}});
-            focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-9;});
-            focus.selectAll(".qual_rev").attr("x",function(d){return widthScale(d["trace_peak"]);});
+            focus.selectAll(".qual_fwd").attr("x",function(d){return widthScale(d["trace_peak"])-2;});
+            focus.selectAll(".qual_rev").attr("x",function(d){return widthScale(d["trace_peak"])+2;});
             focus.selectAll(".line").attr("x1",function(d){return widthScale(d["trace_peak"]);})
                                    .attr("x2",function(d){return widthScale(d["trace_peak"]);});
             focus.selectAll(".var_noise_indic").attr("stroke-width",widthScale(12)-widthScale(0));
         //     //conditional visibility
             //console.log(w);
+
             if(bpt<22){
+                this_show_qual = show_qual;
                 focus.selectAll(".peak_label").attr("visibility","visible");
                 if(bp===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
+                this_show_qual = "hidden";
                 focus.selectAll(".peak_label").attr("visibility","hidden");
                 focus.selectAll(".ref").attr("visibility","visible");
                 focus.selectAll(".user").attr("visibility","visible");
                 focus.selectAll(".var_noise_indic").attr("visibility","visible");
 
                 if(bpt<70){
+                  this_show_qual = show_qual;
                   focus.selectAll(".qual_fwd").attr("visibility","visible");
                   focus.selectAll(".qual_rev").attr("visibility","visible");
                   focus.selectAll(".aa").attr("visibility","visible");
@@ -558,8 +575,8 @@ HTMLWidgets.widget({
                 }
                 //if(bpt<25){focus.selectAll(".short").attr("visibility","visible");}
             }
-            //console.log(show_qual); //setting quality bars on/off
-            focus.selectAll(".q").attr("visibility",show_qual);
+            focus.selectAll(".q").attr("visibility",this_show_qual);
+            focus.selectAll(".call").attr("visibility",'visible');
 
         }
 
@@ -621,71 +638,68 @@ HTMLWidgets.widget({
                 .attr("fill","none").attr("stroke",col)
                 .attr("stroke-width",2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
         }
-        function updateFilt(fwd_x,rev_x,single_rev){
-            if(fwd_x != undefined){filt_fwd_x = fwd_x;}
-            if(rev_x != undefined){filt_rev_x = rev_x;}
-            if(single_rev!=undefined){filt_single_rev = single_rev;}
+        function updateFilt(fwd_start,fwd_end,rev_start,rev_end,has_rev){
+
+            if(fwd_start != undefined){filt_fwd_start = fwd_start;}
+            if(fwd_end != undefined){filt_fwd_end = fwd_end;}
+            if(rev_start != undefined){filt_rev_start = rev_start;}
+            if(rev_end != undefined){filt_rev_end = rev_end;}
+            if(has_rev!=undefined){filt_has_rev = has_rev;}
+            //if(!filt_has_rev){
+            //    filt_rev_start = 0;
+            //    filt_rev_end = 0;
+            //}
+
+            filt_fwd_start_mini.attr("x2",width2Scale(filt_fwd_start));
+            filt_fwd_end_mini.attr("x1",width2Scale(filt_fwd_end)).attr("x2",width);
+            filt_rev_start_mini.attr("x2",width2Scale(filt_rev_start));
+            filt_rev_end_mini.attr("x1",width2Scale(filt_rev_end)).attr("x2",width);
+
             var fwd_width = 0;
-            if(widthScale(filt_fwd_x)>0){fwd_width = widthScale(filt_fwd_x)};
+            if(widthScale(filt_fwd_start)>0){fwd_width = widthScale(filt_fwd_start)};
             clip_fwd.attr("x",0).attr("width",fwd_width);
-            filt_fwd_mini.attr("x2",width2Scale(filt_fwd_x));
             if(fwd_width!=0){
                 //console.log("drawing line");
-                filt_line_fwd.attr("x1",widthScale(filt_fwd_x))
-                             .attr("x2",widthScale(filt_fwd_x))
-                             .attr("y1",200)
-                             .attr("y2",340);
+                filt_line_fwd.attr("x1",widthScale(filt_fwd_start))
+                             .attr("x2",widthScale(filt_fwd_start))
+                             .attr("y1",200).attr("y2",340);
             }else{
-                filt_line_fwd.attr("x1",0)
-                         .attr("x2",0)
-                         .attr("y1",0)
-                         .attr("y2",0);
+                filt_line_fwd.attr("x1",0).attr("x2",0)
+                         .attr("y1",0).attr("y2",0);
             }
             // console.log("filt_rev_x ", filt_rev_x);
             // console.log("widthScale(filt_rev_x) ", widthScale(filt_rev_x));
             // console.log("width",width);
             // console.log("width - widthScale(filt_rev_x)",width - widthScale(filt_rev_x));
-            if(filt_single_rev){
-                if(filt_rev_x == 0  ){
-                    filt_rev_mini.attr("x1",0).attr("x2",0);
-                }else{
-                    filt_rev_mini.attr("x1",width2Scale(filt_rev_x)).attr("x2",width);
-                }
-                //console.log("single_rev true");
-                //console.log("filt_rev_x ",filt_rev_x);
-                if(width - widthScale(filt_rev_x)<0){
-                    clip_fwd.attr("x",0).attr("width",0);
-                }else{
-                    //console.log("filt_rev_x",filt_rev_x);
-                    //console.log("width filt_rev_x",(width - widthScale(filt_rev_x)));
-                    clip_fwd.attr("x",widthScale(filt_rev_x)).attr("width",(width - widthScale(filt_rev_x)));
-                }
+            //if(filt_single_rev){
+
+            //    if(width - widthScale(filt_rev_end)<0){
+            //        clip_fwd.attr("x",0).attr("width",0);
+            //    }else{
+            //        clip_fwd.attr("x",widthScale(filt_rev_end)).attr("width",(width - widthScale(filt_rev_end)));
+            //    }
+            //}else{
+            if(filt_rev_end == 0  ){
+                clip_rev.attr("x",0).attr("width",0);
+                filt_rev_end_mini.attr("x1",0).attr("x2",0);
+                filt_line_rev.attr("x1",0).attr("x2",0)
+                             .attr("y1",0).attr("y2",0);
+
             }else{
-                if(filt_rev_x == 0  ){
+                if(width - widthScale(filt_rev_end)<0){
                     clip_rev.attr("x",0).attr("width",0);
-                    filt_rev_mini.attr("x1",0).attr("x2",0);
-                    filt_line_rev.attr("x1",0)
-                                 .attr("x2",0)
-                                 .attr("y1",0)
-                                 .attr("y2",0);
-
                 }else{
-                    if(width - widthScale(filt_rev_x)<0){
-                        clip_rev.attr("x",0).attr("width",0);
-                    }else{
-                        clip_rev.attr("x",widthScale(filt_rev_x)).attr("width",(width - widthScale(filt_rev_x)));
-                    }
-                    filt_rev_mini.attr("x1",width2Scale(filt_rev_x)).attr("x2",width);
+                    clip_rev.attr("x",widthScale(filt_rev_end)).attr("width",(width - widthScale(filt_rev_end)));
+                }
 
-                    filt_line_rev.attr("x1",(widthScale(filt_rev_x)-1))
-                                     .attr("x2",(widthScale(filt_rev_x)-1))
+                filt_line_rev.attr("x1",(widthScale(filt_rev_end)-1))
+                                     .attr("x2",(widthScale(filt_rev_end)-1))
                                      .attr("y1",350)
                                      .attr("y2",490);
-
-
-                }
             }
+            //}
         }
+
         function setNoiseArea(fwd,rev){
             var gnf = gNoise_fwd.selectAll("path").data([fwd]);
             gnf.enter().append("path")
@@ -964,21 +978,21 @@ HTMLWidgets.widget({
             var qg = quals_g.selectAll("rect").data(calls);
             qg.enter().append("rect")
             .merge(qg).attr("class","peak_label qual_fwd q")
-      		        .attr("x",function(d){return (widthScale(d["trace_peak"])-9);})
-      		        .attr("y",label_pos["qual"]).attr("rx",1).attr("ry",1)
-      		        .attr("width",9+(!rev)*9)
-      		        .attr("height",function(d){return d[q];})
-      		        .attr("fill", "rgba(200,200,200,0.3)");
+      		        .attr("x",function(d){return (widthScale(d["trace_peak"])-2);})
+      		        .attr("y",function(d){return label_pos["qual"] - 11 -d[q]/3}).attr("rx",1).attr("ry",1)
+      		        .attr("width",2+(!rev)*2)
+      		        .attr("height",function(d){return d[q]/3;})
+      		        .attr("fill", "rgba(50,50,50,0.8)");
             qg.exit().remove();
             if(rev!=0){
                 var qg_r = quals_g_r.selectAll("rect").data(calls);
                 qg_r.enter().append("rect")
                 .merge(qg_r).attr("class","peak_label qual_rev q")
-      		        //.attr("x",function(d){return (widthScale(d["trace_peak"]) + 900);})
-      		        .attr("y",label_pos["qual"]).attr("rx",1).attr("ry",1)
-      		        .attr("width",9)
-      		        .attr("height",function(d){return d["quality_rev"];})
-      		        .attr("fill", "rgba(200,200,200,0.3)");
+      		        .attr("x",function(d){return (widthScale(d["trace_peak"])+2);})
+      		        .attr("y",function(d){return label_pos["qual"] - 11 -d["quality_rev"]/3}).attr("rx",1).attr("ry",1)
+      		        .attr("width",2)
+      		        .attr("height",function(d){return  d["quality_rev"]/3;})
+      		        .attr("fill", "rgba(50,50,50,0.8)");
                 qg_r.exit().remove();
             }
         }
@@ -1018,6 +1032,9 @@ HTMLWidgets.widget({
   				.attr("opacity",0.8)
   				.text(function(d){return d["id"];})
   				.attr("fill","black");
+        }
+        function setQual(value){
+            show_qual = value;
         }
 
         Shiny.addCustomMessageHandler("goto",
@@ -1179,7 +1196,7 @@ HTMLWidgets.widget({
             // finish_fwBrushInit: finish_fwBrushInit,
             // finish_rvBrushInit: finish_rvBrushInit,
 	        join:    join,
-            show_qual: show_qual,
+            setQual: setQual,
             joinView:joinView,
             //
             setNoiseArea: setNoiseArea,
@@ -1233,7 +1250,7 @@ HTMLWidgets.widget({
                 //instance.focus.selectAll(".zoom").remove();
                 instance.context.selectAll(".context").remove();
 //                 //instance.focus.selectAll(".excl").remove();
-                instance.updateFilt(0,0,single_rev);
+                //instance.updateFilt(0,0,single_rev);
             }
             instance.instanceCounter = instance.instanceCounter+1;
   			var intens_guide_line = x["intens_guide_line"];
@@ -1319,22 +1336,22 @@ HTMLWidgets.widget({
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
             instance.updateLine([intens["T"]],"T",false);
-            if(single_rev){
-                instance.updateFilt(0,x["brush_fw"],single_rev);
-            }else{
-                instance.updateFilt(x["brush_fw"]);
-            }
+            //if(single_rev){
+            //    instance.updateFilt(0,x["brush_fwd_start"],single_rev);
+            //}else{
+            //    instance.updateFilt(x["brush_fw"]);
+            //}
 
             //noise indicator
             var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
             //reverse strand
+            instance.updateFilt(x["brush_fwd_start"],x["brush_fwd_end"],x["brush_rev_start"],x["brush_rev_end"],intens_rev != "");
             if(intens_rev != ""){
                 var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
                 instance.updateLine([intens_rev["A"]],"A",true);
                 instance.updateLine([intens_rev["C"]],"C",true);
                 instance.updateLine([intens_rev["G"]],"G",true);
                 instance.updateLine([intens_rev["T"]],"T",true);
-                instance.updateFilt(x["brush_fw"],x["brush_rv"]);
             }
             instance.setNoiseArea(a_noise_fwd,a_noise_rev);
             //on single strand always show "join view"
@@ -1381,10 +1398,12 @@ HTMLWidgets.widget({
             }
             var show_qual  = x["show_qual"];
             if(show_qual){
-                instance.show_qual = "visible";
+                //instance.show_qual = "visible";
+                instance.setQual("visible");
                 d3.selectAll(".q").attr("visibility","visible");
             }else{
-                instance.show_qual = "hidden";
+                //instance.show_qual = "hidden";
+                instance.setQual("hidden");
                 d3.selectAll(".q").attr("visibility","hidden");
             }
 //             //default
@@ -1427,6 +1446,7 @@ HTMLWidgets.widget({
             }
             var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
             var intens = x["intens"];
+            instance.updateFilt(x["brush_fwd_start"],x["brush_fwd_end"],x["brush_rev_start"],x["brush_rev_end"],rev);
             instance.updateLine([intens["A"]],"A",false);
             instance.updateLine([intens["C"]],"C",false);
             instance.updateLine([intens["G"]],"G",false);
@@ -1458,7 +1478,8 @@ HTMLWidgets.widget({
                 var choices = HTMLWidgets.dataframeToD3(x["choices"]);
             //     var noisy_neighbors = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
                 var show_calls  = x["show_calls"];
-                if(show_calls){ instance.call_opacity = 0.8; }
+                if(show_calls){
+                    instance.call_opacity = 0.8; }
                 else{ instance.call_opacity = 0; }
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
                 instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]));
@@ -1475,10 +1496,12 @@ HTMLWidgets.widget({
                 instance.setCodingLabel(calls);
                 var show_qual  = x["show_qual"];
                 if(show_qual){
-                    instance.show_qual = "visible";
+                    //instance.show_qual = "visible";
+                    instance.setQual("visible")
                     d3.selectAll(".q").attr("visibility","visible");
                 }else{
-                    instance.show_qual = "hidden";
+                    //instance.show_qual = "hidden";
+                    instance.setQual("hidden");
                     d3.selectAll(".q").attr("visibility","hidden");
                 }
             //

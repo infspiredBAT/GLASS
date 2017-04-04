@@ -6,7 +6,7 @@ input_chrom = 19
 input_gene_name = "calreticulin"
 
 
-tab <- read.table("calreticulin_DNA.tab",sep="\t")
+tab <- read.table("CALR_DNA.tab",sep="\t")
 genedt<-data.table(which(strsplit(as.character(tab[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab[[3]]), '')[[1]]==')'))
 setnames(genedt,c("start","end"))
 genedt[,id := seq_along(genedt$start)]
@@ -36,7 +36,7 @@ if(input_orient == "plus"){
 }
 genedt[,len := end-start +1]
 genedt[,chr := rep(input_chrom,nrow(genedt))]
-con<-file(paste0(input_gene_name,".glassed.intrex.fasta"))
+con<-file(paste0("CALR",".glassed.intrex.fasta"))
 for(i in nrow(genedt)){writeLines(paste0(">ref_",genedt$name,"_",genedt$chr,"_",genedt$start_chr,"_",genedt$end_chr,"_",genedt$end-genedt$start,"\n",genedt$seq),con)}
 close(con) #fasta
 
