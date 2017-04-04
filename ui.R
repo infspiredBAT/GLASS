@@ -77,8 +77,9 @@ shinyUI(
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" > 
-                                     ver 0.2.11 <br> (2017-Mar-22) </a></div>
+                                ver 0.2.12 <br> (2017-Apr-3) </a></div>
                                 <!-- Update log -->
+                                
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
 			                    <div class="modal-content">
@@ -86,6 +87,14 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.12 (2017-Mar-22)</b>
+                                <ul>
+			                     <li>Help images </li>
+			                     <li>Custom GenBank file experimental feature introduced.</li>
+                                 <li>References shown in tiles with additional information provided.</li>
+                                 <li>Widgets for setting filters added.</li>
+                                 <li>"show qualities" issue fixed.</li>
+			                     </ul>
                                 <b>ver 0.2.11 (2017-Mar-22)</b>
                                 <ul>
 			                     <li>Improvments in error handling. </li>
@@ -332,50 +341,50 @@ The more references are selected the longer the upload process wil take."
 					    ,conditionalPanel(condition = "!input.join_traces_checkbox", HTML("<div id='spacer'>  </div>"))
 					    #,uiOutput('helpButton')
 					    #,actionButton("toggle_help",icon = icon("question"), "hide help",class = "show_hide_help")
-					    ,HTML('<button class="btn btn-default action-button show_hide_help shiny-bound-input" type="button" onclick="$(\'#disclaimer-modal2\').modal(\'show\')"><i class="fa fa-question" ></i> show help</button>
-					            
-<div class="modal fade" id="disclaimer-modal2" tabindex="-1" role="dialog">
-			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
-					           <div class="modal-content">
-
-					          <div class="modal-header" style="padding-top:10px;">
-					          <h4>Help</h4>
-					          </div>
-
-					          <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-                                <br>
-                              <ul class="nav nav-tabs">
-                                <li class="active"><a data-toggle="tab" href="#home">Navigation</a></li>
-                                <li><a data-toggle="tab" href="#menu1">Peaks</a></li>
-                                <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
-                              </ul>
-
-                              <div class="tab-content">
-                                <div id="home" class="tab-pane fade in active">
-                                  <h3>Scrolling along the sequence.</h3>
-                                    <img src="navbar_scroll.gif" alt="Navbar zoom" >
-                                    <h3>Zooming.</h3>
-                                    <img src="navbar_zoom.gif" alt="Navbar zoom" >
-                                </div>
-                                <div id="menu1" class="tab-pane fade">
-                                  <h3>Menu 1</h3>
-                                  <p>Some content in menu 1.</p>
-                                </div>
-                                <div id="menu2" class="tab-pane fade">
-                                  <h3>Menu 2</h3>
-                                  <p>Some content in menu 2.</p>
-                                </div>
-                              </div>
-                               
-                                </div>
-					          <div class="modal-footer" style="clear-both">
-					          <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
-					          </div>
-
-					          </div>
-					          </div>
-					          </div>
-					          ')
+					 #   ,HTML('<button class="btn btn-default action-button show_hide_help shiny-bound-input" type="button" onclick="$(\'#disclaimer-modal2\').modal(\'show\')"><i class="fa fa-question" ></i> show help</button>
+					 #           
+                     #          <div class="modal fade" id="disclaimer-modal2" tabindex="-1" role="dialog">
+			         #           <div id="disclaimer-modal-content" class="modal-dialog" role="document">
+					 #          <div class="modal-content">
+#
+					 #         <div class="modal-header" style="padding-top:10px;">
+					 #         <h4>Help</h4>
+					 #         </div>
+#
+					 #         <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                     #           <br>
+                     #         <ul class="nav nav-tabs">
+                     #           <li class="active"><a data-toggle="tab" href="#home">Navigation</a></li>
+                     #           <li><a data-toggle="tab" href="#menu1">Peaks</a></li>
+                     #           <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
+                     #         </ul>
+#
+                     #         <div class="tab-content">
+                     #           <div id="home" class="tab-pane fade in active">
+                     #             <h3>Scrolling along the sequence.</h3>
+                     #               <img src="navbar_scroll.gif" alt="Navbar zoom" >
+                     #               <h3>Zooming.</h3>
+                     #               <img src="navbar_zoom.gif" alt="Navbar zoom" >
+                     #           </div>
+                     #           <div id="menu1" class="tab-pane fade">
+                     #             <h3>Menu 1</h3>
+                     #             <p>Some content in menu 1.</p>
+                     #           </div>
+                     #           <div id="menu2" class="tab-pane fade">
+                     #             <h3>Menu 2</h3>
+                     #             <p>Some content in menu 2.</p>
+                     #           </div>
+                     #         </div>
+                     #          
+                     #           </div>
+					 #         <div class="modal-footer" style="clear-both">
+					 #         <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
+					 #         </div>
+#
+					 #         </div>
+					 #         </div>
+					 #         </div>
+					 #         ')
 					    ,tags$style(HTML("#spacer{margin-top:43px;}"))
 					)
 				),
