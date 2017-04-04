@@ -397,7 +397,11 @@ The more references are selected the longer the upload process wil take."
 				DT::dataTableOutput("chosen_variants_table"),
 				#conditionalPanel(condition=" output.chosen_variants_table ",downloadButton("export_btn","export")),
 				br()
-			)
+			),
+            tabPanel('Help', value = 'help', icon = icon("question"),
+                         selectInput("img_help","Chose a topic:",choices=c("File Upload","Select ref from list","Load custom GenBank ref.","Scroll","Zoom","Export detected variant"))
+                         ,uiOutput("upload_file")
+   			)
 #            ,
 #			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
 #		         verbatimTextOutput("aln"),

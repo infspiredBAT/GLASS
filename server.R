@@ -49,9 +49,9 @@ shinyServer(function(input,output,session) {
     g_refs_avail            <<- c("-","TP53","NOTCH1","ATM","CALR","Custom")
     #g_files = a variable that represents the data table containing individual samples and information about them
     TP53_demo               <- list(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
-                                    FWD_file=c("data/abis/eric/3low_freq_fsF.ab1"),
+                                    FWD_file=c("data/demo/TP53/3low_freq_fsF.ab1"),
                                     REV_name=c("TP53 ; rev ; low freq w frameshift"),
-                                    REV_file=c("data/abis/eric/3low_freq_fsR.ab1"),
+                                    REV_file=c("data/demo/TP53/3low_freq_fsR.ab1"),
                                     REF=c("TP53"),
                                     mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
                                     calls = "",
@@ -973,6 +973,19 @@ shinyServer(function(input,output,session) {
     output$indels_present <- reactive({
         varcall()
         return(g_indels_present)
+    })
+    output$upload_file <- renderUI({
+        input$img_help
+        images <- data.table(c("File Upload","Select ref from list","Load custom GenBank ref.","Scroll","Zoom","Export detected variant")
+                  ,c('src = "LoadFile.gif" alt="File Upload" style="width:640px;height:394px;"',
+                     'src = "select_ref_from_list.gif" alt="Select reference from the list" style="width:640px;height:394px;"',
+                     'src = "custom_ref.gif" alt="Upload custom refrence" style="width:640px;height:394px;"',
+                      'src = "navbar_scroll.gif" alt="Zoom using navigition tool on Minimap" style="width:640px;height:394px;"',
+                     'src="navbar_zoom.gif" alt="Navbar zoom" '
+                     ,'src="export.gif" alt="Export detected variant" style="width:960px;height:561px;"'))
+        
+        UI_out <- paste0('<img ',images[V1==input$img_help]$V2,' ></img>')
+        return(HTML(UI_out))
     })
     #output$show_sample_brows <- reactive({
     #    input$mng_samples_btn
