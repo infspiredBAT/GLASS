@@ -13,14 +13,14 @@ HTMLWidgets.widget({
             width   = w - margin.left - margin.right,
             height  = h - margin.top  - margin.bottom,
             half_height = height/1.6;
-            height2 = h - margin2.top - margin2.bottom;
+        var height2 = h - margin2.top - margin2.bottom;
         var widthScale   = d3.scaleLinear().range([0,width]),
             width2Scale  = d3.scaleLinear().range([0,width]),  //remains constant, to be used with context
             heightScale  = d3.scaleLinear().range([height,0]),
     	    height2Scale = d3.scaleLinear().range([height2,0]),
             heightScale_fwd_split = d3.scaleLinear().range([half_height,(2*half_height -  height)]),
-            heightScale_rev_split = d3.scaleLinear().range([height,half_height]);
-            heightScale_fwd = heightScale_fwd_split;
+            heightScale_rev_split = d3.scaleLinear().range([height,half_height]),
+            heightScale_fwd = heightScale_fwd_split,
             heightScale_rev = heightScale_rev_split;
 
         var line_fwd = d3.line()
@@ -188,6 +188,17 @@ HTMLWidgets.widget({
         label_pos["mut_call_rev"]   = 185 + margin.top - 10;
         label_pos["qual"]           =   0 + margin.top - 10;
         //variables grouped at one place so its easier to read their order and determine their visibility (who's on top)
+        var selected_pos = focus.append("rect")
+                                        .attr("class","selected_pos")
+                                        .attr("x",10)
+                                        .attr("y", 25 + 113)
+                                        .attr("width",20)
+                                        .attr("height",280)
+                                        .attr("stroke-width", 0)
+                                        .attr("fill","lightblue")
+                                        .attr("opacity",0.5);
+        var selected_pos_x = -30;
+
         var scope_g    = focus.append("g");
         var quals_g    = focus.append("g");
         var quals_g_r  = focus.append("g");
@@ -383,7 +394,7 @@ HTMLWidgets.widget({
                                        .attr("width",s[1]-s[0])
            //context.select(".brush").call(brush.move, widthScale.range().map(t.invertX, t));
            redrawLines();
-           console.log("zoome");
+           //console.log("zoomed");
        }
        function zoom_end() {
            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
@@ -392,7 +403,7 @@ HTMLWidgets.widget({
            widthScale.domain(t.rescaleX(width2Scale).domain());
            //focus.select(".area").attr("d", area);
            context.select(".brush").call(brush.move, widthScale.range().map(t.invertX, t));
-           console.log("zoomeend");
+           //console.log("zoomeend");
        }
         // function brushed_fw() {
         //
@@ -488,6 +499,8 @@ HTMLWidgets.widget({
         function redrawLines(){
             //widthScale.domain(brush.empty() ? width2Scale.domain() : brush.extent());
             //widthScale.domain(brush.extent());
+            focus.selectAll(".selected_pos").attr("width",widthScale(10)-widthScale(0));
+            focus.selectAll(".selected_pos").attr("x",widthScale(selected_pos_x));
             focus.selectAll("g").selectAll(".area_fwd").attr("d",noise_area_fwd).attr("visibility","visible");
             focus.selectAll("g").selectAll(".area_rev").attr("d",noise_area_rev).attr("visibility","visible");
             focus.selectAll("g").selectAll(".line_f").attr("d",line_fwd);
@@ -555,7 +568,7 @@ HTMLWidgets.widget({
             //console.log(w);
 
             if(bpt<22){
-                this_show_qual = show_qual;
+                var this_show_qual = show_qual;
                 focus.selectAll(".peak_label").attr("visibility","visible");
                 if(bp===0){focus.selectAll(".peak_label").attr("visibility","hidden");}
             }else{
@@ -747,7 +760,7 @@ HTMLWidgets.widget({
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){callShiny(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"]);})
                 .attr("y",function(d){
                                 if(label.indexOf("rev") > -1){
                                     return((join=="FALSE")*110 + label_pos[label] );
@@ -855,7 +868,7 @@ HTMLWidgets.widget({
                     else {                       return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){callShiny(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"]);})
                 .attr("y",label_pos["aa"])
                 .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
@@ -868,7 +881,7 @@ HTMLWidgets.widget({
                     else {                       return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){callShiny(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"]);})
                 .attr("y",label_pos["aa_sample"])
                 .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
@@ -881,7 +894,7 @@ HTMLWidgets.widget({
                     else {                       return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){callShiny(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"]);})
                 .attr("y",label_pos["aa_mut"])
                 .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
@@ -971,7 +984,7 @@ HTMLWidgets.widget({
       		        .text(function(d){return d["quality"];})
       		        .attr("text-anchor", "middle")
       		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){callShiny(d["id"]);})
+                    .on("click",function(d,i){posClick(d["id"]);})
       		        .attr("y",label_pos["qual"] -2)
       		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             qt.exit().remove();
@@ -1106,10 +1119,23 @@ HTMLWidgets.widget({
 //             }
 //         );
 
-        function callShiny(id,trace_peak){
-            //console.log(id);
+        function posClick(id){
+            var zoom = 400
+            var scope = widthScale.domain()
+            var pos = (id-1)*12 - 2;
+            if(pos < scope[0]){
+                var from = Math.max(0,pos - 200)
+                setBrush(from,from+400);
+            }else if(pos > scope[1]){
+                var to = Math.min(pos + 200,width2Scale.domain()[1])
+                setBrush(to-400,to);
+            }
+            focus.selectAll(".selected_pos").attr("x",widthScale(pos));
+            selected_pos_x = pos;
             Shiny.onInputChange("pos_click", {id: id});
         };
+        //Expose the posClick function
+        window.posClick = posClick;
 
         function get_color(col){
             if      (col === "A"){ return "#00A100"; }
@@ -1232,6 +1258,7 @@ HTMLWidgets.widget({
         //the first run is actually still a part of the initialization step
         if(x.new_sample){
             console.log("new sample");
+            console.log(x);
             x.new_sample = false;
   		    var intens = x["intens"];
             var intens_rev = "";
@@ -1428,8 +1455,8 @@ HTMLWidgets.widget({
 // 	        //zooming in so that the first view is not ugly dense graph
 //
             if (typeof choices[0] !== 'undefined') {
-                from = choices[0]["trace_peak"]-200;
-                to   = choices[0]["trace_peak"]+220;
+                var from = choices[0]["trace_peak"]-200;
+                var to   = choices[0]["trace_peak"]+220;
                 if(from < 0) {from = 0;to = 420}
                 instance.setBrush(from,to);
             }else{

@@ -288,7 +288,6 @@ shinyServer(function(input,output,session) {
                 g_files[,loaded:=F]
                 
                 g_files[load_id,loaded:=T]
-                #if(g_files[loaded==T,]$calls == "") g_files[load_id,status:="viewed"]
                 
                 updateSliders(session,g_files)
                 g_files<<-g_files
@@ -465,6 +464,7 @@ shinyServer(function(input,output,session) {
 
     varcall <- reactive({
         if(class(loading_processed_files())[1] != "my_UI_exception") {
+            if(g_files[loaded==T,]$calls == "") g_files[loaded==T,status:="viewed"]
             updateChosenVariants()
             goReset_handler()
             g_reactval$updateVar
@@ -612,9 +612,10 @@ shinyServer(function(input,output,session) {
             if(varcall() & !is.null(g_choices)) {
                 g_view <<- getView(g_calls,g_choices,g_glassed_snp)
                 g_view <<- applyFilters(g_view,g_files[loaded==TRUE,]$brush_fwd_start,g_files[loaded==TRUE,]$brush_fwd_end,g_files[loaded==TRUE,]$brush_rev_start,g_files[loaded==TRUE,]$brush_rev_end)
-                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go",   onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
+                #add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go", onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
+                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go", onclick = 'posClick(parseInt(this.id.split("_")[1]));')
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)',class="btn dlt_btn" )
-                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL,   onclick = 'console.log($("#DataTables_Table_1"));Shiny.onInputChange(\"goLock\",  this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
+                add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, onclick = 'Shiny.onInputChange(\"goLock\", this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
                 out<-cbind(" "=add_goto_buttons, " "=add_reset_buttons, "<div title='Confirmed variants are kept for the session even if you change parameters,\nand appear in the samples panel from where they can be exported with the green export button.'>confirm [?]</div>"=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
                 if(!is.null(g_glassed_snp)){
                     out <- cbind(out,g_view[,list("dbSNP"=dbSNP)])
@@ -641,14 +642,14 @@ shinyServer(function(input,output,session) {
 #    })
 
     #
-    # data table buttons
+    # data table buttons  ### replaced with a direct call to chromatography.js
     #
-    goGoto_handler <- observe({
-        if(is.null(input$goGoto)) return()
-        goto_id <- floor(as.numeric(strsplit(input$goGoto, "_")[[1]][2]))/10
-        session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==goto_id]$trace_peak))
-        updateTextInput(session,"choose_call_pos",value=paste0(goto_id))
-    })
+    #goGoto_handler <- observe({
+    #    if(is.null(input$goGoto)) return()
+    #    goto_id <- floor(as.numeric(strsplit(input$goGoto, "_")[[1]][2]))/10
+        #session$sendCustomMessage(type = 'goto',message = paste0(g_calls[id==goto_id]$trace_peak))
+    #    updateTextInput(session,"choose_call_pos",value=paste0(goto_id))
+    #})
 
     goReset_handler <- reactive({
         #if(varcall()) {
