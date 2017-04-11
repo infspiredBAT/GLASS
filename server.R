@@ -611,14 +611,18 @@ shinyServer(function(input,output,session) {
             #input$lo
             if(varcall() & !is.null(g_choices)) {
                 g_view <<- getView(g_calls,g_choices,g_glassed_snp)
-                g_view <<- applyFilters(g_view,g_files[loaded==TRUE,]$brush_fwd_start,g_files[loaded==TRUE,]$brush_fwd_end,g_files[loaded==TRUE,]$brush_rev_start,g_files[loaded==TRUE,]$brush_rev_end)
+                g_view <<- applyFilters(g_view,input$trim_fwd_start,input$trim_fwd_end,input$trim_rev_start,input$trim_rev_end)
                 #add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go", onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
                 add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go", onclick = 'posClick(parseInt(this.id.split("_")[1]));')
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)',class="btn dlt_btn" )
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, onclick = 'Shiny.onInputChange(\"goLock\", this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
-                out<-cbind(" "=add_goto_buttons, " "=add_reset_buttons, "<div title='Confirmed variants are kept for the session even if you change parameters,\nand appear in the samples panel from where they can be exported with the green export button.'>confirm [?]</div>"=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
-                if(!is.null(g_glassed_snp)){
-                    out <- cbind(out,g_view[,list("dbSNP"=dbSNP)])
+                if(nrow(g_view)>0){
+                    out<-cbind(" "=add_goto_buttons, " "=add_reset_buttons, "<div title='Confirmed variants are kept for the session even if you change parameters,\nand appear in the samples panel from where they can be exported with the green export button.'>confirm [?]</div>"=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
+                    if(!is.null(g_glassed_snp)){
+                       out <- cbind(out,g_view[,list("dbSNP"=dbSNP)])
+                    }
+                }else{
+                    out <- g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)]
                 }
                 tableout<-DT::datatable(out
                                         , escape=FALSE

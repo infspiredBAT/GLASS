@@ -897,7 +897,6 @@ updateSliders <- function(session,g_files){
 applyFilters <- function(g_view,fwd_start,fwd_end,rev_start,rev_end){
     
     g_view[,show:=TRUE]
-    g_view[strand==1]
     
     g_view[strand==1][id<=fwd_start]$show=FALSE
     g_view[strand==1][id>=fwd_end]$show=FALSE
@@ -905,8 +904,9 @@ applyFilters <- function(g_view,fwd_start,fwd_end,rev_start,rev_end){
     g_view[strand==2][id<=rev_start]$show=FALSE
     g_view[strand==2][id>=rev_end]$show=FALSE
     
-    g_view[strand==3][id<=fwd_start && id <=rev_start]$show=FALSE
-    g_view[strand==3][id>=fwd_end && id >=rev_end]$show=FALSE
+    g_view[strand==3][id<=fwd_start & id <=rev_start]$show=FALSE
+    g_view[strand==3][id>=fwd_end & id >=rev_end]$show=FALSE
+   # print(paste0(" fwd_start: ",fwd_start," fwd_end: ",fwd_end," rev_start: ", rev_start," rev_end: ",rev_end,collapse = ""))
     
     return(g_view[show==TRUE])
 }

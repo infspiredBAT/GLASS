@@ -77,7 +77,7 @@ shinyUI(
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" > 
-                                ver 0.2.13 <br> (2017-Apr-9) </a></div>
+                                ver 0.2.14 <br> (2017-Apr-11) </a></div>
                                 <!-- Update log -->
                                 
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
@@ -87,6 +87,11 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.14 (2017-Apr-11)</b>
+                                <ul>
+			                     <li>Handling error from empty variants table.</li>
+                                  <li>Corrected trimming filter for double stranded variants.</li>
+			                     </ul>
                                 <b>ver 0.2.13 (2017-Apr-9)</b>
                                 <ul>
 			                     <li>Fixed broken status reporting in samples table</li>
