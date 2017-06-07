@@ -110,7 +110,7 @@ get_gbk_info <- function(session,file){
     #    mRNA <-  c(mRNA,list(mRNA[[name]]<-m))
     #}
     
-    call  <- paste0(c("python ext/gb2tab.ppy  -f 'CDS' ",file$datapath),collapse = "")
+    call  <- paste0(c("python ext/gb2tab.py  -f 'CDS' ",file$datapath),collapse = "")
     CDS_call  <- system(call,intern=TRUE)
     CDS=NULL
     if (length(CDS_call)==0){
