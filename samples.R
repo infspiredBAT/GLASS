@@ -110,9 +110,12 @@ get_gbk_info <- function(session,file){
     #    mRNA <-  c(mRNA,list(mRNA[[name]]<-m))
     #}
     
-    call  <- paste0(c("python ext/gb2tab.py  -f 'CDS' ",file$datapath),collapse = "")
+    call  <- paste0(c("python ext/gb2tab.ppy  -f 'CDS' ",file$datapath),collapse = "")
     CDS_call  <- system(call,intern=TRUE)
     CDS=NULL
+    if (length(CDS_call)==0){
+        stop(paste0("Unable to retreive information from GenBank file: ", file$name))
+    }
     for(i in c(1:length(CDS_call))){
         tab <- unlist(strsplit(CDS_call[i],"\t"))
         transcript_id <- gsub('transcript_id=\\"',"",str_match(tab[[4]],'transcript_id=\"[A-Z,a-z,0-9,_,-,.]+')[,1])
