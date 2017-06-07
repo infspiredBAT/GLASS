@@ -85,7 +85,6 @@ shinyServer(function(input,output,session) {
     #SAMPLE BROWSER STUFF
 
     output$samples_table <- DT::renderDataTable({
-
         updateRefs()
         loadSamples()
         goRef_handler()
@@ -278,7 +277,6 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$goLoadSamples)){
             isolate({
                 load_id <- floor(as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2]))/10
-                
                 #save previously loaded 
                 if(nrow(g_files[loaded==TRUE,])==1){
                     tmpfile <- tempfile("calls")
@@ -286,9 +284,7 @@ shinyServer(function(input,output,session) {
                     g_files[loaded==TRUE,calls:=tmpfile]
                 }
                 g_files[,loaded:=F]
-                
                 g_files[load_id,loaded:=T]
-                
                 updateSliders(session,g_files)
                 g_files<<-g_files
             })
@@ -346,15 +342,9 @@ shinyServer(function(input,output,session) {
                     files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
                 })
             }
-            #if(load_id == 1){     
-            #    files_info  <<-  "demo file loaded\nframeshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked"
-            #    output$files <- renderPrint({cat("<pre>frameshift deletion (c.277_278delCT) and heterozygous polymorphism (c.215C>G), detectable with these settings:\nmutation minimum peak % =~ 7; minimum quality =~ 16; 'use detected hetero indels' = checked</pre>")})
-            #    base = ""
-            #    ex <- NULL
-            #}
 
             withProgress(message = paste('Loading abi file.',sep=" "), value = 1, {
-                
+
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
                     error = function(e){output$files <- renderPrint(paste0("<pre>error while reading forward file, are you loading .abi ? ",e$message,"</pre>" ))})
@@ -402,9 +392,8 @@ shinyServer(function(input,output,session) {
                     g_intrexdat       <<- splice_variants(intrexdat)
                     calls             <-  data.table(calls,key="id")
                     
-                    # temporarily switching off functionality
-                    # 2 sept 16, Karol
-                    #g_noisy_neighbors <<- get_noisy_neighbors(calls)
+                    # temporarily switching off functionality 2 sept 16, Karol
+                    # g_noisy_neighbors <<- get_noisy_neighbors(calls)
                     if(!called$qual_present){
                         files_info <- paste0(files_info,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
                     }
@@ -421,7 +410,6 @@ shinyServer(function(input,output,session) {
                     }
                     updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_start,inputId = "trim_fwd_start" )
                     updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_end,inputId = "trim_fwd_end" )
-                    
                     
                     if(!is.null(g_abif_rev)){
                         if(g_files[loaded==TRUE,]$status =="new"){
@@ -446,7 +434,6 @@ shinyServer(function(input,output,session) {
                     }
                     
                     updateTabsetPanel(session,'tabs',selected = "main")
-
                     
                 } else {
                     return(structure("error_reading_Rbin",class = "my_UI_exception"))
@@ -816,7 +803,7 @@ shinyServer(function(input,output,session) {
     })
     
     #######################
-    # alignTo_new (start) #
+    # alignTo (start) #
     #######################
     
     #g_alignTo_options <- c("TP53","ATM","NOTCH1","CALR")
@@ -827,12 +814,14 @@ shinyServer(function(input,output,session) {
     
     output$alignTo_new <- renderUI({
         updateRefs()
+        setCustomRef()
         UI_out <- lapply(g_alignTo_options, function(x) paste0(div(id = paste0(x, '_alignTo_div')
                                                                  , class = 'alignTo_class'
-                                                                 , style = "margin: 2px;
-                                                                            padding: 2px;
+                                                                 , style = "margin: 0.4em;
+                                                                            padding: 0.4em;
+                                                                            height: 8.5em;
                                                                             background-color: #F5F5F5;
-                                                                            box-shadow: 1px 1px 3px #888888;"
+                                                                            box-shadow: 0.1em 0.1em 0.3em #888888;"
                                                                  , h4(x), if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "load demo") else "-"
                                                                  , div(HTML(g_alignTo_description[[x]]))))
                          )
@@ -851,7 +840,8 @@ shinyServer(function(input,output,session) {
     })
     
     updateRefs <-function() {
-        loadGBK()
+        #loadGBK()
+        #setCustomRef()
         g_alignTo_options <<- input$additionalRefs
         if(!is.null(g_custom_ref)){
             g_alignTo_options <<- c(g_alignTo_options,"Custom")
@@ -864,14 +854,34 @@ shinyServer(function(input,output,session) {
         })
     }
     
-    loadGBK <- reactive({
-        if(!is.null(input$custom_gb)){
-            #try catch
+    loadGBK <- observeEvent(input$custom_gb,{
+        #if(!is.null(input$custom_gb)){
             withProgress(
                 tryCatch({
-                        ret <- process_gbk(session,input$custom_gb)
-                        g_custom_cod <<- ret$custom_cod
-                        g_custom_ref <<- ret$custom_fasta
+                        res <- get_gbk_info(session,input$custom_gb)
+                        choices<-NULL
+                        for(i in 1:length(res$CDS)){
+                            option <- paste0("GENE:",res$CDS[[i]]$gene,", PRODUCT: ",res$CDS[[i]]$product," (",nchar(res$CDS[[i]]$translation),"aa)",collapse = "")
+                            choices[[option]] <- i 
+                        }
+                    
+                        showModal({modalDialog(
+                                #p('Found ',length(res$mRNA),' "mRNA" features in GBK file '),
+                                p('Searching for "CDS" features in the GBK file...'),
+                                #if (failed)
+                                #div(tags$b("Invalid name of data object", style = "color: red;")),
+                                
+                                radioButtons("radio_gene_sel", label = h3("Chose one of the following gene products"),
+                                             choices = choices, 
+                                             selected = 1,width = "100%"),
+                                footer = tagList(
+                                    modalButton("Cancel"),
+                                    actionButton("gbk_ok", "OK")
+                                )
+                        ,size='m')})
+                        #ret <- process_gbk(session,input$custom_gb)
+                        #g_custom_cod <<- ret$custom_cod
+                        #g_custom_ref <<- ret$custom_fasta
                     }
                     ,error = function(e){
                         output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" ))
@@ -880,12 +890,57 @@ shinyServer(function(input,output,session) {
                     }
                 ),message = "processing GenBank file."
             )
-            
+        #}
+    })
+    
+    setCustomRef <- reactive({
+        if(!is.null(input$custom_gb) && !is.null(input$gbk_ok) && !(input$gbk_ok==0)){
+        isolate({
+            if(!is.null(input$custom_gb)){
+                withProgress(
+                    tryCatch({
+                        removeModal()
+                        showModal({modalDialog(
+                            #p('Found ',length(res$mRNA),' "mRNA" features in GBK file '),
+                            h1('PLEASE WAIT'),
+                            p('Extracting sequence infromtaion from genBank file...'),
+                            #if (failed)
+                            #div(tags$b("Invalid name of data object", style = "color: red;")),
+                            
+                            footer = tagList(
+                            )
+                            ,size='m')})
+                        ret <- process_gbk(session,input$custom_gb,as.numeric(input$radio_gene_sel))
+                        g_custom_cod <<- ret$custom_cod
+                        g_custom_ref <<- ret$custom_fasta
+                        removeModal()
+                        g_alignTo_options <<- input$additionalRefs
+                        if(!is.null(g_custom_ref)){
+                            g_alignTo_options <<- c(g_alignTo_options,"Custom")
+                        }
+                        
+                        lapply(g_alignTo_options, function(x) {
+                            observeEvent(input[[paste0(x, "_alignTo_lnk")]], {
+                                g_reactval$link <- x
+                            })
+                        })
+                        
+                    }
+                    ,error = function(e){
+                        removeModal()
+                        output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" ))
+                        g_custom_cod <<- NULL
+                        g_custom_ref <<- NULL
+                    }
+                    ),message = NULL,detail=NULL,style="old"
+                )
+            }
+        })
         }
     })
     
     #####################
-    # alignTo_new (end) #
+    # alignTo (end) #
     #####################
 
 

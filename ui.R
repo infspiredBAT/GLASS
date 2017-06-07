@@ -77,7 +77,7 @@ shinyUI(
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" > 
-                                ver 0.2.14 <br> (2017-Apr-11) </a></div>
+                                ver 0.2.15 <br> (2017-Jun-7) </a></div>
                                 <!-- Update log -->
                                 
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
@@ -87,6 +87,10 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.15 (2017-Jun-7)</b>
+                                <ul>
+			                     <li>New dialogues to help with custom GenBank files and stability improvement for GenBank file loading.</li>
+			                     </ul>
                                 <b>ver 0.2.14 (2017-Apr-11)</b>
                                 <ul>
 			                     <li>Handling error from empty variants table.</li>
@@ -94,7 +98,7 @@ shinyUI(
 			                     </ul>
                                 <b>ver 0.2.13 (2017-Apr-9)</b>
                                 <ul>
-			                     <li>Fixed broken status reporting in samples table</li>
+			                     <li>Fixed broken status reporting in samples table.</li>
 			                     </ul>
                                 <b>ver 0.2.12 (2017-Apr-3)</b>
                                 <ul>
@@ -215,7 +219,7 @@ shinyUI(
             tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-                        <b>(very) quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names - if you tick relevant references beforehand, GLASS will align and auto-orientate against them</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) click the blue 'play' button to load the file(s)</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
+                        <b>quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names - if you tick relevant references beforehand, GLASS will align and auto-orientate against them</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) click the blue 'play' button to load the file(s)</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
                         </div>"), sep = ""))))),
                 fluidRow(
                     column(12,tags$div(title="",HTML(paste("<div style='display:inline;'><h3 style='display:inline;'>References </h3><b style='display:inline;' id ='ref_help'>[?]</b></div>")))
@@ -254,7 +258,7 @@ The more references are selected the longer the upload process wil take."
                                                  column(3, fileInput("custom_gb",label = HTML("OR upload your own GenBank file. <b style='display:inline; color:red;' id ='q1'> [?!]</b> "
                                                                                             ),
                                                                      multiple=F,accept=c('.gb','.gbk'),width = '100%'),
-                                                                     bsTooltip(id = "q1","Currently an experimental feature. Help imporove it by reporting errors.", placement = "right", trigger = "hover",
+                                                                     bsTooltip(id = "q1","Currently an experimental feature. Help imporove it by reporting errors.<hr> Genomic coordinates are not extracted. <hr> intorn/exon numbers may be different if transcript starts with an untranslated exon.", placement = "top", trigger = "hover",
                                                                                                                                  options = NULL)
                                                        )
                                              )

@@ -91,49 +91,79 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
                 else not_loaded <- c(not_loaded,s_files[i,]$name)
             }
         }
-        
-        
         return(list(not_loaded=not_loaded,loaded=loaded))
     })
 }
 
+get_gbk_info <- function(session,file){
 
-process_gbk <- function(session,file){
-    #toggleModal(session, "modalnew", toggle = "close")
-    input_orient = "+"  
+    #  ret=system("dev/GLASS/ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
+    #call <- paste0(c("python ext/gb2tab.py -f 'mRNA' ",file$datapath),collapse = "")
+    #mRNA_call <- system(call,intern=TRUE)
+    mRNA=NULL
+    #for(i in c(1:length(mRNA_call))){
+    #    tab <- unlist(strsplit(mRNA_call[i],"\t"))
+    #    transcript_id <- gsub('transcript_id=\\"',"",str_match(tab[[4]],'transcript_id=\"[A-Z,a-z,0-9,_,-,.]+')[,1])
+    #    spliced_product <- gsub('spliced_product=\\"',"",str_match(tab[[4]],'spliced_product=\"[A-Z,a-z]+')[,1])
+    #    m <-list(transcript_id=transcript_id,spliced_product=spliced_product)
+    #    name <- paste0("mRNA",i,collapse = "")
+    #    mRNA <-  c(mRNA,list(mRNA[[name]]<-m))
+    #}
+    
+    call  <- paste0(c("python ext/gb2tab.py  -f 'CDS' ",file$datapath),collapse = "")
+    CDS_call  <- system(call,intern=TRUE)
+    CDS=NULL
+    for(i in c(1:length(CDS_call))){
+        tab <- unlist(strsplit(CDS_call[i],"\t"))
+        transcript_id <- gsub('transcript_id=\\"',"",str_match(tab[[4]],'transcript_id=\"[A-Z,a-z,0-9,_,-,.]+')[,1])
+        product <- gsub('product=\\"',"",str_match(tab[[4]],'product=\"[A-Z,a-z, ,0-9,_,-]+')[,1])
+        translation <- gsub('translation=\\"',"",str_match(tab[[4]],'translation=\"[A-Z]+')[,1])
+        gene <- gsub('gene=\\"',"",str_match(tab[[4]],'gene=\"[A-Z,a-z, ,0-9,_,-]+')[,1])
+        m <-list(transcript_id=transcript_id,product=product,tabi=i,gene=gene,translation=translation)
+        name <- paste0("CDS",i,collapse = "")
+        CDS <-  c(CDS,list(CDS[[name]]<-m))
+    }
+    return(list("mRNA"=mRNA,"CDS"=CDS))
+}
+
+process_gbk <- function(session,file,ind){
+    #INIT
+    input_orient = "+"
     input_gene_start = 1
     input_chrom = "UN"
     input_gene_name = "UN"
     
-    #  ret=system("dev/GLASS/ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
+    incProgress(1/10,message=NULL)
+    
     call <- paste0(c("python ext/gb2tab.py -f 'CDS' ",file$datapath),collapse = "")
-    ret <- system(call,intern=TRUE)
+    fGBK <- system(call,intern=TRUE)
     
     #extract info from the genbank file 
     
-    tab1 <- unlist(strsplit(ret[1],"\t"))
-    coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: [0-9]+..[0-9]+')[,1]
-    input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))      #might not work for chr X,Y and MT
-    input_orient <- gsub("strand=\\\"","",str_match(tab1[[4]],"strand=\\\"."))
-    if(input_orient=="+"){
-        input_gene_start <- as.numeric(gsub("REGION: ","",str_match(coordinates,"REGION: [0-9]+")))
-    }else{
-        input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
-    }
-    if(is.na(coordinates)){
-        coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: complement.[0-9]+..[0-9]+')[,1]
-        input_orient <- "-"
-        input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))
-        input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
-        
-    }
-
+    tab1 <- unlist(strsplit(fGBK[ind],"\t"))
     
-    genedt<-data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab1[[3]]), '')[[1]]==')'))
-    setnames(genedt,c("start","end"))
-    genedt[,id := seq_along(genedt$start)]
-    genedt[,ex:=rep("exon",nrow(genedt))]
-    genedt[,name := paste0(ex,id)]
+    incProgress(1/10,message=NULL)
+    
+    #coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: [0-9]+..[0-9]+')[,1]
+    #input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9,X]+"))      #might not work for chr X,Y and MT
+    #input_orient <- gsub("strand=\\\"","",str_match(tab1[[4]],"strand=\\\"."))
+    #if(input_orient=="+"){
+    #    input_gene_start <- as.numeric(gsub("REGION: ","",str_match(coordinates,"REGION: [0-9]+")))
+    #}else{
+    #    input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
+    #}
+    #if(is.na(coordinates)){
+    #    coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: complement.[0-9]+..[0-9]+')[,1]
+    #    input_orient <- "-"
+    #    input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))
+    #    input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
+    #}
+
+    exon <- data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab1[[3]]), '')[[1]]==')'))
+    setnames(exon,c("start","end"))
+    exon[,id := seq_along(exon$start)]
+    exon[,ex:=rep("exon",nrow(exon))]
+    exon[,name := paste0(ex,id)]
     
     
     intron<-data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='D'),which(strsplit(as.character(tab1[[3]]), '')[[1]]=='A'))
@@ -143,7 +173,7 @@ process_gbk <- function(session,file){
     intron[ ,`:=`( name =paste0(ex,id))]
     
     
-    genedt<-rbind(genedt,intron)
+    genedt<-rbind(exon,intron)
     setkey(genedt,start)
     genedt[,seq := substring(as.character(tab1[[2]]),start,end),by=1:nrow(genedt)]
     
@@ -156,11 +186,15 @@ process_gbk <- function(session,file){
         genedt[,start_chr := input_gene_start - start +1]
         genedt[,end_chr := input_gene_start - end +1]
     }
+    
     genedt[,len := end-start +1]
     genedt[,chr := rep(input_chrom,nrow(genedt))]
     custom_fasta <- tempfile()
-    for(i in nrow(genedt)){writeLines(paste0(">ref_",genedt$name,"_",genedt$chr,"_",genedt$start_chr,"_",genedt$end_chr,"_",genedt$end-genedt$start,"\n",genedt$seq),custom_fasta)}
+    for(i in nrow(genedt)){
+        writeLines(paste0(">ref_",genedt$name,"_",genedt$chr,"_",genedt$start_chr,"_",genedt$end_chr,"_",genedt$end-genedt$start,"\n",genedt$seq),custom_fasta)
+    }
     #close(con) #fasta
+    incProgress(1/10,message=NULL)
     
     cod_table <- rbindlist(
         lapply(1:nrow(genedt),
@@ -173,12 +207,11 @@ process_gbk <- function(session,file){
                )
         )
     
-    #numbers differ in different genebank files grep for smth??
-    #trans <- unlist(strsplit(unlist(strsplit(unlist(strsplit(as.character(tab[[4]]),";"))[5]," "))[11],"="))[9]
     #ret=system("dev/GLASS/ext/gb2tab.py -a 20000 -b 20000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
-    # tab2  <- unlist(strsplit(ret[3],"\t"))
-    vec   <- strsplit(tab2[2],"")
-    vecb  <- lapply(vec,function(x){x==toupper(x)})[[1]]
+    #tab2  <- unlist(strsplit(ret[3],"\t"))
+    #vec   <- strsplit(tab2[2],"")
+    #vecb  <- lapply(vec,function(x){x==toupper(x)})[[1]]
+    
     tab2 <- tab1
     trans <- gsub('/translation=\\"',"",str_match(tab2[[4]],'/translation=\"[A-Z]+')[,1])
     
@@ -189,6 +222,7 @@ process_gbk <- function(session,file){
     # cod_table <- cbind(cod_table, vecb)
     
     # cod_table[!vecb][codon=="exon"]$codon = "non-coding_exon_seq"
+    incProgress(1/10,message=NULL)
     
     cod_table[codon=="exon"]$AA = coding$AA
     cod_table[codon=="exon"]$ord_in_cod = coding$ord_in_cod
@@ -209,6 +243,8 @@ process_gbk <- function(session,file){
     
     intron_name <- unlist(lapply(1:nrow(intr_cod), function(x) {if(intr_cod[x,]$p<intr_cod[x,]$m){ return(paste0(intr_cod[x,]$plus,"+",intr_cod[x,]$p))} else {return(paste0(intr_cod[x,]$minus,"-",intr_cod[x,]$m))}}))
     cod_table[codon=="intron"]$coding_seq = intron_name
+    
+    incProgress(1/10,message=NULL)
     
     cod_table<- cod_table
     file_cod=paste0(input_gene_name,".glassed.codons.rdata")

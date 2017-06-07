@@ -30,7 +30,7 @@
   border: 1px solid #777;
   border-radius: 4px;
   font-size: 20px;
-  opacity: 0.92;
+  opacity: 0.0;
 }
 
 .shiny-input-checkboxgroup label ~ .shiny-options-group, .shiny-input-radiogroup label ~ .shiny-options-group {
