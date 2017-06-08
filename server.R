@@ -67,9 +67,9 @@ shinyServer(function(input,output,session) {
                                     dbSNP = '',
                                     dbSNP_id = '')
     g_files                 <- data.table(FWD_name=character(),FWD_file=character(),REV_name=character(),REV_file=character(),REF=character(),mut_min=numeric(),
-                                           qual_thres_to_call=numeric(),s2n_min=numeric(),show_calls_checkbox=logical(),join_traces_checkbox=logical(),max_y_p=numeric(),opacity=numeric(), 
+                                           qual_thres_to_call=numeric(),s2n_min=numeric(),show_calls_checkbox=logical(),join_traces_checkbox=logical(),max_y_p=numeric(),opacity=numeric(),
                                            incorporate_checkbox=logical(),loaded=logical(),calls=character(),status=character(),id=integer(),brush_fwd_start=numeric(),
-                                           brush_fwd_end=numeric(),brush_rev_start=numeric(),brush_rev_end=numeric(),coding=character(),protein=character(),VAF=character(), 
+                                           brush_fwd_end=numeric(),brush_rev_start=numeric(),brush_rev_end=numeric(),coding=character(),protein=character(),VAF=character(),
                                            dbSNP=character(),dbSNP_id=character())
     #g_files[,`:=` ]
 
@@ -85,6 +85,7 @@ shinyServer(function(input,output,session) {
     #SAMPLE BROWSER STUFF
 
     output$samples_table <- DT::renderDataTable({
+
         updateRefs()
         loadSamples()
         goRef_handler()
@@ -94,8 +95,8 @@ shinyServer(function(input,output,session) {
         loading_processed_files()
         input$goLock
         loadDemo()
-        
-        
+
+
 
         disabled <- rep(FALSE,nrow(g_files))
         disabled[1] <- FALSE
@@ -140,7 +141,7 @@ shinyServer(function(input,output,session) {
     })
 
     #Handlers for the Sample Browser
-    
+
     loadSamples <- reactive({
         if(!is.null(input$browser_files)){
             g_not_loaded <- ""
@@ -179,7 +180,7 @@ shinyServer(function(input,output,session) {
                                                  s2n_min=2,show_calls_checkbox=F,
                                                  join_traces_checkbox=F,max_y_p=100,
                                                  opacity=0,incorporate_checkbox=F,
-                                                 calls = "",loaded= FALSE, 
+                                                 calls = "",loaded= FALSE,
                                                  status = "new",
                                                  brush_fwd_start = 0,brush_fwd_end=0,
                                                  brush_rev_start=0, brush_rev_end = 0,
@@ -277,7 +278,7 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$goLoadSamples)){
             isolate({
                 load_id <- floor(as.numeric(strsplit(input$goLoadSamples, "_")[[1]][2]))/10
-                #save previously loaded 
+                #save previously loaded
                 if(nrow(g_files[loaded==TRUE,])==1){
                     tmpfile <- tempfile("calls")
                     save(g_calls,file=tmpfile)
@@ -289,7 +290,7 @@ shinyServer(function(input,output,session) {
                 g_files<<-g_files
             })
         }
-        
+
         single_rev <- FALSE
         #if(!is.null(input$select_file) || !is.null(ex)) {
         if(!is.null(load_id) || !is.null(ex)) {
@@ -311,7 +312,7 @@ shinyServer(function(input,output,session) {
                 g_glassed_ref <<- paste("data/refs/",ref,".glassed.intrex.fasta",sep="")
                 g_glassed_cod <<- paste("data/refs/",ref,".glassed.codons.rdata",sep="")
             }
-            
+
             snp_file      <-  paste("data/refs/",ref,".avsnp147.annovar.revcom.csv",sep="")
             if(file.exists(snp_file)){
                 g_glassed_snp <<- fread(snp_file,header=FALSE)
@@ -365,7 +366,7 @@ shinyServer(function(input,output,session) {
                         g_files[loaded==T,status:="<font color='red'>error</font>"]
                     }
                 )
-        
+
                 if(!is.null(called)){
                     g_minor_het_insertions  <<- NULL
                     g_stored_het_indels     <<- list()
@@ -391,7 +392,7 @@ shinyServer(function(input,output,session) {
                         intrexdat$new_sample <- TRUE
                     g_intrexdat       <<- splice_variants(intrexdat)
                     calls             <-  data.table(calls,key="id")
-                    
+
                     # temporarily switching off functionality 2 sept 16, Karol
                     # g_noisy_neighbors <<- get_noisy_neighbors(calls)
                     if(!called$qual_present){
@@ -400,17 +401,17 @@ shinyServer(function(input,output,session) {
                     files_info <- paste0("<pre>",files_info,"</pre>")
                     output$files      <-  renderPrint({cat(files_info)})
                     g_new_sample      <<- TRUE
-                    
+
                     #initialize or load trim brushes
                     lapply(c("trim_fwd_start","trim_fwd_end","trim_rev_start","trim_rev_end"),function(x){updateNumericInput(session,max = nrow(calls),inputId=x)})
-                    
+
                     if(g_files[loaded==TRUE,]$status =="new"){
-                        g_files[loaded==TRUE,]$brush_fwd_start<<-calls[call!="-",][25]$id 
+                        g_files[loaded==TRUE,]$brush_fwd_start<<-calls[call!="-",][25]$id
                         g_files[loaded==TRUE,]$brush_fwd_end<<-calls[nrow(calls)-25]$id
                     }
                     updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_start,inputId = "trim_fwd_start" )
                     updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_end,inputId = "trim_fwd_end" )
-                    
+
                     if(!is.null(g_abif_rev)){
                         if(g_files[loaded==TRUE,]$status =="new"){
                             g_files[loaded==TRUE,]$brush_rev_start<<-calls[call_rev!="-",][25]$id
@@ -426,15 +427,15 @@ shinyServer(function(input,output,session) {
                     #    g_brush_fwd <<- calls[nrow(calls[call!="-",])-25]$trace_peak
 
                     #}
-                    #if reloading a previously loaded file 
+                    #if reloading a previously loaded file
                     if(nrow(g_files[loaded==T,]) == 1){                  #g_calls saved from previous session we test if they are compatible to reload
                         if(g_files[loaded==T,]$calls != ""){
                             load(g_files[loaded==T]$calls)
                         }
                     }
-                    
+
                     updateTabsetPanel(session,'tabs',selected = "main")
-                    
+
                 } else {
                     return(structure("error_reading_Rbin",class = "my_UI_exception"))
                 }
@@ -444,13 +445,14 @@ shinyServer(function(input,output,session) {
         g_calls <<- NULL
         return(calls)
     })
-    
+
     get_mut_min <- eventReactive(input$mut_min,{
         return(input$mut_min)
     })
 
     varcall <- reactive({
         if(class(loading_processed_files())[1] != "my_UI_exception") {
+
             if(g_files[loaded==T,]$calls == "") g_files[loaded==T,status:="viewed"]
             updateChosenVariants()
             goReset_handler()
@@ -580,7 +582,7 @@ shinyServer(function(input,output,session) {
     #
     # DataTable stuff
     #
-    
+
 #    add_checkboxes <- function(){
 #        checkboxes <- paste0('<input type="checkbox" name="row', g_view$id, '" value="', g_view$id, '"',"")
 #        for(i in 1:nrow(g_view)) {
@@ -706,7 +708,7 @@ shinyServer(function(input,output,session) {
                 #prots <- paste(g_view[set_by_user == TRUE]$protein,collapse="")
                 #g_files<<-g_files[loaded==TRUE,status:=paste0("<b>confirmed</b>: ",paste(g_view[set_by_user == TRUE]$coding,collapse=";"),prots)]
                 n = nrow(g_view[set_by_user==TRUE])
-                
+
                 g_files<<-g_files[loaded==TRUE,':='(status   = paste0(n," mut. found",collapse=""),
                                                     coding   = paste(g_view[set_by_user == TRUE]$coding,  collapse="<br>"),
                                                     protein  = paste(g_view[set_by_user == TRUE]$protein, collapse="<br>"),
@@ -769,7 +771,7 @@ shinyServer(function(input,output,session) {
             else html("toggle_help",'<i class="fa fa-question"></i> show help')
         }
     })
-    
+
 
     #
     # Send message to JS
@@ -801,17 +803,17 @@ shinyServer(function(input,output,session) {
             session$sendCustomMessage(type = "opac_r",message = paste0(opac_rev))
         }
     })
-    
+
     #######################
     # alignTo (start) #
     #######################
-    
+
     #g_alignTo_options <- c("TP53","ATM","NOTCH1","CALR")
     g_alignTo_description <- list("TP53" = "Acc.: NM_000546.5<br>Ref: GRCh38"
                                 , "ATM" = "Acc.: <br> Ref hg19:"
                                 , "NOTCH1" = "Acc.: NM_017617.4<br>Ref: GRCh38"
                                 , "CALR" = "Acc.:<br> Ref")
-    
+
     output$alignTo_new <- renderUI({
         updateRefs()
         setCustomRef()
@@ -830,7 +832,7 @@ shinyServer(function(input,output,session) {
         return(HTML(UI_out))
     })
 
-    
+
     loadDemo <- reactive({
         if(!is.null(g_reactval$link)){
             if(g_reactval$link=="TP53"){
@@ -838,7 +840,7 @@ shinyServer(function(input,output,session) {
             }
         }
     })
-    
+
     updateRefs <-function() {
         #loadGBK()
         #setCustomRef()
@@ -846,14 +848,14 @@ shinyServer(function(input,output,session) {
         if(!is.null(g_custom_ref)){
             g_alignTo_options <<- c(g_alignTo_options,"Custom")
         }
-        
+
         lapply(g_alignTo_options, function(x) {
             observeEvent(input[[paste0(x, "_alignTo_lnk")]], {
                 g_reactval$link <- x
             })
         })
     }
-    
+
     loadGBK <- observeEvent(input$custom_gb,{
         #if(!is.null(input$custom_gb)){
             withProgress(
@@ -862,17 +864,17 @@ shinyServer(function(input,output,session) {
                         choices<-NULL
                         for(i in 1:length(res$CDS)){
                             option <- paste0("GENE:",res$CDS[[i]]$gene,", PRODUCT: ",res$CDS[[i]]$product," (",nchar(res$CDS[[i]]$translation),"aa)",collapse = "")
-                            choices[[option]] <- i 
+                            choices[[option]] <- i
                         }
-                    
+
                         showModal({modalDialog(
                                 #p('Found ',length(res$mRNA),' "mRNA" features in GBK file '),
                                 p('Searching for "CDS" features in the GBK file...'),
                                 #if (failed)
                                 #div(tags$b("Invalid name of data object", style = "color: red;")),
-                                
+
                                 radioButtons("radio_gene_sel", label = h3("Chose one of the following gene products"),
-                                             choices = choices, 
+                                             choices = choices,
                                              selected = 1,width = "100%"),
                                 footer = tagList(
                                     modalButton("Cancel"),
@@ -892,7 +894,7 @@ shinyServer(function(input,output,session) {
             )
         #}
     })
-    
+
     setCustomRef <- reactive({
         if(!is.null(input$custom_gb) && !is.null(input$gbk_ok) && !(input$gbk_ok==0)){
         isolate({
@@ -906,7 +908,7 @@ shinyServer(function(input,output,session) {
                             p('Extracting sequence infromtaion from genBank file...'),
                             #if (failed)
                             #div(tags$b("Invalid name of data object", style = "color: red;")),
-                            
+
                             footer = tagList(
                             )
                             ,size='m')})
@@ -918,13 +920,13 @@ shinyServer(function(input,output,session) {
                         if(!is.null(g_custom_ref)){
                             g_alignTo_options <<- c(g_alignTo_options,"Custom")
                         }
-                        
+
                         lapply(g_alignTo_options, function(x) {
                             observeEvent(input[[paste0(x, "_alignTo_lnk")]], {
                                 g_reactval$link <- x
                             })
                         })
-                        
+
                     }
                     ,error = function(e){
                         removeModal()
@@ -938,7 +940,7 @@ shinyServer(function(input,output,session) {
         })
         }
     })
-    
+
     #####################
     # alignTo (end) #
     #####################
@@ -1043,7 +1045,7 @@ shinyServer(function(input,output,session) {
                       'src = "navbar_scroll.gif" alt="Zoom using navigition tool on Minimap" style="width:640px;height:394px;"',
                      'src="navbar_zoom.gif" alt="Navbar zoom" '
                      ,'src="export.gif" alt="Export detected variant" style="width:960px;height:561px;"'))
-        
+
         UI_out <- paste0('<img ',images[V1==input$img_help]$V2,' ></img>')
         return(HTML(UI_out))
     })

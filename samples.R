@@ -43,9 +43,9 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
                             pa <- pairwiseAlignment(pattern = ref, subject = reverseComplement(seq),type = "local",substitutionMatrix = sm,gapOpening = -6, gapExtension = -1)
                             score_rev <- pa@score
                             #print(paste0("rev: ",pa@score))
-                            
+
                             if(score_fwd > score_bst || score_rev > score_bst){
-                                
+
                                 if(score_fwd > score_rev){
                                     score_bst <- score_fwd
                                 }else{
@@ -68,8 +68,8 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
                     else{
                         #pair fwd and rev samples with matching names
                         #if exactly one fwd file matches the stripped name of given rev file and this fwd file has no pair then:
-                        
-                        
+
+
                         rev_name <- gsub("_[12][09][0-9][0-9]-[0-1][0-9]-[0123][0-9]_[0-1][0-9]-[0-5][0-9]-[0-5][0-9]","",s_files[i,]$name) #remove date
                         rev_name <- gsub(".abi",".ab1",rev_name) #normalize extension
                         rev_name <- gsub(".ab1","",rev_name)     #remove extension
@@ -86,7 +86,7 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
                             loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start = 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF = '',dbSNP = '', dbSNP_id = ''))
                         }
                     }
-                        
+
                 }
                 else not_loaded <- c(not_loaded,s_files[i,]$name)
             }
@@ -96,7 +96,6 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
 }
 
 get_gbk_info <- function(session,file){
-
     #  ret=system("dev/GLASS/ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
     #call <- paste0(c("python ext/gb2tab.py -f 'mRNA' ",file$datapath),collapse = "")
     #mRNA_call <- system(call,intern=TRUE)
@@ -109,7 +108,7 @@ get_gbk_info <- function(session,file){
     #    name <- paste0("mRNA",i,collapse = "")
     #    mRNA <-  c(mRNA,list(mRNA[[name]]<-m))
     #}
-    
+
     CDS_call <- system2("python",c("ext/gb2tab.py","-f","'CDS'",file$datapath),stdout=TRUE)
     #CDS_call  <- system(call,intern=TRUE)
     CDS=NULL
@@ -131,7 +130,7 @@ get_gbk_info <- function(session,file){
             }
         }
     }
-    
+
     for(i in c(1:length(CDS_merge))){
         tab <- unlist(strsplit(CDS_merge[i],"\t"))
         transcript_id <- gsub('transcript_id=\\"',"",str_match(tab[[4]],'transcript_id=\"[A-Z,a-z,0-9,_,-,.]+')[,1])
@@ -151,9 +150,9 @@ process_gbk <- function(session,file,ind){
     input_gene_start = 1
     input_chrom = "UN"
     input_gene_name = "UN"
-    
+
     incProgress(1/10,message=NULL)
-    
+
     CDS_call <- system2("python",c("ext/gb2tab.py","-f","'CDS'",file$datapath),stdout=TRUE)
     #CDS_call  <- system(call,intern=TRUE)
     CDS=NULL
@@ -175,13 +174,13 @@ process_gbk <- function(session,file,ind){
             }
         }
     }
-    
-    #extract info from the genbank file 
-    
+
+    #extract info from the genbank file
+
     tab1 <- unlist(strsplit(CDS_merge[ind],"\t"))
-    
+
     incProgress(1/10,message=NULL)
-    
+
     #coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: [0-9]+..[0-9]+')[,1]
     #input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9,X]+"))      #might not work for chr X,Y and MT
     #input_orient <- gsub("strand=\\\"","",str_match(tab1[[4]],"strand=\\\"."))
@@ -202,21 +201,21 @@ process_gbk <- function(session,file,ind){
     exon[,id := seq_along(exon$start)]
     exon[,ex:=rep("exon",nrow(exon))]
     exon[,name := paste0(ex,id)]
-    
-    
+
+
     intron<-data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='D'),which(strsplit(as.character(tab1[[3]]), '')[[1]]=='A'))
     setnames(intron,c("start","end"))
     intron[,id := seq_along(intron$start)]
     intron[,ex:=rep("intron",nrow(intron))]
     intron[ ,`:=`( name =paste0(ex,id))]
-    
-    
+
+
     genedt<-rbind(exon,intron)
     setkey(genedt,start)
     genedt[,seq := substring(as.character(tab1[[2]]),start,end),by=1:nrow(genedt)]
-    
+
     #strand specific
-    
+
     if(input_orient == "+"){
         genedt[,start_chr := input_gene_start + start -1]
         genedt[,end_chr := input_gene_start + end -1]
@@ -224,7 +223,7 @@ process_gbk <- function(session,file,ind){
         genedt[,start_chr := input_gene_start - start +1]
         genedt[,end_chr := input_gene_start - end +1]
     }
-    
+
     genedt[,len := end-start +1]
     genedt[,chr := rep(input_chrom,nrow(genedt))]
     custom_fasta <- tempfile()
@@ -233,7 +232,7 @@ process_gbk <- function(session,file,ind){
     }
     #close(con) #fasta
     incProgress(1/10,message=NULL)
-    
+
     cod_table <- rbindlist(
         lapply(1:nrow(genedt),
                function(x) data.table(codon = genedt$ex[x],
@@ -244,53 +243,53 @@ process_gbk <- function(session,file,ind){
                                       seq = unlist(strsplit(genedt$seq[x],split = "")))
                )
         )
-    
+
     #ret=system("dev/GLASS/ext/gb2tab.py -a 20000 -b 20000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
     #tab2  <- unlist(strsplit(ret[3],"\t"))
     #vec   <- strsplit(tab2[2],"")
     #vecb  <- lapply(vec,function(x){x==toupper(x)})[[1]]
-    
+
     tab2 <- tab1
     trans <- gsub('/translation=\\"',"",str_match(tab2[[4]],'/translation=\"[A-Z]+')[,1])
-    
+
     coding<-data.table(AA =c(unlist(strsplit(trans,split="")),"*"),codon = 1:length(c(unlist(strsplit(trans,split="")),"*")))
     coding <- rbindlist(lapply(1:nrow(coding),function(x) data.table(AA = rep(coding$AA[x],3),codon=as.character(rep(coding$codon[x],3)),ord_in_cod= as.integer(c(1,2,3)))))
-    
+
     #remove non coding exons
     # cod_table <- cbind(cod_table, vecb)
-    
+
     # cod_table[!vecb][codon=="exon"]$codon = "non-coding_exon_seq"
     incProgress(1/10,message=NULL)
-    
+
     cod_table[codon=="exon"]$AA = coding$AA
     cod_table[codon=="exon"]$ord_in_cod = coding$ord_in_cod
     cod_table[codon=="exon",]$coding_seq = as.character(1:nrow(cod_table[codon == "exon",]))
     cod_table[codon=="exon"]$codon = coding$codon
-    
-    
+
+
     extra <- cod_table
     plus = extra[,max(as.numeric(coding_seq)),by=intrex][,V1]
     plus <- plus[1:length(plus)-1]
     minus <- plus + 1
-    
-    
+
+
     l1 <-unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x])))
     l2 <-unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x])))
-    
+
     intr_cod <- data.table(plus = unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x]))),minus=unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x]))),p = unlist(lapply(1:length(plus), function(x) 1:genedt[ex=="intron"]$len[x] )),m = unlist(lapply(1:length(minus), function(x) genedt[ex=="intron"]$len[x]:1 )))
-    
+
     intron_name <- unlist(lapply(1:nrow(intr_cod), function(x) {if(intr_cod[x,]$p<intr_cod[x,]$m){ return(paste0(intr_cod[x,]$plus,"+",intr_cod[x,]$p))} else {return(paste0(intr_cod[x,]$minus,"-",intr_cod[x,]$m))}}))
     cod_table[codon=="intron"]$coding_seq = intron_name
-    
+
     incProgress(1/10,message=NULL)
-    
+
     cod_table<- cod_table
     file_cod=paste0(input_gene_name,".glassed.codons.rdata")
     custom_cod <- tempfile()
     save(cod_table,file=custom_cod)
-    
+
     incProgress(amount=1,message="Done")
-    
+
     return(list(custom_cod=custom_cod,custom_fasta=custom_fasta))
-    
+
 }

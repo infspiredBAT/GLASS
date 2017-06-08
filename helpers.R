@@ -76,9 +76,9 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
     }
     calls[,set_by_user:=FALSE]
     # calls[,user_sample_orig:=user_sample]
-    
+
     calls[set_by_user == FALSE, user_sample_orig := ambig_min(user_sample,reference)]
-    
+
     return(calls)
 }
 
@@ -218,7 +218,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
 
         # calls[set_by_user == FALSE, mut_call_rev := ambig_minus(call_rev,reference),by=1:nrow(calls[set_by_user==FALSE,])]
         # initialising mut calls
-        
+
         calls[
               mut_peak_pct_fwd >= mut_min
             & mut_s2n_abs_fwd >= s2n_min
@@ -238,22 +238,22 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
 #             #& mut_call_fwd != call
 #             , c("user_mut","mut_peak_pct") := list(mut_call_fwd,mut_peak_pct_fwd)
 #             ]
-        
+
         # brush filter
         # should be ignored if input het indels is set ??
         #if(!incorp){
-       
+
         #calls <- calls[trace_peak< brush_fwd ,call := if(!is.null(call_rev)){call_rev}else{"N"} ]
         #calls <- calls[trace_peak< brush_fwd, mut_call_fwd := if(!is.null(mut_call_rev)){mut_call_rev}else{"N"} ]
-        
-        ##RETHINK BRUSH LOGIC!! 
+
+        ##RETHINK BRUSH LOGIC!!
         #calls <- calls[trace_peak< brush_fwd ,call := reference ]
-        #calls <- calls[trace_peak< brush_fwd, mut_call_fwd := reference ]    
-        
+        #calls <- calls[trace_peak< brush_fwd, mut_call_fwd := reference ]
+
         #calls <- calls[trace_peak> brush_rev ,call := reference ]
         #calls <- calls[trace_peak> brush_rev, mut_call_rev := reference]
         #}
-        
+
         # setting user muts based on reference and quality
         calls[
               mut_call_fwd!=reference
@@ -291,7 +291,7 @@ call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,
             & mut_peak_base_fwd != reference
             , mut_call_fwd := mut_peak_base_fwd
             ]
-        
+
         rows <- 1:nrow(calls[set_by_user==FALSE,])
         calls[set_by_user == FALSE, mut_call_fwd := ambig_min(mut_call_fwd,reference)]
         #brush filter
@@ -403,7 +403,7 @@ get_choices <- function(calls,ref){
             choices <- calls[call != call_rev]
         }
     }
-    
+
     if (nrow(choices) > 0) {
         choices[,strand:= 0]
         if("call_rev" %in% names(choices)){
@@ -430,7 +430,7 @@ get_choices <- function(calls,ref){
         choices[user_sample != reference & user_sample == "-",                      ':=' (coding = paste0(coding, "del", reference),            VAF = sample_peak_pct)]#,            "(", sample_peak_pct, "%)")]
         # protein
         choices[aa_sample   != aa_ref,                                              protein:= paste0("p.", aa_ref, codon, aa_sample)]#,      "(", sample_peak_pct, "%)")]
-        
+
         choices[aa_sample   == aa_ref,                                              protein:= "p.(=)"]
     # 2nd variant
         # mismatch without 1st variant
@@ -447,7 +447,7 @@ get_choices <- function(calls,ref){
         choices[aa_mut   != aa_ref    & aa_sample   != aa_ref      & aa_sample   != aa_mut,                        protein:= paste0(protein, aa_mut)]#,                  "(", mut_peak_pct, "%)")]
         #choices[aa_mut != aa_ref & aa_sample== aa_ref & aa_mut=="-",                                              protein:= paste0("p.",aa_ref,codon,"fs")]
     }
-    
+
     setkey(choices,id)
     return(choices)
 }
@@ -550,7 +550,7 @@ getView<-function(calls,choices,snps){
         #positionsPair <- lapply(strsplit(positionsStr,"_"),function(x){if(is.na(x[2])){c(x[1],x[1])}else{x}})
         #rsids<-lapply(positionsPair,function(x){paste(snps[snps$"V2"==x[1]&snps$V3==x[2]]$V8,"",sep="")})
         #choices <- cbind(choices,"dbSNP"=unlist(rsids))
-        
+
         #Exact matching for SNPs, probably needs finetuning for indels
         getSNP  <- getSNP <- function(pos,call,mut){return(snps[snps$V2==pos & snps$V3==pos & (snps$V5==call | snps$V5==mut)]$V8)}
         choices <- choices[,dbSNP:=getSNP(gen_coord,user_sample,user_mut),by=1:nrow(choices)]
@@ -657,10 +657,10 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g
             ins_tab <- calls[rep(pos-1,length(ins_seq)),]
             ins_tab[,id := id + seq_along(id)/100]
             ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
-            
+
             ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
             #ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0)]
-            
+
             if("call_rev" %in% row.names(calls)){
                 ins_tab[,`:=`(iA_rev=0,iC_rev=0,iG_rev=0,iT_rev=0)]
             }
@@ -838,7 +838,7 @@ get_expected_het_indels <- function(calls){
         g_expected_het_indel <- list(min = 0,max = 0,hist = hst)
         return(g_expected_het_indel)
     }
-    
+
 }
 
 shinyInput <- function(FUN, ids, id, choices=NULL,selected=NULL, ico = NULL,dsbl = NULL,...) {
@@ -848,7 +848,7 @@ shinyInput <- function(FUN, ids, id, choices=NULL,selected=NULL, ico = NULL,dsbl
         for (i in 1:length(ids)) {
            inputs[i] <- as.character(FUN(paste0(id, ids[i]), label = NULL,choices, selected[i], ...))
         }
-    #All other buttons    
+    #All other buttons
     }else{
         for (i in 1:length(ids)) {
             dis <- NULL
@@ -884,7 +884,7 @@ shinyInputRev <- function(FUN, ids, id, g_files, ...){
     inputs
 }
 updateSliders <- function(session,g_files){
-    
+
     updateSliderInput(session,'mut_min',value=g_files[loaded==T,]$mut_min)
     updateSliderInput(session,'qual_thres_to_call',value=g_files[loaded==T,]$qual_thres_to_call)
     updateSliderInput(session,'s2n_min',value=g_files[loaded==T,]$s2n_min)
@@ -895,18 +895,19 @@ updateSliders <- function(session,g_files){
     updateCheckboxInput(session,'incorporate_checkbox',value=g_files[loaded==T,]$incorporate_checkbox)
 }
 applyFilters <- function(g_view,fwd_start,fwd_end,rev_start,rev_end){
-    
+
     g_view[,show:=TRUE]
-    
+
     g_view[strand==1][id<=fwd_start]$show=FALSE
     g_view[strand==1][id>=fwd_end]$show=FALSE
-    
+
     g_view[strand==2][id<=rev_start]$show=FALSE
     g_view[strand==2][id>=rev_end]$show=FALSE
     
     g_view[strand==3][id<=fwd_start & id <=rev_start]$show=FALSE
     g_view[strand==3][id>=fwd_end & id >=rev_end]$show=FALSE
    # print(paste0(" fwd_start: ",fwd_start," fwd_end: ",fwd_end," rev_start: ", rev_start," rev_end: ",rev_end,collapse = ""))
-    
+
+
     return(g_view[show==TRUE])
 }

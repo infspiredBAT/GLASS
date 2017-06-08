@@ -43,7 +43,7 @@ shinyUI(
                     //margin-left: 4px !important;
                 }
                 .btn-file{
-                   
+
                 }
                 .exp_btn{
                     display:none;
@@ -59,7 +59,7 @@ shinyUI(
                     fill: none;
 		            pointer-events: all;
                 }
-                
+
 		         </style>")
 		),
 
@@ -76,10 +76,10 @@ shinyUI(
 		        #),
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
-			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" > 
+			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
                                 ver 0.2.15 <br> (2017-Jun-7) </a></div>
                                 <!-- Update log -->
-                                
+
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
 			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
 			                    <div class="modal-content">
@@ -226,9 +226,9 @@ shinyUI(
                            ,bsTooltip(id = "ref_help","Set of working references <hr> Displayed as cards are the references against which new samples are aligned (auto detect reference) and also appeare in the \"reference dropdown menu\" in the Samples table below.", placement = "right", trigger = "hover",
                                       options = NULL)
                            )
-                    
+
                 ),
-				
+
                 fluidRow(
                     column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected.
 
@@ -240,7 +240,7 @@ The more references are selected the longer the upload process wil take."
                         #######################
                         # alignTo_new (start) #
                         #######################
-                        
+
                         uiOutput("alignTo_new"),
                         uiOutput("alignTo_new_debug"),
                         #####################
@@ -251,7 +251,7 @@ The more references are selected the longer the upload process wil take."
                             conditionalPanel(condition="input.showWP3",
                                              fluidRow(
                                                  HTML("<br>"),
-                                                 column(3, 
+                                                 column(3,
                                                         selectizeInput("additionalRefs", " Add reference from currated list,",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53","NOTCH1"), multiple = TRUE,
                                                                        options = list(maxItems = 4))
                                                  ),
@@ -265,7 +265,7 @@ The more references are selected the longer the upload process wil take."
                             )
                         #)
                     )
-                        
+
                 )
 				,column(12,tags$div(title="",HTML(paste("<br><br><div style='display:inline;'><h3 style='display:inline;'>Samples </h3><b style='display:inline;' id ='samples_ui'>[?]</b></div><br><br>")))
 				        ,bsTooltip(id = "samples_ui","Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.", placement = "right", trigger = "hover",
@@ -279,7 +279,7 @@ The more references are selected the longer the upload process wil take."
                             downloadButton('export_btn','export variants [?]',class = "exp_btn")))
                     ,DT::dataTableOutput('samples_table')
 		        )
-				
+
             ),
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
 				fluidRow(
@@ -325,7 +325,7 @@ The more references are selected the longer the upload process wil take."
 					),
 					column(1
 					        ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 0)
-					    
+
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
                     column(2
@@ -338,7 +338,7 @@ The more references are selected the longer the upload process wil take."
                             ,numericInput("trim_fwd_end","end of fwd",value = 20,min = 0,max=1000)
                             ,numericInput("trim_rev_end","end of rev",value = 20,min = 0,max=1000)
                         )
-                        
+
                     ),
 					column(1
 					    ,checkboxInput("show_qual_checkbox","show quality", value = F)
@@ -355,7 +355,7 @@ The more references are selected the longer the upload process wil take."
 					    #,uiOutput('helpButton')
 					    #,actionButton("toggle_help",icon = icon("question"), "hide help",class = "show_hide_help")
 					 #   ,HTML('<button class="btn btn-default action-button show_hide_help shiny-bound-input" type="button" onclick="$(\'#disclaimer-modal2\').modal(\'show\')"><i class="fa fa-question" ></i> show help</button>
-					 #           
+					 #
                      #          <div class="modal fade" id="disclaimer-modal2" tabindex="-1" role="dialog">
 			         #           <div id="disclaimer-modal-content" class="modal-dialog" role="document">
 					 #          <div class="modal-content">
@@ -388,7 +388,7 @@ The more references are selected the longer the upload process wil take."
                      #             <p>Some content in menu 2.</p>
                      #           </div>
                      #         </div>
-                     #          
+                     #
                      #           </div>
 					 #         <div class="modal-footer" style="clear-both">
 					 #         <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
@@ -403,11 +403,11 @@ The more references are selected the longer the upload process wil take."
 				),
 				fluidRow(
 				    #  === following lines left out of text bc of space ===
-				    # "| horizontal grey line = full sequence |" 
+				    # "| horizontal grey line = full sequence |"
 				    #  | <font color=brown>brown dots</font> = intensity anomalies (indels?)
-				    
+
 				    #input.toggle_help  % 2 == 0
-				    
+
 					conditionalPanel("input.toggle_help % 2 == 0",column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
                         <b>minimap&nbsp&nbsp&nbsp&nbsp&nbsp</b>: <font color=#4682B4>blue box = resize/move for navigation</font> | boxes = exons/introns | horizontal grey line = full sequence | verticals = variants, ref>pri>sec | <font color=red>red dotted lines</font> = filtered noisy beginnings</br>
                         <b>chromatogram</b>: click text to print info^ | crosshair + click = drag | zoom-in for extra info (coords..) | sequences, from top = ref, call/pri, mut/sec | pink verticals = variants | grey bars = codons</br>
