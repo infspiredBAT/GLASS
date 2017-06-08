@@ -896,7 +896,9 @@ shinyServer(function(input,output,session) {
     })
 
     setCustomRef <- reactive({
-        if(!is.null(input$custom_gb) && !is.null(input$gbk_ok) && !(input$gbk_ok==0)){
+        #if(!is.null(input$custom_gb) && !is.null(input$gbk_ok) && !(input$gbk_ok==0)){
+        if( !is.null(input$gbk_ok) &&!(input$gbk_ok==0)){
+        #input$gbk_ok
         isolate({
             if(!is.null(input$custom_gb)){
                 withProgress(
