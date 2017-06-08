@@ -278,8 +278,19 @@ process_gbk <- function(session,file,ind){
 
     intr_cod <- data.table(plus = unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x]))),minus=unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x]))),p = unlist(lapply(1:length(plus), function(x) 1:genedt[ex=="intron"]$len[x] )),m = unlist(lapply(1:length(minus), function(x) genedt[ex=="intron"]$len[x]:1 )))
 
-    intron_name <- unlist(lapply(1:nrow(intr_cod), function(x) {if(intr_cod[x,]$p<intr_cod[x,]$m){ return(paste0(intr_cod[x,]$plus,"+",intr_cod[x,]$p))} else {return(paste0(intr_cod[x,]$minus,"-",intr_cod[x,]$m))}}))
-    cod_table[codon=="intron"]$coding_seq = intron_name
+    #intron_name <- unlist(lapply(1:nrow(intr_cod), 
+    #                                 function(x){
+    #                                    if(intr_cod[x,]$p<intr_cod[x,]$m){ 
+    #                                        return(paste0(intr_cod[x,]$plus,"+",intr_cod[x,]$p))
+    #                                    } else {
+    #                                        return(paste0(intr_cod[x,]$minus,"-",intr_cod[x,]$m))
+    #                                    }
+    #                                 }
+    #                             )
+    #                      )
+    intr_cod[p<m,name:= paste0(plus,"+",p)]
+    intr_cod[m<p,name:= paste0(minus,"-",m)]
+    cod_table[codon=="intron"]$coding_seq = intr_cod$name
 
     incProgress(1/10,message=NULL)
 
