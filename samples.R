@@ -110,14 +110,30 @@ get_gbk_info <- function(session,file){
     #    mRNA <-  c(mRNA,list(mRNA[[name]]<-m))
     #}
     
-    call  <- paste0(c("python ext/gb2tab.py  -f 'CDS' ",file$datapath),collapse = "")
-    CDS_call  <- system(call,intern=TRUE)
+    CDS_call <- system2("python",c("ext/gb2tab.py","-f","'CDS'",file$datapath),stdout=TRUE)
+    #CDS_call  <- system(call,intern=TRUE)
     CDS=NULL
     if (length(CDS_call)==0){
         stop(paste0("Unable to retreive information from GenBank file: ", file$name))
     }
-    for(i in c(1:length(CDS_call))){
-        tab <- unlist(strsplit(CDS_call[i],"\t"))
+    n=1
+    #system2 chops the output
+    CDS_merge = character()
+    CDS_merge[n] <- CDS_call[1]
+    if(length(CDS_call > 1)){
+        for(i in c(2:c(length(CDS_call)))){
+            CDSt <- paste0(CDS_merge[n],CDS_call[i])
+            if(length(unlist(strsplit(CDSt[1],"\t")))<5){
+                CDS_merge[n] <- CDSt
+            }else{
+                n=n+1
+                CDS_merge[n]<-CDS_call[i]
+            }
+        }
+    }
+    
+    for(i in c(1:length(CDS_merge))){
+        tab <- unlist(strsplit(CDS_merge[i],"\t"))
         transcript_id <- gsub('transcript_id=\\"',"",str_match(tab[[4]],'transcript_id=\"[A-Z,a-z,0-9,_,-,.]+')[,1])
         product <- gsub('product=\\"',"",str_match(tab[[4]],'product=\"[A-Z,a-z, ,0-9,_,-]+')[,1])
         translation <- gsub('translation=\\"',"",str_match(tab[[4]],'translation=\"[A-Z]+')[,1])
@@ -138,12 +154,31 @@ process_gbk <- function(session,file,ind){
     
     incProgress(1/10,message=NULL)
     
-    call <- paste0(c("python ext/gb2tab.py -f 'CDS' ",file$datapath),collapse = "")
-    fGBK <- system(call,intern=TRUE)
+    CDS_call <- system2("python",c("ext/gb2tab.py","-f","'CDS'",file$datapath),stdout=TRUE)
+    #CDS_call  <- system(call,intern=TRUE)
+    CDS=NULL
+    if (length(CDS_call)==0){
+        stop(paste0("Unable to retreive information from GenBank file: ", file$name))
+    }
+    n=1
+    #system2 chops the output
+    CDS_merge = character()
+    CDS_merge[n] <- CDS_call[1]
+    if(length(CDS_call > 1)){
+        for(i in c(2:c(length(CDS_call)))){
+            CDSt <- paste0(CDS_merge[n],CDS_call[i])
+            if(length(unlist(strsplit(CDSt[1],"\t")))<5){
+                CDS_merge[n] <- CDSt
+            }else{
+                n=n+1
+                CDS_merge[n]<-CDS_call[i]
+            }
+        }
+    }
     
     #extract info from the genbank file 
     
-    tab1 <- unlist(strsplit(fGBK[ind],"\t"))
+    tab1 <- unlist(strsplit(CDS_merge[ind],"\t"))
     
     incProgress(1/10,message=NULL)
     
