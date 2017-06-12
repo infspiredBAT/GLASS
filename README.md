@@ -7,6 +7,8 @@ Requirements
 --------------
 
 * RStudio or [Shiny Server](https://www.rstudio.com/products/shiny/shiny-server/)
+* install chromatography package `devtools::install("[GLASS_dir]/chromatography/")`
+
 
 Tested on :
 <verbatim>
