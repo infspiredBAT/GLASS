@@ -6,7 +6,7 @@ Live version available at http://bat.infspire.org/genomepd/glass
 Requirements
 --------------
 
-* RStudio or <href link="https://www.rstudio.com/products/shiny/shiny-server/">Shiny Server</href>
+* RStudio or [Shiny Server](https://www.rstudio.com/products/shiny/shiny-server/)
 
 Tested on :
 <verbatim>
