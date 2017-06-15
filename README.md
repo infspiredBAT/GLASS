@@ -10,7 +10,7 @@ Requirements
 * install chromatography package `devtools::install("[GLASS_dir]/chromatography/")`
 
 
-Tested on :
+Tested with :
 <verbatim>
 ``` R
 sessionInfo()
