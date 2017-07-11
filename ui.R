@@ -252,13 +252,13 @@ The more references are selected the longer the upload process wil take."
                                              fluidRow(
                                                  HTML("<br>"),
                                                  column(3,
-                                                        selectizeInput("additionalRefs", " Add reference from currated list,",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53"), multiple = TRUE,
+                                                        selectizeInput("additionalRefs", " Add reference from curated list,",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53"), multiple = TRUE,
                                                                        options = list(maxItems = 4))
                                                  ),
                                                  column(3, fileInput("custom_gb",label = HTML("OR upload your own GenBank file. <b style='display:inline; color:red;' id ='q1'> [?!]</b> "
                                                                                             ),
                                                                      multiple=F,accept=c('.gb','.gbk'),width = '100%'),
-                                                                     bsTooltip(id = "q1","Currently an experimental feature. Help imporove it by reporting errors.<hr> Genomic coordinates are not extracted. <hr> intorn/exon numbers may be different if transcript starts with an untranslated exon.", placement = "top", trigger = "hover",
+                                                                     bsTooltip(id = "q1","Currently an experimental feature. Help imporove it by reporting errors.<hr> Genomic coordinates are not extracted. <hr> Intron/exon numbers may be different if transcript starts with an untranslated exon.", placement = "top", trigger = "hover",
                                                                                                                                  options = NULL)
                                                        )
                                              )
