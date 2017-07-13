@@ -1,4 +1,5 @@
 library(shiny)
+library(data.table)
 library(sangerseqR) #bioclite
 library(xlsx)
 source("procAbi.R")
