@@ -344,7 +344,7 @@ shinyServer(function(input,output,session) {
                 })
             }
 
-            withProgress(message = paste('Loading abi file.',sep=" "), value = 1, {
+            withProgress(message = paste('loading abi file...',sep=" "), value = 1, {
 
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
@@ -809,23 +809,27 @@ shinyServer(function(input,output,session) {
     #######################
 
     #g_alignTo_options <- c("TP53","ATM","NOTCH1","CALR")
-    g_alignTo_description <- list("TP53" = "Acc.: NM_000546.5<br>Ref: GRCh38"
-                                , "ATM" = "Acc.: <br> Ref hg19:"
-                                , "NOTCH1" = "Acc.: NM_017617.4<br>Ref: GRCh38"
-                                , "CALR" = "Acc.:<br> Ref")
+    g_alignTo_description <- list("TP53"   = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_000546.5' target='_blank'>NM_000546.5</a> <br> GRCh38"
+                                , "ATM"    = "n/a                                                                                        <br> hg19"
+                                , "NOTCH1" = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_017617.4' target='_blank'>NM_017617.4</a> <br> GRCh38"
+                                , "CALR"   = "n/a                                                                                        <br> n/a")
 
     output$alignTo_new <- renderUI({
         updateRefs()
         setCustomRef()
         UI_out <- lapply(g_alignTo_options, function(x) paste0(div(id = paste0(x, '_alignTo_div')
                                                                  , class = 'alignTo_class'
-                                                                 , style = "margin: 0.4em;
+                                                                 , style = "margin: 0.3em;
                                                                             padding: 0.4em;
-                                                                            height: 8.5em;
+                                                                            height: 8.0em;
+                                                                            min-width: 90px;
                                                                             background-color: #F5F5F5;
                                                                             box-shadow: 0.1em 0.1em 0.3em #888888;"
-                                                                 , h4(x), if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "load demo") else "-"
-                                                                 , div(HTML(g_alignTo_description[[x]]))))
+                                                                 , h4(x)
+                                                                 , div(HTML(g_alignTo_description[[x]]))
+                                                                 , if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "[load demo]") else "-"
+                                                                 )
+                                                               )
                          )
         UI_out <- paste0(UI_out, collapse = "</td><td>")
         UI_out <- paste0("<table><tr><td>", UI_out, "</td></tr></table>")
@@ -863,21 +867,21 @@ shinyServer(function(input,output,session) {
                         res <- get_gbk_info(session,input$custom_gb)
                         choices<-NULL
                         for(i in 1:length(res$CDS)){
-                            option <- paste0("GENE:",res$CDS[[i]]$gene,", PRODUCT: ",res$CDS[[i]]$product," (",nchar(res$CDS[[i]]$translation),"aa)",collapse = "")
+                            option <- paste0("GENE: ",res$CDS[[i]]$gene,", PRODUCT: ",res$CDS[[i]]$product," (",nchar(res$CDS[[i]]$translation),"aa)",collapse = "")
                             choices[[option]] <- i
                         }
 
                         showModal({modalDialog(
                                 #p('Found ',length(res$mRNA),' "mRNA" features in GBK file '),
-                                p('Searching for "CDS" features in the GBK file...'),
+                                p('searching for "CDS" features in the GenBank file...'),
                                 #if (failed)
                                 #div(tags$b("Invalid name of data object", style = "color: red;")),
 
-                                radioButtons("radio_gene_sel", label = h3("Chose one of the following gene products"),
+                                radioButtons("radio_gene_sel", label = h3("choose one of the following gene products"),
                                              choices = choices,
                                              selected = 1,width = "100%"),
                                 footer = tagList(
-                                    modalButton("Cancel"),
+                                    modalButton("cancel"),
                                     actionButton("gbk_ok", "OK")
                                 )
                         ,size='m')})
@@ -890,7 +894,7 @@ shinyServer(function(input,output,session) {
                         g_custom_cod <<- NULL
                         g_custom_ref <<- NULL
                     }
-                ),message = "processing GenBank file."
+                ),message = "processing GenBank file..."
             )
         #}
     })
@@ -905,11 +909,10 @@ shinyServer(function(input,output,session) {
                     tryCatch({
                         removeModal()
                         showModal({modalDialog(
-                            #p('Found ',length(res$mRNA),' "mRNA" features in GBK file '),
-                            h1('PLEASE WAIT'),
-                            p('Extracting sequence infromtaion from genBank file...'),
+                            #p('found ',length(res$mRNA),' "mRNA" features in GBK file '),
+                            p('extracting sequence information from GenBank file...'),
                             #if (failed)
-                            #div(tags$b("Invalid name of data object", style = "color: red;")),
+                            #div(tags$b("invalid name of data object", style = "color: red;")),
 
                             footer = tagList(
                             )
@@ -1040,13 +1043,24 @@ shinyServer(function(input,output,session) {
     })
     output$upload_file <- renderUI({
         input$img_help
-        images <- data.table(c("File Upload","Select ref from list","Load custom GenBank ref.","Scroll","Zoom","Export detected variant")
-                  ,c('src = "LoadFile.gif" alt="File Upload" style="width:640px;height:394px;"',
-                     'src = "select_ref_from_list.gif" alt="Select reference from the list" style="width:640px;height:394px;"',
-                     'src = "custom_ref.gif" alt="Upload custom refrence" style="width:640px;height:394px;"',
-                      'src = "navbar_scroll.gif" alt="Zoom using navigition tool on Minimap" style="width:640px;height:394px;"',
-                     'src="navbar_zoom.gif" alt="Navbar zoom" '
-                     ,'src="export.gif" alt="Export detected variant" style="width:960px;height:561px;"'))
+        images <- data.table(
+                   c(
+                      "select ref from list"
+                     ,"load custom GenBank ref"
+                     ,"file upload"
+                     ,"scroll"
+                     ,"zoom"
+                     ,"export detected variants"
+                     )
+                  ,c(
+                      'src = "select_ref_from_list.gif" style="width:640px;height:394px;"'
+                     ,'src = "custom_ref.gif" style="width:640px;height:394px;"'
+                     ,'src = "LoadFile.gif" style="width:640px;height:394px;"'
+                     ,'src = "navbar_scroll.gif" style="width:640px;height:394px;"'
+                     ,'src = "navbar_zoom.gif"'
+                     ,'src = "export.gif" style="width:960px;height:561px;"'
+                     )
+                  )
 
         UI_out <- paste0('<img ',images[V1==input$img_help]$V2,' ></img>')
         return(HTML(UI_out))

@@ -77,7 +77,7 @@ shinyUI(
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                ver 0.2.15 <br> (2017-Jun-7) </a></div>
+                                ver 0.2.16 <br> (2017-Jul-12) </a></div>
                                 <!-- Update log -->
 
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
@@ -87,106 +87,112 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+
+                                <b>ver 0.2.16 (2017-Jul-12)</b>
+                                 <ul>
+			                     <li>UI updates and improvements.</li>
+			                     </ul>
                                 <b>ver 0.2.15 (2017-Jun-7)</b>
-                                <ul>
+                                 <ul>
 			                     <li>New dialogues to help with custom GenBank files and stability improvement for GenBank file loading.</li>
 			                     </ul>
                                 <b>ver 0.2.14 (2017-Apr-11)</b>
-                                <ul>
+                                 <ul>
 			                     <li>Handling error from empty variants table.</li>
-                                  <li>Corrected trimming filter for double stranded variants.</li>
+                                 <li>Corrected trimming filter for double stranded variants.</li>
 			                     </ul>
                                 <b>ver 0.2.13 (2017-Apr-9)</b>
-                                <ul>
+                                 <ul>
 			                     <li>Fixed broken status reporting in samples table.</li>
 			                     </ul>
                                 <b>ver 0.2.12 (2017-Apr-3)</b>
-                                <ul>
-			                     <li>Help images </li>
+                                 <ul>
+			                     <li>Help images.</li>
 			                     <li>Custom GenBank file experimental feature introduced.</li>
                                  <li>References shown in tiles with additional information provided.</li>
                                  <li>Widgets for setting filters added.</li>
                                  <li>"show qualities" issue fixed.</li>
 			                     </ul>
                                 <b>ver 0.2.11 (2017-Mar-22)</b>
-                                <ul>
-			                     <li>Improvments in error handling. </li>
-                                <li>Compatibility issue with new version of the data tables library addressed. </li>
-			                    </ul>
+                                 <ul>
+			                     <li>Improvments in error handling.</li>
+                                 <li>Compatibility issue with new version of the data tables library addressed.</li>
+			                     </ul>
                                 <b>ver 0.2.10 (2017-Jan-13)</b>
-                                <ul>
+                                 <ul>
 			                     <li>Redefined the formula for estimating the resolution. New unit BasePerPixel should be consistent across different input sequence lengths and window sizes. </li>
 			                     </ul>
                                 <b>ver 0.2.9 (2016-Nov-17)</b>
-                                <ul>
+                                 <ul>
 			                     <li>Scrolling events ignored on zoom (zoom on scroll was not seamless).</li>
-			                     <li>Reordered svg elements. Order of elements ~ z coordinate. </li>
+			                     <li>Reordered svg elements. Order of elements ~ z coordinate.</li>
 			                     </ul>
                                 <b>ver 0.2.8 (2016-Nov-3)</b>
-                                <ul>
+                                 <ul>
 			                     <li>UI modifications. Better interactivity (Click and drag in the graph area).</li>
-			                     <li>Filtered beginnings of reads now set to a fixed value. </li>
+			                     <li>Filtered beginnings of reads now set to a fixed value.</li>
 			                     </ul>
                                 <b>ver 0.2.7 (2016-Oct-7)</b>
-                                <ul>
+                                 <ul>
 			                     <li>A bug preventing the loading of some single nucleotide sequences fixed.</li>
 			                     <li>Correction in the way VAF (variant allele frequency) is estimated.</li>
 			                     </ul>
                                 <b>ver 0.2.6 (2016-Sep-29)</b>
-                                <ul>
-			                    <li>Small changes in the table of samples formating for a more comprehensive representation of variants and a more unified style in both the samples table and the final exported excel table.</li>
-                                <li>Added proper naming of protein variants for p.(=) and p.? cases.</li>
-                                </ul>
+                                 <ul>
+			                     <li>Small changes in the table of samples formating for a more comprehensive representation of variants and a more unified style in both the samples table and the final exported excel table.</li>
+                                 <li>Added proper naming of protein variants for p.(=) and p.? cases.</li>
+                                 </ul>
                                 <b>ver 0.2.5 (2016-Sep-10)</b>
-                                <ul>
-			                    <li>dbSNP annotation added for TP53 now uses exact matching instead of position matching.</li>
-                                <li>Added button to show/hide the help infobox in the variants panel.</li>
-                                <li>Titles, email us, table formatting, quick guide</li>
-                                <li>Modified export button behaviour; hide when nothing to export.</li>
-                                <li>Delete button in samples table behaviour fixed.</li>
-                                <li>Enabled the delete button on the example file.</li>
-			                    </ul>
+                                 <ul>
+			                     <li>dbSNP annotation added for TP53 now uses exact matching instead of position matching.</li>
+                                 <li>Added button to show/hide the help infobox in the variants panel.</li>
+                                 <li>Titles, email us, table formatting, quick guide.</li>
+                                 <li>Modified export button behaviour; hide when nothing to export.</li>
+                                 <li>Delete button in samples table behaviour fixed.</li>
+                                 <li>Enabled the delete button on the example file.</li>
+			                     </ul>
                                 <b>ver 0.2.4 (2016-Aug-20)</b>
-                                <ul>
-			                    <li>Position based dbSNP annotation added for TP53. (Column "dbSNP" in the variants table.)</li>
-			                    </ul>
+                                 <ul>
+			                     <li>Position based dbSNP annotation added for TP53. (Column "dbSNP" in the variants table.)</li>
+			                     </ul>
                                 <b>ver 0.2.3 (2016-Aug-11)</b>
-                                <ul>
-                                <li>"No reference" upload fixed and documented.</li>
-                                <li>Forward beginnings filter initial position updated.</li>
-                                </ul>
+                                 <ul>
+                                 <li>"No reference" upload fixed and documented.</li>
+                                 <li>Forward beginnings filter initial position updated.</li>
+                                 </ul>
                                 <b>ver 0.2.2 (2016-Aug-4)</b>
-                                <ul>
-                                <li>Fixed bug causing single strand samples to crash (result of previous update).</li>
-                                <li>Small change in minimap navigation box opacity.</li>
-                                </ul>
+                                 <ul>
+                                 <li>Fixed bug causing single strand samples to crash (result of previous update).</li>
+                                 <li>Small change in minimap navigation box opacity.</li>
+                                 </ul>
                                 <b>ver 0.2.1 (2016-Aug-2)</b>
-			                    <ul>
-			                    <li>Minimap navigation box coloured steel blue (~ magnifier glass) and shadow added to make it "pop-out".</li>
-			                    <li>Variant indicators are now strand specific.</li>
-                                <li>Variant indicator scales to peak width.</li>
-			                    </ul>
+			                     <ul>
+			                     <li>Minimap navigation box coloured steel blue (~ magnifier glass) and shadow added to make it "pop-out".</li>
+			                     <li>Variant indicators are now strand specific.</li>
+                                 <li>Variant indicator scales to peak width.</li>
+			                     </ul>
                                 <b>ver 0.2.0 (2016-Jul-29)</b>
-			                    <ul>
-			                    <li>Minimap navigation box appearence and behaviour.</li>
-			                    <li>More seamless chromatogram transitions.</li>
-			                    <li>Box representing zoomed-in area.</li>
-                                <li>Filters of beginnings of reads stylised in chromatogram and also minimap.</li>
-			                    </ul>
+			                     <ul>
+			                     <li>Minimap navigation box appearence and behaviour.</li>
+			                     <li>More seamless chromatogram transitions.</li>
+			                     <li>Box representing zoomed-in area.</li>
+                                 <li>Filters of beginnings of reads stylised in chromatogram and also minimap.</li>
+			                     </ul>
                                 <b>ver 0.1.1 (2016-Jul-27)</b>
-			                    <ul>
-			                    <li>Filters of beginnings and ends of reads visualised in minimap.</li>
-                                <li>Reference now case sensitive: exons in uppercase, everything else in lowercase.</li>
-                                <li>It\'s now possible to load samples without a reference, just untick all genes.</li>
-			                    </ul>
+			                     <ul>
+			                     <li>Filters of beginnings and ends of reads visualised in minimap.</li>
+                                 <li>Reference now case sensitive: exons in uppercase, everything else in lowercase.</li>
+                                 <li>It\'s now possible to load samples without a reference, just untick all genes.</li>
+			                     </ul>
 			                    <b>ver 0.1.0 (2016-Jul-06)</b>
-			                    <ul>
-                                <li>Implemented brush-able filtering-out of variants from the beginning of reads (the filter is at the end of the reverse sequences since these are reverse complemented). </li>
-                                <li>Added reference selector, with selected references used to autodetect strandedness - not using all references speeds up the upload process.</li>
-                                <li>Added dialog preventing accidental "navigate away".</li>
-			                    <li>Added CALR reference.</li>
-			                    <li>Update log started.</li>
-			                    </ul>
+			                     <ul>
+                                 <li>Implemented brush-able filtering-out of variants from the beginning of reads (the filter is at the end of the reverse sequences since these are reverse complemented). </li>
+                                 <li>Added reference selector, with selected references used to autodetect strandedness - not using all references speeds up the upload process.</li>
+                                 <li>Added dialog preventing accidental "navigate away".</li>
+			                     <li>Added CALR reference.</li>
+			                     <li>Update log started.</li>
+			                     </ul>
+
 	   		                    </div>
 			                    <div class="modal-footer" style="clear-both">
 			                    <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
@@ -219,61 +225,50 @@ shinyUI(
             tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-                        <b>quick guide</b>: (0) hovering over '[?]'s will provide quick help tips</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(1) upload ABI files from supported references, forward and/or reverse, and with unique names - if you tick relevant references beforehand, GLASS will align and auto-orientate against them</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(2) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(3) click the blue 'play' button to load the file(s)</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp(4) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
+<b>quick guide</b>:
+(0) hovering over '[?]'s will provide quick help tips </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+(1) select / upload relevant references beforehand, GLASS will align and auto-orientate against them </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+(2) upload ABI files from supported references, forward and/or reverse, and with unique names </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+(3) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+(4) click the blue 'play' button to load the file(s) </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+(5) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
                         </div>"), sep = ""))))),
                 fluidRow(
-                    column(12,tags$div(title="",HTML(paste("<div style='display:inline;'><h3 style='display:inline;'>References </h3><b style='display:inline;' id ='ref_help'>[?]</b></div>")))
-                           ,bsTooltip(id = "ref_help","Set of working references <hr> Displayed as cards are the references against which new samples are aligned (auto detect reference) and also appeare in the \"reference dropdown menu\" in the Samples table below.", placement = "right", trigger = "hover",
-                                      options = NULL)
-                           )
-
-                ),
-
-                fluidRow(
-                    column(12,tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected.
-
-Selecting NONE of the references will assign no reference to your chromatogram. It is still possible to view it or change the reference afterwards.
-
-The more references are selected the longer the upload process wil take."
-                        #,checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR","Custom"),selected = c("TP53"),inline=TRUE)
-                    ),
-                        #######################
-                        # alignTo_new (start) #
-                        #######################
-
-                        uiOutput("alignTo_new"),
-                        uiOutput("alignTo_new_debug"),
-                        #####################
-                        # alignTo_new (end) #
-                        #####################
-                        #wellPanel(
-                            checkboxInput("showWP3", HTML("Manage References <i class='fa fa-wrench' aria-hidden='true'></i>")),
-                            conditionalPanel(condition="input.showWP3",
-                                             fluidRow(
-                                                 HTML("<br>"),
-                                                 column(3,
-                                                        selectizeInput("additionalRefs", " Add reference from curated list,",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53"), multiple = TRUE,
-                                                                       options = list(maxItems = 4))
-                                                 ),
-                                                 column(3, fileInput("custom_gb",label = HTML("OR upload your own GenBank file. <b style='display:inline; color:red;' id ='q1'> [?!]</b> "
-                                                                                            ),
-                                                                     multiple=F,accept=c('.gb','.gbk'),width = '100%'),
-                                                                     bsTooltip(id = "q1","Currently an experimental feature. Help imporove it by reporting errors.<hr> Genomic coordinates are not extracted. <hr> Intron/exon numbers may be different if transcript starts with an untranslated exon.", placement = "top", trigger = "hover",
-                                                                                                                                 options = NULL)
-                                                       )
-                                             )
-                            )
-                        #)
+                    column(12,
+#                         tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected.
+# Selecting NONE of the references will assign no reference to your chromatogram. It is still possible to view it or change the reference afterwards.
+# The more references are selected the longer the upload process wil take."
+#                         ,checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR","Custom"),selected = c("TP53"),inline=TRUE)
+#                         ),
+                        tags$div(title="",HTML(paste("<hr><div style='display:inline;'><h4 style='display:inline;'>references</h4> &nbsp <b style='display:inline;' id ='ref_help'> [?]</b></div>")))
+                        ,bsTooltip(id = "ref_help","Set of working references <hr> Displayed as cards are the references against which new samples are aligned (auto detect reference) and also appeare in the \"reference dropdown menu\" in the Samples table below.", placement = "right", trigger = "hover",
+                                  options = NULL),
+                        # checkboxInput("showWP3", HTML("Manage References <i class='fa fa-wrench' aria-hidden='true'></i>")),
+                        # conditionalPanel(condition="input.showWP3",
+                             fluidRow(
+                                 column(3,
+                                        selectizeInput("additionalRefs", "select from our list of curated references",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53"), multiple = TRUE,
+                                                       options = list(maxItems = 4))
+                                 ),
+                                 column(3, fileInput("custom_gb",label = HTML("OR upload your own GenBank file<b style='display:inline; color:red;' id ='q1'> [?!]</b>"),
+                                                     multiple=F,accept=c('.gb','.gbk'),width = '100%'),
+                                                     bsTooltip(id = "q1","Currently an experimental feature, please help improve it by reporting errors.<hr> Genomic coordinates are not extracted. <hr> Intron/exon numbers may be different if transcript starts with an untranslated exon.", placement = "top", trigger = "hover",
+                                                                                                                 options = NULL)
+                                 )
+                             ),
+                        # )
+                        HTML("currently selected references"),
+                        uiOutput("alignTo_new")
+                        # ,uiOutput("alignTo_new_debug")
                     )
-
                 )
-				,column(12,tags$div(title="",HTML(paste("<br><br><div style='display:inline;'><h3 style='display:inline;'>Samples </h3><b style='display:inline;' id ='samples_ui'>[?]</b></div><br><br>")))
+				,column(12,tags$div(title="",HTML(paste("<br><hr><div style='display:inline;'><h4 style='display:inline;'>samples</h4> &nbsp <b style='display:inline;' id ='samples_ui'> [?]</b></div>")))
 				        ,bsTooltip(id = "samples_ui","Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.", placement = "right", trigger = "hover",
 				                   options = NULL)
 				)
 				,fluidRow(
                     column(6,
-                        fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'),width = '100%')),
+                        fileInput("browser_files","upload .abi or .ab1 files with unique names",multiple=T,accept=c('.abi','.ab1'),width = '100%')),
                     column(2,
                         tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",
                             downloadButton('export_btn','export variants [?]',class = "exp_btn")))
@@ -324,19 +319,21 @@ The more references are selected the longer the upload process wil take."
                         )
 					),
 					column(1
-					        ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 0)
-
+					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 0)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
                     column(2
-                        ,column(12,h4("Read trimming"))
-                        ,column(6
-                            ,numericInput("trim_fwd_start","start of fwd",value = 20,min = 0,max=1000)
-                            ,numericInput("trim_rev_start","start of rev",value = 20,min = 0,max=1000)
+                        ,column(12,
+                            tags$div(title="positions to ignore, i.e. exclude from variant calling - shown as red dots on minimap",
+                                HTML("ignore sequence positions [?]")))
+                        ,column(1)
+                        ,column(5
+                            ,numericInput("trim_fwd_start","fwd, up to",value = 0,min = 0,max=1000)
+                            ,numericInput("trim_rev_start","rev, up to",value = 0,min = 0,max=1000)
                         )
-                        ,column(6
-                            ,numericInput("trim_fwd_end","end of fwd",value = 20,min = 0,max=1000)
-                            ,numericInput("trim_rev_end","end of rev",value = 20,min = 0,max=1000)
+                        ,column(5
+                            ,numericInput("trim_fwd_end",  "fwd, after",value = 1000,min = 1,max=1000)
+                            ,numericInput("trim_rev_end",  "rev, after",value = 1000,min = 1,max=1000)
                         )
 
                     ),
@@ -420,8 +417,9 @@ The more references are selected the longer the upload process wil take."
 				#conditionalPanel(condition=" output.chosen_variants_table ",downloadButton("export_btn","export")),
 				br()
 			),
-            tabPanel('Help', value = 'help', icon = icon("question"),
-                         selectInput("img_help","Chose a topic:",choices=c("File Upload","Select ref from list","Load custom GenBank ref.","Scroll","Zoom","Export detected variant"))
+            tabPanel('help', value = 'help', icon = icon("question"),
+                         # selectInput("img_help","choose a topic:",choices=c("File Upload","Select ref from list","Load custom GenBank ref.","Scroll","Zoom","Export detected variant"))
+                         selectInput("img_help","choose a topic:",choices=c("select ref from list","load custom GenBank ref","file upload","scroll","zoom","export detected variants"))
                          ,uiOutput("upload_file")
    			)
 #            ,
