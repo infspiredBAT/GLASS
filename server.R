@@ -811,9 +811,9 @@ shinyServer(function(input,output,session) {
 
     #g_alignTo_options <- c("TP53","ATM","NOTCH1","CALR")
     g_alignTo_description <- list("TP53"   = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_000546.5' target='_blank'>NM_000546.5</a> <br> GRCh38"
-                                , "ATM"    = "n/a                                                                                        <br> hg19"
+                                , "ATM"    = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_000051.3' target='_blank'>NM_000051.3</a> <br> hg19"
                                 , "NOTCH1" = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_017617.4' target='_blank'>NM_017617.4</a> <br> GRCh38"
-                                , "CALR"   = "n/a                                                                                        <br> n/a")
+                                , "CALR"   = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_004343.3' target='_blank'>NM_004343.3</a> <br> GRCh38")
 
     output$alignTo_new <- renderUI({
         updateRefs()
