@@ -13,7 +13,8 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
     }else{
         load(glassed_cod)
         calls <- merge(x = calls, y = cod_table[,list(gen_coord,codon,ord_in_cod,coding_seq,aa_ref=AA)], by = "gen_coord", all.x = TRUE)
-        calls[aa_ref != "",aa_ref:=aaa(toupper(aa_ref))]
+        calls[aa_ref != "",aa_ref:=my_aaa(toupper(aa_ref))]
+        #calls[aa_ref=="Stp",aa_ref:='*']
         cod_table <<- cod_table
     }
     calls[,c("aa_sample","aa_mut"):=aa_ref]
@@ -353,7 +354,7 @@ retranslate <- function(calls){
     trans <- seqinr::translate(coding[user_sample != '-',user_sample],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     #Shift annotation of codons by '-'s
     ord_sample<-rep(c(1,2,3),length(trans))
-    suppressWarnings(trans_sample <- aaa(trans))
+    suppressWarnings(trans_sample <- my_aaa(trans))
 #! # calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 
     # USER MUT
@@ -374,7 +375,7 @@ retranslate <- function(calls){
 #! # ord<-rep(c(1,2,3),length(trans))
     trans <- seqinr::translate(coding[user_mut != '-',user_mut],frame = (coding[1,ord_in_cod]-1), NAstring = "X", ambiguous = F)
     ord_mut<-rep(c(1,2,3),length(trans))
-    suppressWarnings(trans_mut <- aaa(trans))
+    suppressWarnings(trans_mut <- my_aaa(trans))
 
     #create a string as long as trans rep(123),add them to ord in cod where user_mut != "-"s
     calls[ord_in_cod>0        & user_sample == "-", sample_ord_in_cod := 0  ]
@@ -510,7 +511,7 @@ getView<-function(calls,choices,snps){
                 to   <- as.numeric(calls[choices[i]$id]$codon) +1
                 choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
                                              calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
-                                             paste(aaa(seqinr::translate(strsplit(seq,"")[[1]])),collapse = ""))
+                                             paste(my_aaa(seqinr::translate(strsplit(seq,"")[[1]])),collapse = ""))
             }
             if(choices[i,]$mut_type=="del"){
 
@@ -910,4 +911,23 @@ applyFilters <- function(g_view,fwd_start,fwd_end,rev_start,rev_end){
 
 
     return(g_view[show==TRUE])
+}
+my_aaa <- function (aa) 
+{
+    aa3 <- c("*", "Ala", "Cys", "Asp", "Glu", "Phe", "Gly", 
+             "His", "Ile", "Lys", "Leu", "Met", "Asn", "Pro", "Gln", 
+             "Arg", "Ser", "Thr", "Val", "Trp", "Tyr")
+    if (missing(aa)) 
+        return(aa3)
+    aa1 <- a()
+    convert <- function(x) {
+        if (all(x != aa1)) {
+            warning("Unknown one letter code for aminoacid")
+            return(NA)
+        }
+        else {
+            return(aa3[which(x == aa1)])
+        }
+    }
+    return(as.vector(unlist(sapply(aa, convert))))
 }
