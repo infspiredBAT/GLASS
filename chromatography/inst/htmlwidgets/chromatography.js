@@ -760,7 +760,7 @@ HTMLWidgets.widget({
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){posClick(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"],d["trace_peak"]);})
                 .attr("y",function(d){
                                 if(label.indexOf("rev") > -1){
                                     return((join=="FALSE")*110 + label_pos[label] );
@@ -868,7 +868,7 @@ HTMLWidgets.widget({
                     else {                       return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){posClick(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"],d["trace_peak"]);})
                 .attr("y",label_pos["aa"])
                 .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
@@ -881,7 +881,7 @@ HTMLWidgets.widget({
                     else {                       return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){posClick(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"],d["trace_peak"]);})
                 .attr("y",label_pos["aa_sample"])
                 .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
@@ -894,7 +894,7 @@ HTMLWidgets.widget({
                     else {                       return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .on("click",function(d,i){posClick(d["id"]);})
+                .on("click",function(d,i){posClick(d["id"],d["trace_peak"]);})
                 .attr("y",label_pos["aa_mut"])
                 .attr("fill", "black").attr("opacity", 0.6).attr("font-family", "sans-serif").attr("font-size", "10px")
                 .attr("stroke","#000000");
@@ -984,7 +984,7 @@ HTMLWidgets.widget({
       		        .text(function(d){return d["quality"];})
       		        .attr("text-anchor", "middle")
       		        .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                    .on("click",function(d,i){posClick(d["id"]);})
+                    .on("click",function(d,i){posClick(d["id"],d["trace_peak"]);})
       		        .attr("y",label_pos["qual"] -2)
       		        .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "10px");
             qt.exit().remove();
@@ -1119,7 +1119,7 @@ HTMLWidgets.widget({
 //             }
 //         );
 
-        function posClick(id){
+        function posClick(id,tp){
             var zoom = 400
             var scope = widthScale.domain()
             var pos = (id-1)*12 - 2;
@@ -1130,8 +1130,8 @@ HTMLWidgets.widget({
                 var to = Math.min(pos + 200,width2Scale.domain()[1])
                 setBrush(to-400,to);
             }
-            focus.selectAll(".selected_pos").attr("x",widthScale(pos));
-            selected_pos_x = pos;
+            focus.selectAll(".selected_pos").attr("x",widthScale(tp-5));
+            selected_pos_x = tp-5;
             Shiny.onInputChange("pos_click", {id: id});
         };
         //Expose the posClick function

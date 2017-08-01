@@ -603,7 +603,8 @@ shinyServer(function(input,output,session) {
                 g_view <<- getView(g_calls,g_choices,g_glassed_snp)
                 g_view <<- applyFilters(g_view,input$trim_fwd_start,input$trim_fwd_end,input$trim_rev_start,input$trim_rev_end)
                 #add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go", onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
-                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go", onclick = 'posClick(parseInt(this.id.split("_")[1]));')
+                tp <- g_view$trace_peak
+                add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', trace_peak = tp, label = "go", onclick = 'posClick(parseInt(this.id.split("_")[1]),parseInt(this.id.split("_")[2]));')
                 add_reset_buttons    <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, ico=rep("close",nrow(g_view)),onclick = 'Shiny.onInputChange(\"goReset\",  this.id)',class="btn dlt_btn" )
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, onclick = 'Shiny.onInputChange(\"goLock\", this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
                 if(nrow(g_view)>0){

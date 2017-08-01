@@ -479,7 +479,7 @@ getView<-function(calls,choices,snps){
             if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) - 1,"_",min(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
             else coding <- paste0("c.",min(coord),"_",max(coord),type, paste(nucs,collapse = ""))
 
-            return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1]))
+            return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
         } else {
             return(tab)
         }
@@ -842,7 +842,7 @@ get_expected_het_indels <- function(calls){
 
 }
 
-shinyInput <- function(FUN, ids, id, choices=NULL,selected=NULL, ico = NULL,dsbl = NULL,...) {
+shinyInput <- function(FUN, ids, id, trace_peak=c(), choices=NULL,selected=NULL, ico = NULL,dsbl = NULL,...) {
     inputs <- character(length(ids))
     #Select input
     if(length(grep("select",id))>0){
@@ -860,10 +860,14 @@ shinyInput <- function(FUN, ids, id, choices=NULL,selected=NULL, ico = NULL,dsbl
                    else
                        dis <- NULL
                 }
-                inputs[i] <- as.character(FUN(paste0(id, ids[i]), icon = icon(ico[i]), disabled =dis,...))
+                    inputs[i] <- as.character(FUN(paste0(id, ids[i]), icon = icon(ico[i]), disabled =dis,...))
             }
             else
-                inputs[i] <- as.character(FUN(paste0(id, ids[i]), ...))
+                if(length(trace_peak) == 0){
+                    inputs[i] <- as.character(FUN(paste0(id, ids[i]), ...))
+                }else{
+                    inputs[i] <- as.character(FUN(paste0(id, ids[i],'_',trace_peak[i]), ...))
+                }
         }
     }
     inputs
