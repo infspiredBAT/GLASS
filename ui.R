@@ -77,7 +77,8 @@ shinyUI(
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                ver 0.2.17 <br> (2017-Aug-9) </a></div>
+                                
+                                ver 0.2.18 <br> (2017-Oct-5) </a></div>
                                 <!-- Update log -->
 
                                 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
@@ -87,6 +88,11 @@ shinyUI(
 			                    <h4>update log</h4>
 			                    </div>
 			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+                                <b>ver 0.2.18 (2017-Oct-5)</b>
+                                 <ul>
+			                     <li>Names of intronic variants on the protein level corrected to "p.?"</li>    
+			                     </ul>
+			                     <b>ver 0.2.16 (2017-Jul-12)</b>
                                 <b>ver 0.2.17 (2017-Aug-9)</b>
                                  <ul>
 			                     <li>Now using "*" to annotate stop codon. (Instead of "Stp" or "Ter".) </li>

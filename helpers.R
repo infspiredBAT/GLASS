@@ -433,6 +433,8 @@ get_choices <- function(calls,ref){
         choices[aa_sample   != aa_ref,                                              protein:= paste0("p.", aa_ref, codon, aa_sample)]#,      "(", sample_peak_pct, "%)")]
 
         choices[aa_sample   == aa_ref,                                              protein:= "p.(=)"]
+        choices[grepl("intron",exon_intron),                                        protein:= "p.?"]
+        
     # 2nd variant
         # mismatch without 1st variant
         choices[user_mut != reference & user_sample == reference   & user_mut    != "-" & reference   != "-",      ':=' (coding = paste0(coding, reference, ">", user_mut), VAF = mut_peak_pct)]#, "(", mut_peak_pct, "%)")]
