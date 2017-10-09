@@ -937,3 +937,67 @@ my_aaa <- function (aa)
     }
     return(as.vector(unlist(sapply(aa, convert))))
 }
+add_tool_tips <- function(session){
+    
+    addTooltip(session,id = "ref_help",
+               title ="Set of working references <hr> Displayed as cards are the references against which new samples are aligned 
+                       (auto detect reference) and also appeare in the \"reference dropdown menu\" in the Samples table below.", 
+               placement = "right", 
+               trigger = "hover",
+               options = NULL)
+    
+    addTooltip(session, id = "q1",
+               title = "Currently an experimental feature, please help improve it by reporting errors.<hr> Genomic coordinates are 
+                        not extracted. <hr> Intron/exon numbers may be different if transcript starts with an untranslated exon.", 
+               placement = "top", 
+               trigger = "hover",
+               options = NULL)
+    
+    addTooltip(session, id = "samples_ui",
+               title = "Please make sure the files have unique names. Uploading a file with the same name as one of the files in 
+                        the table will be ignored.", 
+               placement = "right", 
+               trigger = "hover",
+               options = NULL)
+    
+    addPopover(session, id = "call_pos_help",
+               title = "Call positions",
+               content = "the absolute position of a call, nothing to do with genomic or codon numbering\n\nyou can either type a number, 
+                        or it will show by interacting with glass",
+               trigger = "hover",
+               options = NULL)
+    
+    addPopover(session,"hetero_indel_help",
+               title   = "hetero help",
+               content = "whether we expect heterozygous indels in the data, the % identity of the alignment between the primary 
+               and secondary sequences (get this as high as you can),<br><br>and insertion / deletion (in that order) 
+               counts<br><br>thus expecting an indel does not mean there is one: try any suggested peak%, keep %id high, 
+               and use your best judgement after studying the chromatogram<br><br>if indels are detected, a checkbox to use 
+               them will appear under this infobox",
+               trigger = 'hover')
+    
+    addPopover(session,"change_user_help",
+               title   = "change bases",
+               content = "change the 1st/2nd or major/minor or sample/mutation variants to...",
+               trigger = 'hover')
+    
+    addPopover(session,"general_infobox_help",
+               title = "General Infobox",
+               content = "information about the current position, also highlighted in light blue, including all nucleotides 
+                         (called, reference, mutated), coordinates, qualities (Q), peak %s, signal-to-noise (S/N) ratios, etc",
+               trigger = 'hover')
+    
+    addPopover(session, "mut_min_help",
+               title = "Options",
+               content = "min % of peak for mutation to be called",
+               trigger = 'hover')
+    
+    addPopover(session, "min_sn_help",
+               title = "Options",
+               content = "min signal to noise ratio for mutation to be called",
+               trigger = 'hover')
+    addPopover(session, "trim_help",
+               title = "Trimming",
+               content = "positions to ignore, i.e. exclude from variant calling - shown as red dots on minimap",
+               trigger = 'hover')
+}

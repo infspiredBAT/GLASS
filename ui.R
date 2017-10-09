@@ -59,21 +59,12 @@ shinyUI(
                     fill: none;
 		            pointer-events: all;
                 }
-
+                .popover{
+                     max-width: 100%; /* Max Width of the popover (depending on the container!) */
+		         }
 		         </style>")
 		),
 
-		       #conditionalPanel(condition = "output.show_sample_brows==TRUE",
-		       #          absolutePanel(id = "samples", class = "panel panel-default", fixed = TRUE,
-		        #      draggable = TRUE, top = 200, left = 130, right = "auto", bottom = "auto",
-		        #      width = 1100, height = "auto",
-		        #
-		        #      h2("Sample Browser"),
-		        #
-		        #      DT::dataTableOutput('samples_table'),
-		        #      fileInput("browser_files",NULL,multiple=T,accept=c('.abi','.ab1'))
-		        #         )
-		        #),
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
@@ -214,20 +205,6 @@ shinyUI(
 			column(10, HTML("<br><font size=2em>&nbsp&nbsp | R&D by <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font>&nbsp&nbsp | IT by <a href=https://metavo.metacentrum.cz/en/ target='_blank'>CESNET/MetaCentrum</a>&nbsp&nbsp | @ <a href=mailto:bat@infspire.org target='_blank'>email us</a>"))
 		),
 		fluidRow(
-			#column(1, selectInput("gene_of_interest",NULL,choices=list("ATM"="ATM","NOTCH1"="NOTCH1","TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
-			#column(1, selectInput("gene_of_interest",NULL,choices=list("TP53"="TP53"),selected="TP53",multiple=FALSE,selectize=F,size=1)),
-            #column(1,
-            #    conditionalPanel(condition = "input.gene_of_interest == 'TP53'",
-            #        actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;"))),
-			#column(1,actionButton("ex_btn","example",icon = icon("play"),class="btn btn-info",style="width:100%;height:20px;padding:0;margin-top:8px;margin-bottom:4px;")),
-            #column(3,wellPanel(fluidRow(
-            #    column(5,
-    		#	       tags$div(title="please make sure either or both (in case of paired i.e. forward and reverse) files have an \"F\" or \"R\" before the .abi/.ab1 file extension,\ne.g. my_sampleF.abi and/or my_sampleR.abi\n\nuse \"*R.abi\" even if loading a single reverse file!",
-					# column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">
-    		#	                tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1em;\">up to two ABI files,</br>name fwd and rev as:</br>*<strong style=\"color: red;\">F</strong>.abi *<strong style=\"color: red;\">R</strong>.abi [?]</div>"), sep = "")))),
-    		#	column(7, fileInput("select_file",NULL,multiple=T,accept=c('.abi','.ab1')))
-			#))),
-			#column(2,actionButton("mng_samples_btn","Manage/Load samples",style="width:100%;height:20px;padding:0;margin-top:8px;")),
 			column(2, HTML(paste("&nbsp<i>assisted and standardised assessment</br>&nbsp&nbsp&nbspof gene variations from Sanger data</i></br></br>"))),
 			column(9, htmlOutput("files"))
 		),
@@ -235,13 +212,12 @@ shinyUI(
             tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-<b>quick guide</b>:
-(0) hovering over '[?]'s will provide quick help tips </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-(1) select / upload relevant references beforehand, GLASS will align and auto-orientate against them </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-(2) upload ABI files from supported references, forward and/or reverse, and with unique names </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-(3) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-(4) click the blue 'play' button to load the file(s) </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-(5) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
+<b>quick</b> &nbsp(0) hovering over '[?]'s will provide quick help tips </br>
+<b>guide</b> &nbsp(1) select / upload relevant references beforehand, GLASS will align and auto-orientate against them </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp(2) upload ABI files from supported references, forward and/or reverse, and with unique names </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp(3) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp(4) click the blue 'play' button to load the file(s) </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp(5) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
                         </div>"), sep = ""))))),
                 fluidRow(
                     column(12,
@@ -251,19 +227,16 @@ shinyUI(
 #                         ,checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR","Custom"),selected = c("TP53"),inline=TRUE)
 #                         ),
                         tags$div(title="",HTML(paste("<hr><div style='display:inline;'><h4 style='display:inline;'>references</h4> &nbsp <b style='display:inline;' id ='ref_help'> [?]</b></div>")))
-                        ,bsTooltip(id = "ref_help","Set of working references <hr> Displayed as cards are the references against which new samples are aligned (auto detect reference) and also appeare in the \"reference dropdown menu\" in the Samples table below.", placement = "right", trigger = "hover",
-                                  options = NULL),
+                        
                         # checkboxInput("showWP3", HTML("Manage References <i class='fa fa-wrench' aria-hidden='true'></i>")),
                         # conditionalPanel(condition="input.showWP3",
-                             fluidRow(
+                             ,fluidRow(
                                  column(3,
                                         selectizeInput("additionalRefs", "select from our list of curated references",c("TP53","ATM","NOTCH1","CALR"), selected = c("TP53"), multiple = TRUE,
                                                        options = list(maxItems = 4))
                                  ),
                                  column(3, fileInput("custom_gb",label = HTML("OR upload your own GenBank file<b style='display:inline; color:red;' id ='q1'> [?!]</b>"),
-                                                     multiple=F,accept=c('.gb','.gbk'),width = '100%'),
-                                                     bsTooltip(id = "q1","Currently an experimental feature, please help improve it by reporting errors.<hr> Genomic coordinates are not extracted. <hr> Intron/exon numbers may be different if transcript starts with an untranslated exon.", placement = "top", trigger = "hover",
-                                                                                                                 options = NULL)
+                                                     multiple=F,accept=c('.gb','.gbk'),width = '100%')
                                  )
                              ),
                         # )
@@ -273,8 +246,6 @@ shinyUI(
                     )
                 )
 				,column(12,tags$div(title="",HTML(paste("<br><hr><div style='display:inline;'><h4 style='display:inline;'>samples</h4> &nbsp <b style='display:inline;' id ='samples_ui'> [?]</b></div>")))
-				        ,bsTooltip(id = "samples_ui","Please make sure the files have unique names. Uploading a file with the same name as one of the files in the table will be ignored.", placement = "right", trigger = "hover",
-				                   options = NULL)
 				)
 				,fluidRow(
                     column(6,
@@ -290,42 +261,41 @@ shinyUI(
 				fluidRow(
 					column(1,
 					    # this should be replaced by direct interaction with graph or data table
-                        tags$div(title="the absolute position of a call, nothing to do with genomic or codon numbering\n\nyou can either type a number, or it will show by interacting with glass",
-                            textInput("choose_call_pos","call position [?]")),
-					    # selectInput("change_peak","user_mod it to",choices=list(empty="","-","A","T","G","C","S","W","R","Y","K","M","B","V","H","D","N"),selected="",selectize=F,size=1),
-                        tags$div(title="change the 1st/2nd or major/minor or sample/mutation variants to...",
-    					    selectInput("change_user_sample","change variants [?]",choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
+                        tags$div(title="",
+                            textInput("choose_call_pos",HTML("<div>call position <b id = 'call_pos_help'>[?]</b></div>"))),
+					    tags$div(title="",
+    					    selectInput("change_user_sample",HTML("<div>change variants <b id = 'change_user_help'>[?]</b></div>"),choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
     					    selectInput("change_user_mut",NULL,choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
     					    # textInput("change_variant","change variant to"),
                             actionButton("change_btn","change", icon = icon("exchange"), width='100%'))
 					),
 					column(3,
-                        tags$div(title="information about the current position, also highlighted in light blue, including all nucleotides (called, reference, mutated), coordinates, qualities (Q), peak %s, signal-to-noise (S/N) ratios, etc",
-    				        HTML(paste("general infobox [?]", sep=""))),
+                        tags$div(title="",
+    				        HTML(paste(HTML("<div>general infobox <b id = 'general_infobox_help'>[?]</b></div>"), sep=""))),
 					    verbatimTextOutput("infobox")
 					),
 					column(2,
-                        tags$div(title="whether we expect heterozygous indels in the data,\nthe % identity of the alignment between the primary and secondary sequences (get this as high as you can),\nand insertion / deletion (in that order) counts\n\nus expecting an indel does not mean there is one: try any suggested peak%, keep %id high, and use your best judgement after studying the chromatogram\n\nif indels are detected, a checkbox to use them will appear under this infobox",
-    					    HTML(paste("hetero indels infobox [?]")),verbatimTextOutput("hetero_indel_pid")
-    					),
-#                         tags$div(title="distinct insertion / deletion (in that order) events, and their lengths in nt",
-#     					    HTML(paste("hetero ins/dels [?]")),verbatimTextOutput("hetero_indel_tab")
-#     					),
-					    conditionalPanel(condition = "!output.indels_present",
+                        tags$div(title=""
+    					    ,HTML(paste("<div>hetero indels infobox <b id = 'hetero_indel_help'>[?]</b></div>"))
+    					    ,verbatimTextOutput("hetero_indel_pid")
+    					    
+    					)
+    					
+					    ,conditionalPanel(condition = "!output.indels_present",
 					        HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
-					    ),
-					    conditionalPanel(condition = "output.indels_present",
+					    )
+                        ,conditionalPanel(condition = "output.indels_present",
                             tags$div(title="if there are indel events above, use them to try and correct the variant calling",
                                 checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
                             )
 					    )
 					),
 					column(1,
-                        tags$div(title="min % of peak for mutation to be called",
-                            sliderInput("mut_min","mut: min peak% [?]", ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
+                        tags$div(title="",
+                            sliderInput("mut_min",HTML("mut: min peak% <b id= mut_min_help> [?]</b>"), ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
                         ),
-                        tags$div(title="min signal to noise ratio for mutation to be called",
-    					    sliderInput("s2n_min","mut: min S/N [?]", ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
+                        tags$div(title="",
+    					    sliderInput("s2n_min",HTML("mut: min S/N <b id = min_sn_help>[?]</b>"), ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
                         )
 					),
 					column(1
@@ -334,18 +304,17 @@ shinyUI(
 					),
                     column(2
                         ,column(12,
-                            tags$div(title="positions to ignore, i.e. exclude from variant calling - shown as red dots on minimap",
-                                HTML("ignore sequence positions [?]")))
-                        ,column(1)
-                        ,column(5
+                            tags$div(title="",
+                                HTML("ignore sequence positions <b id = trim_help >[?]</b>")))
+                        #,column(1)
+                        ,column(6
                             ,numericInput("trim_fwd_start","fwd, up to",value = 0,min = 0,max=1000)
                             ,numericInput("trim_rev_start","rev, up to",value = 0,min = 0,max=1000)
                         )
-                        ,column(5
+                        ,column(6
                             ,numericInput("trim_fwd_end",  "fwd, after",value = 1000,min = 1,max=1000)
                             ,numericInput("trim_rev_end",  "rev, after",value = 1000,min = 1,max=1000)
                         )
-
                     ),
 					column(1
 					    ,checkboxInput("show_qual_checkbox","show quality", value = F)

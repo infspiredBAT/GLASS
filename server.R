@@ -1075,4 +1075,5 @@ shinyServer(function(input,output,session) {
     outputOptions(output, 'reverse', suspendWhenHidden=FALSE)
     outputOptions(output, 'indels_present', suspendWhenHidden=FALSE)
     #outputOptions(output, 'show_sample_brows',suspendWhenHidden=FALSE)
+    add_tool_tips(session = session)
 })
