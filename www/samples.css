@@ -36,3 +36,26 @@
 #samples_table table{
     box-shadow: 1px 1px 3px #888888 !important;
 }
+.form-control{
+    background-color: white !important;
+}
+.btn-file{
+
+}
+.exp_btn{
+    display:none;
+}
+.irs-bar, .irs-bar-edge{
+    visibility: hidden;
+}
+.irs-slider {
+    background-color: #777;
+}
+.zoom{
+    cursor: move;
+    fill: none;
+	pointer-events: all;
+}
+/*.popover{
+     max-width: 100%; /* Max Width of the popover (depending on the container!) */
+}*/

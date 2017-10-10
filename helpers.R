@@ -965,39 +965,41 @@ add_tool_tips <- function(session){
                content = "the absolute position of a call, nothing to do with genomic or codon numbering\n\nyou can either type a number, 
                         or it will show by interacting with glass",
                trigger = "hover",
-               options = NULL)
+                
+               options=list(container="body"))
     
     addPopover(session,"hetero_indel_help",
-               title   = "hetero help",
+               title   = "Heterozygous Indels",
                content = "whether we expect heterozygous indels in the data, the % identity of the alignment between the primary 
                and secondary sequences (get this as high as you can),<br><br>and insertion / deletion (in that order) 
                counts<br><br>thus expecting an indel does not mean there is one: try any suggested peak%, keep %id high, 
                and use your best judgement after studying the chromatogram<br><br>if indels are detected, a checkbox to use 
                them will appear under this infobox",
-               trigger = 'hover')
+               trigger = 'hover',options=list(container="body"))
     
     addPopover(session,"change_user_help",
-               title   = "change bases",
+               title   = "Change bases",
                content = "change the 1st/2nd or major/minor or sample/mutation variants to...",
-               trigger = 'hover')
+               trigger = 'hover',options=list(container="body"))
     
     addPopover(session,"general_infobox_help",
                title = "General Infobox",
                content = "information about the current position, also highlighted in light blue, including all nucleotides 
                          (called, reference, mutated), coordinates, qualities (Q), peak %s, signal-to-noise (S/N) ratios, etc",
-               trigger = 'hover')
+               trigger = 'hover',options=list(container="body"))
     
     addPopover(session, "mut_min_help",
                title = "Options",
-               content = "min % of peak for mutation to be called",
-               trigger = 'hover')
+               content = "min % of peak for variant to be called",
+               trigger = 'hover',options=list(container="body"))
     
     addPopover(session, "min_sn_help",
                title = "Options",
-               content = "min signal to noise ratio for mutation to be called",
-               trigger = 'hover')
+               content = "min signal to noise ratio for variant to be called",
+               trigger = 'hover',options=list(container="body"))
+    
     addPopover(session, "trim_help",
-               title = "Trimming",
+               title = "Filter beginnings/ends",
                content = "positions to ignore, i.e. exclude from variant calling - shown as red dots on minimap",
                trigger = 'hover')
 }

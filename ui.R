@@ -12,196 +12,31 @@ library(shinyBS)
 
 shinyUI(
     fluidPage(
-         useShinyjs(),
-#        extendShinyjs(text = jsDeleteRow),
-#        extendShinyjs(text = jsSwapRow),
+        useShinyjs(),
         theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
 		    includeCSS("www/samples.css"),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("GLASS"),
-		    #tags$head(tags$script(src="selectize.min.js")),
-		    #tags$script(incljs),
-            # script for input file cleaning
-		    tags$script('
-		                window.onbeforeunload = function() {
-		                return "You will need to start over if you navigate away!";
-		                };
-		                '),
-            tags$script('
-              		Shiny.addCustomMessageHandler("resetFileInputHandler", function(x) {
-              		var el = $("#" + x);
-              		el.replaceWith(el = el.clone(true));
-              		var id = "#" + x + "_progress";
-              		$(id).css("visibility", "hidden");
-              		});
-              		'),
-            tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }")),
-		    HTML("<style type='text/css'>
-                .form-control{
-                    background-color: white !important;
-                    //margin-left: 4px !important;
-                }
-                .btn-file{
-
-                }
-                .exp_btn{
-                    display:none;
-                }
-                .irs-bar, .irs-bar-edge{
-                    visibility: hidden;
-                }
-                .irs-slider {
-                    background-color: #777;
-                }
-                .zoom{
-                    cursor: move;
-                    fill: none;
-		            pointer-events: all;
-                }
-                .popover{
-                     max-width: 100%; /* Max Width of the popover (depending on the container!) */
-		         }
-		         </style>")
+		    tags$script('window.onbeforeunload = function() {
+		                    return "You will need to start over if you navigate away!";
+		                };'),
+            tags$script('Shiny.addCustomMessageHandler("resetFileInputHandler", function(x) {
+              		        var el = $("#" + x);
+              		        el.replaceWith(el = el.clone(true));
+              		        var id = "#" + x + "_progress";
+              		        $(id).css("visibility", "hidden");
+              		    });'),
+            tags$style(HTML(".DTFC_LeftBodyLiner { width: 100% !important; }"))
 		),
 
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
-			column(1, HTML(paste('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                
-                                ver 0.2.18 <br> (2017-Oct-5) </a></div>
-                                <!-- Update log -->
-
-                                <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
-			                    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
-			                    <div class="modal-content">
-			                    <div class="modal-header" style="padding-top:10px;">
-			                    <h4>update log</h4>
-			                    </div>
-			                    <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-                                <b>ver 0.2.18 (2017-Oct-5)</b>
-                                 <ul>
-			                     <li>Names of intronic variants on the protein level corrected to "p.?"</li>    
-			                     </ul>
-			                     <b>ver 0.2.16 (2017-Jul-12)</b>
-                                <b>ver 0.2.17 (2017-Aug-9)</b>
-                                 <ul>
-			                     <li>Now using "*" to annotate stop codon. (Instead of "Stp" or "Ter".) </li>
-                                 <li>Fixed position indicator (blue rectangle) error when showing locations around indels.</li>    
-			                     </ul>
-                                <b>ver 0.2.16 (2017-Jul-12)</b>
-                                 <ul>
-			                     <li>UI updates and improvements.</li>
-			                     </ul>
-                                <b>ver 0.2.15 (2017-Jun-7)</b>
-                                 <ul>
-			                     <li>New dialogues to help with custom GenBank files and stability improvement for GenBank file loading.</li>
-			                     </ul>
-                                <b>ver 0.2.14 (2017-Apr-11)</b>
-                                 <ul>
-			                     <li>Handling error from empty variants table.</li>
-                                 <li>Corrected trimming filter for double stranded variants.</li>
-			                     </ul>
-                                <b>ver 0.2.13 (2017-Apr-9)</b>
-                                 <ul>
-			                     <li>Fixed broken status reporting in samples table.</li>
-			                     </ul>
-                                <b>ver 0.2.12 (2017-Apr-3)</b>
-                                 <ul>
-			                     <li>Help images.</li>
-			                     <li>Custom GenBank file experimental feature introduced.</li>
-                                 <li>References shown in tiles with additional information provided.</li>
-                                 <li>Widgets for setting filters added.</li>
-                                 <li>"show qualities" issue fixed.</li>
-			                     </ul>
-                                <b>ver 0.2.11 (2017-Mar-22)</b>
-                                 <ul>
-			                     <li>Improvments in error handling.</li>
-                                 <li>Compatibility issue with new version of the data tables library addressed.</li>
-			                     </ul>
-                                <b>ver 0.2.10 (2017-Jan-13)</b>
-                                 <ul>
-			                     <li>Redefined the formula for estimating the resolution. New unit BasePerPixel should be consistent across different input sequence lengths and window sizes. </li>
-			                     </ul>
-                                <b>ver 0.2.9 (2016-Nov-17)</b>
-                                 <ul>
-			                     <li>Scrolling events ignored on zoom (zoom on scroll was not seamless).</li>
-			                     <li>Reordered svg elements. Order of elements ~ z coordinate.</li>
-			                     </ul>
-                                <b>ver 0.2.8 (2016-Nov-3)</b>
-                                 <ul>
-			                     <li>UI modifications. Better interactivity (Click and drag in the graph area).</li>
-			                     <li>Filtered beginnings of reads now set to a fixed value.</li>
-			                     </ul>
-                                <b>ver 0.2.7 (2016-Oct-7)</b>
-                                 <ul>
-			                     <li>A bug preventing the loading of some single nucleotide sequences fixed.</li>
-			                     <li>Correction in the way VAF (variant allele frequency) is estimated.</li>
-			                     </ul>
-                                <b>ver 0.2.6 (2016-Sep-29)</b>
-                                 <ul>
-			                     <li>Small changes in the table of samples formating for a more comprehensive representation of variants and a more unified style in both the samples table and the final exported excel table.</li>
-                                 <li>Added proper naming of protein variants for p.(=) and p.? cases.</li>
-                                 </ul>
-                                <b>ver 0.2.5 (2016-Sep-10)</b>
-                                 <ul>
-			                     <li>dbSNP annotation added for TP53 now uses exact matching instead of position matching.</li>
-                                 <li>Added button to show/hide the help infobox in the variants panel.</li>
-                                 <li>Titles, email us, table formatting, quick guide.</li>
-                                 <li>Modified export button behaviour; hide when nothing to export.</li>
-                                 <li>Delete button in samples table behaviour fixed.</li>
-                                 <li>Enabled the delete button on the example file.</li>
-			                     </ul>
-                                <b>ver 0.2.4 (2016-Aug-20)</b>
-                                 <ul>
-			                     <li>Position based dbSNP annotation added for TP53. (Column "dbSNP" in the variants table.)</li>
-			                     </ul>
-                                <b>ver 0.2.3 (2016-Aug-11)</b>
-                                 <ul>
-                                 <li>"No reference" upload fixed and documented.</li>
-                                 <li>Forward beginnings filter initial position updated.</li>
-                                 </ul>
-                                <b>ver 0.2.2 (2016-Aug-4)</b>
-                                 <ul>
-                                 <li>Fixed bug causing single strand samples to crash (result of previous update).</li>
-                                 <li>Small change in minimap navigation box opacity.</li>
-                                 </ul>
-                                <b>ver 0.2.1 (2016-Aug-2)</b>
-			                     <ul>
-			                     <li>Minimap navigation box coloured steel blue (~ magnifier glass) and shadow added to make it "pop-out".</li>
-			                     <li>Variant indicators are now strand specific.</li>
-                                 <li>Variant indicator scales to peak width.</li>
-			                     </ul>
-                                <b>ver 0.2.0 (2016-Jul-29)</b>
-			                     <ul>
-			                     <li>Minimap navigation box appearence and behaviour.</li>
-			                     <li>More seamless chromatogram transitions.</li>
-			                     <li>Box representing zoomed-in area.</li>
-                                 <li>Filters of beginnings of reads stylised in chromatogram and also minimap.</li>
-			                     </ul>
-                                <b>ver 0.1.1 (2016-Jul-27)</b>
-			                     <ul>
-			                     <li>Filters of beginnings and ends of reads visualised in minimap.</li>
-                                 <li>Reference now case sensitive: exons in uppercase, everything else in lowercase.</li>
-                                 <li>It\'s now possible to load samples without a reference, just untick all genes.</li>
-			                     </ul>
-			                    <b>ver 0.1.0 (2016-Jul-06)</b>
-			                     <ul>
-                                 <li>Implemented brush-able filtering-out of variants from the beginning of reads (the filter is at the end of the reverse sequences since these are reverse complemented). </li>
-                                 <li>Added reference selector, with selected references used to autodetect strandedness - not using all references speeds up the upload process.</li>
-                                 <li>Added dialog preventing accidental "navigate away".</li>
-			                     <li>Added CALR reference.</li>
-			                     <li>Update log started.</li>
-			                     </ul>
-
-	   		                    </div>
-			                    <div class="modal-footer" style="clear-both">
-			                    <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
-			                    </div>
-			                    </div>
-			                    </div>
-			                    </div>
-			                    '))),
+			column(1,HTML('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
+                                ver 0.2.18 <br> (2017-Oct-5) 
+                           </a></div>'), 
+			       includeHTML("www/log.html")
+			       ),
 			column(10, HTML("<br><font size=2em>&nbsp&nbsp | R&D by <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>European Research Initiative on CLL / ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font>&nbsp&nbsp | IT by <a href=https://metavo.metacentrum.cz/en/ target='_blank'>CESNET/MetaCentrum</a>&nbsp&nbsp | @ <a href=mailto:bat@infspire.org target='_blank'>email us</a>"))
 		),
 		fluidRow(
@@ -212,20 +47,16 @@ shinyUI(
             tabPanel('samples',value = 'smpl_brws',icon = icon("flask"),
 				fluidRow(
 					column(12,wellPanel(tags$div(HTML(paste("<div style=\"font-family:'Inconsolata';font-size:1.1em;\">
-<b>quick</b> &nbsp(0) hovering over '[?]'s will provide quick help tips </br>
-<b>guide</b> &nbsp(1) select / upload relevant references beforehand, GLASS will align and auto-orientate against them </br>&nbsp&nbsp&nbsp&nbsp&nbsp
-&nbsp(2) upload ABI files from supported references, forward and/or reverse, and with unique names </br>&nbsp&nbsp&nbsp&nbsp&nbsp
-&nbsp(3) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary </br>&nbsp&nbsp&nbsp&nbsp&nbsp
-&nbsp(4) click the blue 'play' button to load the file(s) </br>&nbsp&nbsp&nbsp&nbsp&nbsp
-&nbsp(5) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
-                        </div>"), sep = ""))))),
+                                            <b>quick</b> &nbsp(0) hovering over '[?]'s will provide quick help tips </br>
+                                            <b>guide</b> &nbsp(1) select / upload relevant references beforehand, GLASS will align and auto-orientate against them </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+                                                         &nbsp(2) upload ABI files from supported references, forward and/or reverse, and with unique names </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+                                                         &nbsp(3) after processing and auto-detection of most file properties, pair / unpair / swap / delete / change reference as necessary </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+                                                         &nbsp(4) click the blue 'play' button to load the file(s) </br>&nbsp&nbsp&nbsp&nbsp&nbsp
+                                                         &nbsp(5) when done in 'variants' panel (find separate instructions there), confirmed variants will appear under 'status' and are exportable with the green 'export variants' button
+                                        </div>"), sep = ""))))
+					),
                 fluidRow(
                     column(12,
-#                         tags$div(title="Uploaded ABI files are aligned against the references of the selected genes and their orientation is automatically detected. Any of the available references can be selected.
-# Selecting NONE of the references will assign no reference to your chromatogram. It is still possible to view it or change the reference afterwards.
-# The more references are selected the longer the upload process wil take."
-#                         ,checkboxGroupInput("alignTo", " select reference(s) to autodetect [?]", c("TP53","ATM","NOTCH1","CALR","Custom"),selected = c("TP53"),inline=TRUE)
-#                         ),
                         tags$div(title="",HTML(paste("<hr><div style='display:inline;'><h4 style='display:inline;'>references</h4> &nbsp <b style='display:inline;' id ='ref_help'> [?]</b></div>")))
                         
                         # checkboxInput("showWP3", HTML("Manage References <i class='fa fa-wrench' aria-hidden='true'></i>")),
@@ -242,7 +73,6 @@ shinyUI(
                         # )
                         HTML("currently selected references"),
                         uiOutput("alignTo_new")
-                        # ,uiOutput("alignTo_new_debug")
                     )
                 )
 				,column(12,tags$div(title="",HTML(paste("<br><hr><div style='display:inline;'><h4 style='display:inline;'>samples</h4> &nbsp <b style='display:inline;' id ='samples_ui'> [?]</b></div>")))
@@ -255,7 +85,6 @@ shinyUI(
                             downloadButton('export_btn','export variants [?]',class = "exp_btn")))
                     ,DT::dataTableOutput('samples_table')
 		        )
-
             ),
 			tabPanel('variants', value = 'main', icon = icon("search"), # http://fontawesome.io/icons/
 				fluidRow(
@@ -278,9 +107,7 @@ shinyUI(
                         tags$div(title=""
     					    ,HTML(paste("<div>hetero indels infobox <b id = 'hetero_indel_help'>[?]</b></div>"))
     					    ,verbatimTextOutput("hetero_indel_pid")
-    					    
     					)
-    					
 					    ,conditionalPanel(condition = "!output.indels_present",
 					        HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
 					    )
@@ -304,9 +131,7 @@ shinyUI(
 					),
                     column(2
                         ,column(12,
-                            tags$div(title="",
-                                HTML("ignore sequence positions <b id = trim_help >[?]</b>")))
-                        #,column(1)
+                            tags$div(title="",HTML("ignore sequence positions <b id = trim_help >[?]</b>")))
                         ,column(6
                             ,numericInput("trim_fwd_start","fwd, up to",value = 0,min = 0,max=1000)
                             ,numericInput("trim_rev_start","rev, up to",value = 0,min = 0,max=1000)
@@ -330,50 +155,6 @@ shinyUI(
 					    ,conditionalPanel(condition = "!input.join_traces_checkbox", HTML("<div id='spacer'>  </div>"))
 					    #,uiOutput('helpButton')
 					    #,actionButton("toggle_help",icon = icon("question"), "hide help",class = "show_hide_help")
-					 #   ,HTML('<button class="btn btn-default action-button show_hide_help shiny-bound-input" type="button" onclick="$(\'#disclaimer-modal2\').modal(\'show\')"><i class="fa fa-question" ></i> show help</button>
-					 #
-                     #          <div class="modal fade" id="disclaimer-modal2" tabindex="-1" role="dialog">
-			         #           <div id="disclaimer-modal-content" class="modal-dialog" role="document">
-					 #          <div class="modal-content">
-#
-					 #         <div class="modal-header" style="padding-top:10px;">
-					 #         <h4>Help</h4>
-					 #         </div>
-#
-					 #         <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-                     #           <br>
-                     #         <ul class="nav nav-tabs">
-                     #           <li class="active"><a data-toggle="tab" href="#home">Navigation</a></li>
-                     #           <li><a data-toggle="tab" href="#menu1">Peaks</a></li>
-                     #           <li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
-                     #         </ul>
-#
-                     #         <div class="tab-content">
-                     #           <div id="home" class="tab-pane fade in active">
-                     #             <h3>Scrolling along the sequence.</h3>
-                     #               <img src="navbar_scroll.gif" alt="Navbar zoom" >
-                     #               <h3>Zooming.</h3>
-                     #               <img src="navbar_zoom.gif" alt="Navbar zoom" >
-                     #           </div>
-                     #           <div id="menu1" class="tab-pane fade">
-                     #             <h3>Menu 1</h3>
-                     #             <p>Some content in menu 1.</p>
-                     #           </div>
-                     #           <div id="menu2" class="tab-pane fade">
-                     #             <h3>Menu 2</h3>
-                     #             <p>Some content in menu 2.</p>
-                     #           </div>
-                     #         </div>
-                     #
-                     #           </div>
-					 #         <div class="modal-footer" style="clear-both">
-					 #         <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close</button>
-					 #         </div>
-#
-					 #         </div>
-					 #         </div>
-					 #         </div>
-					 #         ')
 					    ,tags$style(HTML("#spacer{margin-top:43px;}"))
 					)
 				),
@@ -420,9 +201,9 @@ shinyUI(
 #             )
 		),
         bsModal("modalnew", "Change name", "BUTnew", size = "small",
-        HTML("Do you want to change the name?"),
-        actionButton("BUTyes", "Yes"),
-        actionButton("BUTno", "No")
-)
+            HTML("Do you want to change the name?"),
+            actionButton("BUTyes", "Yes"),
+            actionButton("BUTno", "No")
+        )
     )
 )
