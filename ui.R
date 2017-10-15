@@ -119,13 +119,13 @@ shinyUI(
 					),
 					column(1,
                         tags$div(title="",
-                            sliderInput("mut_min",HTML("mut: min peak% <b id= mut_min_help> [?]</b>"), ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
-                        ),
-                        tags$div(title="",
-    					    sliderInput("s2n_min",HTML("mut: min S/N <b id = min_sn_help>[?]</b>"), ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
+                            sliderInput("mut_min",HTML("min VAF <b id= mut_min_help> [?]</b>"), ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
                         )
 					),
-					column(1
+					column(1,
+					       tags$div(title="",
+					                sliderInput("s2n_min",HTML("min S/N <b id = min_sn_help>[?]</b>"), ticks=FALSE, min = 0, max = 10, value = 2, step = 0.1, round = 1)
+					       )
 					    ,sliderInput("qual_thres_to_call","min quality", ticks=FALSE, min = 0, max = 50, value = 0)
                         #sliderInput("qual_thres_to_trim","[qual thres to trim]", ticks=FALSE, min = 0, max = 60, value = 0)
 					),
@@ -149,7 +149,7 @@ shinyUI(
                         #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
                     ),
 					column(1
-                        ,sliderInput("max_y_p","peak height", ticks=FALSE, min = 1, max = 200, value = 100, step = 10)
+                        ,sliderInput("max_y_p","peak height", ticks=FALSE, min = 1, max = 400, value = 100, step = 10)
 					    ,conditionalPanel(condition = "output.reverse && input.join_traces_checkbox" ,
 					                      sliderInput("opacity","R <trace opacity> F", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
 					    ,conditionalPanel(condition = "!input.join_traces_checkbox", HTML("<div id='spacer'>  </div>"))
@@ -182,11 +182,11 @@ shinyUI(
                          selectInput("img_help","choose a topic:",choices=c("select ref from list","load custom GenBank ref","file upload","scroll","zoom","export detected variants"))
                          ,uiOutput("upload_file")
    			)
-#            ,
-#			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
-#		         verbatimTextOutput("aln"),
-#		         plotOutput('het_histogram',height = 600)
-#			)
+            ,
+			tabPanel('hetero alignment', value = 'aln', icon = icon("sliders"),
+		         verbatimTextOutput("aln"),
+		         plotOutput('het_histogram',height = 600)
+			)
 # 			tabPanel('variant annotation', value = 'annotation', icon = icon("user-md")
 # 			),
 #            ,

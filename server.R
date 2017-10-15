@@ -96,6 +96,7 @@ shinyServer(function(input,output,session) {
         loading_processed_files()
         input$goLock
         loadDemo()
+        varcall()
 
 
 
@@ -539,7 +540,7 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("expected starting at ~",g_expected_het_indel[[1]] * 100,"% ->\n")
+            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("recommended VAF ~",g_expected_het_indel[[1]] * 100,"% ->\n")
             else                                                                       het_indel_info <- paste0(" ... none expected\n")
             cat(het_indel_info)
             cat(g_hetero_indel_report)
@@ -995,18 +996,18 @@ shinyServer(function(input,output,session) {
     # Other tabs
     #
 
-#    output$aln <- renderPrint({
-#      if(varcall() ) {
-#          cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
-#          if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
-#          else print(g_hetero_ins_tab)
-#          cat("\nidentified deletions:\n")
-#          if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
-#          else print(g_hetero_del_tab)
-#          cat("\n")
-#          writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
-#      }
-#    })
+    output$aln <- renderPrint({
+      if(varcall() ) {
+          cat("(P)rimary vs (S)econdary (or consensus of fwd+rev secondaries)\n\nidentified insertions:\n")
+          if(is.na(g_hetero_ins_tab[1])) cat("no insertions\n")
+          else print(g_hetero_ins_tab)
+          cat("\nidentified deletions:\n")
+          if(is.na(g_hetero_del_tab[1])) cat("no deletions\n")
+          else print(g_hetero_del_tab)
+          cat("\n")
+          writePairwiseAlignments(g_hetero_indel_aln, block.width = 150)
+      }
+    })
 #
 #    output$het_histogram <- renderPlot({
 #        if(varcall() ) {

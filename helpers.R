@@ -605,7 +605,7 @@ report_hetero_indels <- function(calls){
     hetero_indel_pid <<- round(pid(hetero_indel_aln),1)
     hetero_ins_tab   <<- hetero_ins_tab
     hetero_del_tab   <<- hetero_del_tab
-    hetero_indel_report <<- paste0("alignment % id : ",hetero_indel_pid,"%\nins/del counts : ",ins_counts," / ",del_counts)
+    hetero_indel_report <<- paste0("alignment identity: ",hetero_indel_pid,"%\nins/del counts : ",ins_counts," / ",del_counts)
     if((ins_counts > 0)||(del_counts > 0)){
         indels_present <- TRUE
     }else{
@@ -990,12 +990,12 @@ add_tool_tips <- function(session){
     
     addPopover(session, "mut_min_help",
                title = "Options",
-               content = "min % of peak for variant to be called",
+               content = "Minimum variant allele frequency (%) for the variant peak to be called.",
                trigger = 'hover',options=list(container="body"))
     
     addPopover(session, "min_sn_help",
                title = "Options",
-               content = "min signal to noise ratio for variant to be called",
+               content = "Minimal signal to noise ratio for variant to be called.",
                trigger = 'hover',options=list(container="body"))
     
     addPopover(session, "trim_help",
