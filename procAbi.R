@@ -73,7 +73,8 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
 #         calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
 #         calls[,rm7qual_fwd := c(quality_fwd[1:3],rollmean(quality_fwd,k=7),quality[(length(quality_fwd) - 2):length(quality_fwd)])]
 #         calls[,rm7qual_rev := c(quality_rev[1:3],rollmean(quality_rev,k=7),quality[(length(quality_rev) - 2):length(quality_rev)])]
-        setkey(res[[2]],id)
+        ##setkey(res[[2]],id) ### sample 2168 id is duplicite??
+        setkey(res[[2]],t_pos) ### CHECK!!!
         if(length(res[[3]]) > 0) {
             setkey(calls,id)
             add <- calls[as.integer(res[[3]]),]

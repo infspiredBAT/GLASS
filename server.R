@@ -388,7 +388,7 @@ shinyServer(function(input,output,session) {
                         intrexdat$intrex     <- list()
                         intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
                         intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-                        cs<- unlist(lapply(intrexdat$intrex$id,function(x){calls[id==x]$coding_seq}))
+                        cs <- unlist(lapply(intrexdat$intrex$id,function(x){calls[id==x]$coding_seq}))
                         intrexdat$intrex[,coding_seq:=cs]
                         intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) # these numbers should be the same
                         intrexdat$new_sample <- TRUE
