@@ -455,10 +455,10 @@ get_choices <- function(calls,ref){
     return(choices)
 }
 
-#remove consecutive single base deletions and replace them with one long deletion in table
-getView<-function(calls,choices,snps){
+#remove consecutive single base deletions/insertion and replace them with one long del/ins in table
+get_view<-function(calls,choices,snps){
 
-    computeConsecutives <- function(ids){
+    compute_consecutives <- function(ids){
         ids <- round(ids * 100)
         res <- rle(ids - c(Inf,ids[-length(ids)]))
         ccc <- cumsum(res$lengths)
@@ -478,7 +478,7 @@ getView<-function(calls,choices,snps){
             if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
             else gen_coord <- paste0(max(tab$gen_coord),"_",min(tab$gen_coord))
 
-            if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) - 1,"_",min(coord),type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
+            if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) ,"_",as.numeric(min(coord))+1,type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
             else coding <- paste0("c.",min(coord),"_",max(coord),type, paste(nucs,collapse = ""))
 
             return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
@@ -487,7 +487,7 @@ getView<-function(calls,choices,snps){
         }
     }
 
-    choices[,consecutives := computeConsecutives(id) ][,mut_type := gsub("c\\.\\d*(...).*","\\1",coding)]
+    choices[,consecutives := compute_consecutives(id) ][,mut_type := gsub("c\\.\\d*(...).*","\\1",coding)]
     indel_tab <- choices[intersect(grep("del|ins",mut_type),which(consecutives != 0)), squeeze_indels(.SD),by = c("mut_type","consecutives")]
     #represent consecutive indels on one line
     if(nrow(indel_tab) > 0){
@@ -542,7 +542,8 @@ getView<-function(calls,choices,snps){
             }
         }else{
             if(nchar(seq)==1)
-                choices[i,]$coding <- paste0("c.",calls[floor(choices[i]$id),]$coding_seq,"_",calls[ceiling(choices[i]$id),]$coding_seq,"ins",seq)
+                choices[i,]$coding <- paste0("c.",calls[id == ceiling(choices[i]$id-1),]$coding_seq,"_",calls[id == floor(choices[i]$id+1),]$coding_seq,"ins",seq)
+                #choices[i,]$coding <- paste0("c.",calls[i-1,]$coding_seq,"_",calls[i+1,]$coding_seq,'ins',seq)
         }
     }
 
@@ -560,12 +561,14 @@ getView<-function(calls,choices,snps){
     }
     return(choices)
 }
+
 mya <- function(x){
     if(is.na(x)){return(".")}
     else{ if(x == "-"){return("-")}
         else{return(a(x))}
     }
 }
+
 mround <- function(x,base){
     base*round(x/base)
 }
@@ -636,51 +639,6 @@ get_consensus_mut <- function(mut_fwd,mut_rev,intens_tab,primery_seq){
     return(cons)
 }
 
-#reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels indels
-incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g_minor_het_insertions){
-    if(!is.na(hetero_del_tab[1])) dels <- as.vector(unlist(apply(hetero_del_tab,1,function(x) x[1]:x[2])))
-    else dels <- numeric()
-    if(!is.na(hetero_ins_tab[1])) ins <- as.vector(unlist(apply(hetero_ins_tab,1,function(x) x[1]:x[2])))
-    else ins <- numeric()
-    if(max(length(dels),length(ins)) != 0){
-        calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T,calls[["sample_peak_base_fwd"]])]
-        calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
-#         calls[,het_mut_s2n_abs_fwd := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
-        calls[set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
-        if(any(colnames(calls) == "call_rev")){
-            calls[,het_mut_call_rev     := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F,calls[["sample_peak_base_rev"]])]
-            calls[,het_mut_peak_pct_rev := incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
-#             calls[,het_mut_s2n_abs_rev := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
-            calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
-        }
-    }
-    if(nrow(g_minor_het_insertions[!is.na(pos)]) > 0){
-        get_ins_data_table <- function(pos,seq){
-            ins_seq <- strsplit(seq,"")[[1]]
-            ins_tab <- calls[rep(pos-1,length(ins_seq)),]
-            ins_tab[,id := id + seq_along(id)/100]
-            ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
-
-            ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
-            #ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0)]
-
-            if("call_rev" %in% row.names(calls)){
-                ins_tab[,`:=`(iA_rev=0,iC_rev=0,iG_rev=0,iT_rev=0)]
-            }
-            return(ins_tab)
-        }
-
-        if(nrow(g_minor_het_insertions[!is.na(pos)])>0){
-            ins_tabs <- lapply(1:nrow(minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(minor_het_insertions[!is.na(pos),]$pos[x],g_minor_het_insertions$seq[x]))
-            added <- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
-            g_minor_het_insertions[,added:=added]
-            #g_minor_het_insertions$added = rbindlist(ins_tabs)$id;
-            calls <- rbindlist(c(list(calls),ins_tabs))
-        }
-    }
-    return(calls)
-}
-
 incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
     orig_vec <- vec
     if(type == "num") elem <- 0
@@ -721,6 +679,58 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
         new_vec[replace] <- primarySeq[replace]
     }
     return(new_vec)
+}
+
+#reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels
+incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g_minor_het_insertions){
+    if(!is.na(hetero_del_tab[1])) dels <- as.vector(unlist(apply(hetero_del_tab,1,function(x) x[1]:x[2])))
+    else dels <- numeric()
+    if(!is.na(hetero_ins_tab[1])) ins <- as.vector(unlist(apply(hetero_ins_tab,1,function(x) x[1]:x[2])))
+    else ins <- numeric()
+    
+    #update call fwd and rev
+    if(max(length(dels),length(ins)) != 0){
+        calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T,calls[["sample_peak_base_fwd"]])]
+        calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
+#         calls[,het_mut_s2n_abs_fwd := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
+        calls[set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+        if(any(colnames(calls) == "call_rev")){
+            calls[,het_mut_call_rev     := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F,calls[["sample_peak_base_rev"]])]
+            calls[,het_mut_peak_pct_rev := incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
+#             calls[,het_mut_s2n_abs_rev := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
+            calls[(quality_fwd < quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
+        }
+    }
+    
+    #add insertion
+    if(nrow(g_minor_het_insertions[!is.na(pos)]) > 0){
+        get_ins_data_table <- function(pos,seq){
+            ins_seq <- strsplit(seq,"")[[1]]
+            ins_id  <- pos -1 
+            ins_tab <- calls[id %in% ins_id,]
+            ins_tab <- ins_tab[rep(1,length(ins_seq)),]
+            
+            ins_tab[,id := id + seq_along(id)/100]
+            ins_tab[,user_sample := "-"][,reference := "-"][,user_mut := ins_seq]
+
+            ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0,ord_in_cod=4)]
+            #ins_tab[,`:=`(iA_fwd=0,iC_fwd=0,iG_fwd=0,iT_fwd=0)]
+
+            if("call_rev" %in% row.names(calls)){
+                ins_tab[,`:=`(iA_rev=0,iC_rev=0,iG_rev=0,iT_rev=0)]
+            }
+            return(ins_tab)
+        }
+
+        if(nrow(g_minor_het_insertions[!is.na(pos)])>0){
+            ins_tabs <- lapply(1:nrow(minor_het_insertions[!is.na(pos),]),function(x) get_ins_data_table(minor_het_insertions[!is.na(pos),]$pos[x],g_minor_het_insertions$seq[x]))
+            added <- lapply(1:nrow(g_minor_het_insertions[!is.na(pos),]),function(x) paste0(ins_tabs[[x]]$id,collapse= " "))
+            g_minor_het_insertions[,added:=added]
+            #g_minor_het_insertions$added = rbindlist(ins_tabs)$id;
+            calls <- rbindlist(c(list(calls),ins_tabs))
+        }
+    }
+    return(calls)
 }
 
 add_intensities <- function(added,calls,intens,intens_rev,intrexdat){

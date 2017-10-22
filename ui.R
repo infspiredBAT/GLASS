@@ -119,7 +119,7 @@ shinyUI(
 					),
 					column(1,
                         tags$div(title="",
-                            sliderInput("mut_min",HTML("min VAF <b id= mut_min_help> [?]</b>"), ticks=FALSE, min = 0, max = 50, value = 20, step = 0.5, round = 1)
+                            sliderInput("mut_min",HTML("Detection limit <b id= mut_min_help> [?]</b>"), ticks=FALSE, min = 0, max = 50, value = 10, step = 0.5, round = 1)
                         )
 					),
 					column(1,

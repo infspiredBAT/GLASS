@@ -601,7 +601,7 @@ shinyServer(function(input,output,session) {
             #input$reset_btn
             #input$lo
             if(varcall() & !is.null(g_choices)) {
-                g_view <<- getView(g_calls,g_choices,g_glassed_snp)
+                g_view <<- get_view(g_calls,g_choices,g_glassed_snp)
                 g_view <<- applyFilters(g_view,input$trim_fwd_start,input$trim_fwd_end,input$trim_rev_start,input$trim_rev_end)
                 #add_goto_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = "go", onclick = 'Shiny.onInputChange(\"goGoto\",  this.id+ (Math.random()/10))' )
                 tp <- g_view$trace_peak
