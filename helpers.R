@@ -538,7 +538,7 @@ get_view<-function(calls,choices,snps){
             choices[i,coding := gsub("ins","dup",coding)]
             #the coordinates are changed to the sequence that is duplicated #! find test for these
             if(nchar(seq)>1){
-                choices[i,]$coding <- paste0("c.",calls[floor(choices[i,]$id)-nchar(seq)+1]$coding_seq,"_",calls[floor(choices[i,]$id),]$coding_seq,"dup",seq)
+                choices[i,]$coding <- paste0("c.",calls[floor(choices[i,]$id)-nchar(seq)]$coding_seq,"_",calls[floor(choices[i,]$id)-1,]$coding_seq,"dup",seq)
             }
         }else{
             if(nchar(seq)==1)
