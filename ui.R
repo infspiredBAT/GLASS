@@ -103,24 +103,30 @@ shinyUI(
     				        HTML(paste(HTML("<div>general infobox <b id = 'general_infobox_help'>[?]</b></div>"), sep=""))),
 					    verbatimTextOutput("infobox")
 					),
-					column(2,
+					
+					column(1,
+					   
                         tags$div(title=""
-    					    ,HTML(paste("<div>hetero indels infobox <b id = 'hetero_indel_help'>[?]</b></div>"))
-    					    ,verbatimTextOutput("hetero_indel_pid")
+    					    ,HTML(paste("<div>het. indel autodetect <b id = 'hetero_indel_help'>[?]</b></div>")),
+    					    wellPanel(
+    					    textOutput("hetero_indel_pid")
+    					    ,conditionalPanel(condition = "output.hetero_indel_pid != ' ... none detected'",actionLink("hetero_use_lnk", "Use detected settings"))
+    					    )
     					)
-					    ,conditionalPanel(condition = "!output.indels_present",
-					        HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
-					    )
-                        ,conditionalPanel(condition = "output.indels_present",
-                            tags$div(title="if there are indel events above, use them to try and correct the variant calling",
-                                checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
-                            )
-					    )
+					   
 					),
 					column(1,
                         tags$div(title="",
                             sliderInput("mut_min",HTML("Detection limit <b id= mut_min_help> [?]</b>"), ticks=FALSE, min = 0, max = 50, value = 10, step = 0.5, round = 1)
                         )
+					   ,conditionalPanel(condition = "output.indels_present",
+					                     tags$div(title="if there are indel events above, use them to try and correct the variant calling",
+					                              checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
+					                     )
+					   )
+					    ,conditionalPanel(condition = "!output.indels_present",
+					        HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
+					    )
 					),
 					column(1,
 					       tags$div(title="",

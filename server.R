@@ -540,10 +540,10 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("recommended VAF ~",g_expected_het_indel[[1]] * 100,"% ->\n")
-            else                                                                       het_indel_info <- paste0(" ... none expected\n")
+            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("heterozygous indel detected at ~",g_expected_het_indel[[1]] * 100,"%\n")
+            else                                                                       het_indel_info <- paste0(" ... none detected\n")
             cat(het_indel_info)
-            cat(g_hetero_indel_report)
+            #cat(g_hetero_indel_report)
         }
     })
 
@@ -773,6 +773,12 @@ shinyServer(function(input,output,session) {
             if(input$toggle_help %% 2 == 0) html("toggle_help",'<i class="fa fa-question"></i> hide help')
             else html("toggle_help",'<i class="fa fa-question"></i> show help')
         }
+    })
+    
+    observeEvent(input$hetero_use_lnk, {
+        print(g_expected_het_indel$min)
+        updateSliderInput(session, "mut_min", value = (g_expected_het_indel$min*100))
+        updateCheckboxInput(session, "incorporate_checkbox", value =T)
     })
 
 
