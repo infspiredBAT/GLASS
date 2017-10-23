@@ -64,7 +64,7 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
                     incProgress(1/nrow(s_files))
                     #test fwd/rev/ which reference
                     if(!rev)
-                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start= 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF='',dbSNP = '', dbSNP_id = ''))
+                        loaded <- rbind(loaded,list(FWD_name=s_files[i,]$name,FWD_file=s_files[i,]$datapath,REV_name="-",REV_file="-",REF=ref_name,mut_min=10,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start= 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF='',dbSNP = '', dbSNP_id = ''))
                     else{
                         #pair fwd and rev samples with matching names
                         #if exactly one fwd file matches the stripped name of given rev file and this fwd file has no pair then:
@@ -80,10 +80,10 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
                             if(loaded[matches]$REV_name == "-"&& loaded[matches]$REF==ref_name)
                                 loaded[matches,`:=`(REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath)]
                             else{
-                                loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start = 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF = '', dbSNP = '', dbSNP_id = ''))
+                                loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=10,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start = 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF = '', dbSNP = '', dbSNP_id = ''))
                             }
                         }else{
-                            loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start = 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF = '',dbSNP = '', dbSNP_id = ''))
+                            loaded <- rbind(loaded,list(FWD_name="-",FWD_file="-",REV_name=s_files[i,]$name,REV_file=s_files[i,]$datapath,REF=ref_name,mut_min=10,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,status="new",calls="",brush_fwd_start = 0,brush_fwd_end=0,brush_rev_start=0,brush_rev_end = 0,coding = '',protein = '',VAF = '',dbSNP = '', dbSNP_id = ''))
                         }
                     }
 
