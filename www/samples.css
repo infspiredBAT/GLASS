@@ -56,3 +56,7 @@
     fill: none;
 	pointer-events: all;
 }
+#hetero_indel_pid {
+    color:#d9230f;
+    font-weight: bold;
+}

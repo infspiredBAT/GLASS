@@ -455,12 +455,12 @@ shinyServer(function(input,output,session) {
     varcall <- reactive({
         if(class(loading_processed_files())[1] != "my_UI_exception") {
 
+            #triggers
             if(g_files[loaded==T,]$calls == "") g_files[loaded==T,status:="viewed"]
             updateChosenVariants()
             goReset_handler()
             g_reactval$updateVar
             #goBrush_fw()
-
             calls<-loading_processed_files()
             if(is.null(g_calls)){
                 g_calls <<- calls
@@ -480,6 +480,9 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,added:=NULL]
                 g_minor_het_insertions[,ins_added := NULL]
             }
+            
+            
+            
             foo <- get_mut_min()
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
             #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,0,0,input$incorporate_checkbox,g_single_rev)
@@ -495,7 +498,8 @@ shinyServer(function(input,output,session) {
             g_hetero_indel_report  <<- report$hetero_indel_report
 
             if(input$incorporate_checkbox & g_indels_present){
-                g_calls <<- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions)
+                g_calls <<- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions,input$qual_thres_to_call)
+                #g_calls <<- recall_variants_after_indel_realign(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
             }
             setkey(g_calls,id)
 
@@ -540,7 +544,8 @@ shinyServer(function(input,output,session) {
 
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
-            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("heterozygous indel detected at ~",g_expected_het_indel[[1]] * 100,"%\n")
+            #if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("heterozygous indel detected at ~",g_expected_het_indel[[1]] * 100,"%\n")
+            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("heterozygous indel detected" )
             else                                                                       het_indel_info <- paste0(" ... none detected\n")
             cat(het_indel_info)
             #cat(g_hetero_indel_report)
@@ -776,7 +781,6 @@ shinyServer(function(input,output,session) {
     })
     
     observeEvent(input$hetero_use_lnk, {
-        print(g_expected_het_indel$min)
         updateSliderInput(session, "mut_min", value = (g_expected_het_indel$min*100))
         updateCheckboxInput(session, "incorporate_checkbox", value =T)
     })

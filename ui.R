@@ -104,13 +104,13 @@ shinyUI(
 					    verbatimTextOutput("infobox")
 					),
 					
-					column(1,
+					column(2,
 					   
                         tags$div(title=""
-    					    ,HTML(paste("<div>het. indel autodetect <b id = 'hetero_indel_help'>[?]</b></div>")),
+    					    ,HTML(paste("<div>Heterozygous insertion/deletion <b id = 'hetero_indel_help'>[?]</b></div>")),
     					    wellPanel(
     					    textOutput("hetero_indel_pid")
-    					    ,conditionalPanel(condition = "output.hetero_indel_pid != ' ... none detected'",actionLink("hetero_use_lnk", "Use detected settings"))
+    					    ,conditionalPanel(condition = "output.hetero_indel_pid != ' ... none detected'",actionLink("hetero_use_lnk", HTML("Align using recommended settings")))
     					    )
     					)
 					   
@@ -120,8 +120,8 @@ shinyUI(
                             sliderInput("mut_min",HTML("Detection limit <b id= mut_min_help> [?]</b>"), ticks=FALSE, min = 0, max = 50, value = 10, step = 0.5, round = 1)
                         )
 					   ,conditionalPanel(condition = "output.indels_present",
-					                     tags$div(title="if there are indel events above, use them to try and correct the variant calling",
-					                              checkboxInput("incorporate_checkbox","use detected hetero indels [?]", value = F)
+					                     tags$div(title="",
+					                              checkboxInput("incorporate_checkbox",HTML("align secondary peaks <b id= sec_align_help>[?]</b>"), value = F)
 					                     )
 					   )
 					    ,conditionalPanel(condition = "!output.indels_present",
@@ -137,7 +137,7 @@ shinyUI(
 					),
                     column(2
                         ,column(12,
-                            tags$div(title="",HTML("ignore sequence positions <b id = trim_help >[?]</b>")))
+                            tags$div(title="",HTML("Trimming: ignore sequence positions <b id = trim_help >[?]</b>")))
                         ,column(6
                             ,numericInput("trim_fwd_start","fwd, up to",value = 0,min = 0,max=1000)
                             ,numericInput("trim_rev_start","rev, up to",value = 0,min = 0,max=1000)
