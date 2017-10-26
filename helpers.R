@@ -80,11 +80,15 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
     #231017
     calls[,mut_call_fwd := ambig_min(mut_call_fwd,reference)]
     calls[,call := ambig_min(call,mut_call_fwd)]
+    calls[!(user_sample %in% c('A','C','G','T')),user_sample:=call]
+    if("call_rev" %in% colnames(calls)){
+        calls[,mut_call_rev := ambig_min(mut_call_rev,reference)]
+        calls[,call_rev := ambig_min(call_rev,mut_call_rev)]
+        
+        calls[!(user_sample %in% c('A','C','G','T')) & quality_fwd < quality_rev,user_sample:=call_rev]
+    }
     
-    calls[,mut_call_rev := ambig_min(mut_call_rev,reference)]
-    calls[,call_rev := ambig_min(call_rev,mut_call_rev)]
-    calls[!(user_sample %in% c('A','C','G','T')) & quality_fwd >= quality_rev,user_sample:=call]
-    calls[!(user_sample %in% c('A','C','G','T')) & quality_fwd < quality_rev,user_sample:=call_rev]
+    
     calls[,user_sample_orig:=user_sample]
     #calls[set_by_user == FALSE, user_sample_orig := ambig_min(user_sample,reference)]
 
@@ -198,9 +202,6 @@ include_locked_indels <- function(calls,vec,indels,fwd){
 #         }
 #         vec <- new_vec
 #     }
-
-
-
 
     return(new_vec)
 }
@@ -320,7 +321,7 @@ ambig_min <- function(ambig,ref){
 retranslate <- function(calls){
 
     # USER SAMPLE
-    coding <- calls[ord_in_cod>0 & !is.na(codon),list(as.numeric(coding_seq),codon,ord_in_cod,user_sample,reference)]
+    coding <- calls[ord_in_cod>0 & !is.na(codon) & codon != 'intron',list(as.numeric(coding_seq),codon,ord_in_cod,user_sample,reference)]
     setnames(coding,"V1","coding_seq")
     push = 0
     #get missing bases for the first frame if incomplete
@@ -346,7 +347,7 @@ retranslate <- function(calls){
 #! # calls[ord_in_cod>0,aa_sample := rep(trans,each=3)[(1+push):(length(aa_sample)+push)]]
 
     # USER MUT
-    coding <- calls[ord_in_cod>0,list(as.numeric(coding_seq),codon,ord_in_cod,user_mut,reference)]
+    coding <- calls[ord_in_cod>0 & !is.na(codon) & codon != 'intron',list(as.numeric(coding_seq),codon,ord_in_cod,user_mut,reference)]
     setnames(coding,"V1","coding_seq")
     push = 0
     while(coding[1,ord_in_cod]!=1){
@@ -673,61 +674,89 @@ incorporate_single_vec <- function(vec,ins,dels,type,fwd,primarySeq){
 }
 
 #reconstructs user_mut and mut_peak_pct by shifting user_call_fwd and user_call_rev by detected indels
-incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g_minor_het_insertions,qual_thres){
-    if(!is.na(hetero_del_tab[1])) dels <- as.vector(unlist(apply(hetero_del_tab,1,function(x) x[1]:x[2])))
+incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g_minor_het_insertions,qual_thres,single_rev){
+    
+    vec  <- calls$id *100
+    vec2 <- vec %% 100
+    vec3 <- vec2 != 0
+    vec4 <- cumsum(vec3) #compensate for insertions introduced before incorporate
+    
+    
+    if(!is.na(hetero_del_tab[1])) {
+        dels <- as.vector(unlist(apply(hetero_del_tab,1,function(x) {x[1]:x[2] + vec4[x[1]-1]})))
+        #dels <- calls[id %in% dels_pos,which = TRUE]
+        }
     else dels <- numeric()
-    if(!is.na(hetero_ins_tab[1])) ins <- as.vector(unlist(apply(hetero_ins_tab,1,function(x) x[1]:x[2])))
+    if(!is.na(hetero_ins_tab[1])){
+        ins <- as.vector(unlist(apply(hetero_ins_tab,1,function(x) {x[1]:x[2]+ vec4[x[1]-1]})))
+        #ins <- calls[id %in% ins_pos,which = TRUE]
+    }
     else ins <- numeric()
+    
+    forward=TRUE
+    if(single_rev){
+        forward = FALSE
+    }
     
     #update call fwd and rev
     if(max(length(dels),length(ins)) != 0){
-        calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",T,calls[["sample_peak_base_fwd"]])]
-        calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",T)]
-        calls[,het_quality_fwd := incorporate_single_vec(calls[["quality_fwd"]],ins,dels,"num",T)]
-        calls[,het_mut_s2n_abs_fwd := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
         
-         calls[,het_mut_s2n_abs_fwd := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",T)]
+        #quick fix for single strand
+        calls[,het_quality_fwd := NULL]
+        calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",forward,calls[["sample_peak_base_fwd"]])]
+        calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",forward)]
+        calls[,het_quality_fwd      := incorporate_single_vec(calls[["quality_fwd"]],ins,dels,"num",forward)]
+        calls[,het_mut_s2n_abs_fwd  := incorporate_single_vec(calls[["mut_s2n_abs_fwd"]],ins,dels,"num",forward)]
          
-         calls[set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+         #calls[set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+         #calls[set_by_user == FALSE & (mut_call_fwd != het_mut_call_fwd),c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
         if(any(colnames(calls) == "call_rev")){
             calls[,het_mut_call_rev     := incorporate_single_vec(calls[["mut_call_rev"]],ins,dels,"char",F,calls[["sample_peak_base_rev"]])]
             calls[,het_mut_peak_pct_rev := incorporate_single_vec(calls[["mut_peak_pct_rev"]],ins,dels,"num",F)]
-            calls[,het_quality_rev := incorporate_single_vec(calls[["quality_rev"]],ins,dels,"num",F)]
-            calls[,het_mut_s2n_abs_rev := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
-#             calls[,het_mut_s2n_abs_rev := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
+            calls[,het_quality_rev      := incorporate_single_vec(calls[["quality_rev"]],ins,dels,"num",F)]
+            calls[,het_mut_s2n_abs_rev  := incorporate_single_vec(calls[["mut_s2n_abs_rev"]],ins,dels,"num",F)]
             
-            calls[(het_quality_fwd < het_quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
-            calls[
-                het_mut_call_fwd!=reference
-                & het_mut_call_rev==reference
-                & het_quality_fwd > qual_thres
-                & set_by_user == FALSE
-                , c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)
-                ]
-            calls[
-                het_mut_call_fwd==reference
-                & het_mut_call_rev!=reference
-                & het_quality_rev > qual_thres
-                & set_by_user == FALSE
-                , c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)
-                ]
-            calls[
-                het_mut_call_fwd!=reference
-                & het_mut_call_rev!=reference
-                & set_by_user == FALSE
-                & het_quality_fwd > qual_thres
-                # & mut_call_rev != call_rev
-                , c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)
-                ]
-            calls[
-                het_mut_call_fwd!=reference
-                & het_mut_call_rev!=reference
-                & het_quality_rev > het_quality_fwd
-                & het_quality_rev > qual_thres
-                & set_by_user == FALSE
-                # & mut_call_rev != call_rev
-                , c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)
-                ]
+            #calls[(quality_fwd< quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
+            #calls[(het_quality_fwd < het_quality_rev | user_mut == "-") & set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
+            calls[ set_by_user == FALSE & ( mut_call_fwd == het_mut_call_fwd & mut_call_rev != het_mut_call_rev) | mut_call_rev == "-", c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+            calls[ set_by_user == FALSE & ( mut_call_rev == het_mut_call_rev & mut_call_fwd != het_mut_call_fwd) | mut_call_fwd == "-", c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
+            calls[ set_by_user == FALSE & ( mut_call_rev != het_mut_call_rev & mut_call_fwd != het_mut_call_fwd) | mut_call_rev == "-", c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+            calls[ set_by_user == FALSE & ((mut_call_rev != het_mut_call_rev & mut_call_fwd != het_mut_call_fwd) | mut_call_fwd == "-") & het_quality_rev > het_quality_fwd, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
+            
+            
+            calls[ set_by_user == FALSE & (mut_call_rev == het_mut_call_rev & mut_call_fwd == het_mut_call_fwd) & het_quality_rev < het_quality_fwd, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+            calls[ set_by_user == FALSE & (mut_call_rev == het_mut_call_rev & mut_call_fwd == het_mut_call_fwd) & het_quality_rev > het_quality_fwd, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
+            #calls[
+            #    het_mut_call_fwd!=reference
+            #    & het_mut_call_rev==reference
+            #    & het_quality_fwd > qual_thres
+            #    & set_by_user == FALSE
+            #    , c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)
+            #    ]
+            #calls[
+            #    het_mut_call_fwd==reference
+            #    & het_mut_call_rev!=reference
+            #    & het_quality_rev > qual_thres
+            #    & set_by_user == FALSE
+            #    , c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)
+            #    ]
+            #calls[
+            #    het_mut_call_fwd!=reference
+            #    & het_mut_call_rev!=reference
+            #    & set_by_user == FALSE
+            #    & het_quality_fwd > qual_thres
+            #    # & mut_call_rev != call_rev
+            #    , c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)
+            #    ]
+            #calls[
+            #    het_mut_call_fwd!=reference
+            #    & het_mut_call_rev!=reference
+            #    & het_quality_rev > het_quality_fwd
+            #    & het_quality_rev > qual_thres
+            #    & set_by_user == FALSE
+            #    # & mut_call_rev != call_rev
+            #    , c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)
+            #    ]
             
         }else{
             calls[set_by_user == FALSE, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
@@ -1058,5 +1087,5 @@ add_tool_tips <- function(session){
     addPopover(session, "trim_help",
                title = "Filter beginnings/ends",
                content = "Positions to ignore, i.e. exclude from variant calling - shown as red dots on minimap.",
-               trigger = 'hover')
+               trigger = 'hover',options=list(container="body"))
 }

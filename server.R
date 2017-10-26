@@ -379,37 +379,42 @@ shinyServer(function(input,output,session) {
                     g_intens_rev <<- intensified$intens_rev
                     tryCatch(
                         calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,g_glassed_cod),
-                        error = function(e){output$files <- renderPrint(paste0("<pre>error while loading calls from abi file : ",e$message,"</pre>" ))}
+                        error = function(e){output$files <- renderPrint(paste0("<pre>error while loading calls from abi file : ",e$message,"</pre>" ))
+                                            return(structure("error_reading_Rbin",class = "my_UI_exception"))}
                     )
-                    calls        <-  adjust_ref_mut(calls,g_intens_rev)
-                    g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
-                    #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
-                        intrexdat            <- list()
-                        intrexdat$intrex     <- list()
-                        intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
-                        intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
-                        cs <- unlist(lapply(intrexdat$intrex$id,function(x){calls[id==x]$coding_seq}))
-                        intrexdat$intrex[,coding_seq:=cs]
-                        intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) # these numbers should be the same
-                        intrexdat$new_sample <- TRUE
-                    g_intrexdat       <<- splice_variants(intrexdat)
-                    calls             <-  data.table(calls,key="id")
+                    if(class(calls)!="my_UI_exception"){
+                        calls        <-  adjust_ref_mut(calls,g_intens_rev)
+                    
+                        g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
+                        #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
+                            intrexdat            <- list()
+                            intrexdat$intrex     <- list()
+                            intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
+                            intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
+                            cs <- unlist(lapply(intrexdat$intrex$id,function(x){calls[id==x]$coding_seq}))
+                            intrexdat$intrex[,coding_seq:=cs]
+                            intrexdat$max_x      <- max(c(nrow(g_intens),nrow(g_intens_rev))) # these numbers should be the same
+                            intrexdat$new_sample <- TRUE
+                        g_intrexdat       <<- splice_variants(intrexdat)
+                        calls             <-  data.table(calls,key="id")
+                    
 
-                    # temporarily switching off functionality 2 sept 16, Karol
-                    # g_noisy_neighbors <<- get_noisy_neighbors(calls)
-                    if(!called$qual_present){
-                        files_info <- paste0(files_info,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
-                    }
-                    files_info <- paste0("<pre>",files_info,"</pre>")
-                    output$files      <-  renderPrint({cat(files_info)})
-                    g_new_sample      <<- TRUE
-
-                    #initialize or load trim brushes
-                    lapply(c("trim_fwd_start","trim_fwd_end","trim_rev_start","trim_rev_end"),function(x){updateNumericInput(session,max = nrow(calls),inputId=x)})
-
-                    if(g_files[loaded==TRUE,]$status =="new"){
-                        g_files[loaded==TRUE,]$brush_fwd_start<<-calls[call!="-",][25]$id
-                        g_files[loaded==TRUE,]$brush_fwd_end<<-calls[nrow(calls)-25]$id
+                        # temporarily switching off functionality 2 sept 16, Karol
+                        # g_noisy_neighbors <<- get_noisy_neighbors(calls)
+                        if(!called$qual_present){
+                            files_info <- paste0(files_info,HTML("\n<strong style=\"color: red;\">no Phred qualities!</strong>"))
+                        }
+                        files_info <- paste0("<pre>",files_info,"</pre>")
+                        output$files      <-  renderPrint({cat(files_info)})
+                        g_new_sample      <<- TRUE
+    
+                        #initialize or load trim brushes
+                        lapply(c("trim_fwd_start","trim_fwd_end","trim_rev_start","trim_rev_end"),function(x){updateNumericInput(session,max = nrow(calls),inputId=x)})
+    
+                        if(g_files[loaded==TRUE,]$status =="new"){
+                            g_files[loaded==TRUE,]$brush_fwd_start<<-calls[call!="-",][25]$id
+                            g_files[loaded==TRUE,]$brush_fwd_end<<-calls[nrow(calls)-25]$id
+                        }
                     }
                     updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_start,inputId = "trim_fwd_start" )
                     updateNumericInput(session,value=g_files[loaded==TRUE,]$brush_fwd_end,inputId = "trim_fwd_end" )
@@ -498,7 +503,7 @@ shinyServer(function(input,output,session) {
             g_hetero_indel_report  <<- report$hetero_indel_report
 
             if(input$incorporate_checkbox & g_indels_present){
-                g_calls <<- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions,input$qual_thres_to_call)
+                g_calls <<- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions,input$qual_thres_to_call,g_single_rev)
                 #g_calls <<- recall_variants_after_indel_realign(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
             }
             setkey(g_calls,id)
