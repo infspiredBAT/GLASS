@@ -54,7 +54,7 @@ shinyServer(function(input,output,session) {
                                     REV_name=c("TP53 ; rev ; low freq w frameshift"),
                                     REV_file=c("data/demo/TP53/3low_freq_fsR.ab1"),
                                     REF=c("TP53"),
-                                    mut_min=20,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
+                                    mut_min=10,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
                                     calls = "",
                                     status="new",
                                     id=1,
@@ -113,7 +113,7 @@ shinyServer(function(input,output,session) {
         add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
         add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files),'selectGene_', choices=c("-",g_alignTo_options), selected = g_files[,REF],width="80px")
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
-        out <- cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?] </div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status,coding,protein,VAF,dbSNP)])
+        out <- cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?] </div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status,coding,protein,VAF)])
         table_out <- DT::datatable(out,escape=FALSE,selection = "none",
                                    style ="bootstrap",
                                    class="compact samplesdt",
@@ -384,7 +384,7 @@ shinyServer(function(input,output,session) {
                     )
                     if(class(calls)!="my_UI_exception"){
                         calls        <-  adjust_ref_mut(calls,g_intens_rev)
-                    
+
                         g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                         #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
                             intrexdat            <- list()
@@ -397,7 +397,7 @@ shinyServer(function(input,output,session) {
                             intrexdat$new_sample <- TRUE
                         g_intrexdat       <<- splice_variants(intrexdat)
                         calls             <-  data.table(calls,key="id")
-                    
+
 
                         # temporarily switching off functionality 2 sept 16, Karol
                         # g_noisy_neighbors <<- get_noisy_neighbors(calls)
@@ -407,10 +407,10 @@ shinyServer(function(input,output,session) {
                         files_info <- paste0("<pre>",files_info,"</pre>")
                         output$files      <-  renderPrint({cat(files_info)})
                         g_new_sample      <<- TRUE
-    
+
                         #initialize or load trim brushes
                         lapply(c("trim_fwd_start","trim_fwd_end","trim_rev_start","trim_rev_end"),function(x){updateNumericInput(session,max = nrow(calls),inputId=x)})
-    
+
                         if(g_files[loaded==TRUE,]$status =="new"){
                             g_files[loaded==TRUE,]$brush_fwd_start<<-calls[call!="-",][25]$id
                             g_files[loaded==TRUE,]$brush_fwd_end<<-calls[nrow(calls)-25]$id
@@ -485,9 +485,9 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,added:=NULL]
                 g_minor_het_insertions[,ins_added := NULL]
             }
-            
-            
-            
+
+
+
             foo <- get_mut_min()
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
             #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,0,0,input$incorporate_checkbox,g_single_rev)
@@ -550,7 +550,7 @@ shinyServer(function(input,output,session) {
     output$hetero_indel_pid <- renderPrint({
         if(varcall() ) {
             #if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("heterozygous indel detected at ~",g_expected_het_indel[[1]] * 100,"%\n")
-            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("heterozygous indel detected" )
+            if(!is.null(g_expected_het_indel) && g_expected_het_indel[[1]] * 100 >= 1) het_indel_info <- paste0("detected\n")
             else                                                                       het_indel_info <- paste0(" ... none detected\n")
             cat(het_indel_info)
             #cat(g_hetero_indel_report)
@@ -620,9 +620,9 @@ shinyServer(function(input,output,session) {
                 add_lock_buttons     <- shinyInput(actionButton, g_view$id, 'button_', label = NULL, onclick = 'Shiny.onInputChange(\"goLock\", this.id+ (Math.random()/10));if($(this).children(":first").attr("class")=="fa fa-unlock"){$(this).children().addClass(\'fa-lock\').removeClass(\'fa-unlock\');}else{$(this).children().addClass(\'fa-unlock\').removeClass(\'fa-lock\');}',ico = unlist(lapply(g_view$set_by_user, function(x){if(isTRUE(x)){"lock"}else{ "unlock"}})),class="btn btn-success" )
                 if(nrow(g_view)>0){
                     out<-cbind(" "=add_goto_buttons, " "=add_reset_buttons, "<div title='Confirmed variants are kept for the session even if you change parameters,\nand appear in the samples panel from where they can be exported with the green export button.'>confirm [?]</div>"=add_lock_buttons, g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)])
-                    if(!is.null(g_glassed_snp)){
-                       out <- cbind(out,g_view[,list("dbSNP"=dbSNP)])
-                    }
+                    #if(!is.null(g_glassed_snp)){
+                    #   out <- cbind(out,g_view[,list("dbSNP"=dbSNP)])
+                    #}
                 }else{
                     out <- g_view[,list("call position (start)"=id,"genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein,"pri peak %"=sample_peak_pct,"sec peak %"=mut_peak_pct)]
                 }
@@ -784,7 +784,7 @@ shinyServer(function(input,output,session) {
             else html("toggle_help",'<i class="fa fa-question"></i> show help')
         }
     })
-    
+
     observeEvent(input$hetero_use_lnk, {
         updateSliderInput(session, "mut_min", value = (g_expected_het_indel$min*100))
         updateCheckboxInput(session, "incorporate_checkbox", value =T)
@@ -845,7 +845,7 @@ shinyServer(function(input,output,session) {
                                                                             box-shadow: 0.1em 0.1em 0.3em #888888;"
                                                                  , h4(x)
                                                                  , div(HTML(g_alignTo_description[[x]]))
-                                                                 , if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "[load demo]") else "-"
+                                                                 , if(x=="TP53") actionLink(paste0(x, "_alignTo_lnk"), label = "[demo sample]") else "-"
                                                                  )
                                                                )
                          )

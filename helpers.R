@@ -207,6 +207,13 @@ include_locked_indels <- function(calls,vec,indels,fwd){
 }
 
 call_variants <- function(calls, qual_thres, mut_min, s2n_min,stored_het_indels,brush_fwd,brush_rev,incorp,single_rev){
+    
+    if('het_mut_call_fwd' %in% colnames(calls)){
+        calls[,het_mut_call_fwd := NULL]
+    }
+    if('het_mut_call_rev' %in% colnames(calls)){
+        calls[,het_mut_call_rev := NULL]
+    }
     # reset all but set_by_user
     calls[set_by_user == FALSE, user_sample := user_sample_orig]
     calls[set_by_user == FALSE, user_mut    := user_sample_orig]
@@ -398,10 +405,15 @@ get_choices <- function(calls,ref){
     if (nrow(choices) > 0) {
         choices[,strand:= 0]
         if("call_rev" %in% names(choices)){
-            choices[(call     != reference) | (mut_call_fwd!= reference), strand:=strand+1 ]
-            choices[(call_rev != reference) | (mut_call_rev!= reference), strand:=strand+2 ]
+            if('het_mut_call_fwd'%in%colnames(calls)){
+                choices[(call     != reference) | (het_mut_call_fwd!= reference), strand:=strand+1 ]
+                choices[(call_rev != reference) | (het_mut_call_rev!= reference), strand:=strand+2 ]
+            }else{
+                choices[(call     != reference) | (mut_call_fwd!= reference), strand:=strand+1 ]
+                choices[(call_rev != reference) | (mut_call_rev!= reference), strand:=strand+2 ]
+            }
         }else{
-            choices[,strand:=strand+1]
+            choices[,strand:=strand+3]
         }
         choices[(user_sample == "-") | (user_mut == "-"),strand:=strand+4]
         #choices <- choices[,`:=` (user_sample=ambig_minus(user_sample,reference),user_mut=ambig_minus(user_mut,reference)),by=1:nrow(choices)]
@@ -433,9 +445,9 @@ get_choices <- function(calls,ref){
         # mismatch with 1st variant
         choices[user_mut != reference & user_sample != reference   & user_mut    != user_sample & user_mut != "-", ':=' (coding = paste0(coding, ">", user_mut),            VAF = mut_peak_pct)]#,            "(", mut_peak_pct, "%)")]
         # ins
-        choices[user_mut != reference & user_mut    != user_sample & reference   == "-",                            ':='(coding = paste0(coding, "ins", user_mut),          VAF = mut_peak_pct)]#,          "(", mut_peak_pct, "%)")]
+        choices[user_mut != reference & user_mut    != user_sample & reference   == "-",                            ':='(coding = paste0(coding, "ins", user_mut),          VAF = NA)]#,          "(", mut_peak_pct, "%)")]
         # del
-        choices[user_mut != reference & user_mut    != user_sample & user_mut    == "-",                            ':='(coding = paste0(coding, "del", reference),         VAF = mut_peak_pct)]#,         "(", mut_peak_pct, "%)")]
+        choices[user_mut != reference & user_mut    != user_sample & user_mut    == "-",                            ':='(coding = paste0(coding, "del", reference),         VAF = NA)]#,         "(", mut_peak_pct, "%)")]
         # protein without 1st variant
         choices[aa_mut   != aa_ref    & aa_sample   == aa_ref,                                                     protein:= paste0("p.", aa_ref, codon, aa_mut)]#,      "(", mut_peak_pct, "%)")]
         # protein with 1st variant
@@ -702,7 +714,7 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g
     if(max(length(dels),length(ins)) != 0){
         
         #quick fix for single strand
-        calls[,het_quality_fwd := NULL]
+        if('het_quality_fwd' %in% colnames(calls)){calls[,het_quality_fwd := NULL]}
         calls[,het_mut_call_fwd     := incorporate_single_vec(calls[["mut_call_fwd"]],ins,dels,"char",forward,calls[["sample_peak_base_fwd"]])]
         calls[,het_mut_peak_pct_fwd := incorporate_single_vec(calls[["mut_peak_pct_fwd"]],ins,dels,"num",forward)]
         calls[,het_quality_fwd      := incorporate_single_vec(calls[["quality_fwd"]],ins,dels,"num",forward)]
@@ -1025,24 +1037,24 @@ add_tool_tips <- function(session){
                        (auto detect reference) and also appeare in the \"reference dropdown menu\" in the Samples table below.", 
                placement = "right", 
                trigger = "hover",
-               options = NULL)
+               options=list(container="body"))
     
     addTooltip(session, id = "q1",
                title = "Currently an experimental feature, please help improve it by reporting errors.<hr> Genomic coordinates are 
                         not extracted. <hr> Intron/exon numbers may be different if transcript starts with an untranslated exon.", 
                placement = "top", 
                trigger = "hover",
-               options = NULL)
+               options=list(container="body"))
     
     addTooltip(session, id = "samples_ui",
                title = "Please make sure the files have unique names. Uploading a file with the same name as one of the files in 
                         the table will be ignored.", 
                placement = "right", 
                trigger = "hover",
-               options = NULL)
+               options=list(container="body"))
     
     addPopover(session, id = "call_pos_help",
-               title = "Call positions",
+               title = "Call Positions",
                content = "The absolute position of a call, nothing to do with genomic or codon numbering.<br>You can either type a number, 
                         or it will show by interacting with glass",
                trigger = "hover",
@@ -1052,21 +1064,33 @@ add_tool_tips <- function(session){
     addPopover(session,"hetero_indel_help",
                title   = "Heterozygous Indels",
                content = "Glass automatically searches for the presence of heterozygous insertion or deletion (indels).
-                          If indels are detected, alignment can be performed using recommended setting (click on the link). 
-                          The setting can be changed manually by shifting the detection limit.<br>
-                          Expecting an indel does not mean there is one. Even if there is an indel, always check variant description. 
-                          Use your best judgment after studying the chromatogram.",
+                          If indels are detected, alignment can be performed using 'Pinpoint indel(s)' button. <br>
+                          Expecting an indel does not mean there is one. Even if there is an indel, always check variant description. <br>
+                          Use your best judgment after studying the chromatogram.
+                          ",
+               trigger = 'hover',options=list(container="body"))
+    
+    addPopover(session,"use_indels_help",
+               title   = "Heterozygous Indels",
+               content = "Aligns secondary peaks to reference and provides indel variant description (see the variant table below the chromatogram).",
+               trigger = 'hover',options=list(container="body"))
+    
+    addPopover(session,"hetero_use_lnk_help",
+               title   = "Heterozygous Indels",
+               content = "Pinpoints indel(s) using settings recommended by the software.
+                          The settings can be changed manually by shifting the <b>detection limit</b> and ticking/unticking the <b>Align secondary peaks</b> checkbox.
+                          ",
                trigger = 'hover',options=list(container="body"))
     
     addPopover(session,"change_user_help",
-               title   = "Change bases",
+               title   = "Change Bases",
                content = "Change the 1st/2nd or major/minor or sample/mutation variants to...",
                trigger = 'hover',options=list(container="body"))
     
     addPopover(session,"general_infobox_help",
                title = "General Infobox",
                content = "Information about the current position, also highlighted in light blue, including all nucleotides 
-                         (called, reference, mutated), coordinates, qualities (Q), peak %s, signal-to-noise (S/N) ratios, etc",
+                         (called, reference, mutated), coordinates, qualities (Q), peak %s, signal-to-noise (S/N) ratios, etc.",
                trigger = 'hover',options=list(container="body"))
     
     addPopover(session, "mut_min_help",
@@ -1085,7 +1109,8 @@ add_tool_tips <- function(session){
                content = "Aligns secondary peaks to reference and provides indel variant description (see the variant table below the chromatogram).",
                trigger = 'hover',options=list(container="body"))
     addPopover(session, "trim_help",
-               title = "Filter beginnings/ends",
-               content = "Positions to ignore, i.e. exclude from variant calling - shown as red dots on minimap.",
+               title = "Ignore Sequence Edges",
+               content = "Sequence positions to ignore, i.e. exclude from variant calling - shown as red dots on minimap.",
                trigger = 'hover',options=list(container="body"))
+    
 }
