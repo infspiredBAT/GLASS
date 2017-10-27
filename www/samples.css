@@ -27,12 +27,14 @@
 .leaflet-container {
   background-color: white !important;
 }
+
 .samplesdt td{
-    padding:8px;
-    margin: 2px;
-    background-color: #F5F5F5;
+    padding:8px !important;
+    margin: 2px !important;
+    background-color: #F5F5F5 !important;
     box-shadow: 1px 1px 3px #888888 !important;
 }
+
 #samples_table table{
     box-shadow: 1px 1px 3px #888888 !important;
 }
@@ -43,20 +45,20 @@
 
 }
 .exp_btn{
-    display:none;
+    display:none !important;
 }
 .irs-bar, .irs-bar-edge{
-    visibility: hidden;
+    visibility: hidden !important;
 }
 .irs-slider {
     background-color: #777;
 }
 .zoom{
-    cursor: move;
-    fill: none;
-	pointer-events: all;
+    cursor: move !important;
+    fill: none !important;
+	pointer-events: all !important;
 }
 #hetero_indel_pid {
-    color:#d9230f;
-    font-weight: bold;
+    color:#d9230f !important;
+    font-weight: bold !important;
 }
