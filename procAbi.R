@@ -485,6 +485,7 @@ adjust_ref_mut <- function(calls,intens_rev){
         calls[id %in% vf,`:=`(swp_base = mut_peak_base_fwd,swp_pct = mut_peak_pct_fwd)]
         calls[id %in% vf,`:=`(mut_peak_base_fwd = sample_peak_base_fwd,mut_peak_pct_fwd = sample_peak_pct_fwd)]
         calls[id %in% vf,`:=`(sample_peak_base_fwd =  swp_base,sample_peak_pct_fwd = swp_pct)]
+        calls[id %in% vf,call := sample_peak_base_fwd]
         calls[,`:=`(swp_base = NULL,swp_pct = NULL)]
     }
     if(!is.null(intens_rev)){
@@ -493,6 +494,7 @@ adjust_ref_mut <- function(calls,intens_rev){
             calls[id %in% vr,`:=`(swp_base = mut_peak_base_rev,swp_pct = mut_peak_pct_rev)]
             calls[id %in% vr,`:=`(mut_peak_base_rev = sample_peak_base_rev,mut_peak_pct_rev = sample_peak_pct_rev)]
             calls[id %in% vr,`:=`(sample_peak_base_rev =  swp_base,sample_peak_pct_rev = swp_pct)]
+            calls[id %in% vf,call_rev := sample_peak_base_rev]
             calls[,`:=`(swp_base = NULL,swp_pct = NULL)]
         }
     }

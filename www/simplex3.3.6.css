@@ -2375,7 +2375,8 @@ th {
 .table {
 /*  font-family: consolas; */
   font-size: 1.1em;
-  width: 100px;
+  width: 100px !important;
+  margin:0 !important;
   max-width: 100%;
 /*  margin-bottom: 18px; */
 }

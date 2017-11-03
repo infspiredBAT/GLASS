@@ -77,7 +77,7 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
     }
     calls[,set_by_user:=FALSE]
     
-    #231017
+    #disambiguate 
     calls[,mut_call_fwd := ambig_min(mut_call_fwd,reference)]
     calls[,call := ambig_min(call,mut_call_fwd)]
     calls[!(user_sample %in% c('A','C','G','T')),user_sample:=call]
@@ -88,6 +88,7 @@ annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
         calls[!(user_sample %in% c('A','C','G','T')) & quality_fwd < quality_rev,user_sample:=call_rev]
     }
     
+    calls        <-  adjust_ref_mut(calls,intens_rev)
     
     calls[,user_sample_orig:=user_sample]
     #calls[set_by_user == FALSE, user_sample_orig := ambig_min(user_sample,reference)]

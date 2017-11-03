@@ -383,7 +383,6 @@ shinyServer(function(input,output,session) {
                                             return(structure("error_reading_Rbin",class = "my_UI_exception"))}
                     )
                     if(class(calls)!="my_UI_exception"){
-                        calls        <-  adjust_ref_mut(calls,g_intens_rev)
 
                         g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                         #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)

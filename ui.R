@@ -113,6 +113,7 @@ shinyUI(
     					)
 					),
 					column(8,
+					       
     					column(2,
                             tags$div(title=""
         					    ,HTML(paste("<div>heterozygous</br>insertion(s)/deletion(s) <b id = 'hetero_indel_help'>[?]</b></div>"))
@@ -121,7 +122,7 @@ shinyUI(
         					    #     HTML("<font color=lightgrey><i>if indels detected, checkbox will appear</i></font>")
         					    # )
        					        ,conditionalPanel(condition = "output.hetero_indel_pid == 'detected'",
-       					                                div(style="display: inline-block;vertical-align:top;" ,actionButton("hetero_use_lnk", "Pinpoint indel(s)"))
+       					                                div(style="display: inline-block;vertical-align:top;" ,actionButton("hetero_use_lnk", "pinpoint indel(s)"))
        					                                 ,   div(style="display: inline-block;vertical-align:top;"    ,HTML(paste("<div><b id = 'hetero_use_lnk_help'>[?]</b></div>"))
                                                         )
        					                          )
@@ -133,11 +134,12 @@ shinyUI(
     					                sliderInput("mut_min",HTML("<font style='font-size:16px;'>detection limit</font> &nbsp <b id= mut_min_help> [?]</b><br><br>"), ticks=FALSE, min = 0, max = 50, value = 10, step = 0.5, round = 1, post='%', width="90%")
     					                ,conditionalPanel(condition = "output.indels_present"
     					                                  ,tags$div(title="",
-    					                                            checkboxInput("incorporate_checkbox",HTML("Align secondary peaks. <b id = use_indels_help >[?]</b>"), value = F)
+    					                                            checkboxInput("incorporate_checkbox",HTML("align secondary peaks <b id = use_indels_help >[?]</b>"), value = F)
     					                                  )
     					                )
     					       )
     					),
+    					
     					column(5,
     					    column(1),
                             column(6
