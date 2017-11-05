@@ -84,12 +84,12 @@ shinyUI(
                 )
 				,br()
 				,fluidRow(
-    				column(1,tags$div(title="",HTML(paste("<hr><div style='display:inline;'><h4 style='display:inline;'>samples</h4> &nbsp <b style='display:inline;' id ='samples_ui'> [?]</b></div>")))),
-                    column(6,
-                        fileInput("browser_files","upload .abi or .ab1 files with unique names",multiple=T,accept=c('.abi','.ab1'),width = '100%')),
-                    column(2,
-                        tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table.",
-                            downloadButton('export_btn','export variants [?]',class = "exp_btn")))
+    				column(1,tags$div(title="",HTML(paste("<hr><div style='display:inline;'><h4 style='display:inline;'>samples</h4> &nbsp <b style='display:inline;' id ='samples_ui'> [?]</b></div>"))))
+                    ,column(6,
+                        fileInput("browser_files","upload .abi or .ab1 files with unique names",multiple=T,accept=c('.abi','.ab1'),width = '100%'))
+                    ,column(2,
+                        tags$div(title="The list of confirmed variants can be exported and saved in the form of an Excel table."
+                            ,downloadButton('export_btn','export variants [?]',class = "exp_btn")))
                     ,DT::dataTableOutput('samples_table')
 		        )
             ),
