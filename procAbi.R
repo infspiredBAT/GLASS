@@ -10,7 +10,7 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
     #TO DO if(length(data$PLOC.1)<=length(data$PBAS.1)){}
     deletions <- list()
     if(is.null(data_rev)) {
-        qual  <- data$PCON.2
+        qual  <- data$PCON.1
         if(is.null(qual)){
             qual <- get_pseudo_qual(data)
             qual_present <- FALSE
@@ -27,11 +27,14 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
                                 ,quality     = qual[length(qual):1]
                                 ,VAF         = 0)
         }else{
-            res   <- generate_ref(gsub('[\\*,!]','',data$PBAS.1),glassed_ref)
+            res   <- generate_ref(gsub('[\\*,!]','',toupper(substr(data$PBAS.1,0,length(data$PLOC.1)))),glassed_ref)
+            print(data$PBAS.1)
+            print(length(data$PLOC.1))
+            print(substr(data$PBAS.1,0,length(data$PLOC.1)))
             calls <- data.table(id           = seq_along(data$PLOC.1)
-                                ,user_sample = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
-                                ,call        = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
-                                ,reference   = str_split(gsub('[\\*,!]','',data$PBAS.1),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,user_sample = str_split(gsub('[\\*,!]','',substr(data$PBAS.1,0,length(data$PLOC.1))),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,call        = str_split(gsub('[\\*,!]','',substr(data$PBAS.1,0,length(data$PLOC.1))),pattern="")[[1]][seq_along(data$PLOC.1)]
+                                ,reference   = str_split(gsub('[\\*,!]','',toupper(substr(data$PBAS.1,0,length(data$PLOC.1)))),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual
                                 ,VAF         = 0)
@@ -115,25 +118,25 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
 
 
 get_pseudo_qual <- function(data){
-    to = length(data$PLOC.2)
+    to = length(data$PLOC.1)
     qual <- c(
-        round((1-noise(max(data$DATA.9[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]),
-                       max(data$DATA.10[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]),
-                       max(data$DATA.11[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]),
-                       max(data$DATA.12[c((data$PLOC.2[1]-3):(data$PLOC.2[1]+3))]))
+        round((1-noise(max(data$DATA.9[c((data$PLOC.1[1]-3):(data$PLOC.1[1]+3))]),
+                       max(data$DATA.10[c((data$PLOC.1[1]-3):(data$PLOC.1[1]+3))]),
+                       max(data$DATA.11[c((data$PLOC.1[1]-3):(data$PLOC.1[1]+3))]),
+                       max(data$DATA.12[c((data$PLOC.1[1]-3):(data$PLOC.1[1]+3))]))
                       )*58,digits=0),
-        unlist(lapply(c(2:(length(data$PLOC.2)-1)),function(x){round((1-noise(max(data$DATA.9[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]),
-                                                                              max(data$DATA.10[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]),
-                                                                              max(data$DATA.11[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]),
-                                                                              max(data$DATA.12[c((data$PLOC.2[x]-3):(data$PLOC.2[x]+3))]))
+        unlist(lapply(c(2:(length(data$PLOC.1)-1)),function(x){round((1-noise(max(data$DATA.9[c((data$PLOC.1[x]-3):(data$PLOC.1[x]+3))]),
+                                                                              max(data$DATA.10[c((data$PLOC.1[x]-3):(data$PLOC.1[x]+3))]),
+                                                                              max(data$DATA.11[c((data$PLOC.1[x]-3):(data$PLOC.1[x]+3))]),
+                                                                              max(data$DATA.12[c((data$PLOC.1[x]-3):(data$PLOC.1[x]+3))]))
                                                                              )*58,digits=0)
                                                               }
                      )
               ),
-        round((1-noise(max(data$DATA.9[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]),
-                       max(data$DATA.10[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]),
-                       max(data$DATA.11[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]),
-                       max(data$DATA.12[c((data$PLOC.2[to]-3):(data$PLOC.2[to]+3))]))
+        round((1-noise(max(data$DATA.9[c((data$PLOC.1[to]-3):(data$PLOC.1[to]+3))]),
+                       max(data$DATA.10[c((data$PLOC.1[to]-3):(data$PLOC.1[to]+3))]),
+                       max(data$DATA.11[c((data$PLOC.1[to]-3):(data$PLOC.1[to]+3))]),
+                       max(data$DATA.12[c((data$PLOC.1[to]-3):(data$PLOC.1[to]+3))]))
                       )*58,digits=0)
     )
     return(qual)

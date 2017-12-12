@@ -396,7 +396,8 @@ retranslate <- function(calls){
 }
 
 get_choices <- function(calls,ref){
-    choices <- calls[user_sample != "N" & (user_sample != reference | user_mut != reference) & trace_peak != "NA" & !is.na(gen_coord)]
+    #hoices <- calls[user_sample != "N" & (user_sample != reference | user_mut != reference) & trace_peak != "NA" & !is.na(gen_coord)]
+    choices <- calls[ (user_sample != reference | user_mut != reference) & trace_peak != "NA" & !is.na(gen_coord)]
     if(gsub(".glassed.intrex.fasta","",gsub("data/refs/","",ref))=="-" & nrow(choices)==0){
         if("call_rev" %in% colnames(calls)){
             choices <- calls[call != call_rev]

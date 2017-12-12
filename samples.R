@@ -273,15 +273,16 @@ process_gbk <- function(session,file,ind){
     minus <- plus + 1
 
 
-    l1 <-unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x])))
-    l2 <-unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x])))
-
-    intr_cod <- data.table(plus = unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x]))),minus=unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x]))),p = unlist(lapply(1:length(plus), function(x) 1:genedt[ex=="intron"]$len[x] )),m = unlist(lapply(1:length(minus), function(x) genedt[ex=="intron"]$len[x]:1 )))
-
-    intr_cod[p<m,name:= paste0(plus,"+",p)]
-    intr_cod[m<p,name:= paste0(minus,"-",m)]
-    cod_table[codon=="intron"]$coding_seq = intr_cod$name
-
+    if("intron" %in% genedt$ex){
+        l1 <-unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x])))
+        l2 <-unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x])))
+    
+        intr_cod <- data.table(plus = unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x]))),minus=unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x]))),p = unlist(lapply(1:length(plus), function(x) 1:genedt[ex=="intron"]$len[x] )),m = unlist(lapply(1:length(minus), function(x) genedt[ex=="intron"]$len[x]:1 )))
+    
+        intr_cod[p<m,name:= paste0(plus,"+",p)]
+        intr_cod[m<p,name:= paste0(minus,"-",m)]
+        cod_table[codon=="intron"]$coding_seq = intr_cod$name
+    }
     incProgress(1/10,message=NULL)
 
     cod_table<- cod_table
