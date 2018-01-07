@@ -396,13 +396,13 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
             intens_rev <- intens_rev[1:max(data_rev$PLOC.1)+offset]
         }
     }
-
-    intens <- normalize_peak_width(intens,data$PLOC.1,11)
-    calls  <- calls[,trace_peak:=rescale_call_positions(data$PLOC.1[1],nrow(calls),11)]
+    peak_res <- 11
+    intens <- normalize_peak_width(intens,data$PLOC.1,peak_res)
+    calls  <- calls[,trace_peak:=rescale_call_positions(data$PLOC.1[1],nrow(calls),peak_res)]
     if(single_rev){
         intens <- setnames(data.table(intens),c("T","G","C","A"))
         deletions <- calls[call=="-"]
-        intens <- intens[1:(max(calls$trace_peak) - (nrow(deletions))*11 + data$PLOC.1[1])]
+        intens <- intens[1:(max(calls$trace_peak) - (nrow(deletions))*preak_res + data$PLOC.1[1])]
         for (j in seq_len(ncol(intens)))
             set(intens,which(is.na(intens[[j]])),j,0)
         intens <- intens[nrow(intens):1,]
@@ -412,10 +412,10 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
     intens[,id:=c(1:nrow(intens))]
     setkey(intens,id)
     if(rev){
-        intens_rev <- normalize_peak_width(intens_rev,data_rev$PLOC.1,11)
+        intens_rev <- normalize_peak_width(intens_rev,data_rev$PLOC.1,peak_res)
         intens_rev <- setnames(data.table(intens_rev),c("T","G","C","A"))
         intens_rev <- intens_rev[nrow(intens_rev):1]
-        calls      <- calls[,trace_peak_rev:=rescale_call_positions(data_rev$PLOC.1[1],nrow(calls),11)]
+        calls      <- calls[,trace_peak_rev:=rescale_call_positions(data_rev$PLOC.1[1],nrow(calls),peak_res)]
         intens_rev[,id:=c(1:nrow(intens_rev))]
         setkey(intens_rev,id)
     }
