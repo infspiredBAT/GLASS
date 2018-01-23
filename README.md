@@ -1,16 +1,20 @@
 # GLASS
-### assisted and standardised assessment of gene variations from Sanger data
+assisted & standardised assessment of gene variations from Sanger data
 
-Live version available at http://bat.infspire.org/genomepd/glass
+</br>
+lab home: http://bat.infspire.org</br>
+citation: http://www.ncbi.nlm.nih.gov/pubmed/29036643</br>
+live demo: http://bat.infspire.org/genomepd/glass
+</br>
 
-Requirements
+requirements
 --------------
 
 * RStudio or [Shiny Server](https://www.rstudio.com/products/shiny/shiny-server/)
 * install chromatography package `devtools::install("[GLASS_dir]/chromatography/")`
 
 
-Tested with :
+tested with:
 <verbatim>
 ``` R
 sessionInfo()
@@ -37,3 +41,5 @@ loaded via a namespace (and not attached):
  [8] grid_3.3.3      miniUI_0.1.1    htmltools_0.3.6 ade4_1.7-6      yaml_2.1.14     digest_0.6.12   mime_0.5       
 [15] jsonlite_1.4    httpuv_1.3.3
 ```
+
+###### supported by Ministry of Health of the Czech Republic grant nr. 16-34272A
