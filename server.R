@@ -487,9 +487,9 @@ shinyServer(function(input,output,session) {
 
 
 
-            foo <- get_mut_min()
-            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
-            #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,0,0,input$incorporate_checkbox,g_single_rev)
+            mut_min <- get_mut_min()
+            g_calls <<- call_variants(g_calls,input$qual_thres_to_call,mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
+            #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,mut_min,input$s2n_min,g_stored_het_indels,0,0,input$incorporate_checkbox,g_single_rev)
             setkey(g_calls,id)
 
             report                  <- report_hetero_indels(g_calls)
@@ -503,7 +503,7 @@ shinyServer(function(input,output,session) {
 
             if(input$incorporate_checkbox & g_indels_present){
                 g_calls <<- incorporate_hetero_indels_func(g_calls,g_hetero_del_tab,g_hetero_ins_tab,g_minor_het_insertions,input$qual_thres_to_call,g_single_rev)
-                #g_calls <<- recall_variants_after_indel_realign(g_calls,input$qual_thres_to_call,foo,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
+                #g_calls <<- recall_variants_after_indel_realign(g_calls,input$qual_thres_to_call,mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
             }
             setkey(g_calls,id)
 
@@ -531,6 +531,7 @@ shinyServer(function(input,output,session) {
     #
     output$plot <- renderChromatography({
         if(varcall()) {
+            print(g_intens)
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
             withProgress(message = paste('Plotting chromatogram.',sep=" "), value = 1 ,{
                 ret<-chromatography(g_intens,g_intens_rev,g_single_rev,g_intrexdat,
@@ -541,6 +542,7 @@ shinyServer(function(input,output,session) {
                                     g_calls[input$trim_fwd_start]$trace_peak,g_calls[input$trim_fwd_end]$trace_peak,
                                     g_calls[input$trim_rev_start]$trace_peak,g_calls[input$trim_rev_end]$trace_peak)
                 g_new_sample <<- FALSE
+                print(ret)
                 return(ret)
             })
         }
