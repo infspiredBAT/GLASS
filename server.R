@@ -531,7 +531,6 @@ shinyServer(function(input,output,session) {
     #
     output$plot <- renderChromatography({
         if(varcall()) {
-            print(g_intens)
             g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
             withProgress(message = paste('Plotting chromatogram.',sep=" "), value = 1 ,{
                 ret<-chromatography(g_intens,g_intens_rev,g_single_rev,g_intrexdat,
