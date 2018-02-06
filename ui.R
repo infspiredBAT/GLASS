@@ -33,7 +33,7 @@ shinyUI(
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1,HTML('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                ver 0.3.2 <br> (2017-Dec-12)
+                                ver 0.3.3 <br> (2017-Feb-6)
                            </a></div>'),
 			       includeHTML("www/log.html")
 			       ),
