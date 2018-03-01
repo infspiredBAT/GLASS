@@ -541,7 +541,7 @@ shinyServer(function(input,output,session) {
                                     g_calls[input$trim_fwd_start]$trace_peak,g_calls[input$trim_fwd_end]$trace_peak,
                                     g_calls[input$trim_rev_start]$trace_peak,g_calls[input$trim_rev_end]$trace_peak)
                 g_new_sample <<- FALSE
-                print(ret)
+                #print(ret)
                 return(ret)
             })
         }

@@ -487,7 +487,8 @@ get_view<-function(calls,choices,snps){
             if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) ,"_",as.numeric(min(coord))+1,type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
             else coding <- paste0("c.",min(coord),"_",max(coord),type, paste(nucs,collapse = ""))
 
-            return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
+            #return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
+            return(list(id = min(tab$id),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
         } else {
             return(tab)
         }
@@ -538,17 +539,24 @@ get_view<-function(calls,choices,snps){
     #identify duplications (special kind of insertions)
     for(i in grep("ins",choices$mut_type)){
         seq <- gsub("c\\.\\d*_*\\d*...(.)","\\1",choices[i,]$coding)
-        if(floor(choices[i,]$id) == choices[i,]$id) prev_seq <- paste0(calls[-(nchar(seq) - 1):0 + choices[i,]$id - 1,]$reference,collapse = "")
-        else prev_seq <- paste0(calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
+        shift <- 0
+        if(floor(choices[i,]$id) == choices[i,]$id) {
+            #note sure about this, id number doesn't have to match the order in calls 
+            prev_seq <- paste0(calls[-(nchar(seq) - 1):0 + choices[i,]$id - 1,]$reference,collapse = "")
+            shift <- 1
+        }else 
+            prev_seq <- paste0(calls[-(nchar(seq) - 1):0 + choices[i,]$id,]$reference,collapse = "")
         if(seq == prev_seq) {
             choices[i,coding := gsub("ins","dup",coding)]
             #the coordinates are changed to the sequence that is duplicated #! find test for these
             if(nchar(seq)>1){
-                choices[i,]$coding <- paste0("c.",calls[floor(choices[i,]$id)-nchar(seq)]$coding_seq,"_",calls[floor(choices[i,]$id)-1,]$coding_seq,"dup",seq)
+                choices[i,]$coding <- paste0("c.",calls[id == floor(choices[i,]$id) - nchar(seq) + 1 - shift]$coding_seq ,"_",calls[id == floor(choices[i,]$id) - shift,]$coding_seq,"dup",seq)
+            }else{
+                choices[i,]$coding <- paste0("c.",calls[id == floor(choices[i,]$id) - shift]$coding_seq ,"dup",seq)
             }
         }else{
             if(nchar(seq)==1)
-                choices[i,]$coding <- paste0("c.",calls[id == ceiling(choices[i]$id-1),]$coding_seq,"_",calls[id == floor(choices[i]$id+1),]$coding_seq,"ins",seq)
+                choices[i,]$coding <- paste0("c.",calls[id == ceiling(choices[i]$id - 1),]$coding_seq,"_",calls[id == floor(choices[i]$id + 1),]$coding_seq,"ins",seq)
                 #choices[i,]$coding <- paste0("c.",calls[i-1,]$coding_seq,"_",calls[i+1,]$coding_seq,'ins',seq)
         }
     }

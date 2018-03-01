@@ -402,7 +402,7 @@ get_intensities <- function(data,data_rev,calls,deletions=NULL,norm=FALSE,single
     if(single_rev){
         intens <- setnames(data.table(intens),c("T","G","C","A"))
         deletions <- calls[call=="-"]
-        intens <- intens[1:(max(calls$trace_peak) - (nrow(deletions))*preak_res + data$PLOC.1[1])]
+        intens <- intens[1:(max(calls$trace_peak) - (nrow(deletions))*peak_res + data$PLOC.1[1])]
         for (j in seq_len(ncol(intens)))
             set(intens,which(is.na(intens[[j]])),j,0)
         intens <- intens[nrow(intens):1,]
