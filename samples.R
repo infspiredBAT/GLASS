@@ -95,6 +95,80 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
     })
 }
 
+loadDemoFunc <- function(g_files){
+    
+    TP53_demo      <- list(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
+                           FWD_file=c("data/demo/TP53/3low_freq_fsF.ab1"),
+                           REV_name=c("TP53 ; rev ; low freq w frameshift"),
+                           REV_file=c("data/demo/TP53/3low_freq_fsR.ab1"),
+                           REF=c("TP53"),
+                           mut_min=10,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
+                           calls = "",
+                           status="new",
+                           id=1,
+                           brush_fwd_start = 0,
+                           brush_fwd_end = 0,
+                           brush_rev_start = 0,
+                           brush_rev_end = 0,
+                           coding = '',
+                           protein = '',
+                           VAF = '',
+                           dbSNP = '',
+                           dbSNP_id = '')
+    
+    g_files <- rbind(g_files,TP53_demo)
+    return(g_files)
+}
+
+changeRev <- function(g_files,pos_at,name,input){
+    
+    if(name=="-"){  #split
+        rev_name <- g_files[pos_at]$REV_name
+        rev_file <- g_files[pos_at]$REV_file
+        ref      <- g_files[pos_at]$REF
+        
+        g_files[pos_at]$REV_name <- "-"
+        g_files[pos_at]$REV_file <- "-"
+        g_files[pos_at]$calls <- ""
+        g_files[pos_at]$loaded <- FALSE
+        g_files[pos_at]$status <- "new"
+        g_files[pos_at]$calls = ""
+        g_files <- rbind(g_files,c(list(FWD_name="-",FWD_file="-",
+                                         REV_name=rev_name,REV_file=rev_file,
+                                         REF=ref,id=nrow(g_files)+1),
+                                         mut_min=10,qual_thres_to_call=0,
+                                         s2n_min=2,show_calls_checkbox=F,
+                                         join_traces_checkbox=F,max_y_p=100,
+                                         opacity=0,incorporate_checkbox=F,
+                                         calls = "",loaded= FALSE,
+                                         status = "new",
+                                         brush_fwd_start = 0,brush_fwd_end=0,
+                                         brush_rev_start=0, brush_rev_end = 0,
+                                         coding = '', protein = '', VAF = '',dbSNP = '',dbSNP_id = ''))
+    }else{          #combine
+        setkey(g_files,id)
+        rev_name <- name
+        rm_id <- g_files[g_files[,REV_name == name]]$id
+        rev_file <- g_files[g_files[,REV_name == name]]$REV_file
+        pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
+        g_files[pos_at]$REV_name <- rev_name
+        g_files[pos_at]$REV_file <- rev_file
+        g_files <- g_files[!g_files[id==rm_id]]
+        
+    }
+    return(g_files)
+    
+}
+
+loadGFiles <- function(){
+    return(data.table(FWD_name=character(), FWD_file=character(), REV_name=character(), REV_file=character(),
+                      REF=character(), mut_min=numeric(), qual_thres_to_call=numeric(), s2n_min=numeric(),
+                      show_calls_checkbox=logical(), join_traces_checkbox=logical(), max_y_p=numeric(), 
+                      opacity=numeric(), incorporate_checkbox=logical(), loaded=logical(), calls=character(),
+                      status=character(), id=integer(), brush_fwd_start=numeric(), brush_fwd_end=numeric(), 
+                      brush_rev_start=numeric(), brush_rev_end=numeric(), coding=character(), protein=character(), 
+                      VAF=character(), dbSNP=character(), dbSNP_id=character()))
+}
 get_gbk_info <- function(session,file){
     #  ret=system("dev/GLASS/ext/gb2tab.py -a 1000 -b 1000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
     #call <- paste0(c("python ext/gb2tab.py -f 'mRNA' ",file$datapath),collapse = "")

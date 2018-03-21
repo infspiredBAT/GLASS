@@ -48,40 +48,7 @@ shinyServer(function(input,output,session) {
     g_reactval              <- reactiveValues()
     g_reactval$updateVar    <- 0
     g_refs_avail            <<- c("-","TP53","NOTCH1","ATM","CALR","Custom")
-    #g_files = a variable that represents the data table containing individual samples and information about them
-    TP53_demo               <- list(FWD_name=c("TP53 ; fwd ; low freq w frameshift"),
-                                    FWD_file=c("data/demo/TP53/3low_freq_fsF.ab1"),
-                                    REV_name=c("TP53 ; rev ; low freq w frameshift"),
-                                    REV_file=c("data/demo/TP53/3low_freq_fsR.ab1"),
-                                    REF=c("TP53"),
-                                    mut_min=10,qual_thres_to_call=0,s2n_min=2,show_calls_checkbox=F,join_traces_checkbox=F,max_y_p=100,opacity=0,incorporate_checkbox=F,loaded=F,
-                                    calls = "",
-                                    status="new",
-                                    id=1,
-                                    brush_fwd_start = 0,
-                                    brush_fwd_end = 0,
-                                    brush_rev_start = 0,
-                                    brush_rev_end = 0,
-                                    coding = '',
-                                    protein = '',
-                                    VAF = '',
-                                    dbSNP = '',
-                                    dbSNP_id = '')
-    g_files                 <- data.table(FWD_name=character(),FWD_file=character(),REV_name=character(),REV_file=character(),REF=character(),mut_min=numeric(),
-                                           qual_thres_to_call=numeric(),s2n_min=numeric(),show_calls_checkbox=logical(),join_traces_checkbox=logical(),max_y_p=numeric(),opacity=numeric(),
-                                           incorporate_checkbox=logical(),loaded=logical(),calls=character(),status=character(),id=integer(),brush_fwd_start=numeric(),
-                                           brush_fwd_end=numeric(),brush_rev_start=numeric(),brush_rev_end=numeric(),coding=character(),protein=character(),VAF=character(),
-                                           dbSNP=character(),dbSNP_id=character())
-    #g_files[,`:=` ]
-
-#     get_file <- reactive({
-#        # if (!is.null(input$select_file)) return(input$select_file$datapath)
-#         if (!is.null(input$select_file)) return(input$select_file)
-#         else return(NULL)
-#     })
-    ex <- NULL
-    btn_counter <- 0
-    show_btn_counter <- 0
+    g_files         <<- loadGFiles() #g_files = represents the data table containing individual samples their info
 
     #SAMPLE BROWSER STUFF
 
@@ -98,10 +65,6 @@ shinyServer(function(input,output,session) {
         loadDemo()
         varcall()
 
-
-
-        disabled <- rep(FALSE,nrow(g_files))
-        disabled[1] <- FALSE
         g_files[,id:= 1:nrow(g_files)]
         g_files <<- g_files
         if(nrow(g_files)==0){
@@ -109,8 +72,8 @@ shinyServer(function(input,output,session) {
             return(NULL)
         }
         add_load_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'loadSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goLoadSamples\",  this.id + (Math.random()/10))',ico=rep("play",nrow(g_files)),class="btn btn-info" )
-        add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id + (Math.random()/10))',ico=rep("close",nrow(g_files)) ,dsbl = disabled,class="btn dlt_btn")
-        add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  ,dsbl = disabled)
+        add_delete_buttons   <- shinyInput(actionButton, 1:nrow(g_files), 'delSample_',  label = NULL, onclick = 'Shiny.onInputChange(\"goDeleteSamples\",  this.id + (Math.random()/10))',ico=rep("close",nrow(g_files)) ,class="btn dlt_btn")
+        add_swap_buttons     <- shinyInput(actionButton, 1:nrow(g_files), 'swapSample_', label = NULL, onclick = 'Shiny.onInputChange(\"goSwapSamples\",  this.id + (Math.random()/10))',ico=rep("exchange",nrow(g_files))  )
         add_reference_dropdown <- shinyInput(selectInput, 1:nrow(g_files),'selectGene_', choices=c("-",g_alignTo_options), selected = g_files[,REF],width="80px")
         add_reverse_dropdown <- shinyInputRev(selectInput,1:nrow(g_files),'chooseRev_',g_files,width="240px")
         out <- cbind(" "=add_delete_buttons,g_files[,list("forward"=FWD_name)],"swap"=add_swap_buttons,"<div title='Use dropdown menu to pair or unpair samples. Only unpaired reverse files appear here.' >reverse [?] </div>"=add_reverse_dropdown,"<div title='' >reference</div>"=add_reference_dropdown," "=add_load_buttons,g_files[,list("<div title='Confirmed (locked) variants appear here.'>status [?]</div>"=status,coding,protein,VAF)])
@@ -163,41 +126,8 @@ shinyServer(function(input,output,session) {
         if(!is.null(input$goChangeRev)){
             pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
             name <- as.character(input$goChangeRev$name)
-            if(name=="-"){  #split
-                rev_name <- g_files[pos_at]$REV_name
-                rev_file <- g_files[pos_at]$REV_file
-                ref      <- g_files[pos_at]$REF
-
-                g_files[pos_at]$REV_name <- "-"
-                g_files[pos_at]$REV_file <- "-"
-                g_files[pos_at]$calls <- ""
-                g_files[pos_at]$loaded <- FALSE
-                g_files[pos_at]$status <- "new"
-                g_files[pos_at]$brush_rev <- 0
-                g_files[pos_at]$calls = ""
-                g_files <<- rbind(g_files,c(list(FWD_name="-",FWD_file="-",
-                                                 REV_name=rev_name,REV_file=rev_file,
-                                                 REF=ref,id=nrow(g_files)+1),
-                                                 mut_min=10,qual_thres_to_call=0,
-                                                 s2n_min=2,show_calls_checkbox=F,
-                                                 join_traces_checkbox=F,max_y_p=100,
-                                                 opacity=0,incorporate_checkbox=F,
-                                                 calls = "",loaded= FALSE,
-                                                 status = "new",
-                                                 brush_fwd_start = 0,brush_fwd_end=0,
-                                                 brush_rev_start=0, brush_rev_end = 0,
-                                                 coding = '', protein = '', VAF = '',dbSNP = '',dbSNP_id = ''))
-            }else{          #combine
-                setkey(g_files,id)
-                rev_name <- name
-                rm_id <- g_files[g_files[,REV_name == name]]$id
-                rev_file <- g_files[g_files[,REV_name == name]]$REV_file
-                pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
-                g_files[pos_at]$REV_name <- rev_name
-                g_files[pos_at]$REV_file <- rev_file
-                g_files<<-g_files[!g_files[id==rm_id]]
-
-            }
+            
+            g_files <<- changeRev(g_files,pos_at,name,input)
         }
     })
     goRef_handler <- reactive({
@@ -270,7 +200,6 @@ shinyServer(function(input,output,session) {
                                       brush_fwd_start=input$trim_fwd_start,
                                       brush_rev_end=input$trim_rev_end)]
         }
-
     })
 
     loading_processed_files <- reactive ({
@@ -294,19 +223,13 @@ shinyServer(function(input,output,session) {
         }
 
         single_rev <- FALSE
-        #if(!is.null(input$select_file) || !is.null(ex)) {
-        if(!is.null(load_id) || !is.null(ex)) {
+        if(!is.null(load_id)) {
             fwd_file      <- g_files[load_id]$FWD_file
             fwd_file_name <- g_files[load_id]$FWD_name
             rev_file      <- g_files[load_id]$REV_file
             rev_file_name <- g_files[load_id]$REV_name
             ref           <- g_files[load_id]$REF
 
-            if(!is.null(ex)){
-                fwd_file <- fwd_file_name <- ex[1]
-                rev_file <- rev_file_name <- ex[2]
-                ref = "TP53"
-            }
             if(ref=="Custom"){
                 g_glassed_ref <<- g_custom_ref
                 g_glassed_cod <<- g_custom_cod
@@ -334,20 +257,13 @@ shinyServer(function(input,output,session) {
 
             g_single_rev <<- single_rev
 
-            #if(substr(base,nchar(base),nchar(base))=="R"){
             if(single_rev){
-                isolate({
-                    files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
-                    #single_rev <- TRUE
-                })
-            }else if(is.null(ex)){
                 isolate({
                     files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
                 })
             }
-
+            
             withProgress(message = paste('loading abi file...',sep=" "), value = 1, {
-
                 tryCatch(
                     g_abif <- sangerseqR::read.abif(fwd_file)@data,
                     error = function(e){output$files <- renderPrint(paste0("<pre>error while reading forward file, are you loading .abi ? ",e$message,"</pre>" ))})
@@ -360,7 +276,6 @@ shinyServer(function(input,output,session) {
 
                 res <- NULL
                 called <- NULL
-                #res <- get_call_data(g_abif,g_abif_rev,input$rm7qual_thres,input$qual_thres,input$aln_min)
                 tryCatch(
                     called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,g_glassed_ref)),
                     error = function(e){
@@ -382,7 +297,7 @@ shinyServer(function(input,output,session) {
                         error = function(e){output$files <- renderPrint(paste0("<pre>error while loading calls from abi file : ",e$message,"</pre>" ))
                                             return(structure("error_reading_Rbin",class = "my_UI_exception"))}
                     )
-                    if(class(calls)!="my_UI_exception"){
+                    if(class(calls)[1] != "my_UI_exception"){
 
                         g_max_y      <<- max(c(max(g_intens[,list(A,C,G,T)]),if(is.null(g_intens_rev)) 0 else max(g_intens_rev[,list(A,C,G,T)])))
                         #intrex contains intesities coordinates of start and end of introns/exons with the sequence id (position in sequence coordinates)
@@ -429,10 +344,6 @@ shinyServer(function(input,output,session) {
                         updateNumericInput(session,value=0,inputId = "trim_rev_start" )
                         updateNumericInput(session,value=nrow(calls),inputId = "trim_rev_end" )
                     }
-                    #if(g_single_rev){
-                    #    g_brush_fwd <<- calls[nrow(calls[call!="-",])-25]$trace_peak
-
-                    #}
                     #if reloading a previously loaded file
                     if(nrow(g_files[loaded==T,]) == 1){                  #g_calls saved from previous session we test if they are compatible to reload
                         if(g_files[loaded==T,]$calls != ""){
@@ -450,10 +361,6 @@ shinyServer(function(input,output,session) {
         g_stored_het_indels <<- list()
         g_calls <<- NULL
         return(calls)
-    })
-
-    get_mut_min <- eventReactive(input$mut_min,{
-        return(input$mut_min)
     })
 
     varcall <- reactive({
@@ -485,9 +392,7 @@ shinyServer(function(input,output,session) {
                 g_minor_het_insertions[,ins_added := NULL]
             }
 
-
-
-            mut_min <- get_mut_min()
+            mut_min <- input$mut_min
             g_calls <<- call_variants(g_calls,input$qual_thres_to_call,mut_min,input$s2n_min,g_stored_het_indels,g_brush_fwd,g_brush_rev,input$incorporate_checkbox,g_single_rev)
             #g_calls <<- call_variants(g_calls,input$qual_thres_to_call,mut_min,input$s2n_min,g_stored_het_indels,0,0,input$incorporate_checkbox,g_single_rev)
             setkey(g_calls,id)
@@ -591,19 +496,6 @@ shinyServer(function(input,output,session) {
         return(T)
     })
 
-    #
-    # DataTable stuff
-    #
-
-#    add_checkboxes <- function(){
-#        checkboxes <- paste0('<input type="checkbox" name="row', g_view$id, '" value="', g_view$id, '"',"")
-#        for(i in 1:nrow(g_view)) {
-#            if(g_view[i]$id %in% g_selected) checkboxes[i] <- paste0(checkboxes[i]," checked>","")
-#            else checkboxes[i] <- paste0(checkboxes[i],">","")
-#        }
-#        return(checkboxes)
-#    }
-
     output$chosen_variants_table <- DT::renderDataTable({
         if(varcall())
         if(!is.null(g_choices) && nrow(g_choices) > 0){
@@ -639,13 +531,6 @@ shinyServer(function(input,output,session) {
     #, options = list(dom = "t",orderClasses=c(-1,-2,-3,-4), paging=F, columnDefs=list(list(targets=c("_all"), searchable=F),list(targets=c(0,1,2,3), orderable=F, title="")))
 
     )
-
-#    variant_select <- observe({
-#        if(varcall()) {
-#            g_selected <<- str_trim(input$rows)
-#            g_selected_goto_index <<- 0
-#        }
-#    })
 
     #
     # data table buttons  ### replaced with a direct call to chromatography.js
@@ -751,8 +636,6 @@ shinyServer(function(input,output,session) {
         if(is.null(input$brush_fw)) return()
         last <- g_brush_fwd
         g_brush_fwd <<- input$brush_fw$coord
-        #print(input$brush_fw$coord)
-        #print(g_brush_fwd)
         if(last <= g_brush_fwd){
             if(nrow(g_choices[trace_peak > last][trace_peak < g_brush_fwd])==0)
                 return()
@@ -779,7 +662,6 @@ shinyServer(function(input,output,session) {
     #})
     observe({
         if(!is.null(input$toggle_help )){
-            #show_btn_counter <<- show_btn_counter + 1
             if(input$toggle_help %% 2 == 0) html("toggle_help",'<i class="fa fa-question"></i> hide help')
             else html("toggle_help",'<i class="fa fa-question"></i> show help')
         }
@@ -826,7 +708,6 @@ shinyServer(function(input,output,session) {
     # alignTo (start) #
     #######################
 
-    #g_alignTo_options <- c("TP53","ATM","NOTCH1","CALR")
     g_alignTo_description <- list("TP53"   = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_000546.5' target='_blank'>NM_000546.5</a> <br> GRCh38"
                                 , "ATM"    = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_000051.3' target='_blank'>NM_000051.3</a> <br> hg19"
                                 , "NOTCH1" = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_017617.4' target='_blank'>NM_017617.4</a> <br> GRCh38"
@@ -858,14 +739,13 @@ shinyServer(function(input,output,session) {
     loadDemo <- reactive({
         if(!is.null(g_reactval$link)){
             if(g_reactval$link=="TP53"){
-                g_files <<- rbind(g_files,TP53_demo)
+                #g_files <<- rbind(g_files,TP53_demo)
+                g_files <<- loadDemoFunc(g_files)
             }
         }
     })
 
     updateRefs <-function() {
-        #loadGBK()
-        #setCustomRef()
         g_alignTo_options <<- input$additionalRefs
         if(!is.null(g_custom_ref)){
             g_alignTo_options <<- c(g_alignTo_options,"Custom")
@@ -879,7 +759,6 @@ shinyServer(function(input,output,session) {
     }
 
     loadGBK <- observeEvent(input$custom_gb,{
-        #if(!is.null(input$custom_gb)){
             withProgress(
                 tryCatch({
                         res <- get_gbk_info(session,input$custom_gb)
@@ -903,9 +782,6 @@ shinyServer(function(input,output,session) {
                                     actionButton("gbk_ok", "OK")
                                 )
                         ,size='m')})
-                        #ret <- process_gbk(session,input$custom_gb)
-                        #g_custom_cod <<- ret$custom_cod
-                        #g_custom_ref <<- ret$custom_fasta
                     }
                     ,error = function(e){
                         output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" ))
@@ -914,26 +790,19 @@ shinyServer(function(input,output,session) {
                     }
                 ),message = "processing GenBank file..."
             )
-        #}
     })
 
     setCustomRef <- reactive({
         #if(!is.null(input$custom_gb) && !is.null(input$gbk_ok) && !(input$gbk_ok==0)){
         if( !is.null(input$gbk_ok) &&!(input$gbk_ok==0)){
-        #input$gbk_ok
         isolate({
             if(!is.null(input$custom_gb)){
                 withProgress(
                     tryCatch({
                         removeModal()
                         showModal({modalDialog(
-                            #p('found ',length(res$mRNA),' "mRNA" features in GBK file '),
-                            p('extracting sequence information from GenBank file...'),
-                            #if (failed)
-                            #div(tags$b("invalid name of data object", style = "color: red;")),
-
-                            footer = tagList(
-                            )
+                            p('extracting sequence information from GenBank file...')
+                            ,footer = tagList()
                             ,size='m')})
                         ret <- process_gbk(session,input$custom_gb,as.numeric(input$radio_gene_sel))
                         g_custom_cod <<- ret$custom_cod
@@ -949,7 +818,6 @@ shinyServer(function(input,output,session) {
                                 g_reactval$link <- x
                             })
                         })
-
                     }
                     ,error = function(e){
                         removeModal()
@@ -995,14 +863,7 @@ shinyServer(function(input,output,session) {
                                       gsub("<br>",";", g_files[i]$VAF),
                                       gsub("<br>",";", g_files[i]$dbSNP_id) ))
             }
-                #out<-rbind(out,list("1","2","2"))
 
-
-            #g_selected <- g_view$id[as.numeric(input$chosen_variants_table_rows_selected)]
-
-            #for(i in 1:nrow(g_view)) {
-            #    if(g_view[i]$id %in% g_selected) out<-rbind(out,g_view[i,list("genomic coordinate"=gen_coord,"coding variant"=coding,"protein variant"=protein)])
-            #}
             write.xlsx(out,con)
         }
     )
