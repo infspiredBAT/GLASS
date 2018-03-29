@@ -257,11 +257,9 @@ shinyServer(function(input,output,session) {
 
             g_single_rev <<- single_rev
 
-            if(single_rev){
-                isolate({
+            isolate({
                     files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
-                })
-            }
+            })
             
             withProgress(message = paste('loading abi file...',sep=" "), value = 1, {
                 tryCatch(
