@@ -512,6 +512,7 @@ get_view<-function(calls,choices,snps){
             while((calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_mut)&
                   (calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_sample)&
                   (!is.na(calls[codon == cod][1]$aa_sample))) {cod = cod +1}
+            aa <- calls[codon ==cod]$aa_ref[1]
             choices[i,]$protein = paste0("p.",aa,cod, "fs")
 
         }else{ #in frame
@@ -828,8 +829,15 @@ add_intensities <- function(added,calls,intens,intens_rev,intrexdat){
     }
     #intens_rev must match intens (hopefully they do otherwise its a bigger problem)
     #update peak positions in calls table
-    calls$trace_peak<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
-    calls$trace_peak_rev<-seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
+    calls$trace_peak <- seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
+    calls$trace_peak_rev <- seq(from = calls[1]$trace_peak, by = 12, length.out = nrow(calls))
+    intens$id_new <- 1:length(intens$id)
+    # we're renaming the intensities, have to update the 'added' ones
+    add$id <- intens[id %in% add$id]$id_new
+    intens[,id:=id_new]
+    intens[,id_new:=NULL]
+    
+    intens_rev$id <- 1:length(intens_rev$id)
     #update intrex
     intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
     intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")

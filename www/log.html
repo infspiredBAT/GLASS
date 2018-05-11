@@ -1,165 +1,165 @@
 <!-- Update log -->
 
 <div class="modal fade" id="disclaimer-modal" tabindex="-1" role="dialog">
-    <div id="disclaimer-modal-content" class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header" style="padding-top:10px;">
-                <h4>update log</h4>
-            </div>
-            <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
-                <b>ver 0.3.4  (2018-Mar-1)</b>
-		        <ul>
-		        	<li>Bug fix for broken 'reverse only' loading of sequences.</li>
-		        	<li>Improvement for cases where duplications weren't recognized correctly.</li>
-		        </ul>
-                <b>ver 0.3.3  (2018-Feb-6)</b>
-		        <ul>
-		        	<li>Removed dependencies to reduce memory footprint.</li>
-		        </ul>
-                <b>ver 0.3.2  (2017-Dec-12)</b>
-		        <ul>
-		        	<li>PBAS.1 sequence trimmed to the lenght of PLOC.1</li>
-		        	<li>Fixed errors given by genbank files without introns.</li>
-		        </ul>
-		        <b>ver 0.3.1  (2017-Oct-27)</b>
-		        <ul>
-		        	<li>Improvements to the indel realignment steps.(Some indels were shifted).</li>
-		        	<li>Changed the rules for calling variants after the indel realignment step.</li>
-		        	<li>Changes to the UI, improved help messages</li>
-		        	<li>Improvements to stability.(Error handling, cleanup between sample reloads).</li>
-		        </ul>	 
-                <b>ver 0.2.19 (2017-Oct-5)</b>
-                <ul>
-                    <li>Names of intronic variants on the protein level corrected to "p.?"</li>
-                </ul>
-                <b>ver 0.2.18 (2017-Aug-9)</b>
-                <ul>
-                    <li>Now using "*" to annotate stop codon. (Instead of "Stp" or "Ter".)</li>
-                    <li>Fixed position indicator (blue rectangle) error when showing locations around indels.</li>
-                </ul>
-                <b>ver 0.2.17 (2017-Jul-12)</b>
-                <ul>
-                    <li>UI updates and improvements.</li>
-                </ul>
-                <b>ver 0.2.16 (2017-Jun-7)</b>
-                <ul>
-                    <li>New dialogues to help with custom GenBank files and stability improvement for GenBank file
-                        loading.
-                    </li>
-                </ul>
-                <b>ver 0.2.15 (2017-Apr-11)</b>
-                <ul>
-                    <li>Handling error from empty variants table.</li>
-                    <li>Corrected trimming filter for double stranded variants.</li>
-                </ul>
-                <b>ver 0.2.14 (2017-Apr-9)</b>
-                <ul>
-                    <li>Fixed broken status reporting in samples table.</li>
-                </ul>
-                <b>ver 0.2.13 (2017-Apr-3)</b>
-                <ul>
-                    <li>Help images.</li>
-                    <li>Custom GenBank file experimental feature introduced.</li>
-                    <li>References shown in tiles with additional information provided.</li>
-                    <li>Widgets for setting filters added.</li>
-                    <li>"show qualities" issue fixed.</li>
-                </ul>
-                <b>ver 0.2.12 (2017-Mar-22)</b>
-                <ul>
-                    <li>Improvments in error handling.</li>
-                    <li>Compatibility issue with new version of the data tables library addressed.</li>
-                </ul>
-                <b>ver 0.2.11 (2017-Jan-13)</b>
-                <ul>
-                    <li>Redefined the formula for estimating the resolution. New unit BasePerPixel should be consistent
-                        across different input sequence lengths and window sizes.
-                    </li>
-                </ul>
-                <b>ver 0.2.10 (2016-Nov-17)</b>
-                <ul>
-                    <li>Scrolling events ignored on zoom (zoom on scroll was not seamless).</li>
-                    <li>Reordered svg elements. Order of elements ~ z coordinate.</li>
-                </ul>
-                <b>ver 0.2.9 (2016-Nov-3)</b>
-                <ul>
-                    <li>UI modifications. Better interactivity (Click and drag in the graph area).</li>
-                    <li>Filtered beginnings of reads now set to a fixed value.</li>
-                </ul>
-                <b>ver 0.2.8 (2016-Oct-7)</b>
-                <ul>
-                    <li>A bug preventing the loading of some single nucleotide sequences fixed.</li>
-                    <li>Correction in the way VAF (variant allele frequency) is estimated.</li>
-                </ul>
-                <b>ver 0.2.7 (2016-Sep-29)</b>
-                <ul>
-                    <li>Small changes in the table of samples formating for a more comprehensive representation of
-                        variants and a more unified style in both the samples table and the final exported excel table.
-                    </li>
-                    <li>Added proper naming of protein variants for p.(=) and p.? cases.</li>
-                </ul>
-                <b>ver 0.2.6 (2016-Sep-10)</b>
-                <ul>
-                    <li>dbSNP annotation added for TP53 now uses exact matching instead of position matching.</li>
-                    <li>Added button to show/hide the help infobox in the variants panel.</li>
-                    <li>Titles, email us, table formatting, quick guide.</li>
-                    <li>Modified export button behaviour; hide when nothing to export.</li>
-                    <li>Delete button in samples table behaviour fixed.</li>
-                    <li>Enabled the delete button on the example file.</li>
-                </ul>
-                <b>ver 0.2.5 (2016-Aug-20)</b>
-                <ul>
-                    <li>Position based dbSNP annotation added for TP53. (Column "dbSNP" in the variants table.)</li>
-                </ul>
-                <b>ver 0.2.4 (2016-Aug-11)</b>
-                <ul>
-                    <li>"No reference" upload fixed and documented.</li>
-                    <li>Forward beginnings filter initial position updated.</li>
-                </ul>
-                <b>ver 0.2.3 (2016-Aug-4)</b>
-                <ul>
-                    <li>Fixed bug causing single strand samples to crash (result of previous update).</li>
-                    <li>Small change in minimap navigation box opacity.</li>
-                </ul>
-                <b>ver 0.2.2 (2016-Aug-2)</b>
-                <ul>
-                    <li>Minimap navigation box coloured steel blue (~ magnifier glass) and shadow added to make it
-                        "pop-out".
-                    </li>
-                    <li>Variant indicators are now strand specific.</li>
-                    <li>Variant indicator scales to peak width.</li>
-                </ul>
-                <b>ver 0.2.1 (2016-Jul-29)</b>
-                <ul>
-                    <li>Minimap navigation box appearence and behaviour.</li>
-                    <li>More seamless chromatogram transitions.</li>
-                    <li>Box representing zoomed-in area.</li>
-                    <li>Filters of beginnings of reads stylised in chromatogram and also minimap.</li>
-                </ul>
-                <b>ver 0.1.2 (2016-Jul-27)</b>
-                <ul>
-                    <li>Filters of beginnings and ends of reads visualised in minimap.</li>
-                    <li>Reference now case sensitive: exons in uppercase, everything else in lowercase.</li>
-                    <li>It\'s now possible to load samples without a reference, just untick all genes.</li>
-                </ul>
-                <b>ver 0.1.1 (2016-Jul-06)</b>
-                <ul>
-                    <li>Implemented brush-able filtering-out of variants from the beginning of reads (the filter is at
-                        the end of the reverse sequences since these are reverse complemented).
-                    </li>
-                    <li>Added reference selector, with selected references used to autodetect strandedness - not using
-                        all references speeds up the upload process.
-                    </li>
-                    <li>Added dialog preventing accidental "navigate away".</li>
-                    <li>Added CALR reference.</li>
-                    <li>Update log started.</li>
-                </ul>
+  <div id="disclaimer-modal-content" class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="padding-top:10px;">
+        <h4>update log</h4>
+      </div>
+      <div class="modal-body" style="padding-top:0px;padding-bottom:0px;font-size:12px;color:rgb(132,132,132)">
+        <b>ver 0.4.0  (2018-May-11)</b>
+        <ul>
+          <li>New alignment method pre-realease</li>
+          <li>Method of alignment changed. Now aligning to continuous sequence.</li>
+          <li>Fix for adding multiple minor insertions. Special case handling.</li>
+          <li>Improved identification of correct protein variant name.</li>
+        </ul>
+        <b>ver 0.3.4  (2018-Mar-1)</b>
+        <ul>
+          <li>Bug fix for broken 'reverse only' loading of sequences.</li>
+          <li>Improvement for cases where duplications weren't recognized correctly.</li>
+        </ul>
+        <b>ver 0.3.3  (2018-Feb-6)</b>
+        <ul>
+          <li>Removed dependencies to reduce memory footprint.</li>
+        </ul>
+        <b>ver 0.3.2  (2017-Dec-12)</b>
+        <ul>
+          <li>PBAS.1 sequence trimmed to the lenght of PLOC.1</li>
+          <li>Fixed errors given by genbank files without introns.</li>
+        </ul>
+        <b>ver 0.3.1  (2017-Oct-27)</b>
+        <ul>
+          <li>Improvements to the indel realignment steps.(Some indels were shifted).</li>
+          <li>Changed the rules for calling variants after the indel realignment step.</li>
+          <li>Changes to the UI, improved help messages</li>
+          <li>Improvements to stability.(Error handling, cleanup between sample reloads).</li>
+        </ul>
+        <b>ver 0.2.19 (2017-Oct-5)</b>
+        <ul>
+          <li>Names of intronic variants on the protein level corrected to "p.?"</li>
+        </ul>
+        <b>ver 0.2.18 (2017-Aug-9)</b>
+        <ul>
+          <li>Now using "*" to annotate stop codon. (Instead of "Stp" or "Ter".)</li>
+          <li>Fixed position indicator (blue rectangle) error when showing locations around indels.</li>
+        </ul>
+        <b>ver 0.2.17 (2017-Jul-12)</b>
+        <ul>
+          <li>UI updates and improvements.</li>
+        </ul>
+        <b>ver 0.2.16 (2017-Jun-7)</b>
+        <ul>
+          <li>New dialogues to help with custom GenBank files and stability improvement for GenBank file loading.
+          </li>
+        </ul>
+        <b>ver 0.2.15 (2017-Apr-11)</b>
+        <ul>
+          <li>Handling error from empty variants table.</li>
+          <li>Corrected trimming filter for double stranded variants.</li>
+        </ul>
+        <b>ver 0.2.14 (2017-Apr-9)</b>
+        <ul>
+          <li>Fixed broken status reporting in samples table.</li>
+        </ul>
+        <b>ver 0.2.13 (2017-Apr-3)</b>
+        <ul>
+          <li>Help images.</li>
+          <li>Custom GenBank file experimental feature introduced.</li>
+          <li>References shown in tiles with additional information provided.</li>
+          <li>Widgets for setting filters added.</li>
+          <li>"show qualities" issue fixed.</li>
+        </ul>
+        <b>ver 0.2.12 (2017-Mar-22)</b>
+        <ul>
+          <li>Improvments in error handling.</li>
+          <li>Compatibility issue with new version of the data tables library addressed.</li>
+        </ul>
+        <b>ver 0.2.11 (2017-Jan-13)</b>
+        <ul>
+          <li>Redefined the formula for estimating the resolution. New unit BasePerPixel should be consistent across different input sequence lengths and window sizes.
+          </li>
+        </ul>
+        <b>ver 0.2.10 (2016-Nov-17)</b>
+        <ul>
+          <li>Scrolling events ignored on zoom (zoom on scroll was not seamless).</li>
+          <li>Reordered svg elements. Order of elements ~ z coordinate.</li>
+        </ul>
+        <b>ver 0.2.9 (2016-Nov-3)</b>
+        <ul>
+          <li>UI modifications. Better interactivity (Click and drag in the graph area).</li>
+          <li>Filtered beginnings of reads now set to a fixed value.</li>
+        </ul>
+        <b>ver 0.2.8 (2016-Oct-7)</b>
+        <ul>
+          <li>A bug preventing the loading of some single nucleotide sequences fixed.</li>
+          <li>Correction in the way VAF (variant allele frequency) is estimated.</li>
+        </ul>
+        <b>ver 0.2.7 (2016-Sep-29)</b>
+        <ul>
+          <li>Small changes in the table of samples formating for a more comprehensive representation of variants and a more unified style in both the samples table and the final exported excel table.
+          </li>
+          <li>Added proper naming of protein variants for p.(=) and p.? cases.</li>
+        </ul>
+        <b>ver 0.2.6 (2016-Sep-10)</b>
+        <ul>
+          <li>dbSNP annotation added for TP53 now uses exact matching instead of position matching.</li>
+          <li>Added button to show/hide the help infobox in the variants panel.</li>
+          <li>Titles, email us, table formatting, quick guide.</li>
+          <li>Modified export button behaviour; hide when nothing to export.</li>
+          <li>Delete button in samples table behaviour fixed.</li>
+          <li>Enabled the delete button on the example file.</li>
+        </ul>
+        <b>ver 0.2.5 (2016-Aug-20)</b>
+        <ul>
+          <li>Position based dbSNP annotation added for TP53. (Column "dbSNP" in the variants table.)</li>
+        </ul>
+        <b>ver 0.2.4 (2016-Aug-11)</b>
+        <ul>
+          <li>"No reference" upload fixed and documented.</li>
+          <li>Forward beginnings filter initial position updated.</li>
+        </ul>
+        <b>ver 0.2.3 (2016-Aug-4)</b>
+        <ul>
+          <li>Fixed bug causing single strand samples to crash (result of previous update).</li>
+          <li>Small change in minimap navigation box opacity.</li>
+        </ul>
+        <b>ver 0.2.2 (2016-Aug-2)</b>
+        <ul>
+          <li>Minimap navigation box coloured steel blue (~ magnifier glass) and shadow added to make it "pop-out".
+          </li>
+          <li>Variant indicators are now strand specific.</li>
+          <li>Variant indicator scales to peak width.</li>
+        </ul>
+        <b>ver 0.2.1 (2016-Jul-29)</b>
+        <ul>
+          <li>Minimap navigation box appearence and behaviour.</li>
+          <li>More seamless chromatogram transitions.</li>
+          <li>Box representing zoomed-in area.</li>
+          <li>Filters of beginnings of reads stylised in chromatogram and also minimap.</li>
+        </ul>
+        <b>ver 0.1.2 (2016-Jul-27)</b>
+        <ul>
+          <li>Filters of beginnings and ends of reads visualised in minimap.</li>
+          <li>Reference now case sensitive: exons in uppercase, everything else in lowercase.</li>
+          <li>It\'s now possible to load samples without a reference, just untick all genes.</li>
+        </ul>
+        <b>ver 0.1.1 (2016-Jul-06)</b>
+        <ul>
+          <li>Implemented brush-able filtering-out of variants from the beginning of reads (the filter is at the end of the reverse sequences since these are reverse complemented).
+          </li>
+          <li>Added reference selector, with selected references used to autodetect strandedness - not using all references speeds up the upload process.
+          </li>
+          <li>Added dialog preventing accidental "navigate away".</li>
+          <li>Added CALR reference.</li>
+          <li>Update log started.</li>
+        </ul>
 
-            </div>
-            <div class="modal-footer" style="clear-both">
-                <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised"
-                        data-dismiss="modal">close
+      </div>
+      <div class="modal-footer" style="clear-both">
+        <button type="button" class="btn btn-default icon-button-sm btn btn-default btn-raised" data-dismiss="modal">close
                 </button>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </div>
