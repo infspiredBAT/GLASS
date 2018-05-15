@@ -238,7 +238,8 @@ generate_ref <-function(user_seq,glassed_ref){
         dt<- data.table(gen_coord = gen_coord,gen_coord_abs = ceiling(gen_coord))
         user_seq_vs_genome <- join(dt,user_seq_vs_genome,by="gen_coord_abs")
         user_seq_vs_genome[,gen_coord_abs := NULL]
-        user_seq_vs_genome[,id := sort(c((align$start + 1):align$end,add_insert(align$diffs[type == "I"]) - 1))]
+        #user_seq_vs_genome[,id := sort(c((align$start + 1):align$end,add_insert(align$diffs[type == "I"]) - 1))]
+        user_seq_vs_genome$id <-  sort(c((align$start + 1):align$end,add_insert(align$diffs[type == "I"]) - 1))
         setcolorder(user_seq_vs_genome,c(1,3,2))
     }
     

@@ -836,8 +836,9 @@ add_intensities <- function(added,calls,intens,intens_rev,intrexdat){
     add$id <- intens[id %in% add$id]$id_new
     intens[,id:=id_new]
     intens[,id_new:=NULL]
-    
-    intens_rev$id <- 1:length(intens_rev$id)
+    if(!is.null(intens_rev)){
+        intens_rev$id <- 1:length(intens_rev$id)
+    }
     #update intrex
     intrexdat$intrex     <- setnames(calls[!is.na(exon_intron),list(max(id)-min(id)+1,min(trace_peak),max(trace_peak)),by = exon_intron],c("attr","length","trace_peak","end"))
     intrexdat$intrex     <- setnames(merge(intrexdat$intrex,calls[,list(id,trace_peak)],by="trace_peak"),"trace_peak","start")
