@@ -33,7 +33,7 @@ shinyUI(
 		fluidRow(
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1,HTML('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                ver 0.4.1 <br> (2018-May-15)
+                                ver 0.4.2 <br> (2018-May-17)
                            </a></div>'),
 			       includeHTML("www/log.html")
 			       ),
@@ -79,7 +79,8 @@ shinyUI(
                              ),
                         # )
                         HTML("currently selected references"),
-                        uiOutput("alignTo_new")
+                        uiOutput("alignTo_new"),
+                        checkboxInput("somevalue", "Some value", FALSE)
                     )
                 )
 				,br()
@@ -105,8 +106,8 @@ shinyUI(
         					    selectInput("change_user_mut",NULL,choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
         					    # textInput("change_variant","change variant to"),
                                 actionButton("change_btn","change", icon = icon("exchange"), width='100%'))
-    					),
-    					column(8,
+    					  ),
+    					  column(9,
                             tags$div(title="",
         				        HTML("<div>general infobox <b id = 'general_infobox_help'>[?]</b></div>")),
     					    verbatimTextOutput("infobox")

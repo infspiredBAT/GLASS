@@ -267,12 +267,16 @@ shinyServer(function(input,output,session) {
             })
             
             withProgress(message = paste('loading abi file...',sep=" "), value = 1, {
-                tryCatch(
-                    g_abif <- sangerseqR::read.abif(fwd_file)@data,
+                tryCatch({
+                    g_abif <- sangerseqR::read.abif(fwd_file)@data
+                    g_abif <- hardtrim(g_abif,30)
+                    },
                     error = function(e){output$files <- renderPrint(paste0("<pre>error while reading forward file, are you loading .abi ? ",e$message,"</pre>" ))})
                 if(!is.null(rev_file)) {
-                    tryCatch(
-                        g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
+                    tryCatch({
+                          g_abif_rev <- sangerseqR::read.abif(rev_file)@data
+                          g_abif_rev <- hardtrim(g_abif_rev,30)
+                        },
                         error = function(e){output$files <- renderPrint(paste0("<pre>error while reading reverse file, are you loading .abi ? ",e$message,"</pre>" ))})
                 }
                 else g_abif_rev <- NULL

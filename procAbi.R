@@ -521,3 +521,20 @@ normalize_peak_width <- function(intensities, call_positions, intervening_length
 rescale_call_positions <- function(call_positions_start, call_positions_length, intervening_length){
     return(seq(from = call_positions_start, by = intervening_length + 1, length.out = call_positions_length))
 }
+hardtrim <- function(data,limit){
+    last_int <- max(last(which(data$DATA.12 > limit)),last(which(data$DATA.11 > limit)),last(which(data$DATA.10 > limit)),last(which(data$DATA.9 > limit)))
+    last_seq <- last(which(data$PLOC.1 < last_int))
+    newdata = list()
+    newdata$PLOC.1 <- data$PLOC.1[1:last_seq]
+    newdata$PCON.1 <- data$PCON.1[1:last_seq]
+    newdata$PCON.2 <- data$PCON.2[1:last_seq]
+    newdata$PBAS.1 <- substr(data$PBAS.1,1,last_seq)
+    newdata$DATA.9 <- data$DATA.9[1:last_int]
+    newdata$DATA.10 <- data$DATA.10[1:last_int]
+    newdata$DATA.11 <- data$DATA.11[1:last_int]
+    newdata$DATA.12 <- data$DATA.12[1:last_int]
+    newdata$FWO <- data$FWO
+    
+    return(newdata)
+
+}

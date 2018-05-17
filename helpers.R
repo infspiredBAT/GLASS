@@ -747,7 +747,7 @@ incorporate_hetero_indels_func <- function(calls,hetero_del_tab,hetero_ins_tab,g
             calls[ set_by_user == FALSE & ((mut_call_rev != het_mut_call_rev & mut_call_fwd != het_mut_call_fwd) | mut_call_fwd == "-") & het_quality_rev > het_quality_fwd, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
             
             
-            calls[ set_by_user == FALSE & (mut_call_rev == het_mut_call_rev & mut_call_fwd == het_mut_call_fwd) & het_quality_rev < het_quality_fwd, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
+            calls[ set_by_user == FALSE & (mut_call_rev == het_mut_call_rev & mut_call_fwd == het_mut_call_fwd) & het_quality_rev <= het_quality_fwd, c("user_mut","mut_peak_pct") := list(het_mut_call_fwd,het_mut_peak_pct_fwd)]
             calls[ set_by_user == FALSE & (mut_call_rev == het_mut_call_rev & mut_call_fwd == het_mut_call_fwd) & het_quality_rev > het_quality_fwd, c("user_mut","mut_peak_pct") := list(het_mut_call_rev,het_mut_peak_pct_rev)]
             #calls[
             #    het_mut_call_fwd!=reference
