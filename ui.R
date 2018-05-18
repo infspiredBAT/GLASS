@@ -33,11 +33,11 @@ shinyUI(
 		fluidRow(
 		    HTML("<div style=\"background-color:#fee0d2\" class=\"alert alert-dismissible alert-primary\">
                     <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
-		                <strong>UPDATE!</strong> <a href=\"#\" class=\"alert-link\">Link to message</a> See change log.
+		                <strong>Important update released on 2018-May-18</strong>, see changelog, contact us directly via <a href=mailto:bat@infspire.org target='_blank'>email</a> if needed.
 		         </div>"),
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1,HTML('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                ver 0.4.2 <br> (2018-May-17)
+                                ver 0.4.3 <br> (2018-May-18)
                            </a></div>'),
 			       includeHTML("www/log.html")
 			       ),
