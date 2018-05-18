@@ -31,13 +31,17 @@ shinyUI(
 		),
 
 		fluidRow(
+		    HTML("<div style=\"background-color:#fee0d2\" class=\"alert alert-dismissible alert-primary\">
+                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+		                <strong>UPDATE!</strong> <a href=\"#\" class=\"alert-link\">Link to message</a> See change log.
+		         </div>"),
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1,HTML('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
                                 ver 0.4.2 <br> (2018-May-17)
                            </a></div>'),
 			       includeHTML("www/log.html")
 			       ),
-			column(10, HTML("<br><font size=2em>&nbsp&nbsp | R&D by <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font>&nbsp&nbsp | IT by <a href=https://metavo.metacentrum.cz/en/ target='_blank'>CESNET/MetaCentrum</a>&nbsp&nbsp | <a href=mailto:bat@infspire.org target='_blank'>email us</a> | <a href=https://www.ncbi.nlm.nih.gov/pubmed/29036643 target='_blank'>cite us</a>"))
+			column(10, HTML("<br><font size=2em>&nbsp&nbsp | R&D by <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=https://www.ceitec.eu/medical-genomics-sarka-pospisilova/rg34 target=_blank>Medical Genomics @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font>&nbsp&nbsp | IT by <a href=https://metavo.metacentrum.cz/en/ target='_blank'>CESNET/MetaCentrum</a>&nbsp&nbsp | <a href=mailto:bat@infspire.org target='_blank'>email us</a> | <a href=https://www.ncbi.nlm.nih.gov/pubmed/29036643 target='_blank'>cite us</a>"))
 		),
 		fluidRow(
 			column(2, HTML(paste("&nbsp<i>assisted & standardised assessment</br>&nbsp&nbspof gene variations from Sanger data</i></br></br>"))),
@@ -79,8 +83,7 @@ shinyUI(
                              ),
                         # )
                         HTML("currently selected references"),
-                        uiOutput("alignTo_new"),
-                        checkboxInput("somevalue", "Some value", FALSE)
+                        uiOutput("alignTo_new")
                     )
                 )
 				,br()

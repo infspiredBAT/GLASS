@@ -3,6 +3,8 @@
 
 \.RData
 
+\.DS_Store
+
 data/priv_abis/ATM/
 
 data/abis/ATM/
