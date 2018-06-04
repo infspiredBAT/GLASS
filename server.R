@@ -3,6 +3,7 @@ library(shiny)
 library(data.table)
 library(sangerseqR) #bioclite
 library(xlsx)
+library(plyr)
 source("procAbi.R")
 source("helpers.R")
 source("samples.R")
@@ -203,7 +204,11 @@ shinyServer(function(input,output,session) {
                                       brush_rev_end=input$trim_rev_end)]
         }
     })
-
+    
+    #-------#
+    # GLASS #
+    #-------#
+    
     loading_processed_files <- reactive ({
 
         calls <- structure("error_reading_Rbin",class = "my_UI_exception")
@@ -259,19 +264,21 @@ shinyServer(function(input,output,session) {
 
             g_single_rev <<- single_rev
 
-            if(single_rev){
-                isolate({
+            isolate({
                     files_info <<- paste0("fwd (F): ",fwd_file_name,"\nrev (R): ",rev_file_name," \n<em>aligned to: ",ref,"</em>",sep="")
-                })
-            }
+            })
             
             withProgress(message = paste('loading abi file...',sep=" "), value = 1, {
-                tryCatch(
-                    g_abif <- sangerseqR::read.abif(fwd_file)@data,
+                tryCatch({
+                    g_abif <- sangerseqR::read.abif(fwd_file)@data
+                    g_abif <- hardtrim(g_abif,30)
+                    },
                     error = function(e){output$files <- renderPrint(paste0("<pre>error while reading forward file, are you loading .abi ? ",e$message,"</pre>" ))})
                 if(!is.null(rev_file)) {
-                    tryCatch(
-                        g_abif_rev <- sangerseqR::read.abif(rev_file)@data,
+                    tryCatch({
+                          g_abif_rev <- sangerseqR::read.abif(rev_file)@data
+                          g_abif_rev <- hardtrim(g_abif_rev,30)
+                        },
                         error = function(e){output$files <- renderPrint(paste0("<pre>error while reading reverse file, are you loading .abi ? ",e$message,"</pre>" ))})
                 }
                 else g_abif_rev <- NULL
@@ -279,7 +286,8 @@ shinyServer(function(input,output,session) {
                 res <- NULL
                 called <- NULL
                 tryCatch(
-                    called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,g_glassed_ref)),
+                    #called <- suppressWarnings(get_call_data(g_abif,g_abif_rev,single_rev,g_glassed_ref)),
+                    called <- get_call_data(g_abif,g_abif_rev,single_rev,g_glassed_ref),
                     error = function(e){
                         output$files <- renderPrint(paste0("<pre>error while loading calls from abi file : ",e$message,"</pre>" ))
                         g_files[loaded==T,status:="<font color='red'>error</font>"]
@@ -380,11 +388,11 @@ shinyServer(function(input,output,session) {
             }
             #remove added minor het ins
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
-                for(i in nrow(g_minor_het_insertions))
+                for(i in 1:nrow(g_minor_het_insertions))
                 {
                     added <- strsplit(g_minor_het_insertions[i]$added[[1]], split = " ")
                     g_calls <<- g_calls[!(id %in% added[[1]])]
-                    ret <- remove_intensities(added,g_calls,g_intens,g_intens_rev,g_intrexdat,g_minor_het_insertions)
+                    ret <- remove_intensities(added,g_calls,g_intens,g_intens_rev,g_intrexdat,g_minor_het_insertions[i])
                     g_calls      <<- ret$calls
                     g_intens     <<- ret$intens
                     g_intens_rev <<- ret$intens_rev
@@ -415,14 +423,16 @@ shinyServer(function(input,output,session) {
             setkey(g_calls,id)
 
             if(exists("g_minor_het_insertions") && !is.null(g_minor_het_insertions$added)){
+                g_minor_het_insertions[,ins_added:=""]
                 for(i in 1:nrow(g_minor_het_insertions)){
                     ret <- add_intensities(strsplit(g_minor_het_insertions[i]$added[[1]],split= " ")[[1]],g_calls,g_intens,g_intens_rev,g_intrexdat)
+                
+                    g_calls                          <<- ret$calls
+                    g_minor_het_insertions[i]$ins_added <<- ret$ins_added
+                    g_intens                         <<- ret$intens
+                    g_intens_rev                     <<- ret$intens_rev
+                    g_intrexdat                      <<- ret$intrexdat
                 }
-                g_calls                          <<- ret$calls
-                g_minor_het_insertions$ins_added <<- ret$ins_added
-                g_intens                         <<- ret$intens
-                g_intens_rev                     <<- ret$intens_rev
-                g_intrexdat                      <<- ret$intrexdat
             }
 
             g_expected_het_indel <<- get_expected_het_indels(g_calls)
@@ -706,9 +716,9 @@ shinyServer(function(input,output,session) {
         }
     })
 
-    #######################
+    ###################
     # alignTo (start) #
-    #######################
+    ###################
 
     g_alignTo_description <- list("TP53"   = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_000546.5' target='_blank'>NM_000546.5</a> <br> GRCh38"
                                 , "ATM"    = "<a href='https://www.ncbi.nlm.nih.gov/nuccore/NM_000051.3' target='_blank'>NM_000051.3</a> <br> hg19"
@@ -839,9 +849,9 @@ shinyServer(function(input,output,session) {
         } 
     })
 
-    #####################
+    #################
     # alignTo (end) #
-    #####################
+    #################
 
 
     #EXPORT

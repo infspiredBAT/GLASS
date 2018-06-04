@@ -28,19 +28,17 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
                                 ,VAF         = 0)
         }else{
             res   <- generate_ref(gsub('[\\*,!]','',toupper(substr(data$PBAS.1,0,length(data$PLOC.1)))),glassed_ref)
-            print(data$PBAS.1)
-            print(length(data$PLOC.1))
-            print(substr(data$PBAS.1,0,length(data$PLOC.1)))
             calls <- data.table(id           = seq_along(data$PLOC.1)
                                 ,user_sample = str_split(gsub('[\\*,!]','',substr(data$PBAS.1,0,length(data$PLOC.1))),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,call        = str_split(gsub('[\\*,!]','',substr(data$PBAS.1,0,length(data$PLOC.1))),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,reference   = str_split(gsub('[\\*,!]','',toupper(substr(data$PBAS.1,0,length(data$PLOC.1)))),pattern="")[[1]][seq_along(data$PLOC.1)]
                                 ,trace_peak  = data$PLOC.1
                                 ,quality     = qual
+                                ,quality_fwd = qual
                                 ,VAF         = 0)
         }
         # calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
-        setkey(res[[2]],id)
+        setkey(res[[2]],t_pos)
         if(length(res[[3]]) > 0) {
             setkey(calls,id)
             add <- calls[as.integer(res[[3]]),]
@@ -184,7 +182,8 @@ generate_ref <-function(user_seq,glassed_ref){
     ref_names <- sapply(ref_info,function(x) x[1])
     ref_start <- as.numeric(sapply(ref_info,function(x) x[3]))
     ref_end <- as.numeric(sapply(ref_info,function(x) x[4]))
-    align_split <- T
+
+    align_split <- F
     
     if(align_split){
         refs <- DNAStringSet(refs[seq(2,length(refs),2)])
@@ -227,17 +226,20 @@ generate_ref <-function(user_seq,glassed_ref){
         align$diffs <- align$diffs[id %in% OK_align,]
     } else {
         
-        
         user_seq_vs_genome <- rbindlist(lapply(seq_along(ref_names),function(x) data.table(exon_intron = ref_names[x],gen_coord_abs = ref_start[x]:ref_end[x])))
         ref <- toupper(paste(refs[seq(2,length(refs),2)],collapse = ""))
         align <- get_alignment(ref,user_seq,cores,"local-global")
 
-        
         gen_coord <- get_coord(align$start,align$ref_start,align$ref_end,max(user_seq_vs_genome$gen_coord),min(user_seq_vs_genome$gen_coord),align$diffs[type == "D"])
         #user_seq_vs_genome <- user_seq_vs_genome[align$ref_starts:align$ref_ends,]
-        user_seq_vs_genome <- merge(user_seq_vs_genome,data.table(gen_coord = gen_coord,gen_coord_abs = ceiling(gen_coord)),by = "gen_coord_abs")
+        
+        #merge does not keep the coorect order
+        #user_seq_vs_genome <- merge(data.table(gen_coord = gen_coord,gen_coord_abs = ceiling(gen_coord)),user_seq_vs_genome,by = "gen_coord_abs")
+        dt<- data.table(gen_coord = gen_coord,gen_coord_abs = ceiling(gen_coord))
+        user_seq_vs_genome <- join(dt,user_seq_vs_genome,by="gen_coord_abs")
         user_seq_vs_genome[,gen_coord_abs := NULL]
-        user_seq_vs_genome[,id := sort(c((align$start + 1):align$end,add_insert(align$diffs[type == "I"]) - 1))]
+        #user_seq_vs_genome[,id := sort(c((align$start + 1):align$end,add_insert(align$diffs[type == "I"]) - 1))]
+        user_seq_vs_genome$id <-  sort(c((align$start + 1):align$end,add_insert(align$diffs[type == "I"]) - 1))
         setcolorder(user_seq_vs_genome,c(1,3,2))
     }
     
@@ -518,4 +520,21 @@ normalize_peak_width <- function(intensities, call_positions, intervening_length
 }
 rescale_call_positions <- function(call_positions_start, call_positions_length, intervening_length){
     return(seq(from = call_positions_start, by = intervening_length + 1, length.out = call_positions_length))
+}
+hardtrim <- function(data,limit){
+    last_int <- max(last(which(data$DATA.12 > limit)),last(which(data$DATA.11 > limit)),last(which(data$DATA.10 > limit)),last(which(data$DATA.9 > limit)))
+    last_seq <- last(which(data$PLOC.1 < last_int))
+    newdata = list()
+    newdata$PLOC.1 <- data$PLOC.1[1:last_seq]
+    newdata$PCON.1 <- data$PCON.1[1:last_seq]
+    newdata$PCON.2 <- data$PCON.2[1:last_seq]
+    newdata$PBAS.1 <- substr(data$PBAS.1,1,last_seq)
+    newdata$DATA.9 <- data$DATA.9[1:last_int]
+    newdata$DATA.10 <- data$DATA.10[1:last_int]
+    newdata$DATA.11 <- data$DATA.11[1:last_int]
+    newdata$DATA.12 <- data$DATA.12[1:last_int]
+    newdata$FWO <- data$FWO
+    
+    return(newdata)
+
 }

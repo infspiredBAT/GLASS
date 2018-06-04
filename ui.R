@@ -31,13 +31,17 @@ shinyUI(
 		),
 
 		fluidRow(
+		    HTML("<div style=\"background-color:#fee0d2\" class=\"alert alert-dismissible alert-primary\">
+                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
+		                <strong>Important update released on 2018-May-18</strong>, see changelog for details, contact us directly via <a href=mailto:bat@infspire.org target='_blank'>email</a> if needed.
+		         </div>"),
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1,HTML('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                ver 0.3.4 <br> (2018-Mar-1)
+                                ver 0.4.3 <br> (2018-May-18)
                            </a></div>'),
 			       includeHTML("www/log.html")
 			       ),
-			column(10, HTML("<br><font size=2em>&nbsp&nbsp | R&D by <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ceitec.eu/ceitec-mu/medical-genomics/rg34 target=_blank>Medical Genomics @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font>&nbsp&nbsp | IT by <a href=https://metavo.metacentrum.cz/en/ target='_blank'>CESNET/MetaCentrum</a>&nbsp&nbsp | <a href=mailto:bat@infspire.org target='_blank'>email us</a> | <a href=https://www.ncbi.nlm.nih.gov/pubmed/29036643 target='_blank'>cite us</a>"))
+			column(10, HTML("<br><font size=2em>&nbsp&nbsp | R&D by <a href=http://bat.infspire.org target=_blank>bat.infspire.org</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=https://www.ceitec.eu/medical-genomics-sarka-pospisilova/rg34 target=_blank>Medical Genomics @ CEITEC MU</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.ericll.org target=_blank>ERIC</a> &nbsp<font size=0.9em>&</font>&nbsp <a href=http://www.igcll.org target=_blank>IgCLL group</a></font>&nbsp&nbsp | IT by <a href=https://metavo.metacentrum.cz/en/ target='_blank'>CESNET/MetaCentrum</a>&nbsp&nbsp | <a href=mailto:bat@infspire.org target='_blank'>email us</a> | <a href=https://www.ncbi.nlm.nih.gov/pubmed/29036643 target='_blank'>cite us</a>"))
 		),
 		fluidRow(
 			column(2, HTML(paste("&nbsp<i>assisted & standardised assessment</br>&nbsp&nbspof gene variations from Sanger data</i></br></br>"))),
@@ -105,8 +109,8 @@ shinyUI(
         					    selectInput("change_user_mut",NULL,choices=list("",deletion="-","A","T","G","C","S (G or C)"="S","W (A or T)"="W","R (A or G)"="R","Y (C or T)"="Y","K (G or T)"="K","M (A or C)"="M","B (C or G or T)"="B","V (A or C or G)"="V","H (A or C or T)"="H","D (A or G or T)"="D","N"),selected="",selectize=F,size=1),
         					    # textInput("change_variant","change variant to"),
                                 actionButton("change_btn","change", icon = icon("exchange"), width='100%'))
-    					),
-    					column(8,
+    					  ),
+    					  column(9,
                             tags$div(title="",
         				        HTML("<div>general infobox <b id = 'general_infobox_help'>[?]</b></div>")),
     					    verbatimTextOutput("infobox")

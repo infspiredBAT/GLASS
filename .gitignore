@@ -3,6 +3,8 @@
 
 \.RData
 
+\.DS_Store
+
 data/priv_abis/ATM/
 
 data/abis/ATM/
@@ -24,3 +26,5 @@ data/priv_abis/P53_cert/round3/
 data/priv_abis/P53_genomic/
 
 data/priv_abis/P53_no_basecalls/
+
+rsconnect/
