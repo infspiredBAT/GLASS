@@ -228,6 +228,8 @@ process_gbk <- function(session,file,ind){
     incProgress(1/10,message=NULL)
 
     CDS_call <- system2("python",c("ext/gb2tab.py","-f","'CDS'",file$datapath),stdout=TRUE)
+    #print(CDS_call)
+    
     #CDS_call  <- system(call,intern=TRUE)
     CDS=NULL
     if (length(CDS_call)==0){
@@ -252,7 +254,7 @@ process_gbk <- function(session,file,ind){
     #extract info from the genbank file
 
     tab1 <- unlist(strsplit(CDS_merge[ind],"\t"))
-
+    
     incProgress(1/10,message=NULL)
 
     #coordinates <- str_match(tab1[[4]],'/GenBank.* REGION: [0-9]+..[0-9]+')[,1]
@@ -269,103 +271,115 @@ process_gbk <- function(session,file,ind){
     #    input_chrom <- gsub("NC_0+","",str_match(coordinates,"NC_0+[1-9]+"))
     #    input_gene_start <- as.numeric(unlist(str_match_all(coordinates,"[0-9]+"))[length(unlist(str_match_all(coordinates,"[0-9]+")))])
     #}
-
-    exon <- data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab1[[3]]), '')[[1]]==')'))
-    setnames(exon,c("start","end"))
-    exon[,id := seq_along(exon$start)]
-    exon[,ex:=rep("exon",nrow(exon))]
-    exon[,name := paste0(ex,id)]
-
-
-    intron<-data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='D'),which(strsplit(as.character(tab1[[3]]), '')[[1]]=='A'))
-    setnames(intron,c("start","end"))
-    intron[,id := seq_along(intron$start)]
-    intron[,ex:=rep("intron",nrow(intron))]
-    intron[ ,`:=`( name =paste0(ex,id))]
-
-
-    genedt<-rbind(exon,intron)
-    setkey(genedt,start)
-    genedt[,seq := substring(as.character(tab1[[2]]),start,end),by=1:nrow(genedt)]
-
-    #strand specific
-
-    if(input_orient == "+"){
-        genedt[,start_chr := input_gene_start + start -1]
-        genedt[,end_chr := input_gene_start + end -1]
+    
+    # check sequence unambiguity
+    
+    if(gregexpr(pattern ='\\?', tab1[[3]]) > 0){
+      
+      return(print("Ambiguous coding sequence"))
+    
     }else{
-        genedt[,start_chr := input_gene_start - start +1]
-        genedt[,end_chr := input_gene_start - end +1]
-    }
+    
+      exon <- data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='('),which(strsplit(as.character(tab1[[3]]), '')[[1]]==')'))
+      setnames(exon,c("start","end"))
+      exon[,id := seq_along(exon$start)]
+      exon[,ex:=rep("exon",nrow(exon))]
+      exon[,name := paste0(ex,id)]
+    
+      ## in CDK4 empty data.table (in tab1[[3]] no intronic sequences)
+      intron<-data.table(which(strsplit(as.character(tab1[[3]]), '')[[1]]=='D'),which(strsplit(as.character(tab1[[3]]), '')[[1]]=='A'))
+      setnames(intron,c("start","end"))
+      intron[,id := seq_along(intron$start)]
+      intron[,ex:=rep("intron",nrow(intron))]
+      intron[ ,`:=`( name =paste0(ex,id))]
 
-    genedt[,len := end-start +1]
-    genedt[,chr := rep(input_chrom,nrow(genedt))]
-    custom_fasta <- tempfile()
-    for(i in nrow(genedt)){
-        writeLines(paste0(">ref_",genedt$name,"_",genedt$chr,"_",genedt$start_chr,"_",genedt$end_chr,"_",genedt$end-genedt$start,"\n",genedt$seq),custom_fasta)
-    }
-    #close(con) #fasta
-    incProgress(1/10,message=NULL)
 
-    cod_table <- rbindlist(
-        lapply(1:nrow(genedt),
-               function(x) data.table(codon = genedt$ex[x],
-                                      gen_coord = genedt$start_chr[x]:genedt$end_chr[x],
-                                      coding_seq = as.character(0),
-                                      intrex =  as.character(genedt$id[x]),
-                                      ord_in_cod = as.integer(0),AA = "",
-                                      seq = unlist(strsplit(genedt$seq[x],split = "")))
-               )
-        )
+      genedt<-rbind(exon,intron)
+      setkey(genedt,start)
+      genedt[,seq := substring(as.character(tab1[[2]]),start,end),by=1:nrow(genedt)]
+
+      #strand specific
+
+      if(input_orient == "+"){
+          genedt[,start_chr := input_gene_start + start -1]
+          genedt[,end_chr := input_gene_start + end -1]
+      }else{
+          genedt[,start_chr := input_gene_start - start +1]
+          genedt[,end_chr := input_gene_start - end +1]
+      }
+
+      genedt[,len := end-start +1]
+      genedt[,chr := rep(input_chrom,nrow(genedt))]
+      custom_fasta <- tempfile()
+    
+      for(i in nrow(genedt)){
+          writeLines(paste0(">ref_",genedt$name,"_",genedt$chr,"_",genedt$start_chr,"_",genedt$end_chr,"_",
+                                  genedt$end-genedt$start,"\n",genedt$seq),custom_fasta)
+      }
+    
+
+      #close(con) #fasta
+      incProgress(1/10,message=NULL)
+    
+      cod_table <- rbindlist(
+          lapply(1:nrow(genedt),
+                 function(x) data.table(codon = genedt$ex[x],
+                                        gen_coord = genedt$start_chr[x]:genedt$end_chr[x],
+                                        coding_seq = as.character(0),
+                                        intrex =  as.character(genedt$id[x]),
+                                        ord_in_cod = as.integer(0),AA = "",
+                                        seq = unlist(strsplit(genedt$seq[x],split = "")))
+                )
+          )
 
     #ret=system("dev/GLASS/ext/gb2tab.py -a 20000 -b 20000 -f 'mRNA,CDS' Desktop/tp53.gb",intern=TRUE)
     #tab2  <- unlist(strsplit(ret[3],"\t"))
     #vec   <- strsplit(tab2[2],"")
     #vecb  <- lapply(vec,function(x){x==toupper(x)})[[1]]
-
-    tab2 <- tab1
-    trans <- gsub('/translation=\\"',"",str_match(tab2[[4]],'/translation=\"[A-Z]+')[,1])
-
-    coding<-data.table(AA =c(unlist(strsplit(trans,split="")),"*"),codon = 1:length(c(unlist(strsplit(trans,split="")),"*")))
-    coding <- rbindlist(lapply(1:nrow(coding),function(x) data.table(AA = rep(coding$AA[x],3),codon=as.character(rep(coding$codon[x],3)),ord_in_cod= as.integer(c(1,2,3)))))
-
-    #remove non coding exons
-    # cod_table <- cbind(cod_table, vecb)
-
-    # cod_table[!vecb][codon=="exon"]$codon = "non-coding_exon_seq"
-    incProgress(1/10,message=NULL)
-
-    cod_table[codon=="exon"]$AA = coding$AA
-    cod_table[codon=="exon"]$ord_in_cod = coding$ord_in_cod
-    cod_table[codon=="exon",]$coding_seq = as.character(1:nrow(cod_table[codon == "exon",]))
-    cod_table[codon=="exon"]$codon = coding$codon
-
-
-    extra <- cod_table
-    plus = extra[,max(as.numeric(coding_seq)),by=intrex][,V1]
-    plus <- plus[1:length(plus)-1]
-    minus <- plus + 1
-
-
-    if("intron" %in% genedt$ex){
-        l1 <-unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x])))
-        l2 <-unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x])))
     
-        intr_cod <- data.table(plus = unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x]))),minus=unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x]))),p = unlist(lapply(1:length(plus), function(x) 1:genedt[ex=="intron"]$len[x] )),m = unlist(lapply(1:length(minus), function(x) genedt[ex=="intron"]$len[x]:1 )))
+      tab2 <- tab1
+      trans <- gsub('/translation=\\"',"",str_match(tab2[[4]],'/translation=\"[A-Z]+')[,1])
+
+      coding<-data.table(AA =c(unlist(strsplit(trans,split="")),"*"),codon = 1:length(c(unlist(strsplit(trans,split="")),"*")))
+      coding <- rbindlist(lapply(1:nrow(coding),function(x) data.table(AA = rep(coding$AA[x],3),codon=as.character(rep(coding$codon[x],3)),ord_in_cod= as.integer(c(1,2,3)))))
+
+      #remove non coding exons
+      # cod_table <- cbind(cod_table, vecb)
+
+      # cod_table[!vecb][codon=="exon"]$codon = "non-coding_exon_seq"
+      incProgress(1/10,message=NULL)
+
+      cod_table[codon=="exon"]$AA = coding$AA
+      cod_table[codon=="exon"]$ord_in_cod = coding$ord_in_cod
+      cod_table[codon=="exon",]$coding_seq = as.character(1:nrow(cod_table[codon == "exon",]))
+      cod_table[codon=="exon"]$codon = coding$codon
+
+
+      extra <- cod_table
+      plus = extra[,max(as.numeric(coding_seq)),by=intrex][,V1]
+      plus <- plus[1:length(plus)-1]
+      minus <- plus + 1
+
+
+      if("intron" %in% genedt$ex){
+          l1 <-unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x])))
+          l2 <-unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x])))
     
-        intr_cod[p<m,name:= paste0(plus,"+",p)]
-        intr_cod[m<p,name:= paste0(minus,"-",m)]
-        cod_table[codon=="intron"]$coding_seq = intr_cod$name
-    }
-    incProgress(1/10,message=NULL)
+          intr_cod <- data.table(plus = unlist(lapply(1:length(plus),function(x) rep(plus[x],genedt[ex=="intron"]$len[x]))),minus=unlist(lapply(1:length(minus),function(x) rep(minus[x],genedt[ex=="intron"]$len[x]))),p = unlist(lapply(1:length(plus), function(x) 1:genedt[ex=="intron"]$len[x] )),m = unlist(lapply(1:length(minus), function(x) genedt[ex=="intron"]$len[x]:1 )))
+    
+          intr_cod[p<m,name:= paste0(plus,"+",p)]
+          intr_cod[m<p,name:= paste0(minus,"-",m)]
+          cod_table[codon=="intron"]$coding_seq = intr_cod$name
+      }
+      incProgress(1/10,message=NULL)
 
-    cod_table<- cod_table
-    file_cod=paste0(input_gene_name,".glassed.codons.rdata")
-    custom_cod <- tempfile()
-    save(cod_table,file=custom_cod)
+      cod_table<- cod_table
+      file_cod=paste0(input_gene_name,".glassed.codons.rdata")
+      custom_cod <- tempfile()
+      save(cod_table,file=custom_cod)
+      incProgress(amount=1,message="Done")
 
-    incProgress(amount=1,message="Done")
-
-    return(list(custom_cod=custom_cod,custom_fasta=custom_fasta))
+      return(list(custom_cod=custom_cod,custom_fasta=custom_fasta))
+  }
 
 }

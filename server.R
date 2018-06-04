@@ -1,3 +1,4 @@
+dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_161.jdk/Contents/Home/jre/lib/server/libjvm.dylib')
 library(shiny)
 library(data.table)
 library(sangerseqR) #bioclite
@@ -144,6 +145,7 @@ shinyServer(function(input,output,session) {
                 delete_id <- floor(as.numeric(strsplit(input$goDeleteSamples, "_")[[1]][2]))/10
                 #g_files <<- g_files[-delete_id]
                 g_files <<- g_files[!g_files[,id==delete_id]]
+                printf(g_files)
                 #js$delRow(delete_id)
             })
         }
@@ -762,12 +764,13 @@ shinyServer(function(input,output,session) {
             withProgress(
                 tryCatch({
                         res <- get_gbk_info(session,input$custom_gb)
+                        #print(res$CDS[[1]])
                         choices<-NULL
                         for(i in 1:length(res$CDS)){
                             option <- paste0("GENE: ",res$CDS[[i]]$gene,", PRODUCT: ",res$CDS[[i]]$product," (",nchar(res$CDS[[i]]$translation),"aa)",collapse = "")
                             choices[[option]] <- i
                         }
-
+                        
                         showModal({modalDialog(
                                 #p('Found ',length(res$mRNA),' "mRNA" features in GBK file '),
                                 p('searching for "CDS" features in the GenBank file...'),
@@ -790,7 +793,7 @@ shinyServer(function(input,output,session) {
                     }
                 ),message = "processing GenBank file..."
             )
-    })
+     })
 
     setCustomRef <- reactive({
         #if(!is.null(input$custom_gb) && !is.null(input$gbk_ok) && !(input$gbk_ok==0)){
@@ -818,18 +821,22 @@ shinyServer(function(input,output,session) {
                                 g_reactval$link <- x
                             })
                         })
-                    }
+                    } 
                     ,error = function(e){
                         removeModal()
-                        output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" ))
+                        if(is.vector(ret) == TRUE){
+                          output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",ret,"</pre>" ))
+                        } else {
+                          output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" ))
+                        }
                         g_custom_cod <<- NULL
                         g_custom_ref <<- NULL
                     }
                     ),message = NULL,detail=NULL,style="old"
                 )
-            }
+              } 
         })
-        }
+        } 
     })
 
     #####################
