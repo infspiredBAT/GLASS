@@ -37,7 +37,7 @@ shinyUI(
 		         </div>"),
 			column(1, HTML("&nbsp&nbsp<b><font size=6em>GLASS</font></b>")),
 			column(1,HTML('<div  style="padding:.3em .5em"><a href="javascript:void(0)" id="app-disclaimer-link" onclick="$(\'#disclaimer-modal\').modal(\'show\')" >
-                                ver 0.4.3 <br> (2018-May-18)
+                                ver 0.4.4 <br> (2018-Jun-5)
                            </a></div>'),
 			       includeHTML("www/log.html")
 			       ),

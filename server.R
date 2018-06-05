@@ -1,64 +1,67 @@
-dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_161.jdk/Contents/Home/jre/lib/server/libjvm.dylib')
 library(shiny)
 library(data.table)
 library(sangerseqR) #bioclite
 library(xlsx)
 library(plyr)
 
-if (!("dev" %in% list.files())) {
-  source("procAbi.R", local = TRUE)
-  source("helpers.R", local = TRUE)
-  source("samples.R", local = TRUE)
 
-  general_global_vars <- ls()
-  for (x in general_global_vars[grepl("general_g_", general_global_vars)]) {
-    assign(gsub("general_", "", x), get(x))
-  }
-}
     
 shinyServer(function(input,output,session) {
     
-  #options(shiny.reactlog=TRUE)
-  g_calls                 <- NULL             #annotated basecall data
-  #makeReactiveBinding("g_calls")
-  g_intens                <- NULL             #intensities file
-  g_intens_rev            <- NULL             #optional reverse intensities file
-  g_single_rev            <- NULL
-  g_intrexdat             <- NULL             #intrex data used in graphs
-  g_glassed_ref           <- NULL
-  g_glassed_cod           <- NULL
-  g_custom_ref            <- NULL
-  g_custom_cod            <- NULL
-  g_glassed_snp           <- NULL
-  g_alignTo_options       <- c("TP53","ATM","NOTCH1","CALR")
-  g_alignTo_description   <- list("TP53"   = "<b>TP53</b> description"
-                                  , "ATM"    = "<b>ATM</b> description"
-                                  , "NOTCH1" = "<b>NOTCH1</b> description"
-                                  , "CALR"   = "<b>CALR</b> description")
-  g_choices               <- NULL
-  g_noisy_neighbors       <- NULL
-  g_view                  <- NULL
-  g_selected              <- NULL
-  g_selected_goto_index   <- 0
-  g_max_y                 <- NULL
-  g_hetero_calls          <- 0
-  g_hetero_indel_pid      <- 0
-  g_hetero_ins_tab        <- NULL
-  g_hetero_del_tab        <- NULL
-  g_expected_het_indel    <- NULL
-  g_minor_het_insertions  <- NULL
-  load_id                 <- NULL
-  g_stored_het_indels     <- list()
-  files_info              <- ""
-  g_indels_present        <- FALSE
-  g_qual_present          <- FALSE
-  g_brush_fwd             <- 0
-  g_brush_rev             <- 0
-  g_not_loaded            <- ""
-  g_reactval              <- reactiveValues()
-  g_reactval$updateVar    <- 0
-  g_refs_avail            <<- c("-","TP53","NOTCH1","ATM","CALR","Custom")
-  g_files         <<- loadGFiles() #g_files = represents the data table containing individual samples their info  
+    if (!("dev" %in% list.files())) {
+        source("global.R", local = T)
+        source("procAbi.R", local = TRUE)
+        source("helpers.R", local = TRUE)
+        source("samples.R", local = TRUE)
+        
+        general_global_vars <- ls()
+        print(general_global_vars)
+        for (x in general_global_vars[grepl("general_", general_global_vars)]) {
+            assign(gsub("general_", "", x), get(x))
+        }
+    }
+    
+  # #options(shiny.reactlog=TRUE)
+  # g_calls                 <- NULL             #annotated basecall data
+  # #makeReactiveBinding("g_calls")
+  # g_intens                <- NULL             #intensities file
+  # g_intens_rev            <- NULL             #optional reverse intensities file
+  # g_single_rev            <- NULL
+  # g_intrexdat             <- NULL             #intrex data used in graphs
+  # g_glassed_ref           <- NULL
+  # g_glassed_cod           <- NULL
+  # g_custom_ref            <- NULL
+  # g_custom_cod            <- NULL
+  # g_glassed_snp           <- NULL
+  # g_alignTo_options       <- c("TP53","ATM","NOTCH1","CALR")
+  # g_alignTo_description   <- list("TP53"   = "<b>TP53</b> description"
+  #                                 , "ATM"    = "<b>ATM</b> description"
+  #                                 , "NOTCH1" = "<b>NOTCH1</b> description"
+  #                                 , "CALR"   = "<b>CALR</b> description")
+  # g_choices               <- NULL
+  # g_noisy_neighbors       <- NULL
+  # g_view                  <- NULL
+  # g_selected              <- NULL
+  # g_selected_goto_index   <- 0
+  # g_max_y                 <- NULL
+  # g_hetero_calls          <- 0
+  # g_hetero_indel_pid      <- 0
+  # g_hetero_ins_tab        <- NULL
+  # g_hetero_del_tab        <- NULL
+  # g_expected_het_indel    <- NULL
+  # g_minor_het_insertions  <- NULL
+  # load_id                 <- NULL
+  # g_stored_het_indels     <- list()
+  # files_info              <- ""
+  # g_indels_present        <- FALSE
+  # g_qual_present          <- FALSE
+  # g_brush_fwd             <- 0
+  # g_brush_rev             <- 0
+  # g_not_loaded            <- ""
+  # g_reactval              <- reactiveValues()
+  # g_reactval$updateVar    <- 0
+  # g_refs_avail            <<- c("-","TP53","NOTCH1","ATM","CALR","Custom")
+  # g_files         <<- loadGFiles() #g_files = represents the data table containing individual samples their info  
   
     #SAMPLE BROWSER STUFF
 
@@ -154,7 +157,7 @@ shinyServer(function(input,output,session) {
                 delete_id <- floor(as.numeric(strsplit(input$goDeleteSamples, "_")[[1]][2]))/10
                 #g_files <<- g_files[-delete_id]
                 g_files <<- g_files[!g_files[,id==delete_id]]
-                printf(g_files)
+                #printf(g_files)
                 #js$delRow(delete_id)
             })
         }
