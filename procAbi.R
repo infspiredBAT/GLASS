@@ -68,8 +68,8 @@ get_call_data <- function(data,data_rev,single_rev,glassed_ref){
                             ,quality        = sapply(seq_along(user_align[[4]]),function(x) max(user_align[[4]][x],user_align[[5]][x]))
                             ,quality_fwd    = user_align[[4]]
                             ,quality_rev    = user_align[[5]]
-                            ,trace_peak     = data$PLOC.1
-                            ,trace_peak_rev = data_rev$PLOC.1
+                            #,trace_peak     = data$PLOC.1
+                            #,trace_peak_rev = data_rev$PLOC.1
                             ,VAF            = 0)
 #         calls[,rm7qual := c(quality[1:3],rollmean(quality,k=7),quality[(length(quality) - 2):length(quality)])]
 #         calls[,rm7qual_fwd := c(quality_fwd[1:3],rollmean(quality_fwd,k=7),quality[(length(quality_fwd) - 2):length(quality_fwd)])]
@@ -230,7 +230,7 @@ generate_ref <-function(user_seq,glassed_ref){
         ref <- toupper(paste(refs[seq(2,length(refs),2)],collapse = ""))
         align <- get_alignment(ref,user_seq,cores,"local-global")
 
-        gen_coord <- get_coord(align$start,align$ref_start,align$ref_end,max(user_seq_vs_genome$gen_coord),min(user_seq_vs_genome$gen_coord),align$diffs[type == "D"])
+        gen_coord <- get_coord(align$start,align$ref_start,align$ref_end,user_seq_vs_genome$gen_coord[1],last(user_seq_vs_genome$gen_coord),align$diffs[type == "D"])
         #user_seq_vs_genome <- user_seq_vs_genome[align$ref_starts:align$ref_ends,]
         
         #merge does not keep the coorect order
