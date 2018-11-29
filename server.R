@@ -1,7 +1,7 @@
 library(shiny)
 library(data.table)
 library(sangerseqR) #bioclite
-library(xlsx)
+library(openxlsx)
 library(plyr)
 
 
