@@ -192,7 +192,6 @@ shinyServer(function(input,output,session) {
         input$max_y_p
         input$s2n_min
         input$show_calls_checkbox
-        input$join_traces_checkbox
         input$max_y_p
         input$opacity
         input$incorporate_checkbox
@@ -207,7 +206,7 @@ shinyServer(function(input,output,session) {
                                       qual_thres_to_call=input$qual_thres_to_call,
                                       s2n_min=input$s2n_min,
                                       show_calls_checkbox=input$show_calls_checkbox,
-                                      join_traces_checkbox=input$join_traces_checkbox,
+                                      join_traces_checkbox=FALSE,
                                       max_y_p=input$max_y_p,
                                       opacity=input$opacity,
                                       incorporate_checkbox=input$incorporate_checkbox,

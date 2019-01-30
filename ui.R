@@ -172,16 +172,15 @@ shinyUI(
         					column(6
         					    ,checkboxInput("show_qual_checkbox","show quality", value = F)
         					    ,checkboxInput("show_calls_checkbox","show calls", value = F)
-        					    ,conditionalPanel(condition = "output.reverse",
-                                                  checkboxInput("join_traces_checkbox","join traces", value = F))
-                                #sliderInput("opacity_fwd","fwd trace opacity", ticks=FALSE, min = 0, max = 100, value = 100, step = 5),
+        					    #,conditionalPanel(condition = "output.reverse",
+                                #                  checkboxInput("join_traces_checkbox","join traces", value = F))
                             ),
     					    column(1),
         					column(4
                                 ,sliderInput("max_y_p","peak height", ticks=FALSE, min = 1, max = 400, value = 100, step = 10)
         					    ,conditionalPanel(condition = "output.reverse && input.join_traces_checkbox" ,
         					                      sliderInput("opacity","R <trace opacity> F", ticks=FALSE, min = -100, max = 100, value = 0, step = 10))
-        					    ,conditionalPanel(condition = "!input.join_traces_checkbox", HTML("<div id='spacer'>  </div>"))
+        					    #,conditionalPanel(condition = "!input.join_traces_checkbox", HTML("<div id='spacer'>  </div>"))
         					    #,uiOutput('helpButton')
         					    #,actionButton("toggle_help",icon = icon("question"), "hide help",class = "show_hide_help")
         					    ,tags$style(HTML("#spacer{margin-top:43px;}"))
