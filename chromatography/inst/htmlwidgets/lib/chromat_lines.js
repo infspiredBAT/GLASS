@@ -49,7 +49,6 @@
         }
         create(n,domain_x,domain_y){
             this.count = n;
-            let i;
             let svg = d3.select("svg");
             //filter for Grayscale to be used on filtered part of traces
             let filter_gs   = svg.append("filter")
@@ -57,7 +56,7 @@
             let colormatrix = filter_gs.append("feColorMatrix")
                                 .attr("type","matrix")
                                 .attr("values","2 0.5 0.5 0 0 0.5 2 0.5 0 0 0.5 0.5 2 0 0 0 0 0 1 0");
-            for(i=1;i<=this.count;i++){
+            for(let i=1;i<=this.count;i++){
                 this.line_el.append("g").attr("class","trace_line line_a_" + i);
                 this.line_el.append("g").attr("class","trace_line line_c_" + i);
                 this.line_el.append("g").attr("class","trace_line line_g_" + i);
@@ -131,57 +130,68 @@
             this.heightScale_rev_split.domain([0,domain_y]);
         }
 
-        updateLine(data_all,rev){
+        updateLine(data_all){
 
-            const n = this.count;
             let base,data;
+            let orient = [true,false]
 
-            for(const b in this.bases){
-                base = this.bases[b];
-                data = [data_all[base]]
+            for(let n=1;n<=this.count;n++){                  //for each sample
+                for(let b in this.bases){                    //for each base
+                    for(let r in orient){                  //both orientations
+                        let rev = orient[r];
+                        if (rev && data_all.single_rev){continue;}
+                        base = this.bases[b];
 
-                switch(base) {        //g2 must go first so its under g1 (svg has no depth, only order of elements)
-                    case "A": if(rev){var g2 = this.line_el.selectAll(".line_a_r_" + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_a_r_" + n); }
-                              else   {var g2 = this.line_el.selectAll(".line_a_"   + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_a_"   + n); }
-                              var col = "#00A100"; break;
-                    case "C": if(rev){var g2 = this.line_el.selectAll(".line_c_r_" + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_c_r_" + n); }
-                              else   {var g2 = this.line_el.selectAll(".line_c_"   + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_c_"   + n); }
-                              var col = "#2985EA"; break;
-                    case "G": if(rev){var g2 = this.line_el.selectAll(".line_g_r_" + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_g_r_" + n); }
-                              else   {var g2 = this.line_el.selectAll(".line_g_"   + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_g_"   + n); }
-                              var col = "#6C6A6C"; break;
-                    case "T": if(rev){var g2 = this.line_el.selectAll(".line_t_r_" + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_t_r_" + n); }
-                              else   {var g2 = this.line_el.selectAll(".line_t_"   + n + "_gray");
-                                      var g1 = this.line_el.selectAll(".line_t_"   + n); }
-                              var col = "#EA2929"; break;
+                        if(rev){
+                            data = [data_all[n-1]['intens_rev'][base]];
+                        }else{
+                            data = [data_all[n-1]['intens'][base]];
+                        }
+
+                        switch(base) {        //g2 must go first so its under g1 (svg has no depth, only order of elements)
+                            case "A": if(rev){var g2 = this.line_el.selectAll(".line_a_r_" + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_a_r_" + n); }
+                                      else   {var g2 = this.line_el.selectAll(".line_a_"   + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_a_"   + n); }
+                                      var col = "#00A100"; break;
+                            case "C": if(rev){var g2 = this.line_el.selectAll(".line_c_r_" + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_c_r_" + n); }
+                                      else   {var g2 = this.line_el.selectAll(".line_c_"   + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_c_"   + n); }
+                                      var col = "#2985EA"; break;
+                            case "G": if(rev){var g2 = this.line_el.selectAll(".line_g_r_" + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_g_r_" + n); }
+                                      else   {var g2 = this.line_el.selectAll(".line_g_"   + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_g_"   + n); }
+                                      var col = "#6C6A6C"; break;
+                            case "T": if(rev){var g2 = this.line_el.selectAll(".line_t_r_" + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_t_r_" + n); }
+                                      else   {var g2 = this.line_el.selectAll(".line_t_"   + n + "_gray");
+                                              var g1 = this.line_el.selectAll(".line_t_"   + n); }
+                                      var col = "#EA2929"; break;
+                        }
+                        if(rev){var c = "line_r"; var l = this.line_rev; var cl = "url(#rect_rev_clip_" + n +")"}
+                        else   {var c = "line_f"; var l = this.line_fwd; var cl = "url(#rect_fwd_clip_" + n +")"}
+
+                        var line = g1.selectAll("path").data(data); //UPDATE
+                        line.exit().remove();                       //EXIT
+                        line.enter().append("path")                 //enter
+                            .merge(line).attr("class", "path " + c)
+                            .attr("d", l)
+                            .attr("clip-path","url(#clip)")
+                            .attr("filter","url(#monochrome)")
+                            .attr("fill","none").attr("stroke", col)
+                            .attr("stroke-width", 2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+                        var line = g2.selectAll("path").data(data); //UPDATE
+                        line.exit().remove();                       //EXIT
+                        line.enter().append("path")                 //enter
+                            .merge(line).attr("class","path "+c)
+                            .attr("d",l)
+                            .attr("clip-path", cl)
+                            .attr("fill","none").attr("stroke",col)
+                            .attr("stroke-width",2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+                    }
                 }
-                if(rev){var c = "line_r"; var l = this.line_rev; var cl = "url(#rect_rev_clip_" + n +")"}
-                else   {var c = "line_f"; var l = this.line_fwd; var cl = "url(#rect_fwd_clip_" + n +")"}
-
-                var line = g1.selectAll("path").data(data); //UPDATE
-                line.exit().remove();                       //EXIT
-                line.enter().append("path")                 //enter
-                    .merge(line).attr("class", "path " + c)
-                    .attr("d", l)
-                    .attr("clip-path","url(#clip)")
-                    .attr("filter","url(#monochrome)")
-                    .attr("fill","none").attr("stroke", col)
-                    .attr("stroke-width", 2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
-                var line = g2.selectAll("path").data(data); //UPDATE
-                line.exit().remove();                       //EXIT
-                line.enter().append("path")                 //enter
-                    .merge(line).attr("class","path "+c)
-                    .attr("d",l)
-                    .attr("clip-path", cl)
-                    .attr("fill","none").attr("stroke",col)
-                    .attr("stroke-width",2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
             }
         }
 
@@ -227,7 +237,7 @@
             let widthScale = this.widthScale;
             let v = g_var.selectAll("line").data(choices);
             v.exit().remove();
-            
+
             //strandness in choices 0 = undetermined (should not occure); 1 = forward strand; 2 = reverse strand; 3 = both, 4 = undetermined indel, 5 = indel forward only, 6 = indel reverse only, 7 = indel both strands
             v.enter().append("line").attr("class","enter")
                 .merge(v).attr("class","peak_label short line var_noise_indic")
@@ -239,19 +249,25 @@
                 .attr("stroke","rgba(255,0,0,0.12)").attr("clip-path","url(#clip)");
         }
 
-        setNoiseArea(fwd,rev,n){
+        setNoiseArea(samples){
 
-            var gnf = this.line_el.select(".gNoise_fwd_" + n).selectAll("path").data([fwd]);
-            gnf.enter().append("path")
-                .merge(gnf).attr("class","area area_fwd").attr("d",this.noise_area_fwd)
-               .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
-            gnf.exit().remove();
-            if(typeof rev !== 'undefined'){
-                var gnr = this.line_el.select(".gNoise_rev_" + n).selectAll("path").data([rev]);
-                gnr.enter().append("path")
-                   .merge(gnr).attr("class","area area_rev").attr("d",this.noise_area_rev)
-                   .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
-                gnr.exit().remove();
+            for(let n=1;n<=this.count;n++){
+                let fwd = HTMLWidgets.dataframeToD3([samples[n-1]["calls"]["trace_peak"],samples[n-1]["calls"]["noise_abs_fwd"]]);
+
+                var gnf = this.line_el.select(".gNoise_fwd_" + n).selectAll("path").data([fwd]);
+                gnf.enter().append("path")
+                    .merge(gnf).attr("class","area area_fwd").attr("d",this.noise_area_fwd)
+                   .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
+                gnf.exit().remove();
+                if(!samples[n-1].single_rev){
+
+                    let rev = HTMLWidgets.dataframeToD3([samples[n-1]["calls"]["trace_peak"],samples[n-1]["calls"]["noise_abs_rev"]]);
+                    var gnr = this.line_el.select(".gNoise_rev_" + n).selectAll("path").data([rev]);
+                    gnr.enter().append("path")
+                       .merge(gnr).attr("class","area area_rev").attr("d",this.noise_area_rev)
+                       .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
+                    gnr.exit().remove();
+                }
             }
         }
 

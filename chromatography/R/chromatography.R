@@ -5,39 +5,23 @@
 #' @import htmlwidgets
 #'
 #' @export
+#' 
 
-chromatography <- function(intens,
-                           intens_rev = NULL,
-                           single_rev,
-                           intrexdat,
-                           calls,
-                           choices,
-                           new_sample,
-                           noisy_neighbors,
+
+chromatography <- function(new_sample,
                            show_calls = FALSE,
                            show_qual = FALSE,
-                           qual_present,
-                           brush_fwd_start,brush_fwd_end,
-                           brush_rev_start,brush_rev_end,
+                           num_samples,
+                           samples,
                            width = NULL, height = NULL) {
 
     x <- list(
-        intens     = intens,
-        intens_rev = intens_rev,
-        single_rev = single_rev,
-        intrexdat  = intrexdat,
-        calls      = calls,
-        choices    = choices,
         new_sample = new_sample,
         resize     = FALSE,
-        noisy_neighbors = noisy_neighbors,
         show_calls      = show_calls,
         show_qual       = show_qual,
-        qual_present    = qual_present,
-        brush_fwd_start = brush_fwd_start,
-        brush_fwd_end   = brush_fwd_end,
-        brush_rev_start = brush_rev_start,
-        brush_rev_end   = brush_rev_end
+        num_samples     = num_samples,
+        samples         = samples
     )
   # create widget
     htmlwidgets::createWidget(

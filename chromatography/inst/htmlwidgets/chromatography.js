@@ -815,20 +815,12 @@ HTMLWidgets.widget({
     renderValue: function(el, x, instance) {
 
         instance.lastValue = x;
+        console.log(x)
         //the render function behaves differently when called repeatedly
         //the first run is actually still a part of the initialization step
         if(x.new_sample){
-            console.log("new sample");
             x.new_sample = false;
-            var intens = x["intens"];
-            var intens_rev = "";
-            var rev = 0;  //offset on labels in case we have alternative reference
-            if(x["intens_rev"] !== null){
-                intens_rev = x["intens_rev"];
-                rev = 1;
-            }
 
-            var single_rev = x["single_rev"];
             if(instance.instanceCounter>=1){ //cleanup after previous sample
                 instance.lines.destroy();
                 instance.focus.selectAll(".peak_label").remove();
@@ -836,10 +828,9 @@ HTMLWidgets.widget({
             }
 
             instance.instanceCounter = instance.instanceCounter+1;
-            var intens_guide_line = x["intens_guide_line"];
-            var calls       = HTMLWidgets.dataframeToD3(x["calls"]);
-            var choices     = HTMLWidgets.dataframeToD3(x["choices"]);
-            var noisy_neighbors     = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
+            var calls       = HTMLWidgets.dataframeToD3(x["samples"][0]["calls"]);
+            var choices     = HTMLWidgets.dataframeToD3(x["samples"][0]["choices"]);
+            //var noisy_neighbors     = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
             var show_calls  = x["show_calls"];
             if(show_calls){
                 instance.call_opacity = 0.8;
@@ -847,11 +838,12 @@ HTMLWidgets.widget({
                 instance.call_opacity = 0;
             }
 
-            var domain_y    = x["intrexdat"]["max_y"];
+            var domain_y    = x["samples"][0]["intrexdat"]["max_y"];
+            console.log(domain_y)
             instance.max_y  = domain_y;
-            var domain_x    = x["intrexdat"]["max_x"];
+            var domain_x    = x["samples"][0]["intrexdat"]["max_x"];
             instance.max_x  = domain_x;
-            var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]);
+            var intrex      = HTMLWidgets.dataframeToD3(x["samples"][0]["intrexdat"]["intrex"]);
             instance.intrex = intrex;
 
             var focus   = instance.focus;
@@ -864,7 +856,7 @@ HTMLWidgets.widget({
             widthScale.domain([0,domain_x]);
             width2Scale.domain([0,domain_x]);
 
-            instance.lines.create(1,domain_x,domain_y);
+            instance.lines.create(x["num_samples"],domain_x,domain_y);
             heightScale.domain([0,domain_y]);
             instance.heightScale_fwd_split.domain([0,domain_y]);
             instance.heightScale_rev_split.domain([0,domain_y]);
@@ -895,50 +887,57 @@ HTMLWidgets.widget({
                 .style("filter", "url(#drop-shadow)")
                 .attr("opacity",1);
 
-            instance.lines.updateLine(intens,false);
+            instance.lines.updateLine(x.samples);
 
             //noise indicator
-            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
-            //reverse strand
-            instance.updateFilt_mini(x["brush_fwd_start"],x["brush_fwd_end"],x["brush_rev_start"],x["brush_rev_end"],intens_rev != "");
-            instance.lines.updateFilt(x["brush_fwd_start"],x["brush_fwd_end"],x["brush_rev_start"],x["brush_rev_end"],intens_rev != "");
-            if(intens_rev != ""){
-                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
-                instance.lines.updateLine(intens_rev,true);
-            }
-            instance.lines.setNoiseArea(a_noise_fwd,a_noise_rev,1);
-            //on single strand always show "join view"
-            if(intens_rev != ""){
-                instance.joinView();
-            }else{
-                instance.joinView("TRUE");
+            //var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
+            instance.lines.setNoiseArea(x.samples);
+
+            //todo solve filters in mini when multiple samples
+            if(x.num_samples == 1){
+                instance.updateFilt_mini(x['samples'][0]['brush_fwd_start'],x['samples'][0]['brush_fwd_end'],x['samples'][0]['brush_rev_start'],x['samples'][0]['brush_rev_end'],x['samples'][0]['intens_rev'] != "");
+                instance.lines.updateFilt(x['samples'][0]['brush_fwd_start'],x['samples'][0]['brush_fwd_end'],x['samples'][0]['brush_rev_start'],x['samples'][0]['brush_rev_end'],x['samples'][0]['intens_rev'] != "");
             }
 
-            focus.append("g").selectAll("text.seq.codon").data(calls).enter() //codon stuff
+            //on single strand always show "join view"
+            // todo move this to chromat_lines.js
+            //if(intens_rev != ""){
+            //    instance.joinView();
+            //}else{
+            //    instance.joinView("TRUE");
+            //}
+
+            console.log("before labels");
+            focus.append("g").selectAll("text.seq.codon").data(calls).enter() //coding coord
                 .append("text").attr("class",function(d){if(d["coding_seq"]%10==0){return "peak_label coding_ten"}else{return "peak_label";}})
                 .text(function(d){
                     if   (d["coding_seq"] > 0){return "c." + d["coding_seq"];}
                     else {                     return "";}})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .attr("y",(instance.label_pos["codon"]+rev))
+                .attr("y",(instance.label_pos["codon"]))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
+            console.log("inbetween labels");
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
                 .append("text").attr("class",function(d){if((d["coding_seq"]%10==0)&&(d["coding_seq"]>0)){return "peak_label coding_ten"}else{return "peak_label"}})
                 .text(function(d){return "g." + d["gen_coord"];})
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
-                .attr("y",(instance.label_pos["gen_coord"]+rev))
+                .attr("y",(instance.label_pos["gen_coord"]))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
+            console.log("after of labels");
             instance.setPeakLabel(calls,"reference");
             instance.setPeakLabel(calls,"call");
+
+            //todo move sample specific labels to chromat_lines.js
             instance.setPeakLabel(calls,"mut_call_fwd");
-            if(rev!==0){
+            if(x['samples'][0]['intens_rev'] != 'undefined'){
                 instance.setPeakLabel(calls,"call_rev");
                 instance.setPeakLabel(calls,"mut_call_rev");
             }
-            if(x["qual_present"]){
-                instance.setQualityLabels(calls,rev);
+            if(x['samples'][0]["qual_present"]){
+                console.log("set qual labels");
+                instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != 'undefined');
             }
             var show_qual  = x["show_qual"];
             if(show_qual){
@@ -969,48 +968,45 @@ HTMLWidgets.widget({
         }else{
             //console.log("render");
 
-            var calls   = HTMLWidgets.dataframeToD3(x["calls"]);
-            var rev = 0;
-            if(x["intens_rev"] !== null){
-                rev = 1;
-            }
-            var a_noise_fwd = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_fwd"]]);
-            var intens = x["intens"];
-            instance.updateFilt_mini(x["brush_fwd_start"],x["brush_fwd_end"],x["brush_rev_start"],x["brush_rev_end"],rev);
-            instance.lines.updateFilt(x["brush_fwd_start"],x["brush_fwd_end"],x["brush_rev_start"],x["brush_rev_end"],rev);
-            if(rev){
-                var a_noise_rev = HTMLWidgets.dataframeToD3([x["calls"]["trace_peak"],x["calls"]["noise_abs_rev"]]);
-                var intens_rev = x["intens_rev"];
+            var calls   = HTMLWidgets.dataframeToD3(x['samples'][0]["calls"]);
+
+            instance.lines.setNoiseArea(x.samples)
+
+            //todo solve filters in mini when multiple samples
+            if(x.num_samples == 1){
+                instance.updateFilt_mini(x['samples'][0]['brush_fwd_start'],x['samples'][0]['brush_fwd_end'],x['samples'][0]['brush_rev_start'],x['samples'][0]['brush_rev_end'],x['samples'][0]['intens_rev'] != "");
+                instance.lines.updateFilt(x['samples'][0]['brush_fwd_start'],x['samples'][0]['brush_fwd_end'],x['samples'][0]['brush_rev_start'],x['samples'][0]['brush_rev_end'],x['samples'][0]['intens_rev'] != "");
             }
 
-            if(x["qual_present"]){
-                instance.setQualityLabels(calls,rev);
+            if(x['samples'][0]["qual_present"]){
+                console.log("set qual labels");
+                instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != 'undefined');
             }
-            if(instance.max_x != x["intrexdat"]["max_x"]){
-                instance.max_x = x["intrexdat"]["max_x"];
-                var domain_x    = x["intrexdat"]["max_x"];
+            if(instance.max_x != x['samples'][0]["intrexdat"]["max_x"]){
+                instance.max_x = x['samples'][0]["intrexdat"]["max_x"];
+                var domain_x    = x['samples'][0]["intrexdat"]["max_x"];
                 instance.width2Scale.domain([0,domain_x]);
-                var intrex      = HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]);
+                var intrex      = HTMLWidgets.dataframeToD3(x['samples'][0]["intrexdat"]["intrex"]);
                 instance.setIntrexBoxes(intrex);
             }
-            if(x["intrexdat"]["max_y"]!= instance.max_y){
+            if(x['samples'][0]["intrexdat"]["max_y"]!= instance.max_y){
                 instance.reHeight(x["intrexdat"]["max_y"]);
                 instance.max_y = x["intrexdat"]["max_y"];
-            }else if(x.choices != instance.choices){
-                var choices = HTMLWidgets.dataframeToD3(x["choices"]);
+            }else if(x['samples'][0].choices != instance.choices){
+                var choices = HTMLWidgets.dataframeToD3(x['samples'][0]["choices"]);
                 var show_calls  = x["show_calls"];
                 if(show_calls){
                     instance.call_opacity = 0.8; }
                 else{ instance.call_opacity = 0; }
                 instance.focus.selectAll(".call").attr("opacity",instance.call_opacity);
-                instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x["intrexdat"]["intrex"]));
+                instance.setIntrexBoxes(HTMLWidgets.dataframeToD3(x['samples'][0]["intrexdat"]["intrex"]));
                 instance.showVarInMinimap(choices);
-                instance.choices = x.choices;
+                instance.choices = x['samples'][0].choices;
                 instance.setPeakLabel(calls,"user_sample");
                 instance.setPeakLabel(calls,"user_mut");
                 instance.setPeakLabel(calls,"reference")
                 instance.setPeakLabel(calls,"mut_call_fwd",instance.call_opacity);
-                if(rev){
+                if(x['samples'][0]['intens_rev'] != 'undefined'){
                     instance.setPeakLabel(calls,"mut_call_rev",instance.call_opacity);
                 }
                 instance.setCodingLabel(calls);
