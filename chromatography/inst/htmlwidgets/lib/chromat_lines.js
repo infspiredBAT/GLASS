@@ -2,16 +2,18 @@
 
     class LineSet {
 
-        constructor(line_el,height,widthScale) {
+        constructor(line_el,height,widthScale,h) {
             this.line_el = line_el ;
             this.count = 0;
-            this.height = height;
+            this.height = height;     //TODO sort out height to keep only one variable!!!
+            this.h      = h;
             this.bases = ["A","C","G","T"];
 
+            let w = widthScale.range()[1];
             this.filt_fwd_start = 0;
-            this.filt_fwd_end =0;
+            this.filt_fwd_end = w;
             this.filt_rev_start = 0;
-            this.filt_rev_end = 0;
+            this.filt_rev_end = w;
             this.filt_has_rev = false;
 
             let half_height = height/1.6;
@@ -55,6 +57,7 @@
         create(n,domain_x,domain_y){
             this.count = n;
             let svg = d3.select("svg");
+            let w = this.widthScale.range()[1];
             //filter for Grayscale to be used on filtered part of traces
             let filter_gs   = svg.append("filter")
                                .attr("id","monochrome");
@@ -91,18 +94,18 @@
                                 .attr("id", "rect_fwd_clip_" + i)
                                 .append("rect")
                                 .attr("x", 0).attr("y", 0)
-                                .attr("width", 0)
-                                .attr("height",this.height)
+                                .attr("width", w)
+                                .attr("height",this.h)
                                 .attr("clip-path","url(#clip)");
-                console.log("clip_fwd element:");
-                console.log(this.clip_fwd);
+                //console.log("clip_fwd element:");
+                //console.log(this.clip_fwd);
 
                 this.clip_rev = svg.append("clipPath")
                                 .attr("id", "rect_rev_clip_" + i)
                                 .append("rect")
                                 .attr("x", 0).attr("y", 0)
-                                .attr("width", 0)
-                                .attr("height",this.height);
+                                .attr("width", w)
+                                .attr("height",this.h);
 
                 this.filt_line_fwd_start = this.line_el.append("line")
                                        .attr("x1", 0).attr("y1", 0)
@@ -140,7 +143,7 @@
             let k = 0;
             let unit = (this.end_draw - this.start_draw) / (2 * this.count);
             let s = this.start_draw;
-            console.log(unit);
+            //console.log(unit);
             for(let i=1; i<=this.count; i++){
                 //for(let j=1; j<=2; j++){  //fwd + rev
                 let fwd = d3.scaleLinear().range([((k + 1) * unit ) + s,k * unit + s]);
@@ -164,7 +167,7 @@
                 this.d3lines[i] = [fwd_line, rev_line]
             }
 
-            console.log(this.hScales);
+            //console.log(this.hScales);
         }
 
         updateLine(data_all){
@@ -234,37 +237,40 @@
 
         updateFilt(fwd_start,fwd_end,rev_start,rev_end,has_rev){
 
-            //should also cycle through this.count and adjust height accordingly
-            if(fwd_start != undefined){this.filt_fwd_start = fwd_start;}
-            if(fwd_end != undefined){this.filt_fwd_end = fwd_end;}
-            if(rev_start != undefined){this.filt_rev_start = rev_start;}
-            if(rev_end != undefined){this.filt_rev_end = rev_end;}
-            if(has_rev!=undefined){this.filt_has_rev = has_rev;}
+            if (this.count == 1){
+
+                //should also cycle through this.count and adjust height accordingly
+                if(fwd_start != undefined){this.filt_fwd_start = fwd_start;}
+                if(fwd_end != undefined){this.filt_fwd_end = fwd_end;}
+                if(rev_start != undefined){this.filt_rev_start = rev_start;}
+                if(rev_end != undefined){this.filt_rev_end = rev_end;}
+                if(has_rev!=undefined){this.filt_has_rev = has_rev;}
 
 
-            let fwd_x = this.widthScale(this.filt_fwd_start);
-            let fwd_width = this.widthScale(this.filt_fwd_end) - fwd_x;
+                let fwd_x = this.widthScale(this.filt_fwd_start);
+                let fwd_width = this.widthScale(this.filt_fwd_end) - fwd_x;
 
-            this.clip_fwd.attr("x",fwd_x).attr("width",fwd_width);
-            this.filt_line_fwd_start.attr("x1",this.widthScale(this.filt_fwd_start))
-                        .attr("x2",this.widthScale(this.filt_fwd_start))
-                        .attr("y1",140).attr("y2",280);
-            this.filt_line_fwd_end.attr("x1",this.widthScale(this.filt_fwd_end))
-                        .attr("x2",this.widthScale(this.filt_fwd_end))
-                        .attr("y1",140).attr("y2",280);
+                this.clip_fwd.attr("x",fwd_x).attr("width",fwd_width);
+                this.filt_line_fwd_start.attr("x1",this.widthScale(this.filt_fwd_start))
+                            .attr("x2",this.widthScale(this.filt_fwd_start))
+                            .attr("y1",140).attr("y2",280);
+                this.filt_line_fwd_end.attr("x1",this.widthScale(this.filt_fwd_end))
+                            .attr("x2",this.widthScale(this.filt_fwd_end))
+                            .attr("y1",140).attr("y2",280);
 
-            if(this.filt_has_rev){
-                let rev_x = this.widthScale(this.filt_rev_start);
-                let rev_width = this.widthScale(this.filt_rev_end)- rev_x;
-                this.clip_rev.attr("x",rev_x).attr("width",rev_width);
-                this.filt_line_rev_start.attr("x1",rev_x)
-                            .attr("x2",rev_x)
-                            .attr("y1",280).attr("y2",420);
-                this.filt_line_rev_end.attr("x1",(this.widthScale(this.filt_rev_end)-1))
-                            .attr("x2",(this.widthScale(this.filt_rev_end)-1))
-                            .attr("y1",280).attr("y2",420);
-            }else{
-                console.log("no filt on reverse");
+                if(this.filt_has_rev ){
+                    let rev_x = this.widthScale(this.filt_rev_start);
+                    let rev_width = this.widthScale(this.filt_rev_end)- rev_x;
+                    this.clip_rev.attr("x",rev_x).attr("width",rev_width);
+                    this.filt_line_rev_start.attr("x1",rev_x)
+                                .attr("x2",rev_x)
+                                .attr("y1",280).attr("y2",420);
+                    this.filt_line_rev_end.attr("x1",(this.widthScale(this.filt_rev_end)-1))
+                                .attr("x2",(this.widthScale(this.filt_rev_end)-1))
+                                .attr("y1",280).attr("y2",420);
+                }else{
+                    console.log("no filt on reverse");
+                }
             }
 
         }

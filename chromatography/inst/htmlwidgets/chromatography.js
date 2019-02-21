@@ -156,7 +156,7 @@ HTMLWidgets.widget({
         var quals_txt  = focus.append("g");
         var gLines     = focus.append("g");
 
-        const lines    = new LineSet(gLines,height,widthScale);
+        const lines    = new LineSet(gLines,height,widthScale,h);
 
 
         var aa_ref_line       = focus.append("g");
@@ -911,7 +911,7 @@ HTMLWidgets.widget({
             //    instance.joinView("TRUE");
             //}
 
-            console.log("before labels");
+            //console.log("before labels");
             focus.append("g").selectAll("text.seq.codon").data(calls).enter() //coding coord
                 .append("text").attr("class",function(d){if(d["coding_seq"]%10==0){return "peak_label coding_ten"}else{return "peak_label";}})
                 .text(function(d){
@@ -921,7 +921,7 @@ HTMLWidgets.widget({
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .attr("y",(instance.label_pos["codon"]))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
-            console.log("inbetween labels");
+            //console.log("inbetween labels");
             focus.append("g").selectAll("text.coord.genomic").data(calls).enter() //gen coord
                 .append("text").attr("class",function(d){if((d["coding_seq"]%10==0)&&(d["coding_seq"]>0)){return "peak_label coding_ten"}else{return "peak_label"}})
                 .text(function(d){return "g." + d["gen_coord"];})
@@ -929,7 +929,7 @@ HTMLWidgets.widget({
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
                 .attr("y",(instance.label_pos["gen_coord"]))
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
-            console.log("after of labels");
+            //console.log("after of labels");
             instance.setPeakLabel(calls,"reference");
             instance.setPeakLabel(calls,"call");
 
@@ -939,9 +939,11 @@ HTMLWidgets.widget({
                 instance.setPeakLabel(calls,"call_rev");
                 instance.setPeakLabel(calls,"mut_call_rev");
             }
-            if(x['samples'][0]["qual_present"]){
-                console.log("set qual labels");
-                instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != 'undefined');
+            if(x.num_samples == 1){
+                if(x['samples'][0]["qual_present"]){
+                    console.log("set qual labels");
+                    instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != 'undefined');
+                }
             }
             var show_qual  = x["show_qual"];
             if(show_qual){
