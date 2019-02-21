@@ -5,6 +5,9 @@ HTMLWidgets.widget({
 
     initialize: function(el, w, h) {
 
+        console.log("height:");
+        console.log(h);
+
         var instanceCounter = 0;
         var intrex = "";
         var max_x = 0;
@@ -814,8 +817,9 @@ HTMLWidgets.widget({
     //function called everytime input parameters change
     renderValue: function(el, x, instance) {
 
+        console.log(x);
         instance.lastValue = x;
-        console.log(x)
+
         //the render function behaves differently when called repeatedly
         //the first run is actually still a part of the initialization step
         if(x.new_sample){
@@ -850,16 +854,16 @@ HTMLWidgets.widget({
             var context = instance.context;
             var brush   = instance.brush;
             var widthScale  = instance.widthScale;
-            var heightScale = instance.heightScale;
+            //var heightScale = instance.heightScale;
             var width2Scale = instance.width2Scale;
 
             widthScale.domain([0,domain_x]);
             width2Scale.domain([0,domain_x]);
 
             instance.lines.create(x["num_samples"],domain_x,domain_y);
-            heightScale.domain([0,domain_y]);
-            instance.heightScale_fwd_split.domain([0,domain_y]);
-            instance.heightScale_rev_split.domain([0,domain_y]);
+            //heightScale.domain([0,domain_y]);
+            //instance.heightScale_fwd_split.domain([0,domain_y]);
+            //instance.heightScale_rev_split.domain([0,domain_y]);
 
             //visualise fullseq width
             instance.full_line

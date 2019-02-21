@@ -22,6 +22,11 @@
             this.heightScale_fwd = this.heightScale_fwd_split,
             this.heightScale_rev = this.heightScale_rev_split;
 
+            this.start_draw = 125;
+            this.end_draw   = height;
+            this.hScales   = [];
+            this.d3lines    = [];
+
             this.widthScale = widthScale;
 
             //const widthScale = widthScale;
@@ -89,6 +94,8 @@
                                 .attr("width", 0)
                                 .attr("height",this.height)
                                 .attr("clip-path","url(#clip)");
+                console.log("clip_fwd element:");
+                console.log(this.clip_fwd);
 
                 this.clip_rev = svg.append("clipPath")
                                 .attr("id", "rect_rev_clip_" + i)
@@ -122,12 +129,42 @@
                                        .attr("stroke", "red")
                                        .attr("opacity",1);
 
-
             }
-            this.widthScale.domain([0,domain_x])
+            this.widthScale.domain([0,domain_x]);
+            let widthScale = this.widthScale;
+
             this.heightScale.domain([0,domain_y]);
             this.heightScale_fwd_split.domain([0,domain_y]);
             this.heightScale_rev_split.domain([0,domain_y]);
+
+            let k = 0;
+            let unit = (this.end_draw - this.start_draw) / (2 * this.count);
+            let s = this.start_draw;
+            console.log(unit);
+            for(let i=1; i<=this.count; i++){
+                //for(let j=1; j<=2; j++){  //fwd + rev
+                let fwd = d3.scaleLinear().range([((k + 1) * unit ) + s,k * unit + s]);
+                k++;
+                let rev = d3.scaleLinear().range([((k + 1) * unit ) + s,k * unit + s]);
+                fwd.domain([0,domain_y])
+                rev.domain([0,domain_y])
+                this.hScales[i] = [fwd, rev]
+                k++;
+                //}
+
+                let hScaleFwd = this.hScales[i][0]; //can not use 'this' in functions below
+                let hScaleRev = this.hScales[i][1];
+                let fwd_line = d3.line()
+                    .x(function(d,j){return widthScale(j)})
+                    .y(function(d){return hScaleFwd(d)});
+                let rev_line = d3.line()
+                    .x(function(d,j){return widthScale(j)})
+                    .y(function(d){return hScaleRev(d)});
+
+                this.d3lines[i] = [fwd_line, rev_line]
+            }
+
+            console.log(this.hScales);
         }
 
         updateLine(data_all){
@@ -137,9 +174,9 @@
 
             for(let n=1;n<=this.count;n++){                  //for each sample
                 for(let b in this.bases){                    //for each base
-                    for(let r in orient){                  //both orientations
+                    for(let r in orient){                    //both orientations
                         let rev = orient[r];
-                        if (rev && data_all.single_rev){continue;}
+                        if (rev && (data_all.intens_rev == 'indefined')){continue;}
                         base = this.bases[b];
 
                         if(rev){
@@ -170,8 +207,8 @@
                                               var g1 = this.line_el.selectAll(".line_t_"   + n); }
                                       var col = "#EA2929"; break;
                         }
-                        if(rev){var c = "line_r"; var l = this.line_rev; var cl = "url(#rect_rev_clip_" + n +")"}
-                        else   {var c = "line_f"; var l = this.line_fwd; var cl = "url(#rect_fwd_clip_" + n +")"}
+                        if(rev){var c = "line_r line_r_" + n ; var l = this.d3lines[n][1]; var cl = "url(#rect_rev_clip_" + n +")"}
+                        else   {var c = "line_f line_f_" + n ; var l = this.d3lines[n][0]; var cl = "url(#rect_fwd_clip_" + n +")"}
 
                         var line = g1.selectAll("path").data(data); //UPDATE
                         line.exit().remove();                       //EXIT
@@ -251,32 +288,46 @@
 
         setNoiseArea(samples){
 
-            for(let n=1;n<=this.count;n++){
-                let fwd = HTMLWidgets.dataframeToD3([samples[n-1]["calls"]["trace_peak"],samples[n-1]["calls"]["noise_abs_fwd"]]);
+            if(this.count == 1){ // for now skipping if for multiple samples (cllpedia)
 
-                var gnf = this.line_el.select(".gNoise_fwd_" + n).selectAll("path").data([fwd]);
-                gnf.enter().append("path")
-                    .merge(gnf).attr("class","area area_fwd").attr("d",this.noise_area_fwd)
-                   .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
-                gnf.exit().remove();
-                if(!samples[n-1].single_rev){
+                for(let n=1;n<=this.count;n++){
+                    let fwd = HTMLWidgets.dataframeToD3([samples[n-1]["calls"]["trace_peak"],samples[n-1]["calls"]["noise_abs_fwd"]]);
 
-                    let rev = HTMLWidgets.dataframeToD3([samples[n-1]["calls"]["trace_peak"],samples[n-1]["calls"]["noise_abs_rev"]]);
-                    var gnr = this.line_el.select(".gNoise_rev_" + n).selectAll("path").data([rev]);
-                    gnr.enter().append("path")
-                       .merge(gnr).attr("class","area area_rev").attr("d",this.noise_area_rev)
-                       .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
-                    gnr.exit().remove();
+                    var gnf = this.line_el.select(".gNoise_fwd_" + n).selectAll("path").data([fwd]);
+                    gnf.enter().append("path")
+                        .merge(gnf).attr("class","area area_fwd").attr("d",this.noise_area_fwd)
+                       .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
+                    gnf.exit().remove();
+                    if(!samples[n-1].single_rev){
+
+                        let rev = HTMLWidgets.dataframeToD3([samples[n-1]["calls"]["trace_peak"],samples[n-1]["calls"]["noise_abs_rev"]]);
+                        var gnr = this.line_el.select(".gNoise_rev_" + n).selectAll("path").data([rev]);
+                        gnr.enter().append("path")
+                           .merge(gnr).attr("class","area area_rev").attr("d",this.noise_area_rev)
+                           .attr("fill","#440000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
+                        gnr.exit().remove();
+                    }
                 }
             }
         }
 
         redrawLines(){
-            this.line_el.selectAll(".line_f").attr("d",this.line_fwd);
-            this.line_el.selectAll(".line_r").attr("d",this.line_rev);
 
-            this.line_el.select(".area_fwd").attr("d",this.noise_area_fwd).attr("visibility","visible");
-            this.line_el.select(".area_rev").attr("d",this.noise_area_rev).attr("visibility","visible");
+            for(let n=1;n<=this.count;n++){
+
+                let line_fwd = this.d3lines[n][1];
+                let line_rev = this.d3lines[n][0];
+
+
+                this.line_el.selectAll(".line_f_" + n).attr("d",line_fwd);
+                this.line_el.selectAll(".line_r_" + n).attr("d",line_rev);
+
+                if(this.count ==1 ){
+
+                    this.line_el.select(".area_fwd").attr("d",this.noise_area_fwd).attr("visibility","visible");
+                    this.line_el.select(".area_rev").attr("d",this.noise_area_rev).attr("visibility","visible");
+                }
+            }
         }
 
         destroy(){
@@ -289,6 +340,8 @@
                 d3.select("svg").selectAll("clipPath").remove();
             }
             this.count = 0;
+            this.hScale = [];
+            this.d3lines = [];
         }
 
     }

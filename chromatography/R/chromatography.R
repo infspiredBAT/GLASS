@@ -5,7 +5,7 @@
 #' @import htmlwidgets
 #'
 #' @export
-#' 
+#'
 
 
 chromatography <- function(new_sample,
@@ -13,7 +13,10 @@ chromatography <- function(new_sample,
                            show_qual = FALSE,
                            num_samples,
                            samples,
-                           width = NULL, height = NULL) {
+                           width = NULL, height = '600px') {
+
+    print("new sample")
+    print(new_sample)
 
     x <- list(
         new_sample = new_sample,
@@ -36,7 +39,7 @@ chromatography <- function(new_sample,
 #' Widget output function for use in Shiny
 #'
 #' @export
-chromatographyOutput <- function(outputId, width = '100%', height = '500px'){
+chromatographyOutput <- function(outputId, width = '100%', height = '700px'){
     shinyWidgetOutput(outputId, 'chromatography', width, height, package = 'chromatography')
 }
 #' Widget render function for use in Shiny
