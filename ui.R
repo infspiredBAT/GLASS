@@ -16,6 +16,7 @@ shinyUI(
         theme = "simplex3.3.6.css", # http://bootswatch.com/ | sandstone/simplex/flatly/darkly
 		tags$head(
 		    includeCSS("www/samples.css"),
+		    includeHTML("www/google-analytics.html"),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("GLASS"),
 		    tags$script('window.onbeforeunload = function() {
