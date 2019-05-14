@@ -145,7 +145,7 @@ HTMLWidgets.widget({
                                         .attr("x",10)
                                         .attr("y", 25 + 113)
                                         .attr("width",20)
-                                        .attr("height",280)
+                                        .attr("height",480)
                                         .attr("stroke-width", 0)
                                         .attr("fill","lightblue")
                                         .attr("opacity",0.5);
@@ -194,6 +194,7 @@ HTMLWidgets.widget({
 
        function brush_start(){
            hideLabels();
+           focus.selectAll(".selected_pos").attr("opacity",0);
        }
        function brushed(){
            var s = d3.event.selection || width2Scale().domain();
@@ -217,6 +218,9 @@ HTMLWidgets.widget({
            var t = s.map(width2Scale.invert, width2Scale)
            widthScale.domain(t);
            lines.updateFilt();
+           focus.selectAll(".selected_pos").attr("width",widthScale(10)-widthScale(0));
+           focus.selectAll(".selected_pos").attr("x",widthScale(selected_pos_x));
+           focus.selectAll(".selected_pos").attr("opacity",0.5 );
            redraw();
        }
        function zoom_start(){
@@ -233,6 +237,8 @@ HTMLWidgets.widget({
            context.select(".selection").attr("x",s[0])
                                        .attr("width",s[1]-s[0])
            lines.redrawLines();
+           focus.selectAll(".selected_pos").attr("width",widthScale(10)-widthScale(0));
+           focus.selectAll(".selected_pos").attr("x",widthScale(selected_pos_x));
        }
        function zoom_end() {
            if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return;
@@ -302,12 +308,6 @@ HTMLWidgets.widget({
         function redrawLines(){
             focus.selectAll(".selected_pos").attr("width",widthScale(10)-widthScale(0));
             focus.selectAll(".selected_pos").attr("x",widthScale(selected_pos_x));
-
-
-            focus.selectAll(".var_noise_indic").attr("stroke-width",widthScale(12)-widthScale(0));
-            focus.selectAll(".var_noise_indic").attr("x1",function(d){return widthScale(d["trace_peak"]);})
-                                    .attr("x2",function(d){return widthScale(d["trace_peak"]);});
-            lines.updateFilt();
         }
 
         function redraw()  {
@@ -455,15 +455,18 @@ HTMLWidgets.widget({
                 })
                 .text(function(d){
                     if(label.indexOf("mut") > -1){
-                        if(typeof(d[label])=='undefined'){ console.log(label);console.log(d);}
-                        return d[label].toLowerCase();
+                        if(typeof(d[label]) == 'undefined'){ console.log(label);console.log(d);}
+                        else{ return d[label].toLowerCase();}
                     } else {
                         if(label=="reference" & d[label]!="NA"){
                                 if(d["exon_intron"].indexOf("exon")>-1){
                                     return d[label];
                                 }
                         }
-                        return d[label].toLowerCase();}
+                        if(d[label] != undefined){
+                            return d[label].toLowerCase();
+                        }
+                    }
                  })
                 .attr("text-anchor", "middle")
                 .attr("x",function(d){return widthScale(d["trace_peak"]);})
@@ -742,7 +745,9 @@ HTMLWidgets.widget({
         function posClick(id,tp){
             var zoom = 400
             var scope = widthScale.domain()
-            var pos = (id-1)*12 - 2;
+            //var pos = (id-1)*12 - 2;
+            var pos = tp;
+            //reset the zoom if 'clicked' outside of current zoom, can happen programmatically
             if(pos < scope[0]){
                 var from = Math.max(0,pos - 200)
                 setBrush(from,from+400);
@@ -942,7 +947,7 @@ HTMLWidgets.widget({
             if(x.num_samples == 1){
                 if(x['samples'][0]["qual_present"]){
                     console.log("set qual labels");
-                    instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != 'undefined');
+                    instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != undefined);
                 }
             }
             var show_qual  = x["show_qual"];
@@ -986,7 +991,7 @@ HTMLWidgets.widget({
 
             if(x['samples'][0]["qual_present"]){
                 console.log("set qual labels");
-                instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != 'undefined');
+                instance.setQualityLabels(calls,x['samples'][0]['intens_rev'] != undefined);
             }
             if(instance.max_x != x['samples'][0]["intrexdat"]["max_x"]){
                 instance.max_x = x['samples'][0]["intrexdat"]["max_x"];

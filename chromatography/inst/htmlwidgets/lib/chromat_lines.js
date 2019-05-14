@@ -2,12 +2,12 @@
 
     class LineSet {
 
-        constructor(line_el,height,widthScale,h) {
+        constructor(line_el, height, widthScale, h) {
             this.line_el = line_el ;
-            this.count = 0;
+            this.count  = 0;
             this.height = height;     //TODO sort out height to keep only one variable!!!
             this.h      = h;
-            this.bases = ["A","C","G","T"];
+            this.bases  = ["A","C","G","T"];
 
             let w = widthScale.range()[1];
             this.filt_fwd_start = 0;
@@ -18,15 +18,15 @@
 
             let half_height = height/1.6;
 
-            this.heightScale  = d3.scaleLinear().range([height,0]),
-            this.heightScale_fwd_split = d3.scaleLinear().range([half_height,(2*half_height -  height)]),
-            this.heightScale_rev_split = d3.scaleLinear().range([height,half_height]);
+            this.heightScale  = d3.scaleLinear().range([height, 0]),
+            this.heightScale_fwd_split = d3.scaleLinear().range([half_height, (2 * half_height - height)]),
+            this.heightScale_rev_split = d3.scaleLinear().range([height, half_height]);
             this.heightScale_fwd = this.heightScale_fwd_split,
             this.heightScale_rev = this.heightScale_rev_split;
 
             this.start_draw = 125;
             this.end_draw   = height;
-            this.hScales   = [];
+            this.hScales    = [];
             this.d3lines    = [];
 
             this.widthScale = widthScale;
@@ -54,16 +54,16 @@
                         .y0(function(d){return heightScale_rev(0)+2;})
                         .y1(function(d){return heightScale_rev(d[1]*mult);});
         }
-        create(n,domain_x,domain_y){
+        create(n, domain_x, domain_y){
             this.count = n;
             let svg = d3.select("svg");
             let w = this.widthScale.range()[1];
             //filter for Grayscale to be used on filtered part of traces
             let filter_gs   = svg.append("filter")
-                               .attr("id","monochrome");
+                               .attr("id", "monochrome");
             let colormatrix = filter_gs.append("feColorMatrix")
-                                .attr("type","matrix")
-                                .attr("values","2 0.5 0.5 0 0 0.5 2 0.5 0 0 0.5 0.5 2 0 0 0 0 0 1 0");
+                                .attr("type", "matrix")
+                                .attr("values", "2 0.5 0.5 0 0 0.5 2 0.5 0 0 0.5 0.5 2 0 0 0 0 0 1 0");
             for(let i=1;i<=this.count;i++){
                 this.line_el.append("g").attr("class","trace_line line_a_" + i);
                 this.line_el.append("g").attr("class","trace_line line_c_" + i);
@@ -174,12 +174,17 @@
 
             let base,data;
             let orient = [true,false]
-
+            //let orient = [false]
             for(let n=1;n<=this.count;n++){                  //for each sample
+                console.log("n: " + n);
                 for(let b in this.bases){                    //for each base
+                    console.log("base: " + b);
                     for(let r in orient){                    //both orientations
+                        console.log("orient: " + r);
                         let rev = orient[r];
-                        if (rev && (data_all.intens_rev == 'indefined')){continue;}
+                        console.log(data_all[n-1].intens_rev);
+                        if (rev && (data_all[n-1].intens_rev === null)){continue;};
+                        console.log("noskip");
                         base = this.bases[b];
 
                         if(rev){
@@ -244,7 +249,7 @@
                 if(fwd_end != undefined){this.filt_fwd_end = fwd_end;}
                 if(rev_start != undefined){this.filt_rev_start = rev_start;}
                 if(rev_end != undefined){this.filt_rev_end = rev_end;}
-                if(has_rev!=undefined){this.filt_has_rev = has_rev;}
+                if(has_rev != undefined){this.filt_has_rev = has_rev;}
 
 
                 let fwd_x = this.widthScale(this.filt_fwd_start);
@@ -305,7 +310,7 @@
                        .attr("fill","#000000").attr("stroke","none").attr("opacity",0.15).attr("clip-path","url(#clip)");
                     gnf.exit().remove();
                     if(!samples[n-1].single_rev){
-
+                        if(samples[n-1].intens_rev == null){continue;};
                         let rev = HTMLWidgets.dataframeToD3([samples[n-1]["calls"]["trace_peak"],samples[n-1]["calls"]["noise_abs_rev"]]);
                         var gnr = this.line_el.select(".gNoise_rev_" + n).selectAll("path").data([rev]);
                         gnr.enter().append("path")
@@ -321,15 +326,13 @@
 
             for(let n=1;n<=this.count;n++){
 
-                let line_fwd = this.d3lines[n][1];
-                let line_rev = this.d3lines[n][0];
-
+                let line_fwd = this.d3lines[n][0];
+                let line_rev = this.d3lines[n][1];
 
                 this.line_el.selectAll(".line_f_" + n).attr("d",line_fwd);
                 this.line_el.selectAll(".line_r_" + n).attr("d",line_rev);
 
                 if(this.count ==1 ){
-
                     this.line_el.select(".area_fwd").attr("d",this.noise_area_fwd).attr("visibility","visible");
                     this.line_el.select(".area_rev").attr("d",this.noise_area_rev).attr("visibility","visible");
                 }
