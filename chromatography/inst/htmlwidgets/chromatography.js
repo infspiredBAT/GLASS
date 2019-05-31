@@ -155,21 +155,21 @@ HTMLWidgets.widget({
         var quals_g_r  = focus.append("g");
         var quals_txt  = focus.append("g");
         var gLines     = focus.append("g");
+        var gText      = focus.append("g");
 
-        const lines    = new LineSet(gLines,height,widthScale,h);
-
+        const lines    = new LineSet(gLines, gText, height, widthScale, h);
 
         var aa_ref_line       = focus.append("g");
         var aa_sample_line    = focus.append("g");
         var aa_mut_line       = focus.append("g");
 
         var text_ref          = focus.append("g");
-        var text_call         = focus.append("g");
-        var text_call_rev     = focus.append("g");
         var text_user_sample  = focus.append("g");
         var text_user_mut     = focus.append("g");
-        var text_mut_call_fwd = focus.append("g");
-        var text_mut_call_rev = focus.append("g");
+        // var text_call         = focus.append("g");
+        // var text_call_rev     = focus.append("g");
+        // var text_mut_call_fwd = focus.append("g");
+        // var text_mut_call_rev = focus.append("g");
         var var_ind_focus     = focus.append("g");
         var full_line         = context.append("g");
         var exon_boxes        = context.append("g");
@@ -439,10 +439,11 @@ HTMLWidgets.widget({
             opacity = typeof opacity !== 'undefined' ? opacity : 0.8;
             switch(label) {
                 case "reference":    var t = text_ref;          c = "ref"; break;
-                case "call":         var t = text_call;         c = "call"; break;
-                case "call_rev":     var t = text_call_rev;     c = "call rev"; break
                 case "user_sample":  var t = text_user_sample;  c = "user"; break;
                 case "user_mut":     var t = text_user_mut;     c = "user"; break;
+
+                case "call":         var t = text_call;         c = "call"; break;
+                case "call_rev":     var t = text_call_rev;     c = "call rev"; break
                 case "mut_call_fwd": var t = text_mut_call_fwd; c = "call call_fwd"; break;
                 case "mut_call_rev": var t = text_mut_call_rev; c = "call mut_rev mut"; break ;
             }
@@ -936,14 +937,19 @@ HTMLWidgets.widget({
                 .attr("fill", "black").attr("opacity", 0.8).attr("font-family", "sans-serif").attr("font-size", "11px");
             //console.log("after of labels");
             instance.setPeakLabel(calls,"reference");
-            instance.setPeakLabel(calls,"call");
 
             //todo move sample specific labels to chromat_lines.js
-            instance.setPeakLabel(calls,"mut_call_fwd");
-            if(x['samples'][0]['intens_rev'] != 'undefined'){
-                instance.setPeakLabel(calls,"call_rev");
-                instance.setPeakLabel(calls,"mut_call_rev");
-            }
+            // instance.setPeakLabel(calls,"call");
+            // instance.setPeakLabel(calls,"mut_call_fwd");
+            // if(x['samples'][0]['intens_rev'] != 'undefined'){
+            //     instance.setPeakLabel(calls,"call_rev");
+            //     instance.setPeakLabel(calls,"mut_call_rev");
+            // }
+            instance.lines.setLineLabel(x.samples,"call");
+            instance.lines.setLineLabel(x.samples,"call_rev");
+            instance.lines.setLineLabel(x.samples,"mut_call_fwd");
+            instance.lines.setLineLabel(x.samples,"mut_call_rev");
+
             if(x.num_samples == 1){
                 if(x['samples'][0]["qual_present"]){
                     console.log("set qual labels");
@@ -1016,10 +1022,7 @@ HTMLWidgets.widget({
                 instance.setPeakLabel(calls,"user_sample");
                 instance.setPeakLabel(calls,"user_mut");
                 instance.setPeakLabel(calls,"reference")
-                instance.setPeakLabel(calls,"mut_call_fwd",instance.call_opacity);
-                if(x['samples'][0]['intens_rev'] != 'undefined'){
-                    instance.setPeakLabel(calls,"mut_call_rev",instance.call_opacity);
-                }
+
                 instance.setCodingLabel(calls);
                 var show_qual  = x["show_qual"];
                 if(show_qual){

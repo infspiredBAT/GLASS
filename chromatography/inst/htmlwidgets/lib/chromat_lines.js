@@ -2,8 +2,9 @@
 
     class LineSet {
 
-        constructor(line_el, height, widthScale, h) {
-            this.line_el = line_el ;
+        constructor(line_el, text_el, height, widthScale, h) {
+            this.line_el = line_el;
+            this.text_el = text_el;
             this.count  = 0;
             this.height = height;     //TODO sort out height to keep only one variable!!!
             this.h      = h;
@@ -28,6 +29,7 @@
             this.end_draw   = height;
             this.hScales    = [];
             this.d3lines    = [];
+            this.lineLabelPos = [];
 
             this.widthScale = widthScale;
 
@@ -65,6 +67,7 @@
                                 .attr("type", "matrix")
                                 .attr("values", "2 0.5 0.5 0 0 0.5 2 0.5 0 0 0.5 0.5 2 0 0 0 0 0 1 0");
             for(let i=1;i<=this.count;i++){
+                //chromatogram lines
                 this.line_el.append("g").attr("class","trace_line line_a_" + i);
                 this.line_el.append("g").attr("class","trace_line line_c_" + i);
                 this.line_el.append("g").attr("class","trace_line line_g_" + i);
@@ -89,7 +92,7 @@
                 this.line_el.append("g").attr("class","gNoise_rev_" + i);
 
                 this.line_el.append("g").attr("class","var_ind_focus_" + i);
-
+                //clipping "gray" lines on the sieds
                 this.clip_fwd = svg.append("clipPath")
                                 .attr("id", "rect_fwd_clip_" + i)
                                 .append("rect")
@@ -97,8 +100,6 @@
                                 .attr("width", w)
                                 .attr("height",this.h)
                                 .attr("clip-path","url(#clip)");
-                //console.log("clip_fwd element:");
-                //console.log(this.clip_fwd);
 
                 this.clip_rev = svg.append("clipPath")
                                 .attr("id", "rect_rev_clip_" + i)
@@ -131,6 +132,16 @@
                                        .attr("stroke-width", 2)
                                        .attr("stroke", "red")
                                        .attr("opacity",1);
+                //peak labels
+                this.text_el.append("g").attr("class","gText_label text_call_" + i);
+                this.text_el.append("g").attr("class","gText_label text_call_rev_" + i);
+                this.text_el.append("g").attr("class","gText_label text_mut_call_fwd_" + i);
+                this.text_el.append("g").attr("class","gText_label text_mut_call_rev_" + i);
+                // var text_call         = focus.append("g");
+                // var text_call_rev     = focus.append("g");
+                // var text_mut_call_fwd = focus.append("g");
+                // var text_mut_call_rev = focus.append("g");
+
 
             }
             this.widthScale.domain([0,domain_x]);
@@ -147,12 +158,14 @@
             for(let i=1; i<=this.count; i++){
                 //for(let j=1; j<=2; j++){  //fwd + rev
                 let fwd = d3.scaleLinear().range([((k + 1) * unit ) + s,k * unit + s]);
+                this.lineLabelPos[k] = k * unit + s;
                 k++;
                 let rev = d3.scaleLinear().range([((k + 1) * unit ) + s,k * unit + s]);
+                this.lineLabelPos[k] = k * unit + s;
+                k++;
                 fwd.domain([0,domain_y])
                 rev.domain([0,domain_y])
                 this.hScales[i] = [fwd, rev]
-                k++;
                 //}
 
                 let hScaleFwd = this.hScales[i][0]; //can not use 'this' in functions below
@@ -165,6 +178,17 @@
                     .y(function(d){return hScaleRev(d)});
 
                 this.d3lines[i] = [fwd_line, rev_line]
+
+                console.log(this.line_fw)
+
+                // mult used to be settable through the interface
+                // currently only showing when n = 1 TO DO !!!
+                const mult = 2;
+                this.noise_area_fwd.y0(function(d){return (hScaleFwd(0)+2);})
+                            .y1(function(d){return hScaleFwd(d[1]*mult);});
+
+                this.noise_area_rev.y0(function(d){return hScaleRev(0)+2;})
+                            .y1(function(d){return hScaleRev(d[1]*mult);});
             }
 
             //console.log(this.hScales);
@@ -172,19 +196,21 @@
 
         updateLine(data_all){
 
+            console.log(data_all);
+
             let base,data;
             let orient = [true,false]
             //let orient = [false]
             for(let n=1;n<=this.count;n++){                  //for each sample
-                console.log("n: " + n);
+                //console.log("n: " + n);
                 for(let b in this.bases){                    //for each base
-                    console.log("base: " + b);
+                    //console.log("base: " + b);
                     for(let r in orient){                    //both orientations
-                        console.log("orient: " + r);
+                        //console.log("orient: " + r);
                         let rev = orient[r];
-                        console.log(data_all[n-1].intens_rev);
+                        //console.log(data_all[n-1].intens_rev);
                         if (rev && (data_all[n-1].intens_rev === null)){continue;};
-                        console.log("noskip");
+                        //console.log("noskip");
                         base = this.bases[b];
 
                         if(rev){
@@ -240,7 +266,7 @@
             }
         }
 
-        updateFilt(fwd_start,fwd_end,rev_start,rev_end,has_rev){
+        updateFilt(fwd_start, fwd_end, rev_start, rev_end, has_rev){
 
             if (this.count == 1){
 
@@ -279,6 +305,66 @@
             }
 
         }
+
+        setLineLabel(data_all,label,opacity){
+            let widthScale = this.widthScale;
+            for(let n=1;n<=this.count;n++){
+                let calls = HTMLWidgets.dataframeToD3(data_all[n-1].calls);
+                let k = 0;
+                let os = 0;
+                if( label.indexOf("rev") > -1 ){ k = 1 };
+                if( label.indexOf("mut") > -1 ){ os = 18  - 2* this.count};
+
+                console.log(this.lineLabelPos);
+                let ycoord = this.lineLabelPos[2*(n-1) + k] + 28 + os;
+                opacity = typeof opacity !== 'undefined' ? opacity : 0.8;
+                switch(label) {
+                    case "call":         var l = "text_call_";         c = "call"; break;
+                    case "call_rev":     var l = "text_call_rev_";     c = "call rev"; break
+                    case "mut_call_fwd": var l = "text_mut_call_fwd_"; c = "call call_fwd"; break;
+                    case "mut_call_rev": var l = "text_mut_call_rev_"; c = "call mut_rev mut"; break ;
+                }
+                let t = this.text_el.selectAll("." + l + n);
+                var text = t.selectAll("text").data(calls);         //Join
+                text.exit().remove();                               //EXIT
+                text.enter().append("text")                         //Enter
+                    .merge(text).attr("class",function(d){
+                        if(label.indexOf("user") > -1) {return "peak_label short user ".concat("id").concat(d["id"]);}
+                        return("peak_label short "+c);
+                    })
+                    .text(function(d){
+                        if(label.indexOf("mut") > -1){
+                            if(typeof(d[label]) == 'undefined'){ console.log(label);console.log(d);}
+                            else{ return d[label].toLowerCase();}
+                        } else {
+                            if(label=="reference" & d[label]!="NA"){
+                                    if(d["exon_intron"].indexOf("exon")>-1){
+                                        return d[label];
+                                    }
+                            }
+                            if(d[label] != undefined){
+                                return d[label].toLowerCase();
+                            }
+                        }
+                     })
+                    .attr("text-anchor", "middle")
+                    .attr("x",function(d){return widthScale(d["trace_peak"]);})
+                    .on("click",function(d,i){posClick(d["id"],d["trace_peak"]);})
+                    .attr("y",function(d){return(ycoord );})
+                    .attr("fill", "black")
+                    .attr("opacity", opacity)
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size",function(){if(label.indexOf("user")>-1){return "12px";}else{return "11px";}})
+                    .attr("stroke",function(d) {
+                        if      (d[label] === "A"){ return "#00A100"; }
+                        else if (d[label] === "C"){ return "#2985EA"; }
+                        else if (d[label] === "G"){ return "#6C6A6C"; }
+                        else if (d[label] === "T"){ return "#EA2929"; }
+                        else if (d[label] === "-"){ return "black"; }
+                        else    {                   return "orange"; }});
+            }
+        }
+
         updateVariants(choices,n){
             //console.log(choices);
             let g_var = this.line_el.select(".var_ind_focus_" + n);
@@ -346,6 +432,7 @@
                 console.log(this.line_el.selectAll(".trace_line"));
                 this.line_el.selectAll(".trace_line").remove();
                 this.line_el.selectAll(".area").remove();
+                this.text_el.selectAll(".gText_label").remove();
                 d3.select("svg").selectAll("clipPath").remove();
             }
             this.count = 0;
