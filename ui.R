@@ -19,6 +19,8 @@ shinyUI(
 		    includeHTML("www/google-analytics.html"),
 		    tags$head(HTML("<link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>")),
             tags$title("GLASS"),
+		    tags$meta(name="description", content="web-based Sanger sequence trace viewer, editor, aligner and variant caller"),
+		    tags$meta(name="keywords", content="Sanger,sequence,TP53,D3.js,Shiny,trace,chromatogram"),
 		    tags$script('window.onbeforeunload = function() {
 		                    return "You will need to start over if you navigate away!";
 		                };'),
@@ -118,7 +120,7 @@ shinyUI(
     					)
 					),
 					column(8,
-					       
+
     					column(2,
                             tags$div(title=""
         					    ,HTML(paste("<div>heterozygous</br>insertion(s)/deletion(s) <b id = 'hetero_indel_help'>[?]</b></div>"))
@@ -131,7 +133,7 @@ shinyUI(
        					                                 ,   div(style="display: inline-block;vertical-align:top;"    ,HTML(paste("<div><b id = 'hetero_use_lnk_help'>[?]</b></div>"))
                                                         )
        					                          )
-        					    
+
         					)
     					),
     					column(2,
@@ -144,7 +146,7 @@ shinyUI(
     					                )
     					       )
     					),
-    					
+
     					column(5,
     					    column(1),
                             column(6
