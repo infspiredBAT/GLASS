@@ -460,19 +460,20 @@ shinyServer(function(input,output,session) {
     #
     output$plot <- renderChromatography({
         if(varcall()) {
-            g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
-            num_samples <- 1
-            sample1 = list(calls = g_calls, choices = g_choices, 
-                           intens = g_intens, intens_rev = g_intens_rev, 
-                           single_rev = g_single_rev, 
-                           intrexdat = g_intrexdat,
-                           brush_fwd_start = g_calls[input$trim_fwd_start]$trace_peak,
-                           brush_fwd_end   = g_calls[input$trim_fwd_end]$trace_peak,
-                           brush_rev_start = g_calls[input$trim_rev_start]$trace_peak,
-                           brush_rev_end   = g_calls[input$trim_rev_end]$trace_peak,
-                           noisy_neighbors = g_noisy_neighbors,
-                           qual_present = g_qual_present)
-            withProgress(message = paste('Plotting chromatogram.',sep=" "), value = 1 ,{
+            withProgress(message = paste('Plotting chromatogram.',sep=" "), value = 0 , style = 'old', {
+                g_intrexdat$max_y <- (g_max_y*100)/input$max_y_p
+                num_samples <- 1
+                sample1 = list(calls = g_calls, choices = g_choices, 
+                               intens = g_intens, intens_rev = g_intens_rev, 
+                               single_rev = g_single_rev, 
+                               intrexdat = g_intrexdat,
+                               brush_fwd_start = g_calls[input$trim_fwd_start]$trace_peak,
+                               brush_fwd_end   = g_calls[input$trim_fwd_end]$trace_peak,
+                               brush_rev_start = g_calls[input$trim_rev_start]$trace_peak,
+                               brush_rev_end   = g_calls[input$trim_rev_end]$trace_peak,
+                               noisy_neighbors = g_noisy_neighbors,
+                               qual_present = g_qual_present)
+            
                 ret<-chromatography(g_new_sample,
                                     input$show_calls_checkbox, input$show_qual_checkbox, num_samples,
                                     list(sample1))
