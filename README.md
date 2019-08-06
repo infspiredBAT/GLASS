@@ -2,9 +2,8 @@
 assisted & standardised assessment of gene variations from Sanger data
 
 </br>
-lab home: http://bat.infspire.org</br>
-citation: http://www.ncbi.nlm.nih.gov/pubmed/29036643</br>
-live demo: http://bat.infspire.org/genomepd/glass
+server: http://bat.infspire.org/genomepd/glass</br>
+citation: http://www.ncbi.nlm.nih.gov/pubmed/29036643
 </br>
 
 requirements
