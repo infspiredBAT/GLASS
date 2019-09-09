@@ -823,7 +823,7 @@ HTMLWidgets.widget({
     //function called everytime input parameters change
     renderValue: function(el, x, instance) {
 
-        console.log(x);
+        //console.log(x);
         instance.lastValue = x;
 
         //the render function behaves differently when called repeatedly
@@ -842,6 +842,10 @@ HTMLWidgets.widget({
             var choices     = HTMLWidgets.dataframeToD3(x["samples"][0]["choices"]);
             //var noisy_neighbors     = HTMLWidgets.dataframeToD3(x["noisy_neighbors"]);
             var show_calls  = x["show_calls"];
+            instance.lines.filters = x["filters"];
+
+            console.log("setting filters:");
+            console.log("setting filters to " + x["filters"]);
             if(show_calls){
                 instance.call_opacity = 0.8;
             }else{

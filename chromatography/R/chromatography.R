@@ -11,6 +11,7 @@
 chromatography <- function(new_sample,
                            show_calls = FALSE,
                            show_qual = FALSE,
+                           filters = TRUE,
                            num_samples,
                            samples,
                            width = NULL, height = '600px') {
@@ -19,12 +20,13 @@ chromatography <- function(new_sample,
     print(new_sample)
 
     x <- list(
-        new_sample = new_sample,
-        resize     = FALSE,
-        show_calls      = show_calls,
-        show_qual       = show_qual,
-        num_samples     = num_samples,
-        samples         = samples
+        new_sample  = new_sample,
+        resize      = FALSE,
+        show_calls  = show_calls,
+        show_qual   = show_qual,
+        filters     = filters,
+        num_samples = num_samples,
+        samples     = samples
     )
   # create widget
     htmlwidgets::createWidget(

@@ -5,10 +5,11 @@
         constructor(line_el, text_el, height, widthScale, h) {
             this.line_el = line_el;
             this.text_el = text_el;
-            this.count  = 0;
-            this.height = height;     //TODO sort out height to keep only one variable!!!
-            this.h      = h;
-            this.bases  = ["A","C","G","T"];
+            this.count   = 0;
+            this.height  = height;     //TODO sort out height to keep only one variable!!!
+            this.h       = h;
+            this.bases   = ["A","C","G","T"];
+            this.filters = true;
 
             let w = widthScale.range()[1];
             this.filt_fwd_start = 0;
@@ -179,8 +180,6 @@
 
                 this.d3lines[i] = [fwd_line, rev_line]
 
-                console.log(this.line_fw)
-
                 // mult used to be settable through the interface
                 // currently only showing when n = 1 TO DO !!!
                 const mult = 2;
@@ -196,7 +195,7 @@
 
         updateLine(data_all){
 
-            console.log(data_all);
+            //console.log(data_all);
 
             let base,data;
             let orient = [true,false]
@@ -244,16 +243,18 @@
                         if(rev){var c = "line_r line_r_" + n ; var l = this.d3lines[n][1]; var cl = "url(#rect_rev_clip_" + n +")"}
                         else   {var c = "line_f line_f_" + n ; var l = this.d3lines[n][0]; var cl = "url(#rect_fwd_clip_" + n +")"}
 
+                        if(this.filters) {
+                            var line = g2.selectAll("path").data(data); //UPDATE
+                            line.exit().remove();                       //EXIT
+                            line.enter().append("path")                 //enter
+                                .merge(line).attr("class", "path " + c)
+                                .attr("d", l)
+                                .attr("clip-path","url(#clip)")
+                                .attr("filter","url(#monochrome)")
+                                .attr("fill","none").attr("stroke", col)
+                                .attr("stroke-width", 2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+                        };
                         var line = g1.selectAll("path").data(data); //UPDATE
-                        line.exit().remove();                       //EXIT
-                        line.enter().append("path")                 //enter
-                            .merge(line).attr("class", "path " + c)
-                            .attr("d", l)
-                            .attr("clip-path","url(#clip)")
-                            .attr("filter","url(#monochrome)")
-                            .attr("fill","none").attr("stroke", col)
-                            .attr("stroke-width", 2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
-                        var line = g2.selectAll("path").data(data); //UPDATE
                         line.exit().remove();                       //EXIT
                         line.enter().append("path")                 //enter
                             .merge(line).attr("class","path "+c)
@@ -261,6 +262,7 @@
                             .attr("clip-path", cl)
                             .attr("fill","none").attr("stroke",col)
                             .attr("stroke-width",2);         // on reverse attr("stroke-dasharray","20,3,10,1,10,1");
+
                     }
                 }
             }
@@ -315,7 +317,7 @@
                 if( label.indexOf("rev") > -1 ){ k = 1 };
                 if( label.indexOf("mut") > -1 ){ os = 18  - 2* this.count};
 
-                console.log(this.lineLabelPos);
+                //console.log(this.lineLabelPos);
                 let ycoord = this.lineLabelPos[2*(n-1) + k] + 28 + os;
                 opacity = typeof opacity !== 'undefined' ? opacity : 0.8;
                 switch(label) {
