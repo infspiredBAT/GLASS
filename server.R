@@ -810,7 +810,9 @@ shinyServer(function(input,output,session) {
                         ,size='m')})
                     }
                     ,error = function(e){
-                        output$files <- renderPrint(paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" ))
+                        output$files <- renderPrint(
+                          paste0("<pre>error while reading GenBank file: ",e$message,"</pre>" )
+                        )
                         g_custom_cod <<- NULL
                         g_custom_ref <<- NULL
                     }

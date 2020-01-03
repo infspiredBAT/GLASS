@@ -476,17 +476,33 @@ get_view<-function(calls,choices,snps){
     }
 
     squeeze_indels <- function(tab){
+        get_value <- function(c){
+            if(grepl('-',c)){
+                splt  <- strsplit(c,'-')[[1]]
+                value <- as.numeric(splt[1]) - as.numeric(splt[2])
+                return(value)
+            }
+            if(grepl('\\+',c)){
+                splt <- strsplit(c,'\\+')[[1]]
+                value <- as.numeric(splt[1]) + as.numeric(splt[2])
+                return(value)
+            }
+            return(as.numeric(c))
+        }
+        
         if(nrow(tab) > 0){
-            coord <- gsub("c\\.(\\d*).*","\\1",tab$coding)
-            nucs  <- gsub("c\\.\\d*...(.)","\\1",tab$coding)
-            type  <- gsub("c\\.\\d*(...).*","\\1",tab$coding)[1]
+            coord <- gsub("c\\.(\\d*-*\\d*).*","\\1",tab$coding)
+            nucs  <- gsub("c\\.\\d*-*\\d*...(.)","\\1",tab$coding)
+            type  <- gsub("c\\.\\d*-*\\d*(...).*","\\1",tab$coding)[1]
+            vals  <- unlist(lapply(coord,get_value))
 
             if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
             else gen_coord <- paste0(max(tab$gen_coord),"_",min(tab$gen_coord))
 
-            if(max(coord) == min(coord)) coding <- paste0("c.",as.numeric(min(coord)) ,"_",as.numeric(min(coord))+1,type,ifelse(nrow(tab) > 10,paste0(nrow(tab),"nt"), paste(nucs,collapse = "") ))
-            else coding <- paste0("c.",min(coord),"_",max(coord),type, paste(nucs,collapse = ""))
-
+            pos_min = match(min(vals), vals)
+            pos_max = match(max(vals), vals)
+            coding <- paste0("c.",coord[pos_min],"_",coord[pos_max],type, paste(nucs,collapse = ""))
+            
             #return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
             return(list(id = min(tab$id),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
         } else {
@@ -494,7 +510,7 @@ get_view<-function(calls,choices,snps){
         }
     }
 
-    choices[,consecutives := compute_consecutives(id) ][,mut_type := gsub("c\\.\\d*(...).*","\\1",coding)]
+    choices[,consecutives := compute_consecutives(id) ][,mut_type := gsub("c\\.\\d*-*\\d*(...).*","\\1",coding)]
     indel_tab <- choices[intersect(grep("del|ins",mut_type),which(consecutives != 0)), squeeze_indels(.SD),by = c("mut_type","consecutives")]
     #represent consecutive indels on one line
     if(nrow(indel_tab) > 0){

@@ -13,7 +13,7 @@ samplesLoad <- function(s_files,output,g_files,alignTo,g_custom_ref){
                 seq<-NULL
                 tryCatch(
                     {abi <- sangerseqR::read.abif(s_files[i,]$datapath)@data
-                    seq <- DNAString(gsub("[\\*,!,/]","N",abi$PBAS.1))},
+                    seq <- DNAString(gsub("[\\*,!,/,&]","N",abi$PBAS.1))},
                     error = function(e){output$files <- renderPrint(paste0("<pre>error while loading abi file : ",e$message,"</pre>" ))}
                 )
                 if(!is.null(abi)&&!is.null(seq)) {
