@@ -491,26 +491,34 @@ get_view<-function(calls,choices,snps){
         }
         
         if(nrow(tab) > 0){
-            coord <- gsub("c\\.(\\d*-*\\d*).*","\\1",tab$coding)
-            nucs  <- gsub("c\\.\\d*-*\\d*...(.)","\\1",tab$coding)
-            type  <- gsub("c\\.\\d*-*\\d*(...).*","\\1",tab$coding)[1]
+            coord <- gsub("c\\.(\\d*[-,\\+]*\\d*).*","\\1",tab$coding)
+            nucs  <- gsub("c\\.\\d*[-,\\+]*\\d*...(.)","\\1",tab$coding)
+            type  <- gsub("c\\.\\d*[-,\\+]*\\d*(...).*","\\1",tab$coding)[1]
             vals  <- unlist(lapply(coord,get_value))
 
             if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
             else gen_coord <- paste0(max(tab$gen_coord),"_",min(tab$gen_coord))
+            
+            # if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
+            
 
             pos_min = match(min(vals), vals)
             pos_max = match(max(vals), vals)
             coding <- paste0("c.",coord[pos_min],"_",coord[pos_max],type, paste(nucs,collapse = ""))
             
             #return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
+            tab1 = tab[1,]
+            tab <- tab[codon!='intron',]
+            if (nrow(tab) == 0){
+                tab = tab1
+            }
             return(list(id = min(tab$id),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
         } else {
             return(tab)
         }
     }
 
-    choices[,consecutives := compute_consecutives(id) ][,mut_type := gsub("c\\.\\d*-*\\d*(...).*","\\1",coding)]
+    choices[,consecutives := compute_consecutives(id) ][,mut_type := gsub("c\\.\\d*[-,\\+]*\\d*(...).*","\\1",coding)]
     indel_tab <- choices[intersect(grep("del|ins",mut_type),which(consecutives != 0)), squeeze_indels(.SD),by = c("mut_type","consecutives")]
     #represent consecutive indels on one line
     if(nrow(indel_tab) > 0){
@@ -519,37 +527,64 @@ get_view<-function(calls,choices,snps){
     }
     #identify frame shifts and inframe indels
     for(i in grep("del|ins",choices$mut_type)){
-        seq <- gsub("c\\.\\d*_*\\d*...(.)","\\1",choices[i,]$coding)
-        #if(length(seq) > 10,paste0(length(seq),"nt")
-        if((str_length(seq) %% 3)!=0){
-            prot <- gsub("(p\\....\\d*).*","\\1",choices[i]$protein)
-            aa <- gsub("p\\.(...)\\d*.*","\\1",choices[i]$protein)
-            cod <- as.numeric(gsub("p\\....(\\d*).*","\\1",choices[i]$protein))
-            while((calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_mut)&
-                  (calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_sample)&
-                  (!is.na(calls[codon == cod][1]$aa_sample))) {cod = cod +1}
-            aa <- calls[codon ==cod]$aa_ref[1]
-            choices[i,]$protein = paste0("p.",aa,cod, "fs")
-
-        }else{ #in frame
-            if(choices[i,]$mut_type == "ins"){
-                from <- as.numeric(calls[choices[i]$id]$codon)
-                to   <- as.numeric(calls[choices[i]$id]$codon) +1
-                choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
-                                             calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
-                                             paste(my_aaa(seqinr::translate(strsplit(seq,"")[[1]])),collapse = ""))
+        
+        
+        #I only need the "coding" part so remove + - coords in case of indels spanning through intron/exon
+        seq <- gsub("c\\.\\d*[-,\\+]*\\d*_*\\d*[-,\\+]*\\d*...(.)","\\1",choices[i,]$coding)
+        if(grepl('-', choices[i,]$coding)){
+            if (str_count(choices[i,]$coding, '-') == 2){
+                seq = ""
+            }else{
+                prefix <- gsub("c\\.\\d*-(\\d*)_*\\d*.*","\\1",choices[i,]$coding)
+                seq <- substr(seq, prefix, nchar(seq))
             }
-            if(choices[i,]$mut_type=="del"){
-
-                from <- as.numeric(calls[choices[i]$id]$codon)
-                to   <- as.numeric(calls[choices[i]$id]$codon) + nchar(seq)/3 -1
-
-                #from <- as.numeric(g_calls[choices[i]$id]$codon) - 10
-                #to   <- as.numeric(g_calls[choices[i]$id]$codon) + nchar(seq)/3 + 10
-                #lapply(g_calls[codon %in% c(from:to) & ord_in_cod == 1]$aa_ref,mya)
-
-                choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
-                                             calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type)
+        }
+        if(grepl('\\+', choices[i,]$coding)){
+            if(str_count(choices[i,]$coding, '\\+') == 2){
+                seq = ""
+            }else{
+                suffix <- gsub("c\\.\\d*_*\\d*\\+(\\d*).*","\\1",choices[i,]$coding)
+                print(choices[i,]$coding)
+                print(suffix)
+                seq <- substr(seq, 1, nchar(seq)-suffix)
+            }
+        }
+        
+        print(seq)
+        #if(length(seq) > 10,paste0(length(seq),"nt")
+        if(nchar(seq) == 0){
+            choices[i,]$protein = "p.?"
+        }else{
+            if((str_length(seq) %% 3)!=0){
+                prot <- gsub("(p\\....\\d*).*","\\1",choices[i]$protein)
+                aa <- gsub("p\\.(...)\\d*.*","\\1",choices[i]$protein)
+                cod <- as.numeric(gsub("p\\....(\\d*).*","\\1",choices[i]$protein))
+                while((calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_mut)&
+                      (calls[codon == cod][1]$aa_ref == calls[codon == cod][1]$aa_sample)&
+                      (!is.na(calls[codon == cod][1]$aa_sample))) {cod = cod +1}
+                aa <- calls[codon ==cod]$aa_ref[1]
+                choices[i,]$protein = paste0("p.",aa,cod, "fs")
+    
+            }else{ #in frame
+                if(choices[i,]$mut_type == "ins"){
+                    from <- as.numeric(calls[choices[i]$id]$codon)
+                    to   <- as.numeric(calls[choices[i]$id]$codon) +1
+                    choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
+                                                 calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type,
+                                                 paste(my_aaa(seqinr::translate(strsplit(seq,"")[[1]])),collapse = ""))
+                }
+                if(choices[i,]$mut_type=="del"){
+    
+                    from <- as.numeric(calls[choices[i]$id]$codon)
+                    to   <- as.numeric(calls[choices[i]$id]$codon) + nchar(seq)/3 -1
+    
+                    #from <- as.numeric(g_calls[choices[i]$id]$codon) - 10
+                    #to   <- as.numeric(g_calls[choices[i]$id]$codon) + nchar(seq)/3 + 10
+                    #lapply(g_calls[codon %in% c(from:to) & ord_in_cod == 1]$aa_ref,mya)
+    
+                    choices[i,]$protein = paste0("p.",calls[codon==from,][1]$aa_ref,from,"_",
+                                                 calls[codon==to,][1]$aa_ref,to,choices[i,]$mut_type)
+                }
             }
         }
     }

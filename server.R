@@ -140,7 +140,7 @@ shinyServer(function(input,output,session) {
             pos_at <- as.numeric(strsplit(input$goChangeRev$id,"_")[[1]][2])
             name <- as.character(input$goChangeRev$name)
             
-            g_files <<- changeRev(g_files,pos_at,name,input)
+            g_files <<- changeRev(g_files,pos_at+1,name,input)
         }
     })
     goRef_handler <- reactive({
