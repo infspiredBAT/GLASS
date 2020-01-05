@@ -508,7 +508,7 @@ get_view<-function(calls,choices,snps){
             
             #return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
             tab1 = tab[1,]
-            tab <- tab[codon!='intron',]
+            tab <- tab[!grepl('intron',exon_intron),]
             if (nrow(tab) == 0){
                 tab = tab1
             }
