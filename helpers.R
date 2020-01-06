@@ -6,12 +6,13 @@ ambig_dt  <- data.table(ambig = ambig_col,ref = ref_col,res = res_col)
 setkey(ambig_dt,ambig,ref)
 
 annotate_calls <- function(calls,intens,intens_rev,glassed_cod){
-
+ 
     #contains codons table
     if(gsub(".glassed.codons.rdata","",gsub("data/refs/","",glassed_cod))=="-"){
         calls[,`:=`(codon=NA,ord_in_cod=NA,coding_seq=NA,aa_ref=NA)]
     }else{
         load(glassed_cod)
+        calls[,gen_coord := ceiling(gen_coord)]
         calls <- merge(x = calls, y = cod_table[,list(gen_coord,codon,ord_in_cod,coding_seq,aa_ref=AA)], by = "gen_coord", all.x = TRUE)
         calls[aa_ref != "",aa_ref:=my_aaa(toupper(aa_ref))]
         #calls[aa_ref=="Stp",aa_ref:='*']
@@ -443,13 +444,13 @@ get_choices <- function(calls,ref){
         
     # 2nd variant
         # mismatch without 1st variant
-        choices[user_mut != reference & user_sample == reference   & user_mut    != "-" & reference   != "-",      ':=' (coding = paste0(coding, reference, ">", user_mut), VAF = mut_peak_pct)]#, "(", mut_peak_pct, "%)")]
+        choices[user_mut != reference & user_sample == reference   & user_mut    != "-" & reference   != "-",                           ':=' (coding = paste0(coding, reference, ">", user_mut), VAF = mut_peak_pct)]#, "(", mut_peak_pct, "%)")]
         # mismatch with 1st variant
-        choices[user_mut != reference & user_sample != reference   & user_mut    != user_sample & user_mut != "-", ':=' (coding = paste0(coding, ">", user_mut),            VAF = mut_peak_pct)]#,            "(", mut_peak_pct, "%)")]
+        choices[user_mut != reference & user_sample != reference   & user_mut    != user_sample & user_mut != "-" & reference   != "-", ':=' (coding = paste0(coding, ">", user_mut),            VAF = mut_peak_pct)]#,            "(", mut_peak_pct, "%)")]
         # ins
-        choices[user_mut != reference & user_mut    != user_sample & reference   == "-",                            ':='(coding = paste0(coding, "ins", user_mut),          VAF = NA)]#,          "(", mut_peak_pct, "%)")]
+        choices[user_mut != reference & user_mut    != user_sample & reference   == "-" & reference == user_sample,                       ':='(coding = paste0(coding, "ins", user_mut),          VAF = NA)]#,          "(", mut_peak_pct, "%)")]
         # del
-        choices[user_mut != reference & user_mut    != user_sample & user_mut    == "-",                            ':='(coding = paste0(coding, "del", reference),         VAF = NA)]#,         "(", mut_peak_pct, "%)")]
+        choices[user_mut != reference & user_mut    != user_sample & user_mut    == "-" & reference == user_sample,                       ':='(coding = paste0(coding, "del", reference),         VAF = NA)]#,         "(", mut_peak_pct, "%)")]
         # protein without 1st variant
         choices[aa_mut   != aa_ref    & aa_sample   == aa_ref,                                                     protein:= paste0("p.", aa_ref, codon, aa_mut)]#,      "(", mut_peak_pct, "%)")]
         # protein with 1st variant
@@ -496,15 +497,34 @@ get_view<-function(calls,choices,snps){
             type  <- gsub("c\\.\\d*[-,\\+]*\\d*(...).*","\\1",tab$coding)[1]
             vals  <- unlist(lapply(coord,get_value))
 
-            if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
+            #condition true if insertion
+            if(max(tab$gen_coord) == min(tab$gen_coord)) {
+                gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
+            }
             else gen_coord <- paste0(max(tab$gen_coord),"_",min(tab$gen_coord))
             
-            # if(max(tab$gen_coord) == min(tab$gen_coord)) gen_coord <- paste0(max(tab$gen_coord) + 1,"_",as.numeric(max(tab$gen_coord)))
             
 
-            pos_min = match(min(vals), vals)
-            pos_max = match(max(vals), vals)
-            coding <- paste0("c.",coord[pos_min],"_",coord[pos_max],type, paste(nucs,collapse = ""))
+            pos_min <- match(min(vals), vals)
+            pos_max <- match(max(vals), vals)
+            #condition true for insertion
+            max_coord <- coord[pos_max]
+            min_coord <- coord[pos_min]
+ 
+            if(min_coord == max_coord){
+                #adding + 1 different if intron
+                if (grepl('\\+',max_coord)){
+                    v <- unlist(strsplit(max_coord,"\\+"))
+                    max_coord <- paste0(v[1],"+",as.numeric(v[2]) + 1)
+                }
+                else if( grepl('-',max_coord)){
+                    v <- unlist(strsplit(max_coord,"-"))
+                    max_coord <- paste0(v[1],"-",as.numeric(v[2]) - 1)
+                }else{
+                    max_coord <- as.numeric(max_coord)+1
+                }
+            }
+            coding <- paste0("c.",min_coord,"_",max_coord,type, paste(nucs,collapse = ""))
             
             #return(list(id = floor(min(tab$id)),gen_coord = gen_coord,coding = coding,set_by_user=tab$set_by_user[1],protein = tab$protein[1],trace_peak=min(tab$trace_peak)))
             tab1 = tab[1,]
@@ -544,13 +564,10 @@ get_view<-function(calls,choices,snps){
                 seq = ""
             }else{
                 suffix <- gsub("c\\.\\d*_*\\d*\\+(\\d*).*","\\1",choices[i,]$coding)
-                print(choices[i,]$coding)
-                print(suffix)
-                seq <- substr(seq, 1, nchar(seq)-suffix)
+                seq <- substr(seq, 1, nchar(seq)-as.numeric(suffix))
             }
         }
         
-        print(seq)
         #if(length(seq) > 10,paste0(length(seq),"nt")
         if(nchar(seq) == 0){
             choices[i,]$protein = "p.?"
@@ -590,7 +607,7 @@ get_view<-function(calls,choices,snps){
     }
     #identify duplications (special kind of insertions)
     for(i in grep("ins",choices$mut_type)){
-        seq <- gsub("c\\.\\d*_*\\d*...(.)","\\1",choices[i,]$coding)
+        seq <- gsub("c\\.\\d*[-,\\+]*\\d*_*\\d*[-,\\+]*\\d*...(.)","\\1",choices[i,]$coding)
         shift <- 0
         if(floor(choices[i,]$id) == choices[i,]$id) {
             #note sure about this, id number doesn't have to match the order in calls 

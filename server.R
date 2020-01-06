@@ -315,6 +315,7 @@ shinyServer(function(input,output,session) {
                     intensified  <-  get_intensities(g_abif,g_abif_rev,calls=called$calls,deletions=called$deletions,norm=FALSE,single_rev)
                     g_intens     <<- intensified$intens
                     g_intens_rev <<- intensified$intens_rev
+                  
                     tryCatch(
                         calls        <-  annotate_calls(calls=intensified$calls,intens=intensified$intens,intens_rev=intensified$intens_rev,g_glassed_cod),
                         error = function(e){output$files <- renderPrint(paste0("<pre>error while loading calls from abi file : ",e$message,"</pre>" ))
